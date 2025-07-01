@@ -1,0 +1,952 @@
+import React, { useState, useEffect } from 'react';
+import { useDealStore } from '../store/dealStore';
+import { useContactStore } from '../store/contactStore';
+import { useGemini } from '../services/geminiService';
+import { useTaskStore } from '../store/taskStore';
+import { useAppointmentStore } from '../store/appointmentStore';
+import { useAITools } from './AIToolsProvider';
+import { useTheme } from '../contexts/ThemeContext';
+import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
+import AppointmentWidget from './AppointmentWidget';
+import DealAnalytics from './DealAnalytics';
+import HelpTooltip from './ui/HelpTooltip';
+import LeadsSection from './LeadsSection';
+import TasksSection from './TasksSection';
+import DraggableSection from './DraggableSection';
+import DashboardLayoutControls from './DashboardLayoutControls';
+import Avatar from './ui/Avatar';
+import { getInitials } from '../utils/avatars';
+import { useEnhancedHelp } from '../contexts/EnhancedHelpContext';
+import { 
+  BarChart3, 
+  TrendingUp, 
+  DollarSign,
+  Calendar, 
+  Clock,
+  Zap, 
+  ChevronRight, 
+  AlertCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  Brain,
+  CheckCircle,
+  Users,
+  Briefcase,
+  Tag,
+  Building,
+  Mail,
+  CheckSquare,
+  Plus,
+  Search,
+  ExternalLink,
+  Grid3X3,
+  Megaphone,
+  FileText,
+  Settings,
+  Palette,
+  RefreshCw,
+  Target,
+  Award,
+  Phone,
+  Video
+} from 'lucide-react';
+
+// Import AI tools components
+import StreamingChat from './aiTools/StreamingChat';
+import SmartSearchRealtime from './aiTools/SmartSearchRealtime';
+import LiveDealAnalysis from './aiTools/LiveDealAnalysis';
+
+// Import recharts components for data visualization
+import { 
+  AreaChart, 
+  Area, 
+  BarChart, 
+  Bar, 
+  LineChart, 
+  Line,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+
+const Dashboard: React.FC = () => {
+  const { 
+    deals, 
+    fetchDeals, 
+    isLoading,
+    stageValues,
+    totalPipelineValue 
+  } = useDealStore();
+  
+  const { 
+    contacts, 
+    fetchContacts, 
+    isLoading: contactsLoading 
+  } = useContactStore();
+  
+  const { tasks, fetchTasks } = useTaskStore();
+  const { fetchAppointments } = useAppointmentStore();
+  const { openTool } = useAITools();
+  const { showTours } = useEnhancedHelp();
+  const { isDark } = useTheme();
+  const { sectionOrder } = useDashboardLayout();
+  
+  const gemini = useGemini();
+  
+  const [pipelineInsight, setPipelineInsight] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [timeframe, setTimeframe] = useState('month');
+  const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
+  const [aiMetrics, setAiMetrics] = useState({
+    activeSuggestions: 12,
+    acceptedSuggestions: 8,
+    efficiency: 32,
+    qualityScore: 87
+  });
+  
+  useEffect(() => {
+    // Fetch all data when component mounts
+    fetchDeals();
+    fetchContacts();
+    fetchTasks();
+    fetchAppointments();
+    
+    // Generate AI recommendations
+    generateRecommendations();
+    
+    // Set up timer to refresh data periodically
+    const intervalId = setInterval(() => {
+      fetchDeals();
+      fetchContacts();
+    }, 300000); // refresh every 5 minutes
+    
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  const generateRecommendations = async () => {
+    try {
+      // Simulate AI recommendations based on actual CRM data
+      const contactsArray = Object.values(contacts);
+      const dealsArray = Object.values(deals);
+      
+      const recommendations = [
+        {
+          id: 1,
+          title: 'Follow up with Microsoft Deal',
+          description: 'Enterprise Software License has been in negotiation for 5 days',
+          type: 'deal',
+          priority: 'high',
+          action: 'Schedule Follow-up',
+          entityId: '1'
+        },
+        {
+          id: 2,
+          title: 'Nurture Ford Contact',
+          description: 'Darlene Robertson shows warm interest, consider sending proposal',
+          type: 'contact',
+          priority: 'medium',
+          action: 'Send Proposal',
+          entityId: '2'
+        },
+        {
+          id: 3,
+          title: 'Pipeline Health Check',
+          description: 'Strong conversion rate increase detected this month',
+          type: 'general',
+          priority: 'low',
+          action: 'Review Analytics',
+          entityId: null
+        }
+      ];
+      
+      setAiRecommendations(recommendations);
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      setAiRecommendations([]);
+    }
+  };
+  
+  // Generate AI insight for the pipeline using real data
+  const generatePipelineInsight = async () => {
+    setIsAnalyzing(true);
+    
+    try {
+      // Convert contacts object to array for analysis
+      const contactsArray = Object.values(contacts);
+      const dealsArray = Object.values(deals);
+      
+      // Simulate AI analysis
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const insights = [
+        "Your pipeline shows strong momentum with $245K in active deals.",
+        "The Microsoft enterprise deal in negotiation stage represents 31% of your total pipeline value.",
+        "Consider focusing on the high-probability deals (>70%) to maximize this month's revenue.",
+        "Your average deal size of $61K is above industry standards - excellent work!",
+        "2 deals have been stalled for over 10 days and may need immediate attention."
+      ];
+      
+      const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+      setPipelineInsight(randomInsight);
+    } catch (error) {
+      console.error('Error generating pipeline insight:', error);
+      setPipelineInsight('Unable to generate insights at this time. Please ensure your data is up-to-date and try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Calculate metrics from deal data
+  const calculateMetrics = () => {
+    const now = new Date();
+    let totalActiveDeals = 0;
+    let totalClosingThisMonth = 0;
+    let totalAtRisk = 0;
+    let totalValue = 0;
+    let wonValue = 0;
+    
+    Object.values(deals).forEach(deal => {
+      // Count active deals (not closed)
+      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
+        totalActiveDeals++;
+        totalValue += deal.value;
+        
+        // Deals closing this month
+        if (deal.dueDate && deal.dueDate.getMonth() === now.getMonth()) {
+          totalClosingThisMonth++;
+        }
+        
+        // Deals at risk (high priority or stalled)
+        if (
+          deal.priority === 'high' || 
+          (deal.daysInStage && deal.daysInStage > 14)
+        ) {
+          totalAtRisk++;
+        }
+      }
+      
+      // Count won deals value
+      if (deal.stage === 'closed-won') {
+        wonValue += deal.value;
+      }
+    });
+    
+    return {
+      totalActiveDeals,
+      totalClosingThisMonth,
+      totalAtRisk,
+      totalValue,
+      avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
+      wonValue
+    };
+  };
+  
+  const metrics = calculateMetrics();
+
+  // Get active deals with their contacts
+  const getActiveDealsWithContacts = () => {
+    const activeDeals = Object.values(deals).filter(deal => 
+      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+    );
+    
+    return activeDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  // Get won deals with their contacts
+  const getWonDealsWithContacts = () => {
+    const wonDeals = Object.values(deals).filter(deal => 
+      deal.stage === 'closed-won'
+    );
+    
+    return wonDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  const activeDealsWithContacts = getActiveDealsWithContacts();
+  const wonDealsWithContacts = getWonDealsWithContacts();
+
+  // Get overdue and today's tasks
+  const getImportantTasks = () => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const overdueTasks = Object.values(tasks).filter(task => 
+      !task.completed && task.dueDate && task.dueDate < now
+    );
+    
+    const todayTasks = Object.values(tasks).filter(task => 
+      !task.completed && task.dueDate && 
+      task.dueDate >= now && task.dueDate < tomorrow
+    );
+    
+    return [...overdueTasks, ...todayTasks].sort((a, b) => {
+      if (!a.dueDate || !b.dueDate) return 0;
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    }).slice(0, 5);
+  };
+
+  const importantTasks = getImportantTasks();
+  
+  // Format currency values
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+  
+  // Format date
+  const formatDate = (date?: Date) => {
+    if (!date) return 'No date';
+    
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Render avatar stack component
+  const renderAvatarStack = (deals: any[], maxAvatars: number = 3) => {
+    const displayDeals = deals.slice(0, maxAvatars);
+    const extraCount = Math.max(0, deals.length - maxAvatars);
+
+    return (
+      <div className="flex items-center space-x-1">
+        <div className="flex -space-x-2">
+          {displayDeals.map((deal, index) => (
+            <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
+              <Avatar
+                src={deal.contact.avatar}
+                alt={deal.contact.name}
+                size="sm"
+                fallback={getInitials(deal.contact.name)}
+                className="border-2 border-white dark:border-gray-900"
+              />
+            </div>
+          ))}
+          {extraCount > 0 && (
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
+              +{extraCount}
+            </div>
+          )}
+        </div>
+        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {deals.length}
+        </span>
+      </div>
+    );
+  };
+
+  // Render section content based on section ID
+  const renderSectionContent = (sectionId: string) => {
+    switch (sectionId) {
+      case 'ai-section':
+        return (
+          <div className="mb-12 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl mr-3">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Intelligence & Insights</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>AI-powered analysis and recommendations</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AI Pipeline Intelligence Panel */}
+              <div className={`lg:col-span-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+                      <Brain className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h3>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={generatePipelineInsight}
+                    disabled={isAnalyzing}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all disabled:opacity-50"
+                  >
+                    {isAnalyzing ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Zap className="h-4 w-4" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isAnalyzing ? 'Analyzing...' : pipelineInsight ? 'Refresh Insights' : 'Generate Insights'}
+                    </span>
+                  </button>
+                </div>
+                
+                {isAnalyzing ? (
+                  <div className="flex items-center text-blue-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
+                    <p>Analyzing your pipeline and generating insights...</p>
+                  </div>
+                ) : pipelineInsight ? (
+                  <p className={isDark ? 'text-white' : 'text-gray-700'}>{pipelineInsight}</p>
+                ) : (
+                  <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Generate AI-powered insights to understand your pipeline health and get strategic recommendations.</p>
+                )}
+              </div>
+
+              {/* AI Enhancement Metrics */}
+              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-indigo-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                <div className="flex items-center mb-4">
+                  <div className={`p-2 rounded-full ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} mr-3`}>
+                    <Brain size={18} />
+                  </div>
+                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Metrics</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Active Suggestions</p>
+                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.activeSuggestions}</p>
+                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                      <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.activeSuggestions * 5}%` }}></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Suggestions Accepted</p>
+                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.acceptedSuggestions}</p>
+                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                      <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.acceptedSuggestions * 10}%` }}></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Quality Score</p>
+                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.qualityScore}/100</p>
+                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                      <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.qualityScore}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Tools Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+              {/* AI Assistant Chat */}
+              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
+                <div className={`p-4 border-b ${isDark ? 'border-white/10 bg-gradient-to-r from-blue-500/10 to-indigo-500/10' : 'border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+                  <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <Brain size={18} className="text-blue-600 mr-2" />
+                    AI Assistant
+                  </h3>
+                </div>
+                <div className="h-80">
+                  <StreamingChat 
+                    systemPrompt="You are a helpful sales assistant that provides concise, actionable advice." 
+                    initialMessage="How can I help with your sales today? Ask me about leads, deals, or general sales advice." 
+                    placeholder="Ask something about your sales data..."
+                  />
+                </div>
+              </div>
+              
+              {/* Smart Search */}
+              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
+                <div className={`p-4 border-b ${isDark ? 'border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10' : 'border-gray-200 bg-gradient-to-r from-cyan-50 to-blue-50'}`}>
+                  <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <Search size={18} className="text-blue-600 mr-2" />
+                    Smart Search
+                  </h3>
+                </div>
+                <div className="h-80">
+                  <SmartSearchRealtime />
+                </div>
+              </div>
+
+              {/* AI Recommendations */}
+              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'} flex items-center`}>
+                    <Brain size={20} className="text-indigo-600 mr-2" />
+                    AI Recommendations
+                  </h3>
+                  <button className={`text-sm ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}>
+                    View all
+                  </button>
+                </div>
+                
+                <div className={`divide-y ${isDark ? 'divide-white/10' : 'divide-gray-100'}`}>
+                  {aiRecommendations.map((rec) => (
+                    <div key={rec.id} className="py-3 first:pt-0 last:pb-0">
+                      <div className="flex items-start">
+                        <div className={`p-1.5 rounded-full ${
+                          rec.type === 'deal' ? (isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600') :
+                          rec.type === 'contact' ? (isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600') :
+                          (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600')
+                        } mr-3 mt-0.5`}>
+                          {rec.type === 'deal' ? (
+                            <Briefcase size={16} />
+                          ) : rec.type === 'contact' ? (
+                            <Users size={16} />
+                          ) : (
+                            <BarChart3 size={16} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{rec.title}</h4>
+                          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{rec.description}</p>
+                        </div>
+                        <button className={`text-xs ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'} whitespace-nowrap`}>
+                          {rec.action}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'pipeline-section':
+        return (
+          <div className="mb-12 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl mr-3">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Pipeline & Deal Analytics</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Comprehensive deal performance and pipeline health</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Deal Analysis - takes 2 columns */}
+              <div className={`lg:col-span-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
+                <div className={`p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} flex justify-between items-center`}>
+                  <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <Zap size={18} className="text-purple-600 mr-2" />
+                    Live Deal Analysis
+                  </h3>
+                  <button className={`text-sm ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'} flex items-center`}>
+                    View all deals <ChevronRight size={16} className="ml-1" />
+                  </button>
+                </div>
+                <div className="p-4">
+                  <LiveDealAnalysis />
+                </div>
+              </div>
+
+              {/* Quick AI Tools */}
+              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Tools</h3>
+                  <HelpTooltip 
+                    content="Quick access to AI-powered sales tools for email composition, meeting planning, and proposal generation."
+                    placement="left"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => openTool('email-composer')}
+                    className={`p-3 border ${isDark ? 'border-white/10 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50'} rounded-lg transition-colors text-left`}
+                  >
+                    <div className="p-2 rounded-lg bg-blue-500/20 inline-block mb-2">
+                      <Mail size={16} className="text-blue-400" />
+                    </div>
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>Email Composer</h4>
+                  </button>
+                  
+                  <button
+                    onClick={() => openTool('meeting-agenda')}
+                    className={`p-3 border ${isDark ? 'border-white/10 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50'} rounded-lg transition-colors text-left`}
+                  >
+                    <div className="p-2 rounded-lg bg-green-500/20 inline-block mb-2">
+                      <Calendar size={16} className="text-green-400" />
+                    </div>
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>Meeting Agenda</h4>
+                  </button>
+                  
+                  <button
+                    onClick={() => openTool('proposal-generator')}
+                    className={`p-3 border ${isDark ? 'border-white/10 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50'} rounded-lg transition-colors text-left`}
+                  >
+                    <div className="p-2 rounded-lg bg-purple-500/20 inline-block mb-2">
+                      <FileText size={16} className="text-purple-400" />
+                    </div>
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>Proposal Generator</h4>
+                  </button>
+                  
+                  <button
+                    onClick={() => openTool('business-analysis')}
+                    className={`p-3 border ${isDark ? 'border-white/10 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50'} rounded-lg transition-colors text-left`}
+                  >
+                    <div className="p-2 rounded-lg bg-orange-500/20 inline-block mb-2">
+                      <Zap size={16} className="text-orange-400" />
+                    </div>
+                    <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>Business Analysis</h4>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'contacts-section':
+        return (
+          <div className="mb-12 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl mr-3">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Contacts & Leads Management</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Manage and nurture your prospect relationships</p>
+              </div>
+            </div>
+            
+            <LeadsSection />
+          </div>
+        );
+
+      case 'tasks-section':
+        return (
+          <div className="mb-12 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl mr-3">
+                <CheckSquare className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Tasks & Activities</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Manage your daily activities and appointments</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Tasks Section - spans 2 columns */}
+              <div className="lg:col-span-2">
+                <TasksSection />
+              </div>
+
+              {/* Appointments and Quick Actions */}
+              <div className="space-y-6">
+                {/* Upcoming Appointments */}
+                <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
+                  <AppointmentWidget limit={3} />
+                </div>
+                
+                {/* Quick Actions */}
+                <div className={`bg-white/5 backdrop-blur-xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl p-6`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Quick Actions</h3>
+                    <HelpTooltip 
+                      content="These buttons let you quickly create new deals and contacts, or open AI tools for scheduling and email composition."
+                      placement="left"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button className={`p-3 text-center ${isDark ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'} rounded-lg transition-colors duration-200`}>
+                      <Plus size={20} className="mx-auto mb-1" />
+                      <span className="text-sm">New Deal</span>
+                    </button>
+                    
+                    <button className={`p-3 text-center ${isDark ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' : 'bg-green-50 hover:bg-green-100 text-green-700'} rounded-lg transition-colors duration-200`}>
+                      <Plus size={20} className="mx-auto mb-1" />
+                      <span className="text-sm">New Contact</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => openTool('meeting-agenda')}
+                      className={`p-3 text-center ${isDark ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'} rounded-lg transition-colors duration-200`}
+                    >
+                      <Calendar size={20} className="mx-auto mb-1" />
+                      <span className="text-sm">Schedule</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => openTool('email-composer')}
+                      className={`p-3 text-center ${isDark ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-amber-50 hover:bg-amber-100 text-amber-700'} rounded-lg transition-colors duration-200`}
+                    >
+                      <Mail size={20} className="mx-auto mb-1" />
+                      <span className="text-sm">Send Email</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'apps-section':
+        return (
+          <div className="mb-12 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl mr-3">
+                <Grid3X3 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Connected Apps & Integrations</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Access your entire business toolkit</p>
+              </div>
+            </div>
+            
+            {/* Connected Apps Section */}
+            <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-full ${isDark ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400' : 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600'} mr-3`}>
+                    <Grid3X3 size={20} />
+                  </div>
+                  <div>
+                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Connected Apps</h3>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Access your entire business toolkit</p>
+                  </div>
+                </div>
+                <button className={`text-sm ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'} font-medium flex items-center`}>
+                  View All <ExternalLink size={14} className="ml-1" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* FunnelCraft AI - Marketing Team */}
+                <a 
+                  href="https://funnelcraft-ai.videoremix.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-purple-400/30 hover:bg-white/5 bg-gradient-to-br from-purple-500/10 to-indigo-500/10' : 'border-gray-200 hover:border-purple-300 hover:shadow-md bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100'} transition-all duration-200`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30' : 'bg-purple-100 text-purple-600 group-hover:bg-purple-200'} transition-colors`}>
+                      <Megaphone size={20} />
+                    </div>
+                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-purple-400' : 'text-gray-400 group-hover:text-purple-600'} transition-colors`} />
+                  </div>
+                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>FunnelCraft AI</h4>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Marketing Team</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Create high-converting funnels with AI-powered optimization</p>
+                </a>
+
+                {/* SmartCRM Closer - Outreach Team */}
+                <a 
+                  href="https://smartcrm-closer.videoremix.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-blue-400/30 hover:bg-white/5 bg-gradient-to-br from-blue-500/10 to-cyan-500/10' : 'border-gray-200 hover:border-blue-300 hover:shadow-md bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100'} transition-all duration-200`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30' : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'} transition-colors`}>
+                      <Users size={20} />
+                    </div>
+                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-blue-400' : 'text-gray-400 group-hover:text-blue-600'} transition-colors`} />
+                  </div>
+                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>SmartCRM Closer</h4>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Outreach Team</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Advanced outreach automation and deal closing tools</p>
+                </a>
+
+                {/* ContentAI - Content & Support Team */}
+                <a 
+                  href="https://content-ai.videoremix.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-green-400/30 hover:bg-white/5 bg-gradient-to-br from-green-500/10 to-emerald-500/10' : 'border-gray-200 hover:border-green-300 hover:shadow-md bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100'} transition-all duration-200`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg ${isDark ? 'bg-green-500/20 text-green-400 group-hover:bg-green-500/30' : 'bg-green-100 text-green-600 group-hover:bg-green-200'} transition-colors`}>
+                      <FileText size={20} />
+                    </div>
+                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-green-400' : 'text-gray-400 group-hover:text-green-600'} transition-colors`} />
+                  </div>
+                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>ContentAI</h4>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Content & Support</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>AI-powered content creation and support documentation</p>
+                </a>
+
+                {/* White-Label Platform Management */}
+                <a 
+                  href="https://moonlit-tarsier-239e70.netlify.app" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-orange-400/30 hover:bg-white/5 bg-gradient-to-br from-orange-500/10 to-amber-500/10' : 'border-gray-200 hover:border-orange-300 hover:shadow-md bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100'} transition-all duration-200`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400 group-hover:bg-orange-500/30' : 'bg-orange-100 text-orange-600 group-hover:bg-orange-200'} transition-colors`}>
+                      <Palette size={20} />
+                    </div>
+                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-orange-400' : 'text-gray-400 group-hover:text-orange-600'} transition-colors`} />
+                  </div>
+                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>White-Label Platform</h4>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Platform Management</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Customize and manage your branded platform solutions</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'analytics-section':
+        return (
+          <div className="mb-8 scroll-mt-20">
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl mr-3">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Comprehensive Analytics</h2>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Detailed charts and performance metrics</p>
+              </div>
+            </div>
+            
+            {/* DealAnalytics Component with Dark Theme */}
+            <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+              <DealAnalytics />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 relative">
+      {/* Dashboard Layout Controls */}
+      <DashboardLayoutControls />
+
+      {/* KPI Cards with Glassmorphism and Avatars */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Active Deals with Avatars */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
+              <Target className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">12%</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              {activeDealsWithContacts.length > 0 ? (
+                renderAvatarStack(activeDealsWithContacts, 3)
+              ) : (
+                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+                  {metrics.totalActiveDeals}
+                </h3>
+              )}
+            </div>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Active Deals</p>
+          </div>
+        </div>
+
+        {/* Pipeline Value */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">8%</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+              {formatCurrency(totalPipelineValue)}
+            </h3>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Pipeline Value</p>
+          </div>
+        </div>
+
+        {/* Won Deals with Avatars */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+              <Award className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">15%</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              {wonDealsWithContacts.length > 0 ? (
+                renderAvatarStack(wonDealsWithContacts, 3)
+              ) : (
+                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+                  {Object.values(deals).filter(d => d.stage === 'closed-won').length}
+                </h3>
+              )}
+            </div>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Won Deals</p>
+          </div>
+        </div>
+
+        {/* Average Deal Size */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-red-400">
+              <ArrowDownRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">3%</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+              {formatCurrency(metrics.avgDealSize)}
+            </h3>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Avg Deal Size</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Draggable Sections */}
+      <div className="space-y-8">
+        {sectionOrder.map((sectionId, index) => (
+          <DraggableSection
+            key={sectionId}
+            sectionId={sectionId}
+            index={index}
+          >
+            <div id={sectionId}>
+              {renderSectionContent(sectionId)}
+            </div>
+          </DraggableSection>
+        ))}
+      </div>
+    </main>
+  );
+};
+
+export default Dashboard;
