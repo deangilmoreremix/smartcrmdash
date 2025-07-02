@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, User, Bell, Search, Settings, LogOut, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Building2, Megaphone, Activity, CheckSquare, Home, Sparkles, Presentation as PresentationChart, UserPlus, ClipboardList, Lightbulb, PieChart, Clock, Shield, Globe, Database, Headphones, Camera, Layers, Repeat, Palette, HelpCircle, Plus, DollarSign, HeartHandshake, Edit3, Monitor, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, User, Bell, Search, Settings, LogOut, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Building2, Megaphone, Activity, CheckSquare, Home, Sparkles, Presentation as PresentationChart, UserPlus, ClipboardList, Lightbulb, PieChart, Clock, Shield, Globe, Database, Headphones, Camera, Layers, Repeat, Palette, HelpCircle, Plus, DollarSign, HeartHandshake, Edit3, Monitor, MoreHorizontal, ExternalLink, Eye, Zap as ZapIcon, Workflow, Bot, Image, Hash, MessageCircle, Volume2, AlertTriangle, LineChart, TrendingDown, Workflow as WorkflowIcon, Map, Cpu, Code, TestTube, FileImage, Brush, Palette as PaletteIcon, Menu, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDealStore } from '../store/dealStore';
@@ -10,6 +10,7 @@ import { useAppointmentStore } from '../store/appointmentStore';
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { navigateToFeature, openAITool } = useNavigation();
   
@@ -57,21 +58,26 @@ const Navbar = () => {
     navigateToFeature(feature);
     setActiveTab(tabName);
     setActiveDropdown(null);
+    setIsMobileMenuOpen(false);
   };
 
   const handleAIToolClick = (toolName: string) => {
     openAITool(toolName);
     setActiveDropdown(null);
+    setIsMobileMenuOpen(false);
   };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setActiveDropdown(null);
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+      setIsMobileMenuOpen(false);
+    };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // All navigation tabs as requested
+  // Main navigation tabs
   const mainTabs = [
     {
       id: 'dashboard',
@@ -82,44 +88,28 @@ const Navbar = () => {
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      id: 'sales',
-      label: 'Sales',
-      icon: DollarSign,
-      action: () => handleNavigation('pipeline', 'sales'),
+      id: 'contacts',
+      label: 'Contacts',
+      icon: Users,
+      action: () => handleNavigation('contacts', 'contacts'),
+      badge: counters.hotContacts,
+      color: 'from-purple-500 to-indigo-500'
+    },
+    {
+      id: 'pipeline',
+      label: 'Pipeline',
+      icon: Briefcase,
+      action: () => handleNavigation('pipeline', 'pipeline'),
       badge: counters.activeDeals,
       color: 'from-green-500 to-emerald-500'
     },
     {
       id: 'ai-goals',
       label: 'AI Goals',
-      icon: Brain,
+      icon: Target,
       action: () => handleNavigation('ai-goals', 'ai-goals'),
       badge: 5,
-      color: 'from-purple-500 to-indigo-500'
-    },
-    {
-      id: 'communication',
-      label: 'Communication',
-      icon: MessageSquare,
-      action: () => handleNavigation('communication', 'communication'),
-      badge: counters.todayAppointments,
-      color: 'from-blue-500 to-indigo-500'
-    },
-    {
-      id: 'content',
-      label: 'Content',
-      icon: Edit3,
-      action: () => handleNavigation('content', 'content'),
-      badge: 3,
-      color: 'from-amber-500 to-orange-500'
-    },
-    {
-      id: 'apps',
-      label: 'Apps',
-      icon: Grid3X3,
-      action: () => handleNavigation('apps', 'apps'),
-      badge: 4,
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-orange-500 to-red-500'
     },
     {
       id: 'tasks',
@@ -127,18 +117,90 @@ const Navbar = () => {
       icon: CheckSquare,
       action: () => handleNavigation('tasks', 'tasks'),
       badge: counters.pendingTasks,
-      color: 'from-orange-500 to-red-500'
+      color: 'from-indigo-500 to-purple-500'
     }
   ];
 
-  // Complete AI Tools list for dropdown
+  // Complete AI Tools list - 29+ tools organized by category
   const aiTools = [
+    // Core AI Tools (8 tools)
+    { name: 'Email Analysis', tool: 'email-analysis', icon: Mail, category: 'Core AI Tools' },
+    { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video, category: 'Core AI Tools' },
+    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Core AI Tools' },
+    { name: 'Call Script Generator', tool: 'call-script', icon: Phone, category: 'Core AI Tools' },
+    { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail, category: 'Core AI Tools' },
+    { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield, category: 'Core AI Tools' },
+    { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp, category: 'Core AI Tools' },
+    { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3, category: 'Core AI Tools' },
+    { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart, category: 'Core AI Tools' },
+
+    // Communication (4 tools)
     { name: 'Email Composer', tool: 'email-composer', icon: Mail, category: 'Communication' },
-    { name: 'Meeting Summary', tool: 'meeting-summary', icon: Video, category: 'Communication' },
-    { name: 'Smart Search', tool: 'smart-search', icon: Search, category: 'Analysis' },
-    { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3, category: 'Analysis' },
-    { name: 'Content Generator', tool: 'content-generator', icon: FileText, category: 'Content' },
-    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Content' }
+    { name: 'Objection Handler', tool: 'objection-handler', icon: MessageSquare, category: 'Communication' },
+    { name: 'Email Response', tool: 'email-response', icon: Mail, category: 'Communication' },
+    { name: 'Voice Tone Optimizer', tool: 'voice-tone', icon: Volume2, category: 'Communication' },
+
+    // Customer & Content (3 tools)
+    { name: 'Customer Persona', tool: 'customer-persona', icon: User, category: 'Customer & Content' },
+    { name: 'Visual Content Generator', tool: 'visual-content', icon: Image, category: 'Customer & Content' },
+    { name: 'Meeting Agenda', tool: 'meeting-agenda', icon: Calendar, category: 'Customer & Content' },
+
+    // Advanced Features (5 tools)
+    { name: 'AI Assistant', tool: 'ai-assistant', icon: Bot, category: 'Advanced Features' },
+    { name: 'Vision Analyzer', tool: 'vision-analyzer', icon: Eye, category: 'Advanced Features' },
+    { name: 'Image Generator', tool: 'image-generator', icon: Camera, category: 'Advanced Features' },
+    { name: 'Semantic Search', tool: 'semantic-search', icon: Search, category: 'Advanced Features' },
+    { name: 'Function Assistant', tool: 'function-assistant', icon: Code, category: 'Advanced Features' },
+
+    // Real-time Features (6 tools)
+    { name: 'Streaming Chat', tool: 'streaming-chat', icon: MessageCircle, category: 'Real-time Features' },
+    { name: 'Form Validation', tool: 'form-validation', icon: CheckSquare, category: 'Real-time Features' },
+    { name: 'Live Deal Analysis', tool: 'live-deal-analysis', icon: Activity, category: 'Real-time Features' },
+    { name: 'Instant Response', tool: 'instant-response', icon: Zap, category: 'Real-time Features' },
+    { name: 'Real-time Email Composer', tool: 'realtime-email', icon: Mail, category: 'Real-time Features' },
+    { name: 'Voice Analysis Real-time', tool: 'voice-analysis', icon: Mic, category: 'Real-time Features' },
+
+    // Reasoning Generators (5 tools)
+    { name: 'Reasoning Email', tool: 'reasoning-email', icon: Brain, category: 'Reasoning Generators' },
+    { name: 'Reasoning Proposal', tool: 'reasoning-proposal', icon: FileText, category: 'Reasoning Generators' },
+    { name: 'Reasoning Script', tool: 'reasoning-script', icon: Phone, category: 'Reasoning Generators' },
+    { name: 'Reasoning Objection', tool: 'reasoning-objection', icon: AlertTriangle, category: 'Reasoning Generators' },
+    { name: 'Reasoning Social', tool: 'reasoning-social', icon: Users, category: 'Reasoning Generators' }
+  ];
+
+  // Sales dropdown tools
+  const salesTools = [
+    { name: 'Sales Tools', tool: 'sales-tools', icon: DollarSign },
+    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
+    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: Target },
+    { name: 'Appointments', tool: 'appointments', icon: Calendar },
+    { name: 'Phone System', tool: 'phone-system', icon: Phone },
+    { name: 'Invoicing', tool: 'invoicing', icon: Receipt }
+  ];
+
+  // Communication dropdown tools
+  const communicationTools = [
+    { name: 'Video Email', tool: 'video-email', icon: Video },
+    { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
+    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
+    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone }
+  ];
+
+  // Content dropdown tools
+  const contentTools = [
+    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
+    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
+    { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3 },
+    { name: 'Image Generator', tool: 'image-generator', icon: Camera },
+    { name: 'Forms', tool: 'forms', icon: FileText }
+  ];
+
+  // Connected apps
+  const connectedApps = [
+    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
+    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
+    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
+    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
 
   const renderBadge = (count: number | null, color: string = 'bg-red-500') => {
@@ -183,8 +245,8 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Main Navigation Pills - All Icons */}
-            <div className="flex items-center space-x-2">
+            {/* Desktop Navigation Pills */}
+            <div className="hidden lg:flex items-center space-x-2">
               {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 
@@ -215,19 +277,15 @@ const Navbar = () => {
                           isActive ? 'scale-110' : 'group-hover:scale-110'
                         }`} 
                       />
-                      <span className={`text-sm font-medium hidden xl:inline ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {tab.label}
-                      </span>
+                      <span className="text-sm font-medium">{tab.label}</span>
                       
                       {/* Dynamic Badge */}
                       {tab.badge && renderBadge(
                         tab.badge, 
-                        tab.id === 'sales' ? 'bg-green-500' :
-                        tab.id === 'ai-goals' ? 'bg-purple-500' :
-                        tab.id === 'communication' ? 'bg-blue-500' :
-                        tab.id === 'content' ? 'bg-amber-500' :
-                        tab.id === 'apps' ? 'bg-purple-500' :
-                        tab.id === 'tasks' ? 'bg-red-500' :
+                        tab.id === 'pipeline' ? 'bg-green-500' :
+                        tab.id === 'contacts' ? 'bg-purple-500' :
+                        tab.id === 'ai-goals' ? 'bg-orange-500' :
+                        tab.id === 'tasks' ? 'bg-indigo-500' :
                         'bg-gray-500'
                       )}
 
@@ -239,29 +297,283 @@ const Navbar = () => {
                   </div>
                 );
               })}
+
+              {/* AI Tools Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown('ai-tools');
+                  }}
+                  className={`
+                    relative flex items-center space-x-2 px-3 py-2 rounded-full 
+                    transition-all duration-300 transform hover:scale-105
+                    ${isDark 
+                      ? 'text-white hover:bg-white/20 hover:text-white' 
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                    group
+                  `}
+                >
+                  <Brain size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-sm font-medium">AI Tools</span>
+                  <ChevronDown 
+                    size={14} 
+                    className={`transition-transform duration-300 ${
+                      activeDropdown === 'ai-tools' ? 'rotate-180' : ''
+                    }`} 
+                  />
+                  
+                  {/* AI Tools Badge */}
+                  {renderBadge(aiTools.length, 'bg-pink-500')}
+                </button>
+
+                {/* AI Tools Dropdown */}
+                {activeDropdown === 'ai-tools' && (
+                  <div className={`
+                    absolute top-14 right-0 w-[520px] max-h-96
+                    ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} 
+                    backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} 
+                    rounded-2xl shadow-2xl z-50 overflow-hidden
+                    animate-fade-in transform transition-all duration-300
+                  `}>
+                    <div className="p-4">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <Brain size={18} className="text-purple-500" />
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          AI Tools
+                        </h3>
+                        <div className="ml-auto">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            {aiTools.length} tools
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Organized by Category */}
+                      <div className="space-y-4 max-h-80 overflow-y-auto">
+                        {['Core AI Tools', 'Communication', 'Customer & Content', 'Advanced Features', 'Real-time Features', 'Reasoning Generators'].map((category) => {
+                          const tools = aiTools.filter(tool => tool.category === category);
+                          return (
+                            <div key={category}>
+                              <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+                                isDark ? 'text-gray-400' : 'text-gray-500'
+                              } flex items-center`}>
+                                {category}
+                                <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                                  isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
+                                }`}>
+                                  {tools.length}
+                                </span>
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                {tools.map((tool, index) => (
+                                  <button
+                                    key={index}
+                                    onClick={() => handleAIToolClick(tool.tool)}
+                                    className={`
+                                      text-left p-3 rounded-xl transition-all duration-200 
+                                      ${isDark 
+                                        ? 'hover:bg-white/5 text-gray-300 hover:text-white' 
+                                        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                                      }
+                                      group border border-transparent hover:border-purple-500/20
+                                    `}
+                                  >
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <tool.icon size={16} className="text-purple-500 group-hover:scale-110 transition-transform" />
+                                      <span className="text-sm font-medium">{tool.name}</span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sales Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown('sales');
+                  }}
+                  className={`
+                    relative flex items-center space-x-2 px-3 py-2 rounded-full 
+                    transition-all duration-300 transform hover:scale-105
+                    ${isDark 
+                      ? 'text-white hover:bg-white/20' 
+                      : 'text-gray-600 hover:bg-gray-100'
+                    }
+                    group
+                  `}
+                >
+                  <DollarSign size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-sm font-medium">Sales</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'sales' ? 'rotate-180' : ''}`} />
+                </button>
+
+                {activeDropdown === 'sales' && (
+                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      {salesTools.map((tool, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleAIToolClick(tool.tool)}
+                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                        >
+                          <tool.icon size={16} className="text-green-500" />
+                          <span className="text-sm font-medium">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Communication Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown('communication');
+                  }}
+                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                >
+                  <MessageSquare size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-sm font-medium">Communication</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'communication' ? 'rotate-180' : ''}`} />
+                </button>
+
+                {activeDropdown === 'communication' && (
+                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      {communicationTools.map((tool, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleAIToolClick(tool.tool)}
+                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                        >
+                          <tool.icon size={16} className="text-blue-500" />
+                          <span className="text-sm font-medium">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Content Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown('content');
+                  }}
+                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                >
+                  <Edit3 size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-sm font-medium">Content</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'content' ? 'rotate-180' : ''}`} />
+                </button>
+
+                {activeDropdown === 'content' && (
+                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      {contentTools.map((tool, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleAIToolClick(tool.tool)}
+                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                        >
+                          <tool.icon size={16} className="text-amber-500" />
+                          <span className="text-sm font-medium">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Connected Apps Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleDropdown('apps');
+                  }}
+                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                >
+                  <Grid3X3 size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-sm font-medium">Apps</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'apps' ? 'rotate-180' : ''}`} />
+                  {renderBadge(4, 'bg-purple-500')}
+                </button>
+
+                {activeDropdown === 'apps' && (
+                  <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      {connectedApps.map((app, index) => (
+                        app.isExternal ? (
+                          <a
+                            key={index}
+                            href={app.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <app.icon size={16} className="text-purple-500" />
+                              <span className="text-sm font-medium">{app.name}</span>
+                            </div>
+                            <ExternalLink size={12} className="opacity-50" />
+                          </a>
+                        ) : (
+                          <button
+                            key={index}
+                            onClick={() => handleNavigation(app.url.slice(1), 'white-label')}
+                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                          >
+                            <app.icon size={16} className="text-purple-500" />
+                            <span className="text-sm font-medium">{app.name}</span>
+                          </button>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                }}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
 
             {/* Right Side Controls */}
-            <div className="flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3">
               {/* Search */}
-              <button className={`
-                p-2 rounded-full transition-all duration-300 transform hover:scale-110
-                ${isDark 
-                  ? 'hover:bg-white/20 text-white hover:text-white' 
-                  : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-                }
-              `}>
+              <button className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
                 <Search size={18} />
               </button>
               
               {/* Notifications */}
-              <button className={`
-                relative p-2 rounded-full transition-all duration-300 transform hover:scale-110
-                ${isDark 
-                  ? 'hover:bg-white/20 text-white hover:text-white' 
-                  : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-                }
-              `}>
+              <button className={`relative p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
                 <Bell size={18} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
@@ -269,13 +581,7 @@ const Navbar = () => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className={`
-                  p-2 rounded-full transition-all duration-500 transform hover:scale-110
-                  ${isDark 
-                    ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                  }
-                `}
+                className={`p-2 rounded-full transition-all duration-500 transform hover:scale-110 ${isDark ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
               >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
@@ -287,75 +593,38 @@ const Navbar = () => {
                     e.stopPropagation();
                     toggleDropdown('profile');
                   }}
-                  className={`
-                    flex items-center space-x-2 p-1 rounded-full transition-all duration-300 transform hover:scale-105
-                    ${isDark 
-                      ? 'hover:bg-white/20 text-white hover:text-white' 
-                      : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                    }
-                  `}
+                  className={`flex items-center space-x-2 p-1 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'}`}
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/20">
                     <span className="text-sm font-bold text-white">JD</span>
                   </div>
-                  <ChevronDown 
-                    size={14} 
-                    className={`transition-transform duration-300 hidden lg:block ${isDark ? 'text-white' : 'text-gray-600'} ${
-                      activeDropdown === 'profile' ? 'rotate-180' : ''
-                    }`} 
-                  />
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'profile' ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {activeDropdown === 'profile' && (
-                  <div className={`
-                    absolute top-12 right-0 w-64 
-                    ${isDark ? 'bg-gray-900/98 border-white/20' : 'bg-white/98 border-gray-200'} 
-                    backdrop-blur-2xl border rounded-2xl shadow-2xl z-50 overflow-hidden
-                    animate-fade-in
-                  `}>
+                  <div className={`absolute top-12 right-0 w-64 ${isDark ? 'bg-gray-900/98 border-white/20' : 'bg-white/98 border-gray-200'} backdrop-blur-2xl border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                     <div className="p-4">
                       <div className="flex items-center space-x-3 mb-4">
                         <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
                           <span className="text-lg font-bold text-white">JD</span>
                         </div>
                         <div>
-                          <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            John Doe
-                          </h3>
-                          <p className={`text-sm ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>
-                            Sales Manager
-                          </p>
+                          <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>John Doe</h3>
+                          <p className={`text-sm ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>Sales Manager</p>
                         </div>
                       </div>
                       
                       <div className="space-y-1">
-                        <button className={`
-                          w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200
-                          ${isDark 
-                            ? 'hover:bg-white/10 text-white hover:text-white' 
-                            : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                          }
-                        `}>
-                          <User size={16} />
-                          <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Profile</span>
-                        </button>
-                        
-                        <button className={`
-                          w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200
-                          ${isDark 
-                            ? 'hover:bg-white/10 text-white hover:text-white' 
-                            : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                          }
-                        `}>
+                        <button className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/10 text-white hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}>
                           <Settings size={16} />
-                          <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Settings</span>
+                          <span className="text-sm font-medium">Settings</span>
                         </button>
                         
                         <hr className={`my-2 ${isDark ? 'border-white/20' : 'border-gray-200'}`} />
                         
                         <button className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 text-red-400 hover:bg-red-500/10">
                           <LogOut size={16} />
-                          <span className="text-sm font-medium">Logout</span>
+                          <span className="text-sm font-medium">Sign Out</span>
                         </button>
                       </div>
                     </div>
@@ -365,6 +634,37 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className={`lg:hidden mt-4 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden animate-fade-in`}>
+            <div className="p-4 space-y-3">
+              {mainTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={tab.action}
+                  className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  <tab.icon size={18} />
+                  <span className="font-medium">{tab.label}</span>
+                  {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
+                </button>
+              ))}
+              
+              <hr className={`${isDark ? 'border-white/20' : 'border-gray-200'}`} />
+              
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={toggleTheme}
+                  className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                  <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
