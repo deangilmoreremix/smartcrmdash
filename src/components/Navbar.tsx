@@ -77,16 +77,8 @@ const Navbar = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Main navigation tabs
+  // Main navigation tabs (removed dashboard since users are already on it)
   const mainTabs = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: Home,
-      action: () => handleNavigation('dashboard', 'dashboard'),
-      badge: null,
-      color: 'from-blue-500 to-cyan-500'
-    },
     {
       id: 'contacts',
       label: 'Contacts',
@@ -226,7 +218,7 @@ const Navbar = () => {
           transition-all duration-500 hover:shadow-3xl
           ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}
         `}>
-          <div className="flex items-center justify-between px-6 py-3">
+          <div className="flex items-center justify-between px-4 py-2">
             
             {/* Logo */}
             <div className="flex items-center space-x-3">
@@ -246,7 +238,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation Pills */}
-            <div className="hidden lg:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-1">
               {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 
@@ -258,7 +250,7 @@ const Navbar = () => {
                         tab.action();
                       }}
                       className={`
-                        relative flex items-center space-x-2 px-3 py-2 rounded-full 
+                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                         transition-all duration-300 transform hover:scale-105
                         ${isActive 
                           ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20` 
@@ -272,12 +264,12 @@ const Navbar = () => {
                       title={tab.label}
                     >
                       <tab.icon 
-                        size={16} 
+                        size={14} 
                         className={`transition-transform duration-300 ${
                           isActive ? 'scale-110' : 'group-hover:scale-110'
                         }`} 
                       />
-                      <span className="text-sm font-medium">{tab.label}</span>
+                      <span className="text-xs font-medium">{tab.label}</span>
                       
                       {/* Dynamic Badge */}
                       {tab.badge && renderBadge(
@@ -306,7 +298,7 @@ const Navbar = () => {
                     toggleDropdown('ai-tools');
                   }}
                   className={`
-                    relative flex items-center space-x-2 px-3 py-2 rounded-full 
+                    relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                     transition-all duration-300 transform hover:scale-105
                     ${isDark 
                       ? 'text-white hover:bg-white/20 hover:text-white' 
@@ -315,10 +307,10 @@ const Navbar = () => {
                     group
                   `}
                 >
-                  <Brain size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-sm font-medium">AI Tools</span>
+                  <Brain size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-xs font-medium">AI Tools</span>
                   <ChevronDown 
-                    size={14} 
+                    size={12} 
                     className={`transition-transform duration-300 ${
                       activeDropdown === 'ai-tools' ? 'rotate-180' : ''
                     }`} 
@@ -406,7 +398,7 @@ const Navbar = () => {
                     toggleDropdown('sales');
                   }}
                   className={`
-                    relative flex items-center space-x-2 px-3 py-2 rounded-full 
+                    relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                     transition-all duration-300 transform hover:scale-105
                     ${isDark 
                       ? 'text-white hover:bg-white/20' 
@@ -415,9 +407,9 @@ const Navbar = () => {
                     group
                   `}
                 >
-                  <DollarSign size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-sm font-medium">Sales</span>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'sales' ? 'rotate-180' : ''}`} />
+                  <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-xs font-medium">Sales</span>
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'sales' ? 'rotate-180' : ''}`} />
                 </button>
 
                 {activeDropdown === 'sales' && (
@@ -445,11 +437,11 @@ const Navbar = () => {
                     e.stopPropagation();
                     toggleDropdown('communication');
                   }}
-                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
                 >
-                  <MessageSquare size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-sm font-medium">Communication</span>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'communication' ? 'rotate-180' : ''}`} />
+                  <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-xs font-medium">Comm</span>
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'communication' ? 'rotate-180' : ''}`} />
                 </button>
 
                 {activeDropdown === 'communication' && (
@@ -477,11 +469,11 @@ const Navbar = () => {
                     e.stopPropagation();
                     toggleDropdown('content');
                   }}
-                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
                 >
-                  <Edit3 size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-sm font-medium">Content</span>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'content' ? 'rotate-180' : ''}`} />
+                  <Edit3 size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-xs font-medium">Content</span>
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'content' ? 'rotate-180' : ''}`} />
                 </button>
 
                 {activeDropdown === 'content' && (
@@ -509,11 +501,11 @@ const Navbar = () => {
                     e.stopPropagation();
                     toggleDropdown('apps');
                   }}
-                  className={`relative flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
+                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
                 >
-                  <Grid3X3 size={16} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-sm font-medium">Apps</span>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'apps' ? 'rotate-180' : ''}`} />
+                  <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                  <span className="text-xs font-medium">Apps</span>
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'apps' ? 'rotate-180' : ''}`} />
                   {renderBadge(4, 'bg-purple-500')}
                 </button>
 
@@ -566,24 +558,24 @@ const Navbar = () => {
             </div>
 
             {/* Right Side Controls */}
-            <div className="hidden lg:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-2">
               {/* Search */}
-              <button className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
-                <Search size={18} />
+              <button className={`p-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
+                <Search size={16} />
               </button>
               
               {/* Notifications */}
-              <button className={`relative p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
-                <Bell size={18} />
+              <button className={`relative p-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
+                <Bell size={16} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
 
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className={`p-2 rounded-full transition-all duration-500 transform hover:scale-110 ${isDark ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+                className={`p-1.5 rounded-full transition-all duration-500 transform hover:scale-105 ${isDark ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
               >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               
               {/* User Profile */}
@@ -593,12 +585,12 @@ const Navbar = () => {
                     e.stopPropagation();
                     toggleDropdown('profile');
                   }}
-                  className={`flex items-center space-x-2 p-1 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'}`}
+                  className={`flex items-center space-x-1 p-1 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'hover:bg-white/20 text-white hover:text-white' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'}`}
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/20">
-                    <span className="text-sm font-bold text-white">JD</span>
+                  <div className="w-7 h-7 bg-gradient-to-r from-green-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/20">
+                    <span className="text-xs font-bold text-white">JD</span>
                   </div>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === 'profile' ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'profile' ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {activeDropdown === 'profile' && (
