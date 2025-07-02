@@ -70,6 +70,9 @@ import StreamingChat from './aiTools/StreamingChat';
 import SmartSearchRealtime from './aiTools/SmartSearchRealtime';
 import LiveDealAnalysis from './aiTools/LiveDealAnalysis';
 
+// Import enhanced AI panel
+import { EnhancedAIInsightsPanel } from './EnhancedAIInsightsPanel';
+
 // Import recharts components for data visualization
 import { 
   AreaChart, 
@@ -122,6 +125,7 @@ const Dashboard: React.FC = () => {
     efficiency: 32,
     qualityScore: 87
   });
+  const [showEnhancedAI, setShowEnhancedAI] = useState(true);
   
   useEffect(() => {
     // Fetch all data when component mounts
@@ -390,93 +394,111 @@ const Dashboard: React.FC = () => {
       case 'ai-section':
         return (
           <div className="mb-12 scroll-mt-20">
-            <div className="flex items-center mb-6">
-              <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl mr-3">
-                <Brain className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl mr-3">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Intelligence & Insights</h2>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>AI-powered analysis and recommendations</p>
+                </div>
               </div>
-              <div>
-                <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Intelligence & Insights</h2>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>AI-powered analysis and recommendations</p>
-              </div>
+
+              <button
+                onClick={() => setShowEnhancedAI(!showEnhancedAI)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  isDark 
+                    ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' 
+                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                } transition-colors flex items-center space-x-2`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>{showEnhancedAI ? 'Show Basic View' : 'Show Advanced View'}</span>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* AI Pipeline Intelligence Panel */}
-              <div className={`lg:col-span-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
-                      <Brain className="h-6 w-6 text-white" />
+            {showEnhancedAI ? (
+              <EnhancedAIInsightsPanel />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* AI Pipeline Intelligence Panel */}
+                <div className={`lg:col-span-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+                        <Brain className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h3>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
+                      </div>
                     </div>
+                    <button
+                      onClick={generatePipelineInsight}
+                      disabled={isAnalyzing}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all disabled:opacity-50"
+                    >
+                      {isAnalyzing ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Zap className="h-4 w-4" />
+                      )}
+                      <span className="text-sm font-medium">
+                        {isAnalyzing ? 'Analyzing...' : pipelineInsight ? 'Refresh Insights' : 'Generate Insights'}
+                      </span>
+                    </button>
+                  </div>
+                  
+                  {isAnalyzing ? (
+                    <div className="flex items-center text-blue-400">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
+                      <p>Analyzing your pipeline and generating insights...</p>
+                    </div>
+                  ) : pipelineInsight ? (
+                    <p className={isDark ? 'text-white' : 'text-gray-700'}>{pipelineInsight}</p>
+                  ) : (
+                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Generate AI-powered insights to understand your pipeline health and get strategic recommendations.</p>
+                  )}
+                </div>
+
+                {/* AI Enhancement Metrics */}
+                <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-indigo-100'} backdrop-blur-xl border rounded-2xl p-6`}>
+                  <div className="flex items-center mb-4">
+                    <div className={`p-2 rounded-full ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} mr-3`}>
+                      <Brain size={18} />
+                    </div>
+                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Metrics</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
                     <div>
-                      <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h3>
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Active Suggestions</p>
+                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.activeSuggestions}</p>
+                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                        <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.activeSuggestions * 5}%` }}></div>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    onClick={generatePipelineInsight}
-                    disabled={isAnalyzing}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all disabled:opacity-50"
-                  >
-                    {isAnalyzing ? (
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Zap className="h-4 w-4" />
-                    )}
-                    <span className="text-sm font-medium">
-                      {isAnalyzing ? 'Analyzing...' : pipelineInsight ? 'Refresh Insights' : 'Generate Insights'}
-                    </span>
-                  </button>
-                </div>
-                
-                {isAnalyzing ? (
-                  <div className="flex items-center text-blue-400">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
-                    <p>Analyzing your pipeline and generating insights...</p>
-                  </div>
-                ) : pipelineInsight ? (
-                  <p className={isDark ? 'text-white' : 'text-gray-700'}>{pipelineInsight}</p>
-                ) : (
-                  <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Generate AI-powered insights to understand your pipeline health and get strategic recommendations.</p>
-                )}
-              </div>
-
-              {/* AI Enhancement Metrics */}
-              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-indigo-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-                <div className="flex items-center mb-4">
-                  <div className={`p-2 rounded-full ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} mr-3`}>
-                    <Brain size={18} />
-                  </div>
-                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Metrics</h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Active Suggestions</p>
-                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.activeSuggestions}</p>
-                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                      <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.activeSuggestions * 5}%` }}></div>
+                    
+                    <div>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Suggestions Accepted</p>
+                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.acceptedSuggestions}</p>
+                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                        <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.acceptedSuggestions * 10}%` }}></div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Suggestions Accepted</p>
-                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.acceptedSuggestions}</p>
-                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                      <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.acceptedSuggestions * 10}%` }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Quality Score</p>
-                    <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.qualityScore}/100</p>
-                    <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                      <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.qualityScore}%` }}></div>
+                    
+                    <div>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Quality Score</p>
+                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.qualityScore}/100</p>
+                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
+                        <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.qualityScore}%` }}></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* AI Tools Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -792,8 +814,8 @@ const Dashboard: React.FC = () => {
       {/* Dashboard Header */}
       <DashboardHeader />
 
-      {/* AI Insights Panel */}
-      <AIInsightsPanel />
+      {/* AI Insights Panel - Show either the regular or enhanced version */}
+      {!showEnhancedAI && <AIInsightsPanel />}
 
       {/* KPI Cards */}
       <KPICards />
