@@ -106,34 +106,42 @@ class OpenAIService {
 
       // Log usage to Supabase
       if (request.customerId) {
-        const modelConfig = await supabaseAIService.getModelById(model);
-        const cost = this.calculateCost(model, result.usage.totalTokens, modelConfig);
-        
-        await supabaseAIService.logUsage({
-          customer_id: request.customerId,
-          model_id: model,
-          feature_used: request.featureUsed || 'chat-completion',
-          tokens_used: result.usage.totalTokens,
-          cost,
-          response_time_ms: responseTime,
-          success: true
-        });
+        try {
+          const modelConfig = await supabaseAIService.getModelById(model);
+          const cost = this.calculateCost(model, result.usage.totalTokens, modelConfig);
+          
+          await supabaseAIService.logUsage({
+            customer_id: request.customerId,
+            model_id: model,
+            feature_used: request.featureUsed || 'chat-completion',
+            tokens_used: result.usage.totalTokens,
+            cost,
+            response_time_ms: responseTime,
+            success: true
+          });
+        } catch (logError) {
+          console.warn('Failed to log OpenAI usage:', logError);
+        }
       }
 
       return result;
     } catch (error) {
       // Log failed usage
       if (request.customerId) {
-        await supabaseAIService.logUsage({
-          customer_id: request.customerId,
-          model_id: model,
-          feature_used: request.featureUsed || 'chat-completion',
-          tokens_used: 0,
-          cost: 0,
-          response_time_ms: Date.now() - startTime,
-          success: false,
-          error_message: error instanceof Error ? error.message : 'Unknown error'
-        });
+        try {
+          await supabaseAIService.logUsage({
+            customer_id: request.customerId,
+            model_id: model,
+            feature_used: request.featureUsed || 'chat-completion',
+            tokens_used: 0,
+            cost: 0,
+            response_time_ms: Date.now() - startTime,
+            success: false,
+            error_message: error instanceof Error ? error.message : 'Unknown error'
+          });
+        } catch (logError) {
+          console.warn('Failed to log OpenAI error usage:', logError);
+        }
       }
 
       console.error('OpenAI API error:', error);
@@ -178,6 +186,10 @@ class OpenAIService {
     tone?: 'formal' | 'casual' | 'friendly';
     context?: string;
   }, customerId?: string, model?: string): Promise<{ subject: string; body: string }> {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    
     const tone = context.tone || 'professional';
     const systemPrompt = `You are a professional email writing assistant. Write clear, engaging emails that drive action. Always format your response as JSON with subject and body fields.`;
 
@@ -219,6 +231,10 @@ class OpenAIService {
    * Generate deal insights
    */
   async generateDealInsights(dealData: any, customerId?: string, model?: string): Promise<any> {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    
     const systemPrompt = `You are an AI specialized in sales analytics. Analyze the provided deal data and return insightful observations in JSON format.`;
     
     const messages: ChatMessage[] = [
@@ -263,6 +279,10 @@ class OpenAIService {
    * Generate pipeline health analysis
    */
   async analyzePipelineHealth(pipelineData: any, customerId?: string, model?: string): Promise<any> {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    
     const systemPrompt = `You are an AI specialized in sales pipeline analysis. Examine the provided pipeline data and identify patterns, bottlenecks, and opportunities.`;
     
     const messages: ChatMessage[] = [
@@ -313,6 +333,10 @@ class OpenAIService {
     duration: number;
     previousNotes?: string;
   }, customerId?: string, model?: string): Promise<any> {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    
     const systemPrompt = `You are an AI specialized in meeting planning and facilitation. Create clear, focused meeting agendas that make excellent use of time.`;
     
     const messages: ChatMessage[] = [

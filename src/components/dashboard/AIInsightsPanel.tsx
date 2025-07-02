@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import { useGemini } from '../../services/geminiService';
+import { aiTaskRecommender } from '../../services/aiTaskRecommender';
 
 interface Insight {
   type: 'success' | 'warning' | 'insight';

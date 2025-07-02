@@ -46,6 +46,19 @@ class AIOrchestratorService {
 
   constructor() {
     this.initializeStats();
+    
+    // Check if API keys are available
+    this.checkApiKeys();
+  }
+  
+  private checkApiKeys() {
+    if (!import.meta.env.VITE_GOOGLE_AI_API_KEY) {
+      console.warn('Warning: Google AI API key not found in environment variables');
+    }
+    
+    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      console.warn('Warning: OpenAI API key not found in environment variables');
+    }
   }
 
   private initializeStats() {
@@ -86,6 +99,7 @@ class AIOrchestratorService {
       feature === 'lead_qualification' ? 'lead_qualification' : 
       'categorization';
 
+    // Fixed: Changed getRecommendation to getModelRecommendation
     const recommendation = aiTaskRecommender.getModelRecommendation(modelType);
 
     // Additional criteria
@@ -152,6 +166,9 @@ class AIOrchestratorService {
     },
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     const modelId = await this.getOptimalModel('email_generation', taskContext);
     const service = this.getServiceForModel(modelId);
     const startTime = Date.now();
@@ -222,6 +239,9 @@ class AIOrchestratorService {
     pipelineData: any,
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     const modelId = await this.getOptimalModel('pipeline_analysis', taskContext);
     const startTime = Date.now();
 
@@ -292,10 +312,11 @@ class AIOrchestratorService {
     } catch (error) {
       return {
         content: {
-          insights: "Unable to analyze pipeline at this time.",
-          recommendations: [],
-          opportunities: [],
-          risks: ["Analysis service unavailable"]
+          healthScore: 0,
+          keyInsights: ["Unable to analyze pipeline health. Please try again later."],
+          bottlenecks: ["Analysis unavailable"],
+          opportunities: ["Analysis unavailable"],
+          forecastAccuracy: 0
         },
         model: modelId,
         provider: this.isGoogleModel(modelId) ? 'Google' : 'OpenAI',
@@ -319,6 +340,9 @@ class AIOrchestratorService {
     },
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     const modelId = await this.getOptimalModel('meeting_agenda', taskContext);
     const startTime = Date.now();
 
@@ -429,6 +453,9 @@ class AIOrchestratorService {
     dealData: any,
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     // For complex analytical tasks like deal analysis, prefer more capable models
     const useGPT4 = dealData.value > 100000 || taskContext.complexity === 'high';
     const defaultModelId = useGPT4 ? 'gpt-4o-mini' : 'gemini-2.5-flash';
@@ -569,6 +596,9 @@ class AIOrchestratorService {
     feature: AIFeature,
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     const modelId = await this.getOptimalModel(feature, taskContext);
     const startTime = Date.now();
 
@@ -679,6 +709,9 @@ class AIOrchestratorService {
     contacts: any[],
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
+    // Verify API keys before proceeding
+    this.verifyRequiredApiKeys();
+    
     // For contact analysis, prefer models with good pattern recognition
     const modelId = await this.getOptimalModel('contact_scoring', {
       ...taskContext,
@@ -765,6 +798,19 @@ class AIOrchestratorService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
       };
+    }
+  }
+
+  /**
+   * Verify that required API keys are available
+   */
+  private verifyRequiredApiKeys() {
+    if (!import.meta.env.VITE_GOOGLE_AI_API_KEY) {
+      throw new Error('Google AI API key is required. Please check your Supabase configuration.');
+    }
+    
+    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is required');
     }
   }
 

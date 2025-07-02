@@ -83,6 +83,12 @@ const LiveDealAnalysis: React.FC = () => {
       // Now enhance with AI insights if we have enough deals
       if (activeDeals.length >= 3) {
         try {
+          // Check if API keys are configured
+          if (!import.meta.env.VITE_GOOGLE_AI_API_KEY && !import.meta.env.VITE_OPENAI_API_KEY) {
+            console.warn('No AI API keys configured. Skipping AI deal analysis.');
+            return;
+          }
+          
           // Prepare data for AI analysis
           const dealData = {
             deals: activeDeals.map(deal => ({

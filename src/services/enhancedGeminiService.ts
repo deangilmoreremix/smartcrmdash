@@ -62,15 +62,26 @@ class EnhancedGeminiService {
     const startTime = Date.now();
     
     if (!this.apiKey) {
-      throw new Error('Google AI API key is required. Please check your Supabase configuration.');
+      throw new Error('Google AI API key is required. Please check your environment variables.');
     }
 
     // Get model configuration from database
     const modelId = request.model || 'gemini-2.5-flash';
-    const modelConfig = await supabaseAIService.getModelById(modelId);
+    let modelConfig;
+    
+    try {
+      modelConfig = await supabaseAIService.getModelById(modelId);
+    } catch (error) {
+      // Fallback to hardcoded model info if database lookup fails
+      modelConfig = {
+        model_name: modelId,
+        max_tokens: 8192
+      };
+      console.warn(`Could not fetch model configuration for ${modelId} from database. Using defaults.`);
+    }
     
     if (!modelConfig) {
-      throw new Error(`Model ${modelId} not found in database configuration`);
+      throw new Error(`Model ${modelId} not found in configuration`);
     }
 
     const url = `${this.baseUrl}/models/${modelConfig.model_name}:generateContent`;
@@ -83,14 +94,15 @@ class EnhancedGeminiService {
       }],
       generationConfig: {
         temperature: request.temperature || 0.7,
-        maxOutputTokens: request.maxTokens || modelConfig.max_tokens,
+        maxOutputTokens: request.maxTokens || modelConfig.max_tokens || 4096,
         topP: 0.8,
         topK: 10
       }
     };
 
     // Add system instruction if provided and supported
-    if (request.systemInstruction && modelConfig.capabilities.includes('system-instructions')) {
+    if (request.systemInstruction && modelConfig.capabilities && 
+        modelConfig.capabilities.includes('system-instructions')) {
       requestBody.systemInstruction = {
         parts: [{
           text: request.systemInstruction
@@ -138,31 +150,39 @@ class EnhancedGeminiService {
       if (request.customerId) {
         const cost = this.calculateCost(modelConfig, result.usage.totalTokens);
         
-        await supabaseAIService.logUsage({
-          customer_id: request.customerId,
-          model_id: modelId,
-          feature_used: request.featureUsed || 'text-generation',
-          tokens_used: result.usage.totalTokens,
-          cost,
-          response_time_ms: responseTime,
-          success: true
-        });
+        try {
+          await supabaseAIService.logUsage({
+            customer_id: request.customerId,
+            model_id: modelId,
+            feature_used: request.featureUsed || 'text-generation',
+            tokens_used: result.usage.totalTokens,
+            cost,
+            response_time_ms: responseTime,
+            success: true
+          });
+        } catch (logError) {
+          console.warn('Failed to log AI usage:', logError);
+        }
       }
 
       return result;
     } catch (error) {
       // Log failed usage
       if (request.customerId) {
-        await supabaseAIService.logUsage({
-          customer_id: request.customerId,
-          model_id: modelId,
-          feature_used: request.featureUsed || 'text-generation',
-          tokens_used: 0,
-          cost: 0,
-          response_time_ms: Date.now() - startTime,
-          success: false,
-          error_message: error instanceof Error ? error.message : 'Unknown error'
-        });
+        try {
+          await supabaseAIService.logUsage({
+            customer_id: request.customerId,
+            model_id: modelId,
+            feature_used: request.featureUsed || 'text-generation',
+            tokens_used: 0,
+            cost: 0,
+            response_time_ms: Date.now() - startTime,
+            success: false,
+            error_message: error instanceof Error ? error.message : 'Unknown error'
+          });
+        } catch (logError) {
+          console.warn('Failed to log AI error usage:', logError);
+        }
       }
 
       console.error('Gemini API error:', error);
@@ -203,17 +223,11 @@ class EnhancedGeminiService {
     
     Format your response as JSON with the following structure:
     {
-      "insights": "string",
-      "recommendations": [
-        {
-          "type": "deal|contact|general",
-          "title": "string",
-          "description": "string",
-          "priority": "high|medium|low"
-        }
-      ],
-      "opportunities": ["string"],
-      "risks": ["string"]
+      "healthScore": 75,
+      "keyInsights": ["Pipeline shows strong growth", "Deal velocity increasing"],
+      "bottlenecks": ["3 deals stalled in negotiation stage"],
+      "opportunities": ["Focus on high-value Microsoft opportunity"],
+      "forecastAccuracy": 85
     }
     `;
 
@@ -230,10 +244,11 @@ class EnhancedGeminiService {
     } catch (error) {
       console.error('Error generating insights:', error);
       return {
-        insights: "Unable to generate insights at this time. Please ensure your data is properly formatted and try again.",
-        recommendations: [],
-        opportunities: [],
-        risks: []
+        healthScore: 0,
+        keyInsights: ["Unable to generate insights at this time."],
+        bottlenecks: ["Analysis service unavailable"],
+        opportunities: ["Manual review required"],
+        forecastAccuracy: 0
       };
     }
   }
