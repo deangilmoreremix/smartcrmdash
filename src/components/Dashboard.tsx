@@ -61,7 +61,6 @@ import RecentActivity from './dashboard/RecentActivity';
 import DashboardHeader from './dashboard/DashboardHeader';
 import ChartsSection from './dashboard/ChartsSection';
 import ConnectedApps from './dashboard/ConnectedApps';
-import AIInsightsPanel from './AIInsightsPanel';
 import NewLeadsSection from './dashboard/NewLeadsSection';
 import KPICards from './dashboard/KPICards';
 import QuickActions from './dashboard/QuickActions';
@@ -70,9 +69,6 @@ import QuickActions from './dashboard/QuickActions';
 import StreamingChat from './aiTools/StreamingChat';
 import SmartSearchRealtime from './aiTools/SmartSearchRealtime';
 import LiveDealAnalysis from './aiTools/LiveDealAnalysis';
-
-// Import enhanced AI panel
-import { EnhancedAIInsightsPanel } from './EnhancedAIInsightsPanel';
 
 // Import recharts components for data visualization
 import { 
@@ -126,7 +122,6 @@ const Dashboard: React.FC = () => {
     efficiency: 32,
     qualityScore: 87
   });
-  const [showEnhancedAI, setShowEnhancedAI] = useState(true);
   
   useEffect(() => {
     // Fetch all data when component mounts
@@ -357,192 +352,6 @@ const Dashboard: React.FC = () => {
 
       case 'quick-actions-section':
         return <QuickActions />;
-
-      case 'ai-section':
-        return (
-          <div className="mb-12 scroll-mt-20">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl mr-3">
-                  <Brain className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Intelligence & Insights</h2>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>AI-powered analysis and recommendations</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowEnhancedAI(!showEnhancedAI)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  isDark 
-                    ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' 
-                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                } transition-colors flex items-center space-x-2`}
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>{showEnhancedAI ? 'Show Basic View' : 'Show Advanced View'}</span>
-              </button>
-            </div>
-
-            {showEnhancedAI ? (
-              <EnhancedAIInsightsPanel />
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* AI Pipeline Intelligence Panel */}
-                <div className={`lg:col-span-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
-                        <Brain className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h3>
-                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={generatePipelineInsight}
-                      disabled={isAnalyzing}
-                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all disabled:opacity-50"
-                    >
-                      {isAnalyzing ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Zap className="h-4 w-4" />
-                      )}
-                      <span className="text-sm font-medium">
-                        {isAnalyzing ? 'Analyzing...' : pipelineInsight ? 'Refresh Insights' : 'Generate Insights'}
-                      </span>
-                    </button>
-                  </div>
-                  
-                  {isAnalyzing ? (
-                    <div className="flex items-center text-blue-400">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
-                      <p>Analyzing your pipeline and generating insights...</p>
-                    </div>
-                  ) : pipelineInsight ? (
-                    <p className={isDark ? 'text-white' : 'text-gray-700'}>{pipelineInsight}</p>
-                  ) : (
-                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Generate AI-powered insights to understand your pipeline health and get strategic recommendations.</p>
-                  )}
-                </div>
-
-                {/* AI Enhancement Metrics */}
-                <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-indigo-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-                  <div className="flex items-center mb-4">
-                    <div className={`p-2 rounded-full ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} mr-3`}>
-                      <Brain size={18} />
-                    </div>
-                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Metrics</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Active Suggestions</p>
-                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.activeSuggestions}</p>
-                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                        <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.activeSuggestions * 5}%` }}></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Suggestions Accepted</p>
-                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.acceptedSuggestions}</p>
-                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                        <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.acceptedSuggestions * 10}%` }}></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Quality Score</p>
-                      <p className={`text-2xl font-semibold mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{aiMetrics.qualityScore}/100</p>
-                      <div className={`mt-2 w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5`}>
-                        <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${aiMetrics.qualityScore}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* AI Tools Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-              {/* AI Assistant Chat */}
-              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
-                <div className={`p-4 border-b ${isDark ? 'border-white/10 bg-gradient-to-r from-blue-500/10 to-indigo-500/10' : 'border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
-                  <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    <Brain size={18} className="text-blue-600 mr-2" />
-                    AI Assistant
-                  </h3>
-                </div>
-                <div className="h-80">
-                  <StreamingChat 
-                    systemPrompt="You are a helpful sales assistant that provides concise, actionable advice." 
-                    initialMessage="How can I help with your sales today? Ask me about leads, deals, or general sales advice." 
-                    placeholder="Ask something about your sales data..."
-                  />
-                </div>
-              </div>
-              
-              {/* Smart Search */}
-              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl overflow-hidden`}>
-                <div className={`p-4 border-b ${isDark ? 'border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10' : 'border-gray-200 bg-gradient-to-r from-cyan-50 to-blue-50'}`}>
-                  <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    <Search size={18} className="text-blue-600 mr-2" />
-                    Smart Search
-                  </h3>
-                </div>
-                <div className="h-80">
-                  <SmartSearchRealtime />
-                </div>
-              </div>
-
-              {/* AI Recommendations */}
-              <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'} flex items-center`}>
-                    <Brain size={20} className="text-indigo-600 mr-2" />
-                    AI Recommendations
-                  </h3>
-                  <button className={`text-sm ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}>
-                    View all
-                  </button>
-                </div>
-                
-                <div className={`divide-y ${isDark ? 'divide-white/10' : 'divide-gray-100'}`}>
-                  {aiRecommendations.map((rec) => (
-                    <div key={rec.id} className="py-3 first:pt-0 last:pb-0">
-                      <div className="flex items-start">
-                        <div className={`p-1.5 rounded-full ${
-                          rec.type === 'deal' ? (isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600') :
-                          rec.type === 'contact' ? (isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600') :
-                          (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600')
-                        } mr-3 mt-0.5`}>
-                          {rec.type === 'deal' ? (
-                            <Briefcase size={16} />
-                          ) : rec.type === 'contact' ? (
-                            <Users size={16} />
-                          ) : (
-                            <BarChart3 size={16} />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{rec.title}</h4>
-                          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{rec.description}</p>
-                        </div>
-                        <button className={`text-xs ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'} whitespace-nowrap`}>
-                          {rec.action}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
 
       case 'interaction-history-section':
         return <InteractionHistory />;
@@ -780,6 +589,142 @@ const Dashboard: React.FC = () => {
 
       {/* Dashboard Header */}
       <DashboardHeader />
+
+      {/* KPI Cards with Glassmorphism and Avatars */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Active Deals with Avatars */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
+              <Target className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">12%</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              {activeDealsWithContacts.length > 0 ? (
+                <div className="flex items-center space-x-1">
+                  <div className="flex -space-x-2">
+                    {activeDealsWithContacts.slice(0, 3).map((deal, index) => (
+                      <div key={deal.id} className="relative" style={{ zIndex: 3 - index }}>
+                        <Avatar
+                          src={deal.contact.avatar}
+                          alt={deal.contact.name}
+                          size="sm"
+                          fallback={getInitials(deal.contact.name)}
+                          className="border-2 border-white dark:border-gray-900"
+                        />
+                      </div>
+                    ))}
+                    {activeDealsWithContacts.length > 3 && (
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+                        isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}>
+                        +{activeDealsWithContacts.length - 3}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+                  {metrics.totalActiveDeals}
+                </h3>
+              )}
+            </div>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Active Deals</p>
+          </div>
+        </div>
+
+        {/* Pipeline Value */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">8%</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+              {formatCurrency(totalPipelineValue)}
+            </h3>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Pipeline Value</p>
+          </div>
+        </div>
+
+        {/* Won Deals with Avatars */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+              <Award className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-green-400">
+              <ArrowUpRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">15%</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              {wonDealsWithContacts.length > 0 ? (
+                <div className="flex items-center space-x-1">
+                  <div className="flex -space-x-2">
+                    {wonDealsWithContacts.slice(0, 3).map((deal, index) => (
+                      <div key={deal.id} className="relative" style={{ zIndex: 3 - index }}>
+                        <Avatar
+                          src={deal.contact.avatar}
+                          alt={deal.contact.name}
+                          size="sm"
+                          fallback={getInitials(deal.contact.name)}
+                          className="border-2 border-white dark:border-gray-900"
+                        />
+                      </div>
+                    ))}
+                    {wonDealsWithContacts.length > 3 && (
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+                        isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}>
+                        +{wonDealsWithContacts.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {wonDealsWithContacts.length}
+                  </span>
+                </div>
+              ) : (
+                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+                  {Object.values(deals).filter(d => d.stage === 'closed-won').length}
+                </h3>
+              )}
+            </div>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Won Deals</p>
+          </div>
+        </div>
+
+        {/* Average Deal Size */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center text-red-400">
+              <ArrowDownRight className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">3%</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+              {formatCurrency(metrics.avgDealSize)}
+            </h3>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Avg Deal Size</p>
+          </div>
+        </div>
+      </div>
 
       {/* Draggable Sections */}
       <div className="space-y-8">
