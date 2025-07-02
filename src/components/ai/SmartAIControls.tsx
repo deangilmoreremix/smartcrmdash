@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Zap, Settings, Check, X, Info, RefreshCw } from 'lucide-react';
+import { Brain, Zap, Settings, Check, X, Info, RefreshCw, Sparkles } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import AIModelSelector from '../AIModelSelector';
 import { AI_MODEL_RECOMMENDATIONS } from '../../services/aiModels';
