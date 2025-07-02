@@ -1,61 +1,178 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDealStore } from '../../store/dealStore';
 import { useTheme } from '../../contexts/ThemeContext';
-import { TrendingUp, AlertTriangle, Clock, DollarSign } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Clock, DollarSign, RefreshCw } from 'lucide-react';
+import { useGemini } from '../../services/geminiService';
+
+interface DealInsight {
+  icon: React.ElementType;
+  title: string;
+  value: string | number;
+  description: string;
+  color: string;
+  bgColor: string;
+}
 
 const LiveDealAnalysis: React.FC = () => {
   const { deals } = useDealStore();
   const { isDark } = useTheme();
+  const gemini = useGemini();
+  
+  const [insights, setInsights] = useState<DealInsight[]>([]);
+  const [averageDealValue, setAverageDealValue] = useState<number>(0);
+  const [activeDealCount, setActiveDealCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const analyzePipeline = () => {
-    const activeDeals = Object.values(deals).filter(deal => 
-      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
-    );
+  useEffect(() => {
+    analyzePipeline();
+  }, [deals]);
 
-    const highValueDeals = activeDeals.filter(deal => deal.value > 50000);
-    const stalledDeals = activeDeals.filter(deal => deal.daysInStage && deal.daysInStage > 10);
-    const hotDeals = activeDeals.filter(deal => deal.probability > 70);
-
-    return {
-      totalActive: activeDeals.length,
-      highValue: highValueDeals.length,
-      stalled: stalledDeals.length,
-      hot: hotDeals.length,
-      avgValue: activeDeals.reduce((sum, deal) => sum + deal.value, 0) / activeDeals.length
-    };
-  };
-
-  const analysis = analyzePipeline();
-
-  const insights = [
-    {
-      icon: TrendingUp,
-      title: 'High-Value Opportunities',
-      value: analysis.highValue,
-      description: 'Deals over $50K',
-      color: 'text-green-600',
-      bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
-    },
-    {
-      icon: AlertTriangle,
-      title: 'Stalled Deals',
-      value: analysis.stalled,
-      description: 'Over 10 days in stage',
-      color: 'text-orange-600',
-      bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
-    },
-    {
-      icon: Clock,
-      title: 'Hot Prospects',
-      value: analysis.hot,
-      description: 'High probability deals',
-      color: 'text-blue-600',
-      bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+  const analyzePipeline = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const activeDeals = Object.values(deals).filter(deal => 
+        deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+      );
+      
+      setActiveDealCount(activeDeals.length);
+      
+      const avgValue = activeDeals.length > 0 
+        ? activeDeals.reduce((sum, deal) => sum + deal.value, 0) / activeDeals.length 
+        : 0;
+      
+      setAverageDealValue(avgValue);
+      
+      // Get basic insights without AI first
+      const highValueDeals = activeDeals.filter(deal => deal.value > 50000);
+      const stalledDeals = activeDeals.filter(deal => deal.daysInStage && deal.daysInStage > 10);
+      const hotDeals = activeDeals.filter(deal => deal.probability > 70);
+      
+      // Set initial insights
+      const initialInsights: DealInsight[] = [
+        {
+          icon: TrendingUp,
+          title: 'High-Value Opportunities',
+          value: highValueDeals.length,
+          description: 'Deals over $50K',
+          color: 'text-green-600',
+          bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
+        },
+        {
+          icon: AlertTriangle,
+          title: 'Stalled Deals',
+          value: stalledDeals.length,
+          description: 'Over 10 days in stage',
+          color: 'text-orange-600',
+          bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
+        },
+        {
+          icon: Clock,
+          title: 'Hot Prospects',
+          value: hotDeals.length,
+          description: 'High probability deals',
+          color: 'text-blue-600',
+          bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+        }
+      ];
+      
+      setInsights(initialInsights);
+      
+      // Now enhance with AI insights if we have enough deals
+      if (activeDeals.length >= 3) {
+        try {
+          // Prepare data for AI analysis
+          const dealData = {
+            deals: activeDeals.map(deal => ({
+              id: deal.id,
+              title: deal.title,
+              value: deal.value,
+              stage: deal.stage,
+              probability: deal.probability,
+              daysInStage: deal.daysInStage || 0,
+              priority: deal.priority
+            })),
+            summary: {
+              totalCount: activeDeals.length,
+              totalValue: activeDeals.reduce((sum, deal) => sum + deal.value, 0),
+              avgValue,
+              stageDistribution: {
+                qualification: activeDeals.filter(d => d.stage === 'qualification').length,
+                proposal: activeDeals.filter(d => d.stage === 'proposal').length,
+                negotiation: activeDeals.filter(d => d.stage === 'negotiation').length
+              }
+            }
+          };
+          
+          // Use AI orchestrator for smart model routing
+          const analysisResult = await gemini.analyzeDeal(dealData, {
+            priority: 'balanced', // Balance of speed and quality
+            customerId: 'demo-customer-id' // For tracking
+          });
+          
+          if (analysisResult.success && analysisResult.content) {
+            console.log(`Deal analysis generated with ${analysisResult.model} (${analysisResult.provider}) in ${analysisResult.responseTime}ms`);
+            
+            // Update insights with AI recommendations
+            const aiInsights: DealInsight[] = [
+              {
+                icon: TrendingUp,
+                title: 'High-Value Opportunities',
+                value: highValueDeals.length,
+                description: analysisResult.content.keyInsights[0] || 'Deals over $50K',
+                color: 'text-green-600',
+                bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
+              },
+              {
+                icon: AlertTriangle,
+                title: analysisResult.content.riskLevel === 'high' ? 'High Risk Deals' : 'Deal Attention Required',
+                value: analysisResult.content.potentialBlockers ? analysisResult.content.potentialBlockers.length : stalledDeals.length,
+                description: analysisResult.content.potentialBlockers ? analysisResult.content.potentialBlockers[0] : 'Over 10 days in stage',
+                color: 'text-orange-600',
+                bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
+              },
+              {
+                icon: Clock,
+                title: 'Win Probability',
+                value: `${Math.round(analysisResult.content.winProbability)}%`,
+                description: analysisResult.content.recommendedActions ? analysisResult.content.recommendedActions[0] : 'High probability deals',
+                color: 'text-blue-600',
+                bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+              }
+            ];
+            
+            setInsights(aiInsights);
+          }
+        } catch (aiError) {
+          console.error("AI deal analysis error:", aiError);
+          // We keep the basic insights if AI fails
+        }
+      }
+    } catch (e) {
+      console.error("Error in deal analysis:", e);
+      setError("Failed to analyze deals");
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="space-y-4">
+      {isLoading && (
+        <div className="text-center py-2">
+          <RefreshCw size={20} className="animate-spin mx-auto mb-2" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing deals...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className={`p-3 rounded-lg ${isDark ? 'bg-red-500/20 text-red-300' : 'bg-red-100 text-red-700'}`}>
+          {error}
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 gap-3">
         {insights.map((insight, index) => (
           <div key={index} className={`p-3 border rounded-lg ${
@@ -107,12 +224,12 @@ const LiveDealAnalysis: React.FC = () => {
         <p className={`text-2xl font-bold ${
           isDark ? 'text-white' : 'text-blue-900'
         }`}>
-          ${Math.round(analysis.avgValue).toLocaleString()}
+          ${Math.round(averageDealValue).toLocaleString()}
         </p>
         <p className={`text-xs ${
           isDark ? 'text-blue-400' : 'text-blue-700'
         }`}>
-          Based on {analysis.totalActive} active deals
+          Based on {activeDealCount} active deals
         </p>
       </div>
     </div>
