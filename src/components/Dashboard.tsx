@@ -346,40 +346,6 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  // Render avatar stack component
-  const renderAvatarStack = (deals: any[], maxAvatars: number = 3) => {
-    const displayDeals = deals.slice(0, maxAvatars);
-    const extraCount = Math.max(0, deals.length - maxAvatars);
-
-    return (
-      <div className="flex items-center space-x-1">
-        <div className="flex -space-x-2">
-          {displayDeals.map((deal, index) => (
-            <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
-              <Avatar
-                src={deal.contact.avatar}
-                alt={deal.contact.name}
-                size="sm"
-                fallback={getInitials(deal.contact.name)}
-                className="border-2 border-white dark:border-gray-900"
-              />
-            </div>
-          ))}
-          {extraCount > 0 && (
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
-              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
-            }`}>
-              +{extraCount}
-            </div>
-          )}
-        </div>
-        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {deals.length}
-        </span>
-      </div>
-    );
-  };
-
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
@@ -814,15 +780,6 @@ const Dashboard: React.FC = () => {
 
       {/* Dashboard Header */}
       <DashboardHeader />
-
-      {/* AI Insights Panel - Show either the regular or enhanced version */}
-      {!showEnhancedAI && <AIInsightsPanel />}
-
-      {/* KPI Cards */}
-      <KPICards />
-
-      {/* Quick Actions */}
-      <QuickActions />
 
       {/* Draggable Sections */}
       <div className="space-y-8">
