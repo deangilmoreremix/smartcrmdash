@@ -33,7 +33,17 @@ class EnhancedGeminiService {
   }
 
   /**
-   * Load available models from Supabase
+   * Check if API key is valid (not a placeholder)
+   */
+  private isValidApiKey(): boolean {
+    return this.apiKey && 
+           this.apiKey.length > 10 && 
+           !this.apiKey.includes('your_google_ai_api_key') &&
+           !this.apiKey.includes('placeholder');
+  }
+
+  /**
+   * Load available models from Supabase or fallback
    */
   private async loadAvailableModels(): Promise<void> {
     try {
@@ -41,7 +51,8 @@ class EnhancedGeminiService {
       const geminiModels = await supabaseAIService.getModelsByProvider('gemini');
       this.availableModels = geminiModels;
     } catch (error) {
-      console.error('Error loading available models:', error);
+      console.warn('Error loading available models, using fallback configurations:', error);
+      // Fallback models will be handled by supabaseAIService
     }
   }
 
@@ -61,27 +72,27 @@ class EnhancedGeminiService {
   async generateContent(request: GenerateContentRequest): Promise<GenerateContentResponse> {
     const startTime = Date.now();
     
-    if (!this.apiKey) {
-      throw new Error('Google AI API key is required. Please check your environment variables.');
+    if (!this.isValidApiKey()) {
+      throw new Error('Google AI API key is required and must be properly configured. Please check your environment variables.');
     }
 
-    // Get model configuration from database
+    // Get model configuration from database or fallback
     const modelId = request.model || 'gemini-2.5-flash';
-    let modelConfig;
+    let modelConfig: AIModelConfig | null = null;
     
     try {
       modelConfig = await supabaseAIService.getModelById(modelId);
     } catch (error) {
-      // Fallback to hardcoded model info if database lookup fails
-      modelConfig = {
-        model_name: modelId,
-        max_tokens: 8192
-      };
-      console.warn(`Could not fetch model configuration for ${modelId} from database. Using defaults.`);
+      console.warn(`Could not fetch model configuration for ${modelId} from database:`, error);
     }
     
     if (!modelConfig) {
-      throw new Error(`Model ${modelId} not found in configuration`);
+      // Use fallback configuration
+      modelConfig = supabaseAIService.getFallbackModel(modelId);
+      if (!modelConfig) {
+        throw new Error(`Model ${modelId} not found in configuration and no fallback available`);
+      }
+      console.warn(`Using fallback configuration for model ${modelId}`);
     }
 
     const url = `${this.baseUrl}/models/${modelConfig.model_name}:generateContent`;
@@ -146,7 +157,7 @@ class EnhancedGeminiService {
         responseTime
       };
 
-      // Log usage to Supabase
+      // Log usage to Supabase (gracefully handle failures)
       if (request.customerId) {
         const cost = this.calculateCost(modelConfig, result.usage.totalTokens);
         
@@ -161,13 +172,13 @@ class EnhancedGeminiService {
             success: true
           });
         } catch (logError) {
-          console.warn('Failed to log AI usage:', logError);
+          console.warn('Failed to log AI usage (non-critical):', logError);
         }
       }
 
       return result;
     } catch (error) {
-      // Log failed usage
+      // Log failed usage (gracefully handle failures)
       if (request.customerId) {
         try {
           await supabaseAIService.logUsage({
@@ -181,7 +192,7 @@ class EnhancedGeminiService {
             error_message: error instanceof Error ? error.message : 'Unknown error'
           });
         } catch (logError) {
-          console.warn('Failed to log AI error usage:', logError);
+          console.warn('Failed to log AI error usage (non-critical):', logError);
         }
       }
 
@@ -231,6 +242,17 @@ class EnhancedGeminiService {
     }
     `;
 
+    if (!this.isValidApiKey()) {
+      console.warn('Google AI API key not configured, returning fallback insights');
+      return {
+        healthScore: 75,
+        keyInsights: ["API key not configured - unable to generate AI insights"],
+        bottlenecks: ["Please configure Google AI API key"],
+        opportunities: ["Set up API keys to enable AI analysis"],
+        forecastAccuracy: 0
+      };
+    }
+
     try {
       const response = await this.generateContent({
         prompt,
@@ -242,7 +264,7 @@ class EnhancedGeminiService {
 
       return JSON.parse(response.content);
     } catch (error) {
-      console.error('Error generating insights:', error);
+      console.warn('Error generating insights:', error);
       return {
         healthScore: 0,
         keyInsights: ["Unable to generate insights at this time."],
@@ -262,6 +284,15 @@ class EnhancedGeminiService {
     tone?: 'formal' | 'casual' | 'friendly';
     context?: string;
   }, customerId?: string, model?: string): Promise<{ subject: string; body: string }> {
+    
+    if (!this.isValidApiKey()) {
+      console.warn('Google AI API key not configured, returning fallback email');
+      return {
+        subject: `Following up: ${context.purpose}`,
+        body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[Please configure Google AI API key to enable AI-generated content]\n\nBest regards`
+      };
+    }
+
     const tone = context.tone || 'professional';
     const prompt = `
     Generate a ${tone} email for the following context:
@@ -292,7 +323,7 @@ class EnhancedGeminiService {
 
       return JSON.parse(response.content);
     } catch (error) {
-      console.error('Error generating email:', error);
+      console.warn('Error generating email:', error);
       return {
         subject: `Following up: ${context.purpose}`,
         body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[Generated content unavailable - please try again]\n\nBest regards`
@@ -308,7 +339,7 @@ class EnhancedGeminiService {
       const models = await supabaseAIService.getRecommendedModels(useCase);
       return models.length > 0 ? models[0] : null;
     } catch (error) {
-      console.error('Error getting recommended model:', error);
+      console.warn('Error getting recommended model:', error);
       return null;
     }
   }
