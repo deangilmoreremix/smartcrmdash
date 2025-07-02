@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   title = 'Dashboard Overview',
-  subtitle = 'Welcome back! Here's an overview of your sales performance'
+  subtitle = 'Welcome back! Here\'s an overview of your sales performance'
 }) => {
   const { isDark } = useTheme();
   
