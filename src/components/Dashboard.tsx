@@ -215,166 +215,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Calculate metrics from deal data
-  const calculateMetrics = () => {
-    const now = new Date();
-    let totalActiveDeals = 0;
-    let totalClosingThisMonth = 0;
-    let totalAtRisk = 0;
-    let totalValue = 0;
-    let wonValue = 0;
-    
-    Object.values(deals).forEach(deal => {
-      // Count active deals (not closed)
-      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
-        totalActiveDeals++;
-        totalValue += deal.value;
-        
-        // Deals closing this month
-        if (deal.dueDate && deal.dueDate.getMonth() === now.getMonth()) {
-          totalClosingThisMonth++;
-        }
-        
-        // Deals at risk (high priority or stalled)
-        if (
-          deal.priority === 'high' || 
-          (deal.daysInStage && deal.daysInStage > 14)
-        ) {
-          totalAtRisk++;
-        }
-      }
-      
-      // Count won deals value
-      if (deal.stage === 'closed-won') {
-        wonValue += deal.value;
-      }
-    });
-    
-    return {
-      totalActiveDeals,
-      totalClosingThisMonth,
-      totalAtRisk,
-      totalValue,
-      avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
-      wonValue
-    };
-  };
-  
-  const metrics = calculateMetrics();
-
-  // Get active deals with their contacts
-  const getActiveDealsWithContacts = () => {
-    const activeDeals = Object.values(deals).filter(deal => 
-      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
-    );
-    
-    return activeDeals.map(deal => ({
-      ...deal,
-      contact: contacts[deal.contactId]
-    })).filter(deal => deal.contact); // Only include deals with valid contacts
-  };
-
-  // Get won deals with their contacts
-  const getWonDealsWithContacts = () => {
-    const wonDeals = Object.values(deals).filter(deal => 
-      deal.stage === 'closed-won'
-    );
-    
-    return wonDeals.map(deal => ({
-      ...deal,
-      contact: contacts[deal.contactId]
-    })).filter(deal => deal.contact); // Only include deals with valid contacts
-  };
-
-  const activeDealsWithContacts = getActiveDealsWithContacts();
-  const wonDealsWithContacts = getWonDealsWithContacts();
-
-  // Get overdue and today's tasks
-  const getImportantTasks = () => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const overdueTasks = Object.values(tasks).filter(task => 
-      !task.completed && task.dueDate && task.dueDate < now
-    );
-    
-    const todayTasks = Object.values(tasks).filter(task => 
-      !task.completed && task.dueDate && 
-      task.dueDate >= now && task.dueDate < tomorrow
-    );
-    
-    return [...overdueTasks, ...todayTasks].sort((a, b) => {
-      if (!a.dueDate || !b.dueDate) return 0;
-      return a.dueDate.getTime() - b.dueDate.getTime();
-    }).slice(0, 5);
-  };
-
-  const importantTasks = getImportantTasks();
-  
-  // Format currency values
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
-  
-  // Format date
-  const formatDate = (date?: Date) => {
-    if (!date) return 'No date';
-    
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-    
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  // Render avatar stack component
-  const renderAvatarStack = (deals: any[], maxAvatars: number = 3) => {
-    const displayDeals = deals.slice(0, maxAvatars);
-    const extraCount = Math.max(0, deals.length - maxAvatars);
-
-    return (
-      <div className="flex items-center space-x-1">
-        <div className="flex -space-x-2">
-          {displayDeals.map((deal, index) => (
-            <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
-              <Avatar
-                src={deal.contact.avatar}
-                alt={deal.contact.name}
-                size="sm"
-                fallback={getInitials(deal.contact.name)}
-                className="border-2 border-white dark:border-gray-900"
-              />
-            </div>
-          ))}
-          {extraCount > 0 && (
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
-              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
-            }`}>
-              +{extraCount}
-            </div>
-          )}
-        </div>
-        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {deals.length}
-        </span>
-      </div>
-    );
-  };
-
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
@@ -386,6 +226,9 @@ const Dashboard: React.FC = () => {
 
       case 'quick-actions-section':
         return <QuickActions />;
+        
+      case 'ai-insights-section':
+        return <AIInsightsPanel />;
 
       case 'interaction-history-section':
         return <InteractionHistory />;
@@ -398,9 +241,6 @@ const Dashboard: React.FC = () => {
 
       case 'tasks-and-funnel-section':
         return <TasksAndFunnel />;
-
-      case 'charts-section':
-        return <ChartsSection />;
 
       case 'pipeline-section':
         return (
@@ -611,6 +451,9 @@ const Dashboard: React.FC = () => {
           </div>
         );
 
+      case 'charts-section':
+        return <ChartsSection />;
+
       default:
         return null;
     }
@@ -623,100 +466,6 @@ const Dashboard: React.FC = () => {
 
       {/* Dashboard Header */}
       <DashboardHeader />
-
-      {/* AI Insights Panel */}
-      <AIInsightsPanel />
-
-      {/* KPI Cards with Glassmorphism and Avatars */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Active Deals with Avatars */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
-              <Target className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">12%</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              {activeDealsWithContacts.length > 0 ? (
-                renderAvatarStack(activeDealsWithContacts, 3)
-              ) : (
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-                  {metrics.totalActiveDeals}
-                </h3>
-              )}
-            </div>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Active Deals</p>
-          </div>
-        </div>
-
-        {/* Pipeline Value */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
-              <DollarSign className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">8%</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {formatCurrency(totalPipelineValue)}
-            </h3>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Pipeline Value</p>
-          </div>
-        </div>
-
-        {/* Won Deals with Avatars */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
-              <Award className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">15%</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              {wonDealsWithContacts.length > 0 ? (
-                renderAvatarStack(wonDealsWithContacts, 3)
-              ) : (
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-                  {Object.values(deals).filter(d => d.stage === 'closed-won').length}
-                </h3>
-              )}
-            </div>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Won Deals</p>
-          </div>
-        </div>
-
-        {/* Average Deal Size */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-red-400">
-              <ArrowDownRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">3%</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {formatCurrency(metrics.avgDealSize)}
-            </h3>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Avg Deal Size</p>
-          </div>
-        </div>
-      </div>
 
       {/* Draggable Sections */}
       <div className="space-y-8">

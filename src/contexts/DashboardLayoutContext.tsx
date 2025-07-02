@@ -34,6 +34,7 @@ export const useDashboardLayout = () => {
 const defaultSectionOrder = [
   'kpi-cards-section',
   'quick-actions-section',
+  'ai-insights-section',
   'metrics-cards-section',
   'pipeline-section', 
   'charts-section',
@@ -63,6 +64,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
     icon: 'Zap',
     component: null,
     color: 'from-green-500 to-teal-500'
+  },
+  'ai-insights-section': {
+    id: 'ai-insights-section',
+    title: 'AI Pipeline Intelligence',
+    description: 'AI-powered analysis and recommendations',
+    icon: 'Brain',
+    component: null,
+    color: 'from-purple-500 to-indigo-500'
   },
   'metrics-cards-section': {
     id: 'metrics-cards-section',
