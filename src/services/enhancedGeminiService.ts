@@ -253,7 +253,6 @@ class EnhancedGeminiService {
     `;
 
     if (!this.isValidApiKey()) {
-      console.warn('Google AI API key not configured, returning fallback insights');
       return {
         healthScore: 75,
         keyInsights: ["API key not configured - unable to generate AI insights"],
@@ -268,7 +267,7 @@ class EnhancedGeminiService {
         prompt,
         model: model || 'gemini-2.5-flash',
         customerId,
-        featureUsed: 'crm-insights',
+        featureUsed: 'business_analysis',
         systemInstruction: "You are a CRM analytics expert. Provide concise, actionable insights in valid JSON format."
       });
 
@@ -296,7 +295,6 @@ class EnhancedGeminiService {
   }, customerId?: string, model?: string): Promise<{ subject: string; body: string }> {
     
     if (!this.isValidApiKey()) {
-      console.warn('Google AI API key not configured, returning fallback email');
       return {
         subject: `Following up: ${context.purpose}`,
         body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[Please configure Google AI API key to enable AI-generated content]\n\nBest regards`

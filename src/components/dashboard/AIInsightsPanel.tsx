@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Zap, RefreshCw, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Brain, Zap, RefreshCw, TrendingUp, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import { useGemini } from '../../services/geminiService';
-import { aiTaskRecommender } from '../../services/aiTaskRecommender';
 
 interface Insight {
   type: 'success' | 'warning' | 'insight';
@@ -15,34 +14,35 @@ interface Insight {
   bgColor: string;
 }
 
-const AIInsightsPanel: React.FC = () => {
+const AIInsightsPanel = () => {
   const { isDark } = useTheme();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
   const gemini = useGemini();
   
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [insights, setInsights] = useState<Insight[]>([
     {
       type: 'success',
       title: 'Pipeline Health Strong',
-      description: 'Your pipeline velocity has increased 23% this month with high-quality leads entering the qualification stage.',
+      description: 'Your conversion rate increased 15% this month',
       icon: CheckCircle,
       color: isDark ? 'text-green-400' : 'text-green-600',
       bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
     },
     {
       type: 'warning',
-      title: 'Deal Risk Alert',
-      description: '3 high-value deals show stagnation in negotiation stage. Consider immediate follow-up actions.',
+      title: 'Follow-up Required',
+      description: '3 high-value deals need immediate attention',
       icon: AlertTriangle,
       color: isDark ? 'text-orange-400' : 'text-orange-600',
       bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
     },
     {
       type: 'insight',
-      title: 'Conversion Opportunity',
-      description: 'AI identified 5 prospects with 85%+ closing probability. Prioritize these for immediate attention.',
+      title: 'Best Contact Time',
+      description: 'Prospects respond 40% more on Tuesday afternoons',
       icon: TrendingUp,
       color: isDark ? 'text-blue-400' : 'text-blue-600',
       bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
@@ -69,11 +69,13 @@ const AIInsightsPanel: React.FC = () => {
 
   const generateInsights = async () => {
     setIsGenerating(true);
+    setError(null);
     
     try {
       await generateRealInsights();
     } catch (error) {
       console.error("Failed to generate insights:", error);
+      setError(error instanceof Error ? error.message : "Failed to generate insights");
       // Keep existing insights on error
     } finally {
       setIsGenerating(false);
@@ -198,7 +200,7 @@ const AIInsightsPanel: React.FC = () => {
           </div>
           <div>
             <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h2>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time analysis of your sales performance</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
           </div>
         </div>
         <button
@@ -220,6 +222,27 @@ const AIInsightsPanel: React.FC = () => {
           </span>
         </button>
       </div>
+
+      {error && (
+        <div className={`p-4 mb-4 rounded-lg ${
+          isDark ? 'bg-red-500/10 border-red-500/20 border' : 'bg-red-50 border-red-200 border'
+        }`}>
+          <div className="flex items-start">
+            <Info className={`h-5 w-5 mt-0.5 ${isDark ? 'text-red-400' : 'text-red-500'}`} />
+            <div className="ml-3">
+              <h3 className={`text-sm font-medium ${isDark ? 'text-red-300' : 'text-red-800'}`}>
+                AI Service Unavailable
+              </h3>
+              <p className={`mt-1 text-sm ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                {error.includes("API key") ? 
+                  "Please configure your AI API keys in the .env file to enable AI insights." :
+                  error
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insights.map((insight, index) => (

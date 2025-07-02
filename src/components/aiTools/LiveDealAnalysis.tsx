@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDealStore } from '../../store/dealStore';
 import { useTheme } from '../../contexts/ThemeContext';
-import { TrendingUp, AlertTriangle, Clock, DollarSign, RefreshCw } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Clock, DollarSign, RefreshCw, Info } from 'lucide-react';
 import { useGemini } from '../../services/geminiService';
 
 interface DealInsight {
@@ -25,6 +25,7 @@ const LiveDealAnalysis: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Analyze pipeline on initial load and when deals change
     analyzePipeline();
   }, [deals]);
 
@@ -33,6 +34,7 @@ const LiveDealAnalysis: React.FC = () => {
     setError(null);
     
     try {
+      // Process basic insights without requiring AI
       const activeDeals = Object.values(deals).filter(deal => 
         deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
       );
@@ -83,12 +85,6 @@ const LiveDealAnalysis: React.FC = () => {
       // Now enhance with AI insights if we have enough deals
       if (activeDeals.length >= 3) {
         try {
-          // Check if API keys are configured
-          if (!import.meta.env.VITE_GOOGLE_AI_API_KEY && !import.meta.env.VITE_OPENAI_API_KEY) {
-            console.warn('No AI API keys configured. Skipping AI deal analysis.');
-            return;
-          }
-          
           // Prepare data for AI analysis
           const dealData = {
             deals: activeDeals.map(deal => ({
@@ -119,8 +115,6 @@ const LiveDealAnalysis: React.FC = () => {
           });
           
           if (analysisResult.success && analysisResult.content) {
-            console.log(`Deal analysis generated with ${analysisResult.model} (${analysisResult.provider}) in ${analysisResult.responseTime}ms`);
-            
             // Update insights with AI recommendations
             const aiInsights: DealInsight[] = [
               {
@@ -150,10 +144,12 @@ const LiveDealAnalysis: React.FC = () => {
             ];
             
             setInsights(aiInsights);
+            console.log(`Deal analysis generated with ${analysisResult.model} (${analysisResult.provider})`);
           }
         } catch (aiError) {
           console.error("AI deal analysis error:", aiError);
           // We keep the basic insights if AI fails
+          setError(aiError instanceof Error ? aiError.message : "Failed to analyze deals with AI");
         }
       }
     } catch (e) {
@@ -168,14 +164,25 @@ const LiveDealAnalysis: React.FC = () => {
     <div className="space-y-4">
       {isLoading && (
         <div className="text-center py-2">
-          <RefreshCw size={20} className="animate-spin mx-auto mb-2" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing deals...</p>
+          <RefreshCw size={20} className={`animate-spin mx-auto mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Analyzing deals...</p>
         </div>
       )}
       
       {error && (
-        <div className={`p-3 rounded-lg ${isDark ? 'bg-red-500/20 text-red-300' : 'bg-red-100 text-red-700'}`}>
-          {error}
+        <div className={`p-3 rounded-lg ${
+          isDark ? 'bg-yellow-500/10 border-yellow-500/20 border' : 'bg-yellow-50 border-yellow-200 border'
+        }`}>
+          <div className="flex items-start">
+            <Info className={`h-4 w-4 mt-0.5 ${isDark ? 'text-yellow-400' : 'text-yellow-500'}`} />
+            <div className="ml-2">
+              <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>
+                {error.includes("API key") ? 
+                  "AI analysis requires API keys. Using basic analysis instead." : 
+                  "Using basic analysis mode. AI-powered insights unavailable."}
+              </p>
+            </div>
+          </div>
         </div>
       )}
       
