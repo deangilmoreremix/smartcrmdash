@@ -195,6 +195,45 @@ const Navbar = () => {
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
 
+  // Dropdown menu configurations with color and badge counts
+  const dropdownMenus = [
+    {
+      id: 'ai-tools',
+      label: 'AI Tools',
+      icon: Brain,
+      badge: aiTools.length,
+      color: 'from-pink-500 to-rose-500'
+    },
+    {
+      id: 'sales',
+      label: 'Sales',
+      icon: DollarSign,
+      badge: salesTools.length,
+      color: 'from-green-500 to-teal-500'
+    },
+    {
+      id: 'communication',
+      label: 'Comm',
+      icon: MessageSquare,
+      badge: communicationTools.length,
+      color: 'from-blue-500 to-sky-500'
+    },
+    {
+      id: 'content',
+      label: 'Content',
+      icon: Edit3,
+      badge: contentTools.length,
+      color: 'from-amber-500 to-orange-500'
+    },
+    {
+      id: 'apps',
+      label: 'Apps',
+      icon: Grid3X3,
+      badge: connectedApps.length,
+      color: 'from-purple-500 to-violet-500'
+    }
+  ];
+
   const renderBadge = (count: number | null, color: string = 'bg-red-500') => {
     if (!count || count === 0) return null;
     
@@ -290,258 +329,203 @@ const Navbar = () => {
                 );
               })}
 
-              {/* AI Tools Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown('ai-tools');
-                  }}
-                  className={`
-                    relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
-                    transition-all duration-300 transform hover:scale-105
-                    ${isDark 
-                      ? 'text-white hover:bg-white/20 hover:text-white' 
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }
-                    group
-                  `}
-                >
-                  <Brain size={14} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-xs font-medium">AI Tools</span>
-                  <ChevronDown 
-                    size={12} 
-                    className={`transition-transform duration-300 ${
-                      activeDropdown === 'ai-tools' ? 'rotate-180' : ''
-                    }`} 
-                  />
-                  
-                  {/* AI Tools Badge */}
-                  {renderBadge(aiTools.length, 'bg-pink-500')}
-                </button>
+              {/* Dropdown Menu Items */}
+              {dropdownMenus.map((menu) => (
+                <div key={menu.id} className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDropdown(menu.id);
+                    }}
+                    className={`
+                      relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
+                      transition-all duration-300 transform hover:scale-105
+                      ${activeDropdown === menu.id 
+                        ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20` 
+                        : `${isDark 
+                            ? 'text-white hover:bg-white/20 hover:text-white' 
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          }`
+                      }
+                      group
+                    `}
+                  >
+                    <menu.icon size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                    <span className="text-xs font-medium">{menu.label}</span>
+                    <ChevronDown 
+                      size={12} 
+                      className={`transition-transform duration-300 ${
+                        activeDropdown === menu.id ? 'rotate-180' : ''
+                      }`} 
+                    />
+                    
+                    {/* Badge */}
+                    {renderBadge(menu.badge, `bg-gradient-to-r ${menu.color}`)}
 
-                {/* AI Tools Dropdown */}
-                {activeDropdown === 'ai-tools' && (
-                  <div className={`
-                    absolute top-14 right-0 w-[520px] max-h-96
-                    ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} 
-                    backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} 
-                    rounded-2xl shadow-2xl z-50 overflow-hidden
-                    animate-fade-in transform transition-all duration-300
-                  `}>
-                    <div className="p-4">
-                      <div className="flex items-center space-x-2 mb-4">
-                        <Brain size={18} className="text-purple-500" />
-                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          AI Tools
-                        </h3>
-                        <div className="ml-auto">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'
-                          }`}>
-                            {aiTools.length} tools
-                          </span>
+                    {/* Active Dropdown Glow Effect */}
+                    {activeDropdown === menu.id && (
+                      <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
+                    )}
+                  </button>
+
+                  {/* AI Tools Dropdown */}
+                  {menu.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
+                    <div className={`
+                      absolute top-14 right-0 w-[520px] max-h-96
+                      ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} 
+                      backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} 
+                      rounded-2xl shadow-2xl z-50 overflow-hidden
+                      animate-fade-in transform transition-all duration-300
+                    `}>
+                      <div className="p-4">
+                        <div className="flex items-center space-x-2 mb-4">
+                          <Brain size={18} className="text-purple-500" />
+                          <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            AI Tools
+                          </h3>
+                          <div className="ml-auto">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'
+                            }`}>
+                              {aiTools.length} tools
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Organized by Category */}
+                        <div className="space-y-4 max-h-80 overflow-y-auto">
+                          {['Core AI Tools', 'Communication', 'Customer & Content', 'Advanced Features', 'Real-time Features', 'Reasoning Generators'].map((category) => {
+                            const tools = aiTools.filter(tool => tool.category === category);
+                            return (
+                              <div key={category}>
+                                <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+                                  isDark ? 'text-gray-400' : 'text-gray-500'
+                                } flex items-center`}>
+                                  {category}
+                                  <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                                    isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
+                                  }`}>
+                                    {tools.length}
+                                  </span>
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {tools.map((tool, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() => handleAIToolClick(tool.tool)}
+                                      className={`
+                                        text-left p-3 rounded-xl transition-all duration-200 
+                                        ${isDark 
+                                          ? 'hover:bg-white/5 text-gray-300 hover:text-white' 
+                                          : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                                        }
+                                        group border border-transparent hover:border-purple-500/20
+                                      `}
+                                    >
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <tool.icon size={16} className="text-purple-500 group-hover:scale-110 transition-transform" />
+                                        <span className="text-sm font-medium">{tool.name}</span>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                      
-                      {/* Organized by Category */}
-                      <div className="space-y-4 max-h-80 overflow-y-auto">
-                        {['Core AI Tools', 'Communication', 'Customer & Content', 'Advanced Features', 'Real-time Features', 'Reasoning Generators'].map((category) => {
-                          const tools = aiTools.filter(tool => tool.category === category);
-                          return (
-                            <div key={category}>
-                              <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
-                                isDark ? 'text-gray-400' : 'text-gray-500'
-                              } flex items-center`}>
-                                {category}
-                                <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                                  isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
-                                }`}>
-                                  {tools.length}
-                                </span>
-                              </h4>
-                              <div className="grid grid-cols-2 gap-2">
-                                {tools.map((tool, index) => (
-                                  <button
-                                    key={index}
-                                    onClick={() => handleAIToolClick(tool.tool)}
-                                    className={`
-                                      text-left p-3 rounded-xl transition-all duration-200 
-                                      ${isDark 
-                                        ? 'hover:bg-white/5 text-gray-300 hover:text-white' 
-                                        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                                      }
-                                      group border border-transparent hover:border-purple-500/20
-                                    `}
-                                  >
-                                    <div className="flex items-center space-x-2 mb-1">
-                                      <tool.icon size={16} className="text-purple-500 group-hover:scale-110 transition-transform" />
-                                      <span className="text-sm font-medium">{tool.name}</span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              {/* Sales Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown('sales');
-                  }}
-                  className={`
-                    relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
-                    transition-all duration-300 transform hover:scale-105
-                    ${isDark 
-                      ? 'text-white hover:bg-white/20' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                    }
-                    group
-                  `}
-                >
-                  <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-xs font-medium">Sales</span>
-                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'sales' ? 'rotate-180' : ''}`} />
-                </button>
-
-                {activeDropdown === 'sales' && (
-                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                    <div className="p-3">
-                      {salesTools.map((tool, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAIToolClick(tool.tool)}
-                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                        >
-                          <tool.icon size={16} className="text-green-500" />
-                          <span className="text-sm font-medium">{tool.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Communication Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown('communication');
-                  }}
-                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
-                >
-                  <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-xs font-medium">Comm</span>
-                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'communication' ? 'rotate-180' : ''}`} />
-                </button>
-
-                {activeDropdown === 'communication' && (
-                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                    <div className="p-3">
-                      {communicationTools.map((tool, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAIToolClick(tool.tool)}
-                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                        >
-                          <tool.icon size={16} className="text-blue-500" />
-                          <span className="text-sm font-medium">{tool.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Content Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown('content');
-                  }}
-                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
-                >
-                  <Edit3 size={14} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-xs font-medium">Content</span>
-                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'content' ? 'rotate-180' : ''}`} />
-                </button>
-
-                {activeDropdown === 'content' && (
-                  <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                    <div className="p-3">
-                      {contentTools.map((tool, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAIToolClick(tool.tool)}
-                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                        >
-                          <tool.icon size={16} className="text-amber-500" />
-                          <span className="text-sm font-medium">{tool.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Connected Apps Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown('apps');
-                  }}
-                  className={`relative flex items-center space-x-1 px-2 py-1.5 rounded-full transition-all duration-300 transform hover:scale-105 ${isDark ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'} group`}
-                >
-                  <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />
-                  <span className="text-xs font-medium">Apps</span>
-                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === 'apps' ? 'rotate-180' : ''}`} />
-                  {renderBadge(4, 'bg-purple-500')}
-                </button>
-
-                {activeDropdown === 'apps' && (
-                  <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                    <div className="p-3">
-                      {connectedApps.map((app, index) => (
-                        app.isExternal ? (
-                          <a
-                            key={index}
-                            href={app.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <app.icon size={16} className="text-purple-500" />
-                              <span className="text-sm font-medium">{app.name}</span>
-                            </div>
-                            <ExternalLink size={12} className="opacity-50" />
-                          </a>
-                        ) : (
+                  {/* Sales Dropdown */}
+                  {menu.id === 'sales' && activeDropdown === 'sales' && (
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3">
+                        {salesTools.map((tool, index) => (
                           <button
                             key={index}
-                            onClick={() => handleNavigation(app.url.slice(1), 'white-label')}
+                            onClick={() => handleAIToolClick(tool.tool)}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <app.icon size={16} className="text-purple-500" />
-                            <span className="text-sm font-medium">{app.name}</span>
+                            <tool.icon size={16} className="text-green-500" />
+                            <span className="text-sm font-medium">{tool.name}</span>
                           </button>
-                        )
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {/* Communication Dropdown */}
+                  {menu.id === 'communication' && activeDropdown === 'communication' && (
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3">
+                        {communicationTools.map((tool, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleAIToolClick(tool.tool)}
+                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                          >
+                            <tool.icon size={16} className="text-blue-500" />
+                            <span className="text-sm font-medium">{tool.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Content Dropdown */}
+                  {menu.id === 'content' && activeDropdown === 'content' && (
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3">
+                        {contentTools.map((tool, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleAIToolClick(tool.tool)}
+                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                          >
+                            <tool.icon size={16} className="text-amber-500" />
+                            <span className="text-sm font-medium">{tool.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Connected Apps Dropdown */}
+                  {menu.id === 'apps' && activeDropdown === 'apps' && (
+                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3">
+                        {connectedApps.map((app, index) => (
+                          app.isExternal ? (
+                            <a
+                              key={index}
+                              href={app.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <app.icon size={16} className="text-purple-500" />
+                                <span className="text-sm font-medium">{app.name}</span>
+                              </div>
+                              <ExternalLink size={12} className="opacity-50" />
+                            </a>
+                          ) : (
+                            <button
+                              key={index}
+                              onClick={() => handleNavigation(app.url.slice(1), 'white-label')}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <app.icon size={16} className="text-purple-500" />
+                              <span className="text-sm font-medium">{app.name}</span>
+                            </button>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
             {/* Mobile Menu Button */}
