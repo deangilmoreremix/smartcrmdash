@@ -48,7 +48,8 @@ import {
   Target,
   Award,
   Phone,
-  Video
+  Video,
+  Sparkles
 } from 'lucide-react';
 
 // Import the dashboard components
