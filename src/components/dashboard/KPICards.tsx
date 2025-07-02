@@ -1,42 +1,165 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useDealStore } from '../../store/dealStore';
+import { useContactStore } from '../../store/contactStore';
+import Avatar from '../ui/Avatar';
+import { getInitials } from '../../utils/avatars';
 
 const KPICards: React.FC = () => {
   const { isDark } = useTheme();
+  const { deals, totalPipelineValue } = useDealStore();
+  const { contacts } = useContactStore();
+
+  // Get active deals with their contacts
+  const getActiveDealsWithContacts = () => {
+    const activeDeals = Object.values(deals).filter(deal => 
+      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+    );
+    
+    return activeDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  // Get won deals with their contacts
+  const getWonDealsWithContacts = () => {
+    const wonDeals = Object.values(deals).filter(deal => 
+      deal.stage === 'closed-won'
+    );
+    
+    return wonDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  const activeDealsWithContacts = getActiveDealsWithContacts();
+  const wonDealsWithContacts = getWonDealsWithContacts();
+
+  // Calculate metrics
+  const calculateMetrics = () => {
+    const dealsArray = Object.values(deals);
+    let totalActiveDeals = 0;
+    let totalValue = 0;
+    let wonValue = 0;
+    
+    dealsArray.forEach(deal => {
+      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
+        totalActiveDeals++;
+        totalValue += deal.value;
+      }
+      
+      if (deal.stage === 'closed-won') {
+        wonValue += deal.value;
+      }
+    });
+    
+    return {
+      totalActiveDeals,
+      totalValue,
+      avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
+      wonDeals: Object.values(deals).filter(d => d.stage === 'closed-won').length
+    };
+  };
+  
+  const metrics = calculateMetrics();
+
+  // Format currency values
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  // Render avatar stack component
+  const renderAvatarStack = (deals: any[], maxAvatars: number = 3) => {
+    const displayDeals = deals.slice(0, maxAvatars);
+    const extraCount = Math.max(0, deals.length - maxAvatars);
+
+    return (
+      <div className="flex items-center space-x-1">
+        <div className="flex -space-x-2">
+          {displayDeals.map((deal, index) => (
+            <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
+              <Avatar
+                src={deal.contact.avatar}
+                alt={deal.contact.name}
+                size="sm"
+                fallback={getInitials(deal.contact.name)}
+                className="border-2 border-white dark:border-gray-900"
+              />
+            </div>
+          ))}
+          {extraCount > 0 && (
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
+              +{extraCount}
+            </div>
+          )}
+        </div>
+        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {deals.length}
+        </span>
+      </div>
+    );
+  };
 
   const kpis = [
     {
       title: 'Active Deals',
-      value: '34',
+      value: metrics.totalActiveDeals.toString(),
       change: '+12%',
       trend: 'up',
       icon: Target,
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
+      renderContent: () => activeDealsWithContacts.length > 0 ? 
+        renderAvatarStack(activeDealsWithContacts) : 
+        <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+          {metrics.totalActiveDeals}
+        </h3>
     },
     {
       title: 'Pipeline Value',
-      value: '$247K',
+      value: formatCurrency(totalPipelineValue),
       change: '+8%',
       trend: 'up',
       icon: DollarSign,
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
+      renderContent: () => 
+        <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+          {formatCurrency(totalPipelineValue)}
+        </h3>
     },
     {
       title: 'Won Deals',
-      value: '20',
+      value: metrics.wonDeals.toString(),
       change: '+15%',
       trend: 'up',
       icon: Award,
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-pink-500',
+      renderContent: () => wonDealsWithContacts.length > 0 ? 
+        renderAvatarStack(wonDealsWithContacts) : 
+        <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+          {metrics.wonDeals}
+        </h3>
     },
     {
       title: 'Avg Deal Size',
-      value: '$12.3K',
+      value: formatCurrency(metrics.avgDealSize),
       change: '-3%',
       trend: 'down',
       icon: BarChart3,
-      color: 'from-orange-500 to-red-500'
+      color: 'from-orange-500 to-red-500',
+      renderContent: () => 
+        <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
+          {formatCurrency(metrics.avgDealSize)}
+        </h3>
     }
   ];
 
@@ -60,10 +183,12 @@ const KPICards: React.FC = () => {
               <span className="text-sm font-medium">{kpi.change}</span>
             </div>
           </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {kpi.value}
-            </h3>
+          <div className="space-y-3">
+            {kpi.renderContent && (
+              <div>
+                {kpi.renderContent()}
+              </div>
+            )}
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{kpi.title}</p>
           </div>
         </div>
