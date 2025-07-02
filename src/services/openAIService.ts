@@ -45,11 +45,24 @@ class OpenAIService {
   }
 
   /**
+   * Check if API key is valid (not a placeholder)
+   */
+  private isValidApiKey(): boolean {
+    return this.apiKey && 
+           this.apiKey.length > 10 && 
+           !this.apiKey.includes('your_openai_api_key') &&
+           !this.apiKey.includes('your_ope') &&
+           !this.apiKey.includes('placeholder') &&
+           !this.apiKey.startsWith('your_') &&
+           this.apiKey !== 'your_openai_api_key';
+  }
+
+  /**
    * Generate content using OpenAI API
    */
   async generateContent(request: GenerateRequest): Promise<GenerateResponse> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is required');
+    if (!this.isValidApiKey()) {
+      throw new Error('OpenAI API key is required and must be properly configured. Please check your environment variables.');
     }
 
     const startTime = Date.now();
@@ -104,7 +117,7 @@ class OpenAIService {
         ...(functionCalls ? { functionCalls } : {})
       };
 
-      // Log usage to Supabase
+      // Log usage to Supabase (gracefully handle failures)
       if (request.customerId) {
         try {
           const modelConfig = await supabaseAIService.getModelById(model);
@@ -120,13 +133,13 @@ class OpenAIService {
             success: true
           });
         } catch (logError) {
-          console.warn('Failed to log OpenAI usage:', logError);
+          console.warn('Failed to log OpenAI usage (non-critical):', logError);
         }
       }
 
       return result;
     } catch (error) {
-      // Log failed usage
+      // Log failed usage (gracefully handle failures)
       if (request.customerId) {
         try {
           await supabaseAIService.logUsage({
@@ -140,7 +153,7 @@ class OpenAIService {
             error_message: error instanceof Error ? error.message : 'Unknown error'
           });
         } catch (logError) {
-          console.warn('Failed to log OpenAI error usage:', logError);
+          console.warn('Failed to log OpenAI error usage (non-critical):', logError);
         }
       }
 
@@ -186,8 +199,12 @@ class OpenAIService {
     tone?: 'formal' | 'casual' | 'friendly';
     context?: string;
   }, customerId?: string, model?: string): Promise<{ subject: string; body: string }> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is required');
+    if (!this.isValidApiKey()) {
+      console.warn('OpenAI API key not configured, returning fallback email');
+      return {
+        subject: `Following up: ${context.purpose}`,
+        body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[Please configure OpenAI API key to enable AI-generated content]\n\nBest regards`
+      };
     }
     
     const tone = context.tone || 'professional';
@@ -231,8 +248,15 @@ class OpenAIService {
    * Generate deal insights
    */
   async generateDealInsights(dealData: any, customerId?: string, model?: string): Promise<any> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is required');
+    if (!this.isValidApiKey()) {
+      console.warn('OpenAI API key not configured, returning fallback insights');
+      return {
+        riskLevel: "unknown",
+        keyInsights: ["API key not configured - unable to generate AI insights"],
+        recommendedActions: ["Please configure OpenAI API key"],
+        winProbability: 0,
+        potentialBlockers: ["Set up API keys to enable AI analysis"]
+      };
     }
     
     const systemPrompt = `You are an AI specialized in sales analytics. Analyze the provided deal data and return insightful observations in JSON format.`;
@@ -279,8 +303,15 @@ class OpenAIService {
    * Generate pipeline health analysis
    */
   async analyzePipelineHealth(pipelineData: any, customerId?: string, model?: string): Promise<any> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is required');
+    if (!this.isValidApiKey()) {
+      console.warn('OpenAI API key not configured, returning fallback analysis');
+      return {
+        healthScore: 0,
+        keyInsights: ["API key not configured - unable to generate AI insights"],
+        bottlenecks: ["Please configure OpenAI API key"],
+        opportunities: ["Set up API keys to enable AI analysis"],
+        forecastAccuracy: 0
+      };
     }
     
     const systemPrompt = `You are an AI specialized in sales pipeline analysis. Examine the provided pipeline data and identify patterns, bottlenecks, and opportunities.`;
@@ -333,8 +364,21 @@ class OpenAIService {
     duration: number;
     previousNotes?: string;
   }, customerId?: string, model?: string): Promise<any> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key is required');
+    if (!this.isValidApiKey()) {
+      console.warn('OpenAI API key not configured, returning fallback agenda');
+      return {
+        title: context.meetingTitle,
+        objective: context.purpose,
+        agendaItems: [
+          {
+            topic: "Introduction",
+            duration: 5,
+            owner: "All",
+            description: "Welcome and meeting objectives"
+          }
+        ],
+        notes: "API key not configured - please set up OpenAI API key to enable AI-generated agendas."
+      };
     }
     
     const systemPrompt = `You are an AI specialized in meeting planning and facilitation. Create clear, focused meeting agendas that make excellent use of time.`;

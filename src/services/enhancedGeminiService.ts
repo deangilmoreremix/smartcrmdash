@@ -39,7 +39,9 @@ class EnhancedGeminiService {
     return this.apiKey && 
            this.apiKey.length > 10 && 
            !this.apiKey.includes('your_google_ai_api_key') &&
-           !this.apiKey.includes('placeholder');
+           !this.apiKey.includes('placeholder') &&
+           !this.apiKey.startsWith('your_') &&
+           this.apiKey !== 'your_google_ai_api_key';
   }
 
   /**
@@ -52,7 +54,10 @@ class EnhancedGeminiService {
       this.availableModels = geminiModels;
     } catch (error) {
       console.warn('Error loading available models, using fallback configurations:', error);
-      // Fallback models will be handled by supabaseAIService
+      // Get fallback models for Google AI
+      this.availableModels = supabaseAIService.getAllFallbackModels().filter(model => 
+        model.provider === 'gemini'
+      );
     }
   }
 
@@ -90,9 +95,14 @@ class EnhancedGeminiService {
       // Use fallback configuration
       modelConfig = supabaseAIService.getFallbackModel(modelId);
       if (!modelConfig) {
-        throw new Error(`Model ${modelId} not found in configuration and no fallback available`);
+        // If still no model config, try with a default working model
+        console.warn(`Model ${modelId} not found, trying with default gemini-2.5-flash`);
+        modelConfig = supabaseAIService.getFallbackModel('gemini-2.5-flash');
+        if (!modelConfig) {
+          throw new Error(`Model ${modelId} not found in configuration and no fallback available`);
+        }
       }
-      console.warn(`Using fallback configuration for model ${modelId}`);
+      console.info(`Using fallback configuration for model ${modelId}`);
     }
 
     const url = `${this.baseUrl}/models/${modelConfig.model_name}:generateContent`;
