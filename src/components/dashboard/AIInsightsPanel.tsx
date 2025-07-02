@@ -5,7 +5,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 const AIInsightsPanel: React.FC = () => {
   const { isDark } = useTheme();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [pipelineInsight, setPipelineInsight] = useState<string | null>(null);
 
   const generateInsights = () => {
     setIsGenerating(true);
@@ -73,7 +72,7 @@ const AIInsightsPanel: React.FC = () => {
           </span>
         </button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insights.map((insight, index) => (
           <div
