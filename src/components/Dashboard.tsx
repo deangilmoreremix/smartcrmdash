@@ -242,6 +242,9 @@ const Dashboard: React.FC = () => {
       case 'tasks-and-funnel-section':
         return <TasksAndFunnel />;
 
+      case 'charts-section':
+        return <ChartsSection />;
+
       case 'pipeline-section':
         return (
           <div className="mb-12 scroll-mt-20">
@@ -450,9 +453,6 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         );
-
-      case 'charts-section':
-        return <ChartsSection />;
 
       default:
         return null;
