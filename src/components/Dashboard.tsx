@@ -215,6 +215,132 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Calculate metrics from deal data
+  const calculateMetrics = () => {
+    const now = new Date();
+    let totalActiveDeals = 0;
+    let totalClosingThisMonth = 0;
+    let totalAtRisk = 0;
+    let totalValue = 0;
+    let wonValue = 0;
+    
+    Object.values(deals).forEach(deal => {
+      // Count active deals (not closed)
+      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
+        totalActiveDeals++;
+        totalValue += deal.value;
+        
+        // Deals closing this month
+        if (deal.dueDate && deal.dueDate.getMonth() === now.getMonth()) {
+          totalClosingThisMonth++;
+        }
+        
+        // Deals at risk (high priority or stalled)
+        if (
+          deal.priority === 'high' || 
+          (deal.daysInStage && deal.daysInStage > 14)
+        ) {
+          totalAtRisk++;
+        }
+      }
+      
+      // Count won deals value
+      if (deal.stage === 'closed-won') {
+        wonValue += deal.value;
+      }
+    });
+    
+    return {
+      totalActiveDeals,
+      totalClosingThisMonth,
+      totalAtRisk,
+      totalValue,
+      avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
+      wonValue
+    };
+  };
+  
+  const metrics = calculateMetrics();
+
+  // Get active deals with their contacts
+  const getActiveDealsWithContacts = () => {
+    const activeDeals = Object.values(deals).filter(deal => 
+      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+    );
+    
+    return activeDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  // Get won deals with their contacts
+  const getWonDealsWithContacts = () => {
+    const wonDeals = Object.values(deals).filter(deal => 
+      deal.stage === 'closed-won'
+    );
+    
+    return wonDeals.map(deal => ({
+      ...deal,
+      contact: contacts[deal.contactId]
+    })).filter(deal => deal.contact); // Only include deals with valid contacts
+  };
+
+  const activeDealsWithContacts = getActiveDealsWithContacts();
+  const wonDealsWithContacts = getWonDealsWithContacts();
+
+  // Get overdue and today's tasks
+  const getImportantTasks = () => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const overdueTasks = Object.values(tasks).filter(task => 
+      !task.completed && task.dueDate && task.dueDate < now
+    );
+    
+    const todayTasks = Object.values(tasks).filter(task => 
+      !task.completed && task.dueDate && 
+      task.dueDate >= now && task.dueDate < tomorrow
+    );
+    
+    return [...overdueTasks, ...todayTasks].sort((a, b) => {
+      if (!a.dueDate || !b.dueDate) return 0;
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    }).slice(0, 5);
+  };
+
+  const importantTasks = getImportantTasks();
+  
+  // Format currency values
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+  
+  // Format date
+  const formatDate = (date?: Date) => {
+    if (!date) return 'No date';
+    
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
