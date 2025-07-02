@@ -86,7 +86,7 @@ class AIOrchestratorService {
       feature === 'lead_qualification' ? 'lead_qualification' : 
       'categorization';
 
-    const recommendation = aiTaskRecommender.getRecommendation(modelType);
+    const recommendation = aiTaskRecommender.getModelRecommendation(modelType);
 
     // Additional criteria
     if (context.priority === 'speed') {
