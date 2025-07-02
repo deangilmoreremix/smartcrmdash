@@ -11,12 +11,6 @@ const AIInsightsPanel: React.FC = () => {
     setIsGenerating(true);
     // Simulate AI analysis
     setTimeout(() => {
-      const insights = [
-        "Your pipeline velocity has increased 23% this month with high-quality leads entering the qualification stage.",
-        "AI identified 5 prospects with 85%+ closing probability. Prioritize these for immediate attention.",
-        "3 high-value deals show stagnation in negotiation stage. Consider immediate follow-up actions."
-      ];
-      setPipelineInsight(insights[Math.floor(Math.random() * insights.length)]);
       setIsGenerating(false);
     }, 2000);
   };
@@ -80,14 +74,6 @@ const AIInsightsPanel: React.FC = () => {
         </button>
       </div>
       
-      {pipelineInsight && (
-        <div className={`p-4 ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-100'} border rounded-lg mb-6`}>
-          <p className={isDark ? 'text-white' : 'text-gray-800'}>
-            {pipelineInsight}
-          </p>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insights.map((insight, index) => (
           <div
