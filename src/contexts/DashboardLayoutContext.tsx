@@ -32,6 +32,8 @@ export const useDashboardLayout = () => {
 };
 
 const defaultSectionOrder = [
+  'kpi-cards-section',
+  'quick-actions-section',
   'ai-section',
   'metrics-cards-section',
   'pipeline-section', 
@@ -47,6 +49,22 @@ const defaultSectionOrder = [
 ];
 
 const sectionConfigs: Record<string, SectionConfig> = {
+  'kpi-cards-section': {
+    id: 'kpi-cards-section',
+    title: 'Key Performance Indicators',
+    description: 'High-level business metrics overview',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-blue-500 to-green-500'
+  },
+  'quick-actions-section': {
+    id: 'quick-actions-section',
+    title: 'Quick Actions',
+    description: 'Fast access to common tasks',
+    icon: 'Zap',
+    component: null,
+    color: 'from-green-500 to-teal-500'
+  },
   'ai-section': {
     id: 'ai-section',
     title: 'AI Intelligence & Insights',

@@ -62,6 +62,8 @@ import ChartsSection from './dashboard/ChartsSection';
 import ConnectedApps from './dashboard/ConnectedApps';
 import AIInsightsPanel from './AIInsightsPanel';
 import NewLeadsSection from './dashboard/NewLeadsSection';
+import KPICards from './dashboard/KPICards';
+import QuickActions from './dashboard/QuickActions';
 
 // Import AI tools components
 import StreamingChat from './aiTools/StreamingChat';
@@ -378,6 +380,12 @@ const Dashboard: React.FC = () => {
     switch (sectionId) {
       case 'metrics-cards-section':
         return <MetricsCards />;
+
+      case 'kpi-cards-section':
+        return <KPICards />;
+
+      case 'quick-actions-section':
+        return <QuickActions />;
 
       case 'ai-section':
         return (
@@ -787,96 +795,11 @@ const Dashboard: React.FC = () => {
       {/* AI Insights Panel */}
       <AIInsightsPanel />
 
-      {/* KPI Cards with Glassmorphism and Avatars */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Active Deals with Avatars */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg">
-              <Target className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">12%</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              {activeDealsWithContacts.length > 0 ? (
-                renderAvatarStack(activeDealsWithContacts, 3)
-              ) : (
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-                  {metrics.totalActiveDeals}
-                </h3>
-              )}
-            </div>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Active Deals</p>
-          </div>
-        </div>
+      {/* KPI Cards */}
+      <KPICards />
 
-        {/* Pipeline Value */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
-              <DollarSign className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">8%</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {formatCurrency(totalPipelineValue)}
-            </h3>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Pipeline Value</p>
-          </div>
-        </div>
-
-        {/* Won Deals with Avatars */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
-              <Award className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-green-400">
-              <ArrowUpRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">15%</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              {wonDealsWithContacts.length > 0 ? (
-                renderAvatarStack(wonDealsWithContacts, 3)
-              ) : (
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-                  {Object.values(deals).filter(d => d.stage === 'closed-won').length}
-                </h3>
-              )}
-            </div>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Won Deals</p>
-          </div>
-        </div>
-
-        {/* Average Deal Size */}
-        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex items-center text-red-400">
-              <ArrowDownRight className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">3%</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {formatCurrency(metrics.avgDealSize)}
-            </h3>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Avg Deal Size</p>
-          </div>
-        </div>
-      </div>
+      {/* Quick Actions */}
+      <QuickActions />
 
       {/* Draggable Sections */}
       <div className="space-y-8">
