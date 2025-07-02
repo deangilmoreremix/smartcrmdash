@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import VideoCallOverlay from './components/VideoCallOverlay';
@@ -11,8 +11,12 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { VideoCallProvider } from './contexts/VideoCallContext';
+import { ContactsModal } from './components/modals/ContactsModal';
+import './components/styles/design-system.css';
 
 function App() {
+  const [isContactsModalOpen, setIsContactsModalOpen] = useState(false);
+
   return (
     <ThemeProvider>
       <VideoCallProvider>
@@ -27,6 +31,12 @@ function App() {
                   <VideoCallOverlay />
                   <VideoCallPreviewWidget />
                   <PersistentVideoCallButton />
+                  
+                  {/* ContactsModal rendered at the root level */}
+                  <ContactsModal
+                    isOpen={isContactsModalOpen}
+                    onClose={() => setIsContactsModalOpen(false)}
+                  />
                 </div>
               </EnhancedHelpProvider>
             </DashboardLayoutProvider>

@@ -33,9 +33,15 @@ export const useDashboardLayout = () => {
 
 const defaultSectionOrder = [
   'ai-section',
+  'metrics-cards-section',
   'pipeline-section', 
+  'charts-section',
   'contacts-section',
+  'interaction-history-section',
   'tasks-section',
+  'customer-profile-section',
+  'recent-activity-section',
+  'tasks-and-funnel-section',
   'apps-section',
   'analytics-section'
 ];
@@ -48,6 +54,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
     icon: 'Brain',
     component: null,
     color: 'from-purple-500 to-indigo-500'
+  },
+  'metrics-cards-section': {
+    id: 'metrics-cards-section',
+    title: 'Key Performance Metrics',
+    description: 'Overview of critical business metrics',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-green-500 to-blue-500'
   },
   'pipeline-section': {
     id: 'pipeline-section',
@@ -65,6 +79,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
     component: null,
     color: 'from-blue-500 to-cyan-500'
   },
+  'interaction-history-section': {
+    id: 'interaction-history-section',
+    title: 'Interaction History',
+    description: 'Recent contact interactions and communications',
+    icon: 'MessageSquare',
+    component: null,
+    color: 'from-purple-500 to-blue-500'
+  },
   'tasks-section': {
     id: 'tasks-section',
     title: 'Tasks & Activities',
@@ -73,6 +95,30 @@ const sectionConfigs: Record<string, SectionConfig> = {
     component: null,
     color: 'from-orange-500 to-red-500'
   },
+  'customer-profile-section': {
+    id: 'customer-profile-section',
+    title: 'Customer Profile',
+    description: 'Detailed customer information and insights',
+    icon: 'User',
+    component: null,
+    color: 'from-blue-500 to-indigo-500'
+  },
+  'recent-activity-section': {
+    id: 'recent-activity-section',
+    title: 'Recent Activity',
+    description: 'Latest actions and events in your CRM',
+    icon: 'Clock',
+    component: null,
+    color: 'from-gray-500 to-gray-600'
+  },
+  'tasks-and-funnel-section': {
+    id: 'tasks-and-funnel-section',
+    title: 'Tasks & Sales Funnel',
+    description: 'Task management and sales pipeline visualization',
+    icon: 'Target',
+    component: null,
+    color: 'from-amber-500 to-orange-500'
+  },
   'apps-section': {
     id: 'apps-section',
     title: 'Connected Apps & Integrations',
@@ -80,6 +126,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
     icon: 'Grid3X3',
     component: null,
     color: 'from-purple-500 to-indigo-500'
+  },
+  'charts-section': {
+    id: 'charts-section',
+    title: 'Sales Charts & Analytics',
+    description: 'Visualization of key sales metrics',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-blue-500 to-teal-500'
   },
   'analytics-section': {
     id: 'analytics-section',
@@ -93,7 +147,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
 
 export const DashboardLayoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
-    // Load from localStorage or use default
+    // Load from localStorage first, then use default
     const saved = localStorage.getItem('dashboard-section-order');
     return saved ? JSON.parse(saved) : defaultSectionOrder;
   });

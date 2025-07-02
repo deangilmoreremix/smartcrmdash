@@ -51,6 +51,18 @@ import {
   Video
 } from 'lucide-react';
 
+// Import the dashboard components
+import MetricsCards from './dashboard/MetricsCards';
+import InteractionHistory from './dashboard/InteractionHistory';
+import TasksAndFunnel from './dashboard/TasksAndFunnel';
+import CustomerProfile from './dashboard/CustomerProfile';
+import RecentActivity from './dashboard/RecentActivity';
+import DashboardHeader from './dashboard/DashboardHeader';
+import ChartsSection from './dashboard/ChartsSection';
+import ConnectedApps from './dashboard/ConnectedApps';
+import AIInsightsPanel from './AIInsightsPanel';
+import NewLeadsSection from './dashboard/NewLeadsSection';
+
 // Import AI tools components
 import StreamingChat from './aiTools/StreamingChat';
 import SmartSearchRealtime from './aiTools/SmartSearchRealtime';
@@ -364,6 +376,9 @@ const Dashboard: React.FC = () => {
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
+      case 'metrics-cards-section':
+        return <MetricsCards />;
+
       case 'ai-section':
         return (
           <div className="mb-12 scroll-mt-20">
@@ -532,6 +547,21 @@ const Dashboard: React.FC = () => {
           </div>
         );
 
+      case 'interaction-history-section':
+        return <InteractionHistory />;
+
+      case 'customer-profile-section':
+        return <CustomerProfile />;
+
+      case 'recent-activity-section':
+        return <RecentActivity />;
+
+      case 'tasks-and-funnel-section':
+        return <TasksAndFunnel />;
+
+      case 'charts-section':
+        return <ChartsSection />;
+
       case 'pipeline-section':
         return (
           <div className="mb-12 scroll-mt-20">
@@ -631,7 +661,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             
-            <LeadsSection />
+            <NewLeadsSection />
           </div>
         );
 
@@ -717,96 +747,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             {/* Connected Apps Section */}
-            <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6`}>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className={`p-2 rounded-full ${isDark ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400' : 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600'} mr-3`}>
-                    <Grid3X3 size={20} />
-                  </div>
-                  <div>
-                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Connected Apps</h3>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Access your entire business toolkit</p>
-                  </div>
-                </div>
-                <button className={`text-sm ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'} font-medium flex items-center`}>
-                  View All <ExternalLink size={14} className="ml-1" />
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* FunnelCraft AI - Marketing Team */}
-                <a 
-                  href="https://funnelcraft-ai.videoremix.io/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-purple-400/30 hover:bg-white/5 bg-gradient-to-br from-purple-500/10 to-indigo-500/10' : 'border-gray-200 hover:border-purple-300 hover:shadow-md bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100'} transition-all duration-200`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${isDark ? 'bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30' : 'bg-purple-100 text-purple-600 group-hover:bg-purple-200'} transition-colors`}>
-                      <Megaphone size={20} />
-                    </div>
-                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-purple-400' : 'text-gray-400 group-hover:text-purple-600'} transition-colors`} />
-                  </div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>FunnelCraft AI</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Marketing Team</p>
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Create high-converting funnels with AI-powered optimization</p>
-                </a>
-
-                {/* SmartCRM Closer - Outreach Team */}
-                <a 
-                  href="https://smartcrm-closer.videoremix.io" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-blue-400/30 hover:bg-white/5 bg-gradient-to-br from-blue-500/10 to-cyan-500/10' : 'border-gray-200 hover:border-blue-300 hover:shadow-md bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100'} transition-all duration-200`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30' : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'} transition-colors`}>
-                      <Users size={20} />
-                    </div>
-                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-blue-400' : 'text-gray-400 group-hover:text-blue-600'} transition-colors`} />
-                  </div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>SmartCRM Closer</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Outreach Team</p>
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Advanced outreach automation and deal closing tools</p>
-                </a>
-
-                {/* ContentAI - Content & Support Team */}
-                <a 
-                  href="https://content-ai.videoremix.io" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-green-400/30 hover:bg-white/5 bg-gradient-to-br from-green-500/10 to-emerald-500/10' : 'border-gray-200 hover:border-green-300 hover:shadow-md bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100'} transition-all duration-200`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${isDark ? 'bg-green-500/20 text-green-400 group-hover:bg-green-500/30' : 'bg-green-100 text-green-600 group-hover:bg-green-200'} transition-colors`}>
-                      <FileText size={20} />
-                    </div>
-                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-green-400' : 'text-gray-400 group-hover:text-green-600'} transition-colors`} />
-                  </div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>ContentAI</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Content & Support</p>
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>AI-powered content creation and support documentation</p>
-                </a>
-
-                {/* White-Label Platform Management */}
-                <a 
-                  href="https://moonlit-tarsier-239e70.netlify.app" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={`group p-4 rounded-lg border ${isDark ? 'border-white/10 hover:border-orange-400/30 hover:bg-white/5 bg-gradient-to-br from-orange-500/10 to-amber-500/10' : 'border-gray-200 hover:border-orange-300 hover:shadow-md bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100'} transition-all duration-200`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400 group-hover:bg-orange-500/30' : 'bg-orange-100 text-orange-600 group-hover:bg-orange-200'} transition-colors`}>
-                      <Palette size={20} />
-                    </div>
-                    <ExternalLink size={14} className={`${isDark ? 'text-gray-400 group-hover:text-orange-400' : 'text-gray-400 group-hover:text-orange-600'} transition-colors`} />
-                  </div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>White-Label Platform</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Platform Management</p>
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Customize and manage your branded platform solutions</p>
-                </a>
-              </div>
-            </div>
+            <ConnectedApps />
           </div>
         );
 
@@ -839,6 +780,12 @@ const Dashboard: React.FC = () => {
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 relative">
       {/* Dashboard Layout Controls */}
       <DashboardLayoutControls />
+
+      {/* Dashboard Header */}
+      <DashboardHeader />
+
+      {/* AI Insights Panel */}
+      <AIInsightsPanel />
 
       {/* KPI Cards with Glassmorphism and Avatars */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
