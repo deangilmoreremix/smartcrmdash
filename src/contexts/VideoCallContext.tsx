@@ -331,6 +331,95 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [initializeAudioAnalysis]);
 
+  // Real signaling simulation using localStorage for cross-tab communication
+  const handleSignaling = useCallback((signal: any, isInitiator: boolean) => {
+    console.log('Handling signaling:', signal.type, 'initiator:', isInitiator);
+    
+    // For demo purposes, use localStorage to enable cross-tab calling
+    const channelName = `webrtc-signal-${currentCall?.id || 'demo'}`;
+    
+    if (isInitiator) {
+      // Store offer for the other peer to pick up
+      localStorage.setItem(`${channelName}-offer`, JSON.stringify(signal));
+      
+      // Listen for answer
+      const checkForAnswer = () => {
+        const answer = localStorage.getItem(`${channelName}-answer`);
+        if (answer && peerRef.current && !peerRef.current.destroyed) {
+          try {
+            peerRef.current.signal(JSON.parse(answer));
+            localStorage.removeItem(`${channelName}-answer`);
+            console.log('Processed answer signal');
+          } catch (error) {
+            console.error('Error processing answer:', error);
+          }
+        } else {
+          setTimeout(checkForAnswer, 1000);
+        }
+      };
+      
+      setTimeout(checkForAnswer, 1000);
+    } else {
+      // Store answer for the initiator to pick up
+      localStorage.setItem(`${channelName}-answer`, JSON.stringify(signal));
+    }
+    
+    // For single-tab demo, also create a mirror connection
+    if (isInitiator) {
+      setTimeout(() => {
+        if (peerRef.current && !peerRef.current.destroyed) {
+          try {
+            // Create a self-connecting demo by using the same signal
+            console.log('Setting up demo self-connection');
+            setCallStatus('connected');
+            
+            // For demo, use the local stream as remote stream with some delay
+            setTimeout(() => {
+              if (localStreamRef.current) {
+                // Clone the local stream for demo remote stream
+                const clonedStream = localStreamRef.current.clone();
+                setRemoteStream(clonedStream);
+                setConnectionQuality('excellent');
+                console.log('Demo connection established');
+                
+                // If this is a group call, also update participants with streams
+                if (isGroupCall && currentCall?.groupParticipants) {
+                  // Add streams to participants
+                  setParticipants(currentCall.groupParticipants.map(participant => ({
+                    ...participant,
+                    stream: clonedStream.clone(),
+                    isConnected: true,
+                    isVideoEnabled: true,
+                    isAudioEnabled: true,
+                    isSpeaking: false
+                  })));
+                }
+                
+                // If 1:1 call, update recipient with stream
+                else if (currentCall) {
+                  const updatedRecipient = {
+                    ...currentCall.recipient,
+                    stream: clonedStream,
+                    isConnected: true,
+                    isVideoEnabled: true,
+                    isAudioEnabled: true
+                  };
+                  
+                  setCurrentCall({
+                    ...currentCall,
+                    recipient: updatedRecipient
+                  });
+                }
+              }
+            }, 1000);
+          } catch (error) {
+            console.error('Error in demo connection:', error);
+          }
+        }
+      }, 2000);
+    }
+  }, [currentCall, isGroupCall]);
+
   // Create peer connection with real WebRTC for 1:1 calls
   const createPeer = useCallback((initiator: boolean, stream: MediaStream) => {
     console.log('Creating peer connection, initiator:', initiator);
@@ -493,7 +582,73 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setPeer(newPeer);
     
     return newPeer;
-  }, [cleanup, currentCall, handleSignaling, initializeAudioAnalysis, isGroupCall]);
+  }, [cleanup, currentCall, handleSignaling, isGroupCall]);
+
+  // Simulate signaling for group call (in a real app, this would use a server)
+  const simulateSignalingForGroupCall = useCallback((participantId: string, signal: any, initiator: boolean) => {
+    console.log(`Simulating signaling for ${participantId}, initiator: ${initiator}`);
+    
+    // In a real app, you'd send this signal to the participant via your signaling server
+    // For this demo, we'll simulate a successful connection
+    
+    setTimeout(() => {
+      // Simulate the participant accepting the call and sending back their signal
+      if (initiator) {
+        const peerConnection = peersRef.current[participantId];
+        if (peerConnection && peerConnection.peer) {
+          try {
+            // Create a simulated answer signal
+            const answerSignal = {
+              type: 'answer',
+              sdp: 'v=0\r\no=- 3256016840 1 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0 1\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS ZMHxrXXPEfQUBCB5QzlO6NZvmjzOSJOqlGIX\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\nc=IN IP4 0.0.0.0\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=ice-ufrag:9rO2\r\na=ice-pwd:jZ8LoGYlEqsM4/GMO8rldjBi\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4E:9C:FE:A9:69:4C:18:D1:89:29:F5:E5:31:FE:C9:85:37:38:35:17:16:3A:81:B0:FC:08:80:EB:BC:A5:F1:4D\r\na=setup:active\r\na=mid:0\r\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\r\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\r\na=recvonly\r\na=rtcp-mux\r\na=rtpmap:111 opus/48000/2\r\na=rtcp-fb:111 transport-cc\r\na=fmtp:111 minptime=10;useinbandfec=1\r\nm=video 9 UDP/TLS/RTP/SAVPF 96\r\nc=IN IP4 0.0.0.0\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=ice-ufrag:9rO2\r\na=ice-pwd:jZ8LoGYlEqsM4/GMO8rldjBi\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4E:9C:FE:A9:69:4C:18:D1:89:29:F5:E5:31:FE:C9:85:37:38:35:17:16:3A:81:B0:FC:08:80:EB:BC:A5:F1:4D\r\na=setup:active\r\na=mid:1\r\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\r\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\r\na=recvonly\r\na=rtcp-mux\r\na=rtcp-rsize\r\na=rtpmap:96 VP8/90000\r\na=rtcp-fb:96 goog-remb\r\na=rtcp-fb:96 transport-cc\r\na=rtcp-fb:96 ccm fir\r\na=rtcp-fb:96 nack\r\na=rtcp-fb:96 nack pli\r\n'
+            };
+            
+            // Simulate receiving the answer
+            console.log(`Simulating answer signal from ${participantId}`);
+            peerConnection.peer.signal(answerSignal);
+          } catch (error) {
+            console.error(`Error in simulated signaling for ${participantId}:`, error);
+          }
+        }
+      }
+    }, 1000);
+    
+    // In a real implementation, this would be handled by the signaling server
+    // and the remote peer would actually process the signal and respond
+  }, []);
+
+  // Handle media control messages
+  const handleMediaControlMessage = useCallback((message: any, participantId: string) => {
+    console.log(`Received media control from ${participantId}:`, message);
+    
+    // Update participant status based on message
+    if (message.action === 'video-toggle' || message.action === 'audio-toggle' || message.action === 'initial-state') {
+      setParticipants(prev => 
+        prev.map(p => 
+          p.id === participantId 
+            ? { 
+              ...p, 
+              isVideoEnabled: message.action === 'video-toggle' ? message.enabled 
+                : message.action === 'initial-state' ? message.isVideoEnabled 
+                : p.isVideoEnabled,
+              isAudioEnabled: message.action === 'audio-toggle' ? message.enabled 
+                : message.action === 'initial-state' ? message.isAudioEnabled 
+                : p.isAudioEnabled
+            } 
+            : p
+        )
+      );
+    }
+    else if (message.action === 'speaking-update') {
+      setParticipants(prev => 
+        prev.map(p => 
+          p.id === participantId 
+            ? { ...p, isSpeaking: message.isSpeaking } 
+            : p
+        )
+      );
+    }
+  }, []);
 
   // Create a peer connection for a group call participant
   const createGroupPeerConnection = useCallback((participantId: string, stream: MediaStream, initiator: boolean = true) => {
@@ -628,162 +783,28 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
     
     return newPeer;
-  }, [isVideoEnabled, isAudioEnabled, removeParticipantFromCall, simulateSignalingForGroupCall, handleMediaControlMessage]);
+  }, [isVideoEnabled, isAudioEnabled, simulateSignalingForGroupCall, handleMediaControlMessage]);
 
-  // Simulate signaling for group call (in a real app, this would use a server)
-  const simulateSignalingForGroupCall = useCallback((participantId: string, signal: any, initiator: boolean) => {
-    console.log(`Simulating signaling for ${participantId}, initiator: ${initiator}`);
+  // Remove a participant from a call
+  const removeParticipantFromCall = useCallback((participantId: string) => {
+    console.log('Removing participant from call:', participantId);
     
-    // In a real app, you'd send this signal to the participant via your signaling server
-    // For this demo, we'll simulate a successful connection
-    
-    setTimeout(() => {
-      // Simulate the participant accepting the call and sending back their signal
-      if (initiator) {
-        const peerConnection = peersRef.current[participantId];
-        if (peerConnection && peerConnection.peer) {
-          try {
-            // Create a simulated answer signal
-            const answerSignal = {
-              type: 'answer',
-              sdp: 'v=0\r\no=- 3256016840 1 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0 1\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS ZMHxrXXPEfQUBCB5QzlO6NZvmjzOSJOqlGIX\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\nc=IN IP4 0.0.0.0\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=ice-ufrag:9rO2\r\na=ice-pwd:jZ8LoGYlEqsM4/GMO8rldjBi\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4E:9C:FE:A9:69:4C:18:D1:89:29:F5:E5:31:FE:C9:85:37:38:35:17:16:3A:81:B0:FC:08:80:EB:BC:A5:F1:4D\r\na=setup:active\r\na=mid:0\r\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\r\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\r\na=recvonly\r\na=rtcp-mux\r\na=rtpmap:111 opus/48000/2\r\na=rtcp-fb:111 transport-cc\r\na=fmtp:111 minptime=10;useinbandfec=1\r\nm=video 9 UDP/TLS/RTP/SAVPF 96\r\nc=IN IP4 0.0.0.0\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=ice-ufrag:9rO2\r\na=ice-pwd:jZ8LoGYlEqsM4/GMO8rldjBi\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4E:9C:FE:A9:69:4C:18:D1:89:29:F5:E5:31:FE:C9:85:37:38:35:17:16:3A:81:B0:FC:08:80:EB:BC:A5:F1:4D\r\na=setup:active\r\na=mid:1\r\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\r\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\r\na=recvonly\r\na=rtcp-mux\r\na=rtcp-rsize\r\na=rtpmap:96 VP8/90000\r\na=rtcp-fb:96 goog-remb\r\na=rtcp-fb:96 transport-cc\r\na=rtcp-fb:96 ccm fir\r\na=rtcp-fb:96 nack\r\na=rtcp-fb:96 nack pli\r\n'
-            };
-            
-            // Simulate receiving the answer
-            console.log(`Simulating answer signal from ${participantId}`);
-            peerConnection.peer.signal(answerSignal);
-          } catch (error) {
-            console.error(`Error in simulated signaling for ${participantId}:`, error);
-          }
-        }
+    // Destroy peer connection if exists
+    if (peersRef.current[participantId]) {
+      try {
+        peersRef.current[participantId].peer.destroy();
+      } catch (error) {
+        console.warn(`Error destroying peer connection for ${participantId}:`, error);
       }
-    }, 1000);
-    
-    // In a real implementation, this would be handled by the signaling server
-    // and the remote peer would actually process the signal and respond
-  }, []);
-
-  // Handle media control messages
-  const handleMediaControlMessage = useCallback((message: any, participantId: string) => {
-    console.log(`Received media control from ${participantId}:`, message);
-    
-    // Update participant status based on message
-    if (message.action === 'video-toggle' || message.action === 'audio-toggle' || message.action === 'initial-state') {
-      setParticipants(prev => 
-        prev.map(p => 
-          p.id === participantId 
-            ? { 
-              ...p, 
-              isVideoEnabled: message.action === 'video-toggle' ? message.enabled 
-                : message.action === 'initial-state' ? message.isVideoEnabled 
-                : p.isVideoEnabled,
-              isAudioEnabled: message.action === 'audio-toggle' ? message.enabled 
-                : message.action === 'initial-state' ? message.isAudioEnabled 
-                : p.isAudioEnabled
-            } 
-            : p
-        )
-      );
-    }
-    else if (message.action === 'speaking-update') {
-      setParticipants(prev => 
-        prev.map(p => 
-          p.id === participantId 
-            ? { ...p, isSpeaking: message.isSpeaking } 
-            : p
-        )
-      );
-    }
-  }, []);
-
-  // Real signaling simulation using localStorage for cross-tab communication
-  const handleSignaling = useCallback((signal: any, isInitiator: boolean) => {
-    console.log('Handling signaling:', signal.type, 'initiator:', isInitiator);
-    
-    // For demo purposes, use localStorage to enable cross-tab calling
-    const channelName = `webrtc-signal-${currentCall?.id || 'demo'}`;
-    
-    if (isInitiator) {
-      // Store offer for the other peer to pick up
-      localStorage.setItem(`${channelName}-offer`, JSON.stringify(signal));
       
-      // Listen for answer
-      const checkForAnswer = () => {
-        const answer = localStorage.getItem(`${channelName}-answer`);
-        if (answer && peerRef.current && !peerRef.current.destroyed) {
-          try {
-            peerRef.current.signal(JSON.parse(answer));
-            localStorage.removeItem(`${channelName}-answer`);
-            console.log('Processed answer signal');
-          } catch (error) {
-            console.error('Error processing answer:', error);
-          }
-        } else {
-          setTimeout(checkForAnswer, 1000);
-        }
-      };
-      
-      setTimeout(checkForAnswer, 1000);
-    } else {
-      // Store answer for the initiator to pick up
-      localStorage.setItem(`${channelName}-answer`, JSON.stringify(signal));
+      // Remove from peersRef
+      delete peersRef.current[participantId];
+      setPeers({...peersRef.current});
     }
     
-    // For single-tab demo, also create a mirror connection
-    if (isInitiator) {
-      setTimeout(() => {
-        if (peerRef.current && !peerRef.current.destroyed) {
-          try {
-            // Create a self-connecting demo by using the same signal
-            console.log('Setting up demo self-connection');
-            setCallStatus('connected');
-            
-            // For demo, use the local stream as remote stream with some delay
-            setTimeout(() => {
-              if (localStreamRef.current) {
-                // Clone the local stream for demo remote stream
-                const clonedStream = localStreamRef.current.clone();
-                setRemoteStream(clonedStream);
-                setConnectionQuality('excellent');
-                console.log('Demo connection established');
-                
-                // If this is a group call, also update participants with streams
-                if (isGroupCall && currentCall?.groupParticipants) {
-                  // Add streams to participants
-                  setParticipants(currentCall.groupParticipants.map(participant => ({
-                    ...participant,
-                    stream: clonedStream.clone(),
-                    isConnected: true,
-                    isVideoEnabled: true,
-                    isAudioEnabled: true,
-                    isSpeaking: false
-                  })));
-                }
-                
-                // If 1:1 call, update recipient with stream
-                else if (currentCall) {
-                  const updatedRecipient = {
-                    ...currentCall.recipient,
-                    stream: clonedStream,
-                    isConnected: true,
-                    isVideoEnabled: true,
-                    isAudioEnabled: true
-                  };
-                  
-                  setCurrentCall({
-                    ...currentCall,
-                    recipient: updatedRecipient
-                  });
-                }
-              }
-            }, 1000);
-          } catch (error) {
-            console.error('Error in demo connection:', error);
-          }
-        }
-      }, 2000);
-    }
-  }, [currentCall, isGroupCall]);
+    // Remove from participants list
+    setParticipants(prev => prev.filter(p => p.id !== participantId));
+  }, []);
 
   // Initiate a one-on-one call
   const initiateCall = useCallback(async (recipient: CallParticipant, type: 'video' | 'audio') => {
@@ -1026,27 +1047,6 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       throw error;
     }
   }, [isInCall, isGroupCall, createGroupPeerConnection]);
-
-  // Remove a participant from a call
-  const removeParticipantFromCall = useCallback((participantId: string) => {
-    console.log('Removing participant from call:', participantId);
-    
-    // Destroy peer connection if exists
-    if (peersRef.current[participantId]) {
-      try {
-        peersRef.current[participantId].peer.destroy();
-      } catch (error) {
-        console.warn(`Error destroying peer connection for ${participantId}:`, error);
-      }
-      
-      // Remove from peersRef
-      delete peersRef.current[participantId];
-      setPeers({...peersRef.current});
-    }
-    
-    // Remove from participants list
-    setParticipants(prev => prev.filter(p => p.id !== participantId));
-  }, []);
 
   // Toggle video with real track control
   const toggleVideo = useCallback(() => {
