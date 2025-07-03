@@ -1,96 +1,78 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useContactStore } from '../../store/contactStore';
 import { MoreHorizontal, ArrowRight } from 'lucide-react';
-
-const interactions = [
-  {
-    id: 1,
-    type: 'Royal Package Opportunity',
-    value: '11,250$',
-    date: 'Oct 12',
-    status: 'active',
-    bgColor: 'bg-blue-500',
-    textColor: 'text-white',
-    participants: [
-      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  },
-  {
-    id: 2,
-    type: 'Third Deal Most Useful',
-    value: '21,300$',
-    date: 'Oct 9',
-    status: 'success',
-    bgColor: 'bg-teal-500',
-    textColor: 'text-white',
-    participants: [
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  },
-  {
-    id: 3,
-    type: 'Absolute Success Deal',
-    value: '2,100$',
-    date: 'Oct 12',
-    status: 'pending',
-    bgColor: 'bg-black',
-    textColor: 'text-white',
-    participants: [
-      'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  },
-  {
-    id: 4,
-    type: 'Royal Package Opportunity',
-    value: '4,160$',
-    date: 'Oct 11',
-    status: 'warning',
-    bgColor: 'bg-yellow-400',
-    textColor: 'text-black',
-    participants: [
-      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  },
-  {
-    id: 5,
-    type: 'Adaptive Business Services',
-    value: '3,140$',
-    date: 'Oct 7',
-    status: 'success',
-    bgColor: 'bg-gray-300',
-    textColor: 'text-black',
-    participants: [
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  },
-  {
-    id: 6,
-    type: 'Second deal Common Service',
-    value: '12,350$',
-    date: 'Oct 5',
-    status: 'active',
-    bgColor: 'bg-gray-300',
-    textColor: 'text-black',
-    participants: [
-      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    ]
-  }
-];
+import Avatar from '../ui/Avatar';
+import { getInitials } from '../../utils/avatars';
 
 const InteractionHistory: React.FC = () => {
   const { isDark } = useTheme();
+  const { contacts } = useContactStore();
   
+  // Updated interactions with contactIds instead of direct participant arrays
+  const interactions = [
+    {
+      id: 1,
+      type: 'Royal Package Opportunity',
+      value: '11,250$',
+      date: 'Oct 12',
+      status: 'active',
+      bgColor: 'bg-blue-500',
+      textColor: 'text-white',
+      participantIds: ['1', '2', '3'] // Contact IDs from the contact store
+    },
+    {
+      id: 2,
+      type: 'Third Deal Most Useful',
+      value: '21,300$',
+      date: 'Oct 9',
+      status: 'success',
+      bgColor: 'bg-teal-500',
+      textColor: 'text-white',
+      participantIds: ['2', '3', '1', '4']
+    },
+    {
+      id: 3,
+      type: 'Absolute Success Deal',
+      value: '2,100$',
+      date: 'Oct 12',
+      status: 'pending',
+      bgColor: 'bg-black',
+      textColor: 'text-white',
+      participantIds: ['5', '2', '3']
+    },
+    {
+      id: 4,
+      type: 'Royal Package Opportunity',
+      value: '4,160$',
+      date: 'Oct 11',
+      status: 'warning',
+      bgColor: 'bg-yellow-400',
+      textColor: 'text-black',
+      participantIds: ['1', '2']
+    },
+    {
+      id: 5,
+      type: 'Adaptive Business Services',
+      value: '3,140$',
+      date: 'Oct 7',
+      status: 'success',
+      bgColor: 'bg-gray-300',
+      textColor: 'text-black',
+      participantIds: ['3', '5']
+    },
+    {
+      id: 6,
+      type: 'Second deal Common Service',
+      value: '12,350$',
+      date: 'Oct 5',
+      status: 'active',
+      bgColor: 'bg-gray-300',
+      textColor: 'text-black',
+      participantIds: ['1', '2', '3']
+    }
+  ];
+
   return (
     <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 mb-6`}>
       <div className="flex items-center justify-between mb-6">
@@ -131,18 +113,23 @@ const InteractionHistory: React.FC = () => {
             
             <div className="flex items-center justify-between">
               <div className="flex -space-x-2">
-                {interaction.participants.slice(0, 3).map((participant, i) => (
-                  <div key={i} className="relative">
-                    <img
-                      src={participant}
-                      alt={`Participant ${i + 1}`}
-                      className="w-8 h-8 rounded-full border-3 border-white object-cover shadow-lg ring-2 ring-white/50"
-                    />
-                  </div>
-                ))}
-                {interaction.participants.length > 3 && (
+                {interaction.participantIds.slice(0, 3).map((participantId, i) => {
+                  const contact = contacts[participantId];
+                  return contact ? (
+                    <div key={i} className="relative">
+                      <Avatar
+                        src={contact.avatar}
+                        alt={contact.name}
+                        size="sm"
+                        fallback={getInitials(contact.name)}
+                        className="border-3 border-white object-cover shadow-lg ring-2 ring-white/50"
+                      />
+                    </div>
+                  ) : null;
+                })}
+                {interaction.participantIds.length > 3 && (
                   <div className="w-8 h-8 rounded-full border-3 border-white bg-gray-400 flex items-center justify-center shadow-lg ring-2 ring-white/50">
-                    <span className="text-xs font-semibold text-white">+{interaction.participants.length - 3}</span>
+                    <span className="text-xs font-semibold text-white">+{interaction.participantIds.length - 3}</span>
                   </div>
                 )}
               </div>

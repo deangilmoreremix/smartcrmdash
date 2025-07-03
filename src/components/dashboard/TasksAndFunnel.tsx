@@ -1,63 +1,46 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useContactStore } from '../../store/contactStore';
 import { MoreHorizontal, ArrowRight, Calendar, UserPlus, Users, Plus } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
+// Update taskData to include contactIds instead of direct assignee objects
 const taskData = [
   { 
     day: 'Mon', 
     tasks: 2, 
-    assignees: [
-      { id: '1', name: 'Jane Doe', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '2', name: 'John Smith', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'offline' }
-    ]
+    assigneeIds: ['1', '2'] // Contact IDs from the contact store
   },
   { 
     day: 'Tue', 
     tasks: 0, 
-    assignees: []
+    assigneeIds: []
   },
   { 
     day: 'Wed', 
     tasks: 3, 
-    assignees: [
-      { id: '3', name: 'Darlene Robertson', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '4', name: 'Eva Robinson', avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '5', name: 'Wade Warren', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'away' }
-    ]
+    assigneeIds: ['3', '1', '5']
   },
   { 
     day: 'Thu', 
     tasks: 1, 
-    assignees: [
-      { id: '6', name: 'Jonah Jude', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' }
-    ]
+    assigneeIds: ['4']
   },
   { 
     day: 'Fri', 
     tasks: 4, 
-    assignees: [
-      { id: '1', name: 'Jane Doe', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '2', name: 'John Smith', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '3', name: 'Darlene Robertson', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '4', name: 'Eva Robinson', avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' }
-    ]
+    assigneeIds: ['1', '2', '3', '1']
   },
   { 
     day: 'Sat', 
     tasks: 2, 
-    assignees: [
-      { id: '5', name: 'Wade Warren', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' },
-      { id: '6', name: 'Jonah Jude', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' }
-    ]
+    assigneeIds: ['5', '4']
   },
   { 
     day: 'Sun', 
     tasks: 1, 
-    assignees: [
-      { id: '2', name: 'John Smith', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2', status: 'online' }
-    ]
+    assigneeIds: ['2']
   },
 ];
 
@@ -70,19 +53,24 @@ const funnelData = [
 
 // Component to display assignee avatars
 const TaskAssignees: React.FC<{ 
-  assignees: Array<{ id: string; name: string; avatar: string; status?: string }>;
+  assigneeIds: string[];
   maxVisible?: number;
   size?: 'sm' | 'md';
   onClick?: (id: string) => void;
 }> = ({ 
-  assignees, 
+  assigneeIds, 
   maxVisible = 3,
   size = 'sm',
   onClick 
 }) => {
   const { isDark } = useTheme();
+  const { contacts } = useContactStore();
   
-  if (!assignees.length) {
+  // Filter out duplicate IDs and any IDs that don't correspond to contacts
+  const uniqueAssigneeIds = [...new Set(assigneeIds)];
+  const validAssignees = uniqueAssigneeIds.filter(id => contacts[id]);
+  
+  if (!validAssignees.length) {
     return (
       <div className={`w-5 h-5 rounded-full ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} flex items-center justify-center text-xs`}>
         0
@@ -90,26 +78,29 @@ const TaskAssignees: React.FC<{
     );
   }
 
-  const visibleAssignees = assignees.slice(0, maxVisible);
-  const remainingCount = assignees.length - maxVisible;
+  const visibleAssignees = validAssignees.slice(0, maxVisible);
+  const remainingCount = validAssignees.length - maxVisible;
   
   return (
     <div className="flex -space-x-2">
-      {visibleAssignees.map((assignee) => (
-        <div 
-          key={assignee.id} 
-          className="relative cursor-pointer hover:z-10 transition-all hover:transform hover:scale-110"
-          onClick={() => onClick && onClick(assignee.id)}
-          title={assignee.name}
-        >
-          <Avatar
-            src={assignee.avatar}
-            alt={assignee.name}
-            size={size}
-            status={assignee.status as 'online' | 'offline' | 'away' | 'busy'}
-          />
-        </div>
-      ))}
+      {visibleAssignees.map((assigneeId) => {
+        const contact = contacts[assigneeId];
+        return (
+          <div 
+            key={assigneeId} 
+            className="relative cursor-pointer hover:z-10 transition-all hover:transform hover:scale-110"
+            onClick={() => onClick && onClick(assigneeId)}
+            title={contact.name}
+          >
+            <Avatar
+              src={contact.avatar}
+              alt={contact.name}
+              size={size}
+              status={contact.status === 'hot' ? 'online' : contact.status === 'warm' ? 'away' : 'offline'}
+            />
+          </div>
+        );
+      })}
       {remainingCount > 0 && (
         <div className={`relative z-10 w-7 h-7 rounded-full ${isDark ? 'bg-gray-700 text-white border-gray-900' : 'bg-gray-200 text-gray-700 border-white'} flex items-center justify-center text-xs font-medium border-2 shadow-sm`}>
           +{remainingCount}
@@ -123,16 +114,16 @@ const TaskAssignees: React.FC<{
 const CalendarDay: React.FC<{
   day: number;
   isToday?: boolean;
-  assignees?: Array<{ id: string; name: string; avatar: string; status?: string }>;
+  assigneeIds?: string[];
   onClick?: () => void;
 }> = ({ 
   day, 
   isToday = false,
-  assignees = [], 
+  assigneeIds = [], 
   onClick 
 }) => {
   const { isDark } = useTheme();
-  const hasAssignees = assignees.length > 0;
+  const hasAssignees = assigneeIds.length > 0;
   
   return (
     <div 
@@ -155,7 +146,7 @@ const CalendarDay: React.FC<{
       {hasAssignees && (
         <div className="flex justify-center -mt-1">
           <TaskAssignees 
-            assignees={assignees} 
+            assigneeIds={assigneeIds} 
             maxVisible={2} 
             size="sm" 
           />
@@ -167,24 +158,24 @@ const CalendarDay: React.FC<{
 
 const TasksAndFunnel: React.FC = () => {
   const { isDark } = useTheme();
+  const { contacts } = useContactStore();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const today = new Date().getDate();
 
-  // Mock calendar data - for each day, randomly assign avatars based on our contacts
+  // Mock calendar data with assignee IDs
   const calendarData = Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
     // Randomly determine if this day has assignees
     const hasAssignees = Math.random() > 0.65;
-    if (!hasAssignees) return { day, assignees: [] };
+    if (!hasAssignees) return { day, assigneeIds: [] };
     
-    // Get 1-4 random assignees from our task data
-    const allAssignees = taskData.flatMap(t => t.assignees);
-    const uniqueAssignees = [...new Map(allAssignees.map(a => [a.id, a])).values()];
-    const shuffled = [...uniqueAssignees].sort(() => 0.5 - Math.random());
+    // Get 1-4 random assignee IDs from our contacts store
+    const contactIds = Object.keys(contacts);
+    const shuffled = [...contactIds].sort(() => 0.5 - Math.random());
     const count = Math.floor(Math.random() * 4) + 1;
     
     return {
       day,
-      assignees: shuffled.slice(0, count)
+      assigneeIds: shuffled.slice(0, count)
     };
   });
 
@@ -227,12 +218,12 @@ const TasksAndFunnel: React.FC = () => {
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1 text-center text-sm">
-            {calendarData.map(({ day, assignees }) => (
+            {calendarData.map(({ day, assigneeIds }) => (
               <CalendarDay 
                 key={day} 
                 day={day} 
                 isToday={day === today}
-                assignees={assignees}
+                assigneeIds={assigneeIds}
                 onClick={() => handleDayClick(day)}
               />
             ))}
@@ -245,7 +236,7 @@ const TasksAndFunnel: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-700'}`}>{task.day}</div>
                 <TaskAssignees 
-                  assignees={task.assignees} 
+                  assigneeIds={task.assigneeIds} 
                   onClick={handleAssigneeClick}
                 />
               </div>
@@ -269,14 +260,14 @@ const TasksAndFunnel: React.FC = () => {
               </button>
             </div>
             <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-              {calendarData[selectedDay - 1].assignees.length > 0
-                ? `${calendarData[selectedDay - 1].assignees.length} assignees with scheduled tasks`
+              {calendarData[selectedDay - 1].assigneeIds.length > 0
+                ? `${calendarData[selectedDay - 1].assigneeIds.length} assignees with scheduled tasks`
                 : 'No tasks scheduled for this day'}
             </p>
-            {calendarData[selectedDay - 1].assignees.length > 0 && (
+            {calendarData[selectedDay - 1].assigneeIds.length > 0 && (
               <div className="mt-2 flex items-center space-x-2">
                 <TaskAssignees 
-                  assignees={calendarData[selectedDay - 1].assignees}
+                  assigneeIds={calendarData[selectedDay - 1].assigneeIds}
                   maxVisible={5}
                   onClick={handleAssigneeClick}
                 />
@@ -336,22 +327,30 @@ const TasksAndFunnel: React.FC = () => {
             </button>
           </div>
           <div className="space-y-3">
-            {[...new Map(taskData.flatMap(t => t.assignees).map(a => [a.id, a])).values()].map((assignee) => (
-              <div key={assignee.id} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Avatar
-                    src={assignee.avatar}
-                    alt={assignee.name}
-                    size="sm"
-                    status={assignee.status as 'online' | 'offline' | 'away' | 'busy'}
-                  />
-                  <span className={`text-sm font-medium ${isDark ? 'text-blue-100' : 'text-blue-800'}`}>{assignee.name}</span>
-                </div>
-                <span className={`text-xs ${isDark ? 'text-blue-300 bg-blue-500/30' : 'text-blue-700 bg-blue-100'} px-2 py-1 rounded`}>
-                  {taskData.filter(t => t.assignees.some(a => a.id === assignee.id)).length} days
-                </span>
-              </div>
-            ))}
+            {/* Get unique assignees from all tasks */}
+            {Array.from(new Set(taskData.flatMap(t => t.assigneeIds)))
+              .filter(id => contacts[id]) // Filter out invalid IDs
+              .map((assigneeId) => {
+                const contact = contacts[assigneeId];
+                const taskCount = taskData.filter(t => t.assigneeIds.includes(assigneeId)).length;
+                
+                return (
+                  <div key={assigneeId} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Avatar
+                        src={contact.avatar}
+                        alt={contact.name}
+                        size="sm"
+                        status={contact.status === 'hot' ? 'online' : contact.status === 'warm' ? 'away' : 'offline'}
+                      />
+                      <span className={`text-sm font-medium ${isDark ? 'text-blue-100' : 'text-blue-800'}`}>{contact.name}</span>
+                    </div>
+                    <span className={`text-xs ${isDark ? 'text-blue-300 bg-blue-500/30' : 'text-blue-700 bg-blue-100'} px-2 py-1 rounded`}>
+                      {taskCount} days
+                    </span>
+                  </div>
+                );
+            })}
           </div>
         </div>
       </div>

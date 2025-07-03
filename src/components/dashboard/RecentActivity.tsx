@@ -1,79 +1,80 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useContactStore } from '../../store/contactStore';
 import { Calendar, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
 import Avatar from '../ui/Avatar';
-
-const upcomingDeals = [
-  {
-    id: 1,
-    company: 'TechCorp Solutions',
-    value: '$85,000',
-    probability: '85%',
-    dueDate: 'Tomorrow',
-    contact: 'Sarah Johnson',
-    avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-    status: 'online'
-  },
-  {
-    id: 2,
-    company: 'Innovation Labs',
-    value: '$120,000',
-    probability: '60%',
-    dueDate: 'Friday',
-    contact: 'Mike Chen',
-    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-    status: 'offline'
-  },
-  {
-    id: 3,
-    company: 'Global Dynamics',
-    value: '$95,500',
-    probability: '75%',
-    dueDate: 'Next Week',
-    contact: 'Emily Davis',
-    avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2',
-    status: 'online'
-  }
-];
-
-const recentActivities = [
-  {
-    type: 'deal',
-    icon: TrendingUp,
-    title: 'Deal moved to negotiation',
-    description: 'TechCorp Solutions - $85,000',
-    time: '2 hours ago',
-    color: 'text-blue-600'
-  },
-  {
-    type: 'task',
-    icon: CheckCircle,
-    title: 'Task completed',
-    description: 'Follow-up call with Innovation Labs',
-    time: '4 hours ago',
-    color: 'text-green-600'
-  },
-  {
-    type: 'meeting',
-    icon: Calendar,
-    title: 'Meeting scheduled',
-    description: 'Product demo with Global Dynamics',
-    time: '6 hours ago',
-    color: 'text-purple-600'
-  },
-  {
-    type: 'alert',
-    icon: AlertCircle,
-    title: 'Deal at risk',
-    description: 'No activity on Enterprise Corp deal',
-    time: '1 day ago',
-    color: 'text-yellow-600'
-  }
-];
+import { getInitials } from '../../utils/avatars';
 
 const RecentActivity: React.FC = () => {
   const { isDark } = useTheme();
+  const { contacts } = useContactStore();
   
+  // Updated upcomingDeals with contactId instead of direct avatar
+  const upcomingDeals = [
+    {
+      id: 1,
+      company: 'TechCorp Solutions',
+      value: '$85,000',
+      probability: '85%',
+      dueDate: 'Tomorrow',
+      contactId: '1', // Changed from contact+avatar to contactId
+      status: 'online'
+    },
+    {
+      id: 2,
+      company: 'Innovation Labs',
+      value: '$120,000',
+      probability: '60%',
+      dueDate: 'Friday',
+      contactId: '2',
+      status: 'offline'
+    },
+    {
+      id: 3,
+      company: 'Global Dynamics',
+      value: '$95,500',
+      probability: '75%',
+      dueDate: 'Next Week',
+      contactId: '3',
+      status: 'online'
+    }
+  ];
+
+  const recentActivities = [
+    {
+      type: 'deal',
+      icon: TrendingUp,
+      title: 'Deal moved to negotiation',
+      description: 'TechCorp Solutions - $85,000',
+      time: '2 hours ago',
+      color: 'text-blue-600'
+    },
+    {
+      type: 'task',
+      icon: CheckCircle,
+      title: 'Task completed',
+      description: 'Follow-up call with Innovation Labs',
+      time: '4 hours ago',
+      color: 'text-green-600'
+    },
+    {
+      type: 'meeting',
+      icon: Calendar,
+      title: 'Meeting scheduled',
+      description: 'Product demo with Global Dynamics',
+      time: '6 hours ago',
+      color: 'text-purple-600'
+    },
+    {
+      type: 'alert',
+      icon: AlertCircle,
+      title: 'Deal at risk',
+      description: 'No activity on Enterprise Corp deal',
+      time: '1 day ago',
+      color: 'text-yellow-600'
+    }
+  ];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Upcoming Deals */}
@@ -84,26 +85,36 @@ const RecentActivity: React.FC = () => {
         </div>
         
         <div className="space-y-4">
-          {upcomingDeals.map((deal) => (
-            <div key={deal.id} className={`flex items-center justify-between p-4 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50/80 hover:bg-gray-100/80'} rounded-xl transition-colors`}>
-              <div className="flex items-center space-x-3">
-                <Avatar
-                  src={deal.avatar}
-                  alt={deal.contact}
-                  size="sm"
-                  status={deal.status as 'online' | 'offline' | 'away' | 'busy'}
-                />
-                <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{deal.company}</h4>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{deal.contact}</p>
+          {upcomingDeals.map((deal) => {
+            // Get contact data using contactId
+            const contact = contacts[deal.contactId];
+            
+            return (
+              <div key={deal.id} className={`flex items-center justify-between p-4 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50/80 hover:bg-gray-100/80'} rounded-xl transition-colors`}>
+                <div className="flex items-center space-x-3">
+                  {contact && (
+                    <Avatar
+                      src={contact.avatar}
+                      alt={contact.name}
+                      size="sm"
+                      fallback={getInitials(contact.name)}
+                      status={deal.status as 'online' | 'offline' | 'away' | 'busy'}
+                    />
+                  )}
+                  <div>
+                    <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{deal.company}</h4>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {contact ? contact.name : 'Unknown Contact'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{deal.value}</p>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{deal.probability} • {deal.dueDate}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{deal.value}</p>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{deal.probability} • {deal.dueDate}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
