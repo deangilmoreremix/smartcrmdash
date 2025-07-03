@@ -132,12 +132,12 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 w-full">
+    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
       {/* Dashboard Layout Controls */}
       <DashboardLayoutControls />
 
       {/* Draggable Sections */}
-      <div className="space-y-8 pb-10">
+      <div className="space-y-8 pb-20">
         {sectionOrder.map((sectionId, index) => (
           <DraggableSection
             key={sectionId}

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Make sure html and body take up full height */
+/* Essential full-screen setup */
 html, body {
   height: 100%;
   margin: 0;
@@ -11,9 +11,9 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Ensure the root div takes full height */
 #root {
   min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   width: 100%;
