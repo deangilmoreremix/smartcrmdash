@@ -58,6 +58,23 @@ class OpenAIService {
   }
 
   /**
+   * Strip markdown code blocks from AI response
+   */
+  private stripMarkdownCodeBlocks(content: string): string {
+    // Remove markdown code blocks (```json...``` or ```...```)
+    let cleaned = content.trim();
+    
+    // Remove opening code block markers
+    cleaned = cleaned.replace(/^```(?:json|javascript|js)?\s*/i, '');
+    
+    // Remove closing code block markers
+    cleaned = cleaned.replace(/\s*```\s*$/i, '');
+    
+    // Remove any remaining leading/trailing whitespace
+    return cleaned.trim();
+  }
+
+  /**
    * Generate content using OpenAI API
    */
   async generateContent(request: GenerateRequest): Promise<GenerateResponse> {
@@ -234,7 +251,9 @@ class OpenAIService {
         temperature: 0.7
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.error('Error generating email with OpenAI:', error);
       return {
@@ -286,7 +305,9 @@ class OpenAIService {
         temperature: 0.3
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.error('Error generating deal insights with OpenAI:', error);
       return {
@@ -341,7 +362,9 @@ class OpenAIService {
         temperature: 0.3
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.error('Error analyzing pipeline health with OpenAI:', error);
       return {
@@ -418,7 +441,9 @@ class OpenAIService {
         temperature: 0.7
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.error('Error generating meeting agenda with OpenAI:', error);
       return {

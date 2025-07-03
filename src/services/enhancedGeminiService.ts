@@ -45,6 +45,23 @@ class EnhancedGeminiService {
   }
 
   /**
+   * Strip markdown code blocks from AI response
+   */
+  private stripMarkdownCodeBlocks(content: string): string {
+    // Remove markdown code blocks (```json...``` or ```...```)
+    let cleaned = content.trim();
+    
+    // Remove opening code block markers
+    cleaned = cleaned.replace(/^```(?:json|javascript|js)?\s*/i, '');
+    
+    // Remove closing code block markers
+    cleaned = cleaned.replace(/\s*```\s*$/i, '');
+    
+    // Remove any remaining leading/trailing whitespace
+    return cleaned.trim();
+  }
+
+  /**
    * Load available models from Supabase or fallback
    */
   private async loadAvailableModels(): Promise<void> {
@@ -271,7 +288,9 @@ class EnhancedGeminiService {
         systemInstruction: "You are a CRM analytics expert. Provide concise, actionable insights in valid JSON format."
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.warn('Error generating insights:', error);
       return {
@@ -329,7 +348,9 @@ class EnhancedGeminiService {
         systemInstruction: "You are a professional email writing assistant. Write clear, engaging emails that drive action."
       });
 
-      return JSON.parse(response.content);
+      // Strip markdown code blocks before parsing
+      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
+      return JSON.parse(cleanedContent);
     } catch (error) {
       console.warn('Error generating email:', error);
       return {
