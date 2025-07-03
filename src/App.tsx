@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import VideoCallOverlay from './components/VideoCallOverlay';
 import VideoCallPreviewWidget from './components/VideoCallPreviewWidget';
-import PersistentVideoCallButton from './components/PersistentVideoCallButton';
 import DevicePermissionChecker from './components/DevicePermissionChecker';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
@@ -30,7 +29,6 @@ function App() {
                   <Dashboard />
                   <VideoCallOverlay />
                   <VideoCallPreviewWidget />
-                  <PersistentVideoCallButton />
                   
                   {/* ContactsModal rendered at the root level */}
                   <ContactsModal
