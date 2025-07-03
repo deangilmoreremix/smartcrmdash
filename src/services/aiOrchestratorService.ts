@@ -64,6 +64,77 @@ class AIOrchestratorService {
   }
 
   /**
+   * Strip markdown code blocks from AI response
+   */
+  private stripMarkdownCodeBlocks(content: string): string {
+    // Remove markdown code blocks (```json...``` or ```...```)
+    let cleaned = content.trim();
+    
+    // Remove opening code block markers
+    cleaned = cleaned.replace(/^```(?:json|javascript|js)?\s*/i, '');
+    
+    // Remove closing code block markers
+    cleaned = cleaned.replace(/\s*```\s*$/i, '');
+    
+    // Remove any remaining leading/trailing whitespace
+    return cleaned.trim();
+  }
+
+  /**
+   * Parse JSON safely from AI response
+   */
+  private parseJsonSafely(content: string): any {
+    // First strip any markdown code blocks
+    const cleaned = this.stripMarkdownCodeBlocks(content);
+    
+    try {
+      return JSON.parse(cleaned);
+    } catch (error) {
+      console.warn('Failed to parse JSON, attempting additional cleanup:', error);
+      
+      // Additional cleanup attempt - sometimes AI adds explanatory text before/after the JSON
+      try {
+        const jsonStart = cleaned.indexOf('{');
+        const jsonEnd = cleaned.lastIndexOf('}') + 1;
+        
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          const jsonPart = cleaned.substring(jsonStart, jsonEnd);
+          return JSON.parse(jsonPart);
+        }
+      } catch (secondError) {
+        console.error('Failed additional JSON parsing attempt:', secondError);
+      }
+      
+      throw new Error('Failed to parse response as JSON');
+    }
+  }
+
+  /**
+   * Validate and clean customer ID for UUID compatibility
+   */
+  private validateCustomerId(customerId?: string): string | undefined {
+    if (!customerId || 
+        customerId === 'demo-customer-id' || 
+        customerId.includes('demo') || 
+        customerId.includes('placeholder') ||
+        customerId === 'test-customer' ||
+        customerId.startsWith('demo-') ||
+        customerId.startsWith('test-') ||
+        customerId.length < 10) {
+      return undefined;
+    }
+    
+    // Check if it's a valid UUID format (basic validation)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(customerId)) {
+      console.debug(`Invalid customer ID format: ${customerId}, treating as null`);
+      return undefined;
+    }
+    
+    return customerId;
+  }
+
+  /**
    * Check if any required API keys are available
    */
   private hasAvailableProvider(): boolean {
@@ -205,7 +276,7 @@ class AIOrchestratorService {
     const startTime = Date.now();
 
     try {
-      const email = await service.generateEmail(context, taskContext.customerId, modelId);
+      const email = await service.generateEmail(context, this.validateCustomerId(taskContext.customerId), modelId);
       const responseTime = Date.now() - startTime;
 
       // Estimate cost
@@ -269,9 +340,17 @@ class AIOrchestratorService {
     try {
       let result;
       if (this.isGoogleModel(modelId)) {
-        result = await enhancedGeminiService.generateInsights(pipelineData, taskContext.customerId, modelId);
+        result = await enhancedGeminiService.generateInsights(
+          pipelineData, 
+          this.validateCustomerId(taskContext.customerId), 
+          modelId
+        );
       } else {
-        result = await openAIService.analyzePipelineHealth(pipelineData, taskContext.customerId, modelId);
+        result = await openAIService.analyzePipelineHealth(
+          pipelineData, 
+          this.validateCustomerId(taskContext.customerId), 
+          modelId
+        );
       }
 
       const responseTime = Date.now() - startTime;
@@ -376,7 +455,7 @@ class AIOrchestratorService {
           Duration: ${context.duration} minutes
           Previous Notes: ${context.previousNotes || 'None'}
           
-          Format your response as JSON with the following structure:
+          Format your response as a JSON object with the following structure, WITHOUT ANY MARKDOWN CODE BLOCKS:
           {
             "title": "string",
             "objective": "string",
@@ -395,14 +474,18 @@ class AIOrchestratorService {
         const geminiResponse = await enhancedGeminiService.generateContent({
           prompt,
           model: modelId,
-          customerId: taskContext.customerId,
+          customerId: this.validateCustomerId(taskContext.customerId),
           featureUsed: 'meeting-agenda',
-          systemInstruction: "You are an expert meeting facilitator. Create focused, efficient meeting agendas."
+          systemInstruction: "You are an expert meeting facilitator. Create focused, efficient meeting agendas. Return only valid JSON without markdown formatting."
         });
         
-        result = JSON.parse(geminiResponse.content);
+        result = this.parseJsonSafely(geminiResponse.content);
       } else {
-        result = await openAIService.generateMeetingAgenda(context, taskContext.customerId, modelId);
+        result = await openAIService.generateMeetingAgenda(
+          context, 
+          this.validateCustomerId(taskContext.customerId), 
+          modelId
+        );
       }
 
       const responseTime = Date.now() - startTime;
@@ -488,7 +571,8 @@ class AIOrchestratorService {
     }
     
     // For complex analytical tasks like deal analysis, prefer more capable models
-    const useGPT4 = dealData.value > 100000 || taskContext.complexity === 'high';
+    const useGPT4 = dealData.deals && dealData.deals.some((deal: any) => deal.value > 100000) || 
+                   taskContext.complexity === 'high';
     const defaultModelId = useGPT4 ? 'gpt-4o-mini' : 'gemini-2.5-flash';
     
     const modelId = await this.getOptimalModel('deal_insights', {
@@ -507,7 +591,7 @@ class AIOrchestratorService {
           
           ${JSON.stringify(dealData, null, 2)}
           
-          Format your response as JSON with the following structure:
+          Format your response as a JSON object with the following structure, WITHOUT ANY MARKDOWN CODE BLOCKS:
           {
             "riskLevel": "low|medium|high",
             "keyInsights": ["string"],
@@ -520,14 +604,18 @@ class AIOrchestratorService {
         const geminiResponse = await enhancedGeminiService.generateContent({
           prompt,
           model: modelId,
-          customerId: taskContext.customerId,
+          customerId: this.validateCustomerId(taskContext.customerId),
           featureUsed: 'deal-insights',
-          systemInstruction: "You are a sales analytics expert specializing in deal risk assessment."
+          systemInstruction: "You are a sales analytics expert specializing in deal risk assessment. Return only plain JSON without markdown code blocks."
         });
         
-        result = JSON.parse(geminiResponse.content);
+        result = this.parseJsonSafely(geminiResponse.content);
       } else {
-        result = await openAIService.generateDealInsights(dealData, taskContext.customerId, modelId);
+        result = await openAIService.generateDealInsights(
+          dealData, 
+          this.validateCustomerId(taskContext.customerId), 
+          modelId
+        );
       }
 
       const responseTime = Date.now() - startTime;
@@ -609,7 +697,7 @@ class AIOrchestratorService {
       3. Patterns in the data
       4. Contact scoring recommendations
       
-      Format your response as JSON with the following structure:
+      Format your response as a JSON object with the following structure, WITHOUT ANY MARKDOWN CODE BLOCKS:
       {
         "highValueContacts": ["string"],
         "needFollowUp": ["string"],
@@ -624,24 +712,24 @@ class AIOrchestratorService {
         const geminiResponse = await enhancedGeminiService.generateContent({
           prompt,
           model: modelId,
-          customerId: taskContext.customerId,
+          customerId: this.validateCustomerId(taskContext.customerId),
           featureUsed: 'contact-insights',
-          systemInstruction: "You are a CRM analytics expert specialized in contact scoring and analysis."
+          systemInstruction: "You are a CRM analytics expert specialized in contact scoring and analysis. Return only plain JSON without markdown code blocks."
         });
         
-        result = JSON.parse(geminiResponse.content);
+        result = this.parseJsonSafely(geminiResponse.content);
       } else {
         const openAIResponse = await openAIService.generateContent({
           messages: [
-            { role: 'system', content: "You are a CRM analytics expert specialized in contact scoring and analysis." },
+            { role: 'system', content: "You are a CRM analytics expert specialized in contact scoring and analysis. Return only plain JSON without markdown code blocks." },
             { role: 'user', content: prompt }
           ],
           model: modelId,
-          customerId: taskContext.customerId,
+          customerId: this.validateCustomerId(taskContext.customerId),
           featureUsed: 'contact-insights'
         });
         
-        result = JSON.parse(openAIResponse.content);
+        result = this.parseJsonSafely(openAIResponse.content);
       }
 
       const responseTime = Date.now() - startTime;
