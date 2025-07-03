@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Make sure html and body take up full height */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure the root div takes full height */
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Custom scrollbar for dark mode */
 .dark {
   color-scheme: dark;
