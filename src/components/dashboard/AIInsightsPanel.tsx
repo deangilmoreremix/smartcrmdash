@@ -22,6 +22,7 @@ const AIInsightsPanel = () => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiKeysConfigured, setApiKeysConfigured] = useState(true);
   const [insights, setInsights] = useState<Insight[]>([
     {
       type: 'success',
@@ -64,6 +65,7 @@ const AIInsightsPanel = () => {
       await generateRealInsights();
     } catch (error) {
       console.error("Failed to generate initial insights:", error);
+      // Don't set error state for initial load failures
     }
   };
 
@@ -124,9 +126,20 @@ const AIInsightsPanel = () => {
         customerId: 'demo-customer-id' // Demo customer ID for logging
       });
       
+      // Handle case where AI services are unavailable
       if (!result.success) {
-        throw new Error("Pipeline analysis failed");
+        setApiKeysConfigured(false);
+        if (result.error?.includes("API key") || result.error?.includes("No AI provider configured")) {
+          setError("AI services are not configured. Please add your API keys to enable AI insights.");
+        } else {
+          setError(result.error || "AI analysis is currently unavailable.");
+        }
+        // Don't throw error, just handle gracefully
+        return;
       }
+
+      // Reset API keys configured flag if we got a successful result
+      setApiKeysConfigured(true);
 
       // Convert AI insights to our format
       const newInsights: Insight[] = [];
@@ -186,8 +199,9 @@ const AIInsightsPanel = () => {
       
     } catch (error) {
       console.error("Error generating insights:", error);
-      // Keep existing insights on error
-      throw error;
+      // Set a more user-friendly error message
+      setError("Unable to generate AI insights at this time. Please try again later.");
+      setApiKeysConfigured(false);
     }
   };
 
@@ -200,17 +214,19 @@ const AIInsightsPanel = () => {
           </div>
           <div>
             <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h2>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Real-time insights powered by AI</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {apiKeysConfigured ? 'Real-time insights powered by AI' : 'Configure API keys to enable AI features'}
+            </p>
           </div>
         </div>
         <button
           onClick={generateInsights}
-          disabled={isGenerating}
+          disabled={isGenerating || !apiKeysConfigured}
           className={`flex items-center space-x-2 px-4 py-2 ${
             isDark 
               ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' 
               : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-          } text-white rounded-xl transition-all disabled:opacity-50`}
+          } text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isGenerating ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
