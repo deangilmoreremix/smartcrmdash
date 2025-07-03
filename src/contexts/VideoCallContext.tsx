@@ -17,6 +17,15 @@ export interface CallData {
   type: 'video' | 'audio';
 }
 
+interface GroupCallParticipant extends CallParticipant {
+  stream?: MediaStream;
+  peer?: SimplePeer.Instance;
+  isConnected: boolean;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
+  isSpeaking: boolean;
+}
+
 interface VideoCallContextType {
   // Call State
   currentCall: CallData | null;
@@ -53,6 +62,13 @@ interface VideoCallContextType {
   startRecording: () => Promise<void>;
   stopRecording: () => void;
   isRecording: boolean;
+  
+  // Group Call Features
+  initiateGroupCall: (participants: CallParticipant[], type: 'video' | 'audio') => Promise<void>;
+  addParticipantToCall: (participant: CallParticipant) => Promise<void>;
+  removeParticipantFromCall: (participantId: string) => void;
+  participants: GroupCallParticipant[];
+  isGroupCall: boolean;
 }
 
 const VideoCallContext = createContext<VideoCallContextType | undefined>(undefined);
@@ -82,13 +98,19 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [peer, setPeer] = useState<SimplePeer.Instance | null>(null);
   const [connectionQuality, setConnectionQuality] = useState<'excellent' | 'good' | 'poor' | 'disconnected'>('disconnected');
   
+  // Group Call
+  const [participants, setParticipants] = useState<GroupCallParticipant[]>([]);
+  const [isGroupCall, setIsGroupCall] = useState(false);
+  
   // Refs
   const peerRef = useRef<SimplePeer.Instance | null>(null);
+  const peersRef = useRef<Map<string, SimplePeer.Instance>>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
   const originalStreamRef = useRef<MediaStream | null>(null);
   const messageCallbackRef = useRef<((message: string) => void) | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const roomIdRef = useRef<string | null>(null);
 
   const isInCall = callStatus === 'connected';
 
@@ -96,11 +118,19 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const cleanup = useCallback(() => {
     console.log('Cleaning up video call...');
     
+    // Clean up individual peer
     if (peerRef.current) {
       peerRef.current.destroy();
       peerRef.current = null;
       setPeer(null);
     }
+    
+    // Clean up all peers in group calls
+    peersRef.current.forEach(peer => {
+      peer.destroy();
+    });
+    peersRef.current.clear();
+    setParticipants([]);
     
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach(track => {
@@ -126,6 +156,8 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCallStatus('idle');
     setIsScreenSharing(false);
     setConnectionQuality('disconnected');
+    setIsGroupCall(false);
+    roomIdRef.current = null;
   }, [isRecording]);
 
   // Get user media with enhanced error handling
@@ -218,8 +250,8 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   // Create peer connection with real WebRTC
-  const createPeer = useCallback((initiator: boolean, stream: MediaStream) => {
-    console.log('Creating peer connection, initiator:', initiator);
+  const createPeer = useCallback((initiator: boolean, stream: MediaStream, recipientId?: string) => {
+    console.log('Creating peer connection, initiator:', initiator, 'recipient:', recipientId);
     
     const config = {
       initiator,
@@ -254,13 +286,22 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       // In a production app, you'd send this to a signaling server
       // For demo, we'll use localStorage to simulate peer communication
-      handleSignaling(signal, initiator);
+      handleSignaling(signal, initiator, recipientId);
     });
 
     // Handle incoming stream
     newPeer.on('stream', (stream) => {
       console.log('Remote stream received:', stream.getTracks().map(t => `${t.kind}: ${t.label || 'unlabeled'}`));
-      setRemoteStream(stream);
+      
+      // For group calls, associate stream with participant
+      if (isGroupCall && recipientId) {
+        setParticipants(prev => 
+          prev.map(p => p.id === recipientId ? { ...p, stream } : p)
+        );
+      } else {
+        setRemoteStream(stream);
+      }
+      
       setCallStatus('connected');
       setConnectionQuality('excellent');
       
@@ -285,6 +326,12 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.log('Peer connected successfully');
       setCallStatus('connected');
       setConnectionQuality('excellent');
+      
+      if (recipientId) {
+        setParticipants(prev => 
+          prev.map(p => p.id === recipientId ? { ...p, isConnected: true } : p)
+        );
+      }
     });
 
     // Handle data channel messages
@@ -300,6 +347,18 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } else if (parsedData.type === 'media-control') {
           console.log('Received media control:', parsedData);
           // Handle remote media control notifications
+          if (recipientId && parsedData.action) {
+            // Update participant state based on control messages
+            if (parsedData.action === 'video-toggle') {
+              setParticipants(prev => 
+                prev.map(p => p.id === recipientId ? { ...p, isVideoEnabled: parsedData.enabled } : p)
+              );
+            } else if (parsedData.action === 'audio-toggle') {
+              setParticipants(prev => 
+                prev.map(p => p.id === recipientId ? { ...p, isAudioEnabled: parsedData.enabled } : p)
+              );
+            }
+          }
         }
       } catch (error) {
         console.error('Error handling received data:', error);
@@ -324,28 +383,47 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       } else {
         setConnectionQuality('disconnected');
         console.log('Unrecoverable peer error, ending call');
-        setTimeout(cleanup, 2000);
+        setTimeout(() => {
+          // If this is a group call, just remove this participant
+          if (isGroupCall && recipientId) {
+            removeParticipantFromCall(recipientId);
+          } else {
+            cleanup();
+          }
+        }, 2000);
       }
     });
 
     // Handle close
     newPeer.on('close', () => {
       console.log('Peer connection closed');
-      cleanup();
+      if (isGroupCall && recipientId) {
+        removeParticipantFromCall(recipientId);
+      } else {
+        cleanup();
+      }
     });
 
-    peerRef.current = newPeer;
-    setPeer(newPeer);
+    if (recipientId) {
+      // Store in peers map for group calls
+      peersRef.current.set(recipientId, newPeer);
+    } else {
+      // Store as main peer for 1:1 calls
+      peerRef.current = newPeer;
+      setPeer(newPeer);
+    }
     
     return newPeer;
-  }, [cleanup]);
+  }, [cleanup, isGroupCall]);
 
   // Real signaling simulation using localStorage for cross-tab communication
-  const handleSignaling = useCallback((signal: any, isInitiator: boolean) => {
-    console.log('Handling signaling:', signal.type, 'initiator:', isInitiator);
+  const handleSignaling = useCallback((signal: any, isInitiator: boolean, recipientId?: string) => {
+    console.log('Handling signaling:', signal.type, 'initiator:', isInitiator, 'recipient:', recipientId);
     
     // For demo purposes, use localStorage to enable cross-tab calling
-    const channelName = `webrtc-signal-${currentCall?.id || 'demo'}`;
+    const channelName = recipientId
+      ? `webrtc-signal-${currentCall?.id || 'demo'}-${recipientId}`
+      : `webrtc-signal-${currentCall?.id || 'demo'}`;
     
     if (isInitiator) {
       // Store offer for the other peer to pick up
@@ -354,11 +432,24 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // Listen for answer
       const checkForAnswer = () => {
         const answer = localStorage.getItem(`${channelName}-answer`);
-        if (answer && peerRef.current && !peerRef.current.destroyed) {
+        if (answer) {
           try {
-            peerRef.current.signal(JSON.parse(answer));
+            const parsedAnswer = JSON.parse(answer);
+            // For group calls, find the correct peer
+            if (recipientId && peersRef.current.has(recipientId)) {
+              const targetPeer = peersRef.current.get(recipientId);
+              if (targetPeer && !targetPeer.destroyed) {
+                targetPeer.signal(parsedAnswer);
+                console.log('Processed answer signal for participant:', recipientId);
+              }
+            }
+            // For 1:1 calls
+            else if (peerRef.current && !peerRef.current.destroyed) {
+              peerRef.current.signal(parsedAnswer);
+              console.log('Processed answer signal for 1:1 call');
+            }
+            
             localStorage.removeItem(`${channelName}-answer`);
-            console.log('Processed answer signal');
           } catch (error) {
             console.error('Error processing answer:', error);
           }
@@ -376,10 +467,31 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // For single-tab demo, also create a mirror connection
     if (isInitiator) {
       setTimeout(() => {
-        if (peerRef.current && !peerRef.current.destroyed) {
+        if (recipientId && peersRef.current.has(recipientId)) {
+          const targetPeer = peersRef.current.get(recipientId);
+          if (targetPeer && !targetPeer.destroyed) {
+            console.log('Setting up demo connection for participant:', recipientId);
+            setCallStatus('connected');
+            
+            // For demo, create a clone of the local stream
+            if (localStreamRef.current) {
+              const clonedStream = localStreamRef.current.clone();
+              
+              // Update participant's stream
+              setParticipants(prev => 
+                prev.map(p => p.id === recipientId ? { 
+                  ...p, 
+                  isConnected: true,
+                  stream: clonedStream 
+                } : p)
+              );
+            }
+          }
+        }
+        else if (peerRef.current && !peerRef.current.destroyed) {
           try {
             // Create a self-connecting demo by using the same signal
-            console.log('Setting up demo self-connection');
+            console.log('Setting up demo self-connection for 1:1 call');
             setCallStatus('connected');
             
             // For demo, use the local stream as remote stream with some delay
@@ -398,7 +510,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }, 2000);
     }
-  }, [currentCall?.id]);
+  }, [currentCall?.id, isGroupCall]);
 
   // Initiate call with real media capture
   const initiateCall = useCallback(async (recipient: CallParticipant, type: 'video' | 'audio') => {
@@ -499,10 +611,26 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     }
     
+    // For group calls, notify all peers
+    if (isGroupCall) {
+      peersRef.current.forEach((peer, participantId) => {
+        try {
+          if (peer.connected) {
+            peer.send(JSON.stringify({
+              type: 'call-end',
+              timestamp: new Date().toISOString()
+            }));
+          }
+        } catch (error) {
+          console.error(`Error sending call end notification to ${participantId}:`, error);
+        }
+      });
+    }
+    
     setTimeout(() => {
       cleanup();
     }, 1000);
-  }, [cleanup]);
+  }, [cleanup, isGroupCall]);
 
   // Toggle video with real track control
   const toggleVideo = useCallback(() => {
@@ -515,7 +643,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsVideoEnabled(videoTrack.enabled);
         console.log('Video toggled to:', videoTrack.enabled);
         
-        // Notify remote peer
+        // Notify remote peer in 1:1 call
         if (peerRef.current && peerRef.current.connected) {
           try {
             peerRef.current.send(JSON.stringify({
@@ -528,11 +656,29 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             console.error('Error sending video toggle notification:', error);
           }
         }
+        
+        // Notify all peers in group call
+        if (isGroupCall) {
+          peersRef.current.forEach(peer => {
+            try {
+              if (peer.connected) {
+                peer.send(JSON.stringify({
+                  type: 'media-control',
+                  action: 'video-toggle',
+                  enabled: videoTrack.enabled,
+                  timestamp: new Date().toISOString()
+                }));
+              }
+            } catch (error) {
+              console.error('Error sending video toggle to group:', error);
+            }
+          });
+        }
       } else {
         console.log('No video track found');
       }
     }
-  }, [isVideoEnabled]);
+  }, [isVideoEnabled, isGroupCall]);
 
   // Toggle audio with real track control
   const toggleAudio = useCallback(() => {
@@ -545,7 +691,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsAudioEnabled(audioTrack.enabled);
         console.log('Audio toggled to:', audioTrack.enabled);
         
-        // Notify remote peer
+        // Notify remote peer in 1:1 call
         if (peerRef.current && peerRef.current.connected) {
           try {
             peerRef.current.send(JSON.stringify({
@@ -558,11 +704,29 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             console.error('Error sending audio toggle notification:', error);
           }
         }
+        
+        // Notify all peers in group call
+        if (isGroupCall) {
+          peersRef.current.forEach(peer => {
+            try {
+              if (peer.connected) {
+                peer.send(JSON.stringify({
+                  type: 'media-control',
+                  action: 'audio-toggle',
+                  enabled: audioTrack.enabled,
+                  timestamp: new Date().toISOString()
+                }));
+              }
+            } catch (error) {
+              console.error('Error sending audio toggle to group:', error);
+            }
+          });
+        }
       } else {
         console.log('No audio track found');
       }
     }
-  }, [isAudioEnabled]);
+  }, [isAudioEnabled, isGroupCall]);
 
   // Real screen sharing implementation
   const toggleScreenShare = useCallback(async () => {
@@ -591,31 +755,69 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         // Store original stream
         originalStreamRef.current = localStreamRef.current;
         
-        // Replace video track in peer connection
-        if (peerRef.current && localStreamRef.current) {
-          const videoTrack = screenStream.getVideoTracks()[0];
-          
-          // Get the peer connection
-          const pc = (peerRef.current as any)._pc;
-          if (pc) {
-            const senders = pc.getSenders();
-            const videoSender = senders.find((sender: RTCRtpSender) => 
-              sender.track && sender.track.kind === 'video'
-            );
+        if (isGroupCall) {
+          // For group calls, replace video track for all peers
+          peersRef.current.forEach((peerConnection, participantId) => {
+            if (peerConnection && !peerConnection.destroyed) {
+              const videoTrack = screenStream.getVideoTracks()[0];
+              if (videoTrack) {
+                // Get the peer connection
+                const pc = (peerConnection as any)._pc;
+                if (pc) {
+                  const senders = pc.getSenders();
+                  const videoSender = senders.find((sender: RTCRtpSender) => 
+                    sender.track && sender.track.kind === 'video'
+                  );
+                  
+                  if (videoSender) {
+                    videoSender.replaceTrack(videoTrack)
+                      .then(() => console.log('Screen share track replaced for:', participantId))
+                      .catch(err => console.error('Error replacing track for', participantId, err));
+                    
+                    // Notify peer
+                    try {
+                      peerConnection.send(JSON.stringify({
+                        type: 'media-control',
+                        action: 'screen-share-start',
+                        timestamp: new Date().toISOString()
+                      }));
+                    } catch (e) {
+                      console.error('Error sending screen share notification:', e);
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } else {
+          // Replace video track in 1:1 peer connection
+          if (peerRef.current && localStreamRef.current) {
+            const videoTrack = screenStream.getVideoTracks()[0];
             
-            if (videoSender && videoTrack) {
-              try {
-                await videoSender.replaceTrack(videoTrack);
-                console.log('Screen share track replaced successfully in peer connection');
-                
-                // Notify remote peer
-                peerRef.current.send(JSON.stringify({
-                  type: 'media-control',
-                  action: 'screen-share-start',
-                  timestamp: new Date().toISOString()
-                }));
-              } catch (replaceError) {
-                console.error('Error replacing video track:', replaceError);
+            // Get the peer connection
+            const pc = (peerRef.current as any)._pc;
+            if (pc) {
+              const senders = pc.getSenders();
+              const videoSender = senders.find((sender: RTCRtpSender) => 
+                sender.track && sender.track.kind === 'video'
+              );
+              
+              if (videoSender && videoTrack) {
+                try {
+                  await videoSender.replaceTrack(videoTrack);
+                  console.log('Screen share track replaced successfully in peer connection');
+                  
+                  // Notify remote peer
+                  if (peerRef.current.connected) {
+                    peerRef.current.send(JSON.stringify({
+                      type: 'media-control',
+                      action: 'screen-share-start',
+                      timestamp: new Date().toISOString()
+                    }));
+                  }
+                } catch (replaceError) {
+                  console.error('Error replacing video track:', replaceError);
+                }
               }
             }
           }
@@ -646,28 +848,62 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (originalStreamRef.current) {
           const videoTrack = originalStreamRef.current.getVideoTracks()[0];
           
-          // Replace track back to camera in peer connection
-          if (peerRef.current && videoTrack) {
-            const pc = (peerRef.current as any)._pc;
-            if (pc) {
-              const senders = pc.getSenders();
-              const videoSender = senders.find((sender: RTCRtpSender) => 
-                sender.track && sender.track.kind === 'video'
-              );
-              
-              if (videoSender) {
-                try {
-                  await videoSender.replaceTrack(videoTrack);
-                  console.log('Camera track restored successfully in peer connection');
+          if (isGroupCall) {
+            // Replace track in all group connections
+            peersRef.current.forEach((peerConnection, participantId) => {
+              if (peerConnection && !peerConnection.destroyed && videoTrack) {
+                const pc = (peerConnection as any)._pc;
+                if (pc) {
+                  const senders = pc.getSenders();
+                  const videoSender = senders.find((sender: RTCRtpSender) => 
+                    sender.track && sender.track.kind === 'video'
+                  );
                   
-                  // Notify remote peer
-                  peerRef.current.send(JSON.stringify({
-                    type: 'media-control',
-                    action: 'screen-share-stop',
-                    timestamp: new Date().toISOString()
-                  }));
-                } catch (replaceError) {
-                  console.error('Error restoring camera track:', replaceError);
+                  if (videoSender) {
+                    videoSender.replaceTrack(videoTrack)
+                      .then(() => console.log('Camera track restored for:', participantId))
+                      .catch(err => console.error('Error restoring track for', participantId, err));
+                    
+                    // Notify peer
+                    try {
+                      peerConnection.send(JSON.stringify({
+                        type: 'media-control',
+                        action: 'screen-share-stop',
+                        timestamp: new Date().toISOString()
+                      }));
+                    } catch (e) {
+                      console.error('Error sending screen share stop notification:', e);
+                    }
+                  }
+                }
+              }
+            });
+          } else {
+            // Replace track back to camera in 1:1 peer connection
+            if (peerRef.current && videoTrack) {
+              const pc = (peerRef.current as any)._pc;
+              if (pc) {
+                const senders = pc.getSenders();
+                const videoSender = senders.find((sender: RTCRtpSender) => 
+                  sender.track && sender.track.kind === 'video'
+                );
+                
+                if (videoSender) {
+                  try {
+                    await videoSender.replaceTrack(videoTrack);
+                    console.log('Camera track restored successfully in peer connection');
+                    
+                    // Notify remote peer
+                    if (peerRef.current.connected) {
+                      peerRef.current.send(JSON.stringify({
+                        type: 'media-control',
+                        action: 'screen-share-stop',
+                        timestamp: new Date().toISOString()
+                      }));
+                    }
+                  } catch (replaceError) {
+                    console.error('Error restoring camera track:', replaceError);
+                  }
                 }
               }
             }
@@ -705,7 +941,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
     }
-  }, [isScreenSharing, currentCall?.type, getUserMedia]);
+  }, [isScreenSharing, currentCall?.type, getUserMedia, isGroupCall]);
 
   // Real call recording implementation
   const startRecording = useCallback(async () => {
@@ -724,10 +960,20 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         combinedStream.addTrack(track);
       });
 
-      // Add remote tracks if available
-      if (remoteStream) {
+      // For 1:1 calls, add remote stream
+      if (!isGroupCall && remoteStream) {
         remoteStream.getTracks().forEach(track => {
           combinedStream.addTrack(track);
+        });
+      } 
+      // For group calls, add all participant streams
+      else if (isGroupCall) {
+        participants.forEach(participant => {
+          if (participant.stream) {
+            participant.stream.getTracks().forEach(track => {
+              combinedStream.addTrack(track);
+            });
+          }
         });
       }
 
@@ -802,7 +1048,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setIsRecording(false);
       throw error;
     }
-  }, [isInCall, localStreamRef, remoteStream]);
+  }, [isInCall, isGroupCall, participants, remoteStream]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
@@ -814,7 +1060,8 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Send message via data channel
   const sendMessage = useCallback((message: string) => {
-    if (peerRef.current && peerRef.current.connected) {
+    // For 1:1 calls
+    if (!isGroupCall && peerRef.current && peerRef.current.connected) {
       try {
         const messageData = {
           type: 'chat',
@@ -824,20 +1071,174 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         };
         
         peerRef.current.send(JSON.stringify(messageData));
-        console.log('Message sent:', message);
+        console.log('Message sent to single peer:', message);
       } catch (error) {
         console.error('Error sending message:', error);
         throw new Error('Failed to send message');
       }
+    } 
+    // For group calls, broadcast to all peers
+    else if (isGroupCall) {
+      try {
+        const messageData = {
+          type: 'chat',
+          content: message,
+          timestamp: new Date().toISOString(),
+          sender: 'user'
+        };
+        
+        const serializedMessage = JSON.stringify(messageData);
+        
+        // Send to all connected peers
+        let successCount = 0;
+        peersRef.current.forEach((peer, participantId) => {
+          if (peer.connected) {
+            try {
+              peer.send(serializedMessage);
+              successCount++;
+            } catch (peerError) {
+              console.error(`Failed to send message to participant ${participantId}:`, peerError);
+            }
+          }
+        });
+        
+        console.log(`Broadcast message to ${successCount}/${peersRef.current.size} participants:`, message);
+        
+        if (successCount === 0) {
+          throw new Error('No connected peers to send message to');
+        }
+      } catch (error) {
+        console.error('Error broadcasting message:', error);
+        throw new Error('Failed to broadcast message');
+      }
     } else {
-      console.warn('Cannot send message: peer not connected');
-      throw new Error('Peer not connected');
+      console.warn('Cannot send message: no active call');
+      throw new Error('No active call');
     }
-  }, []);
+  }, [isGroupCall]);
 
   // Set message received callback
   const onMessageReceived = useCallback((callback: (message: string) => void) => {
     messageCallbackRef.current = callback;
+  }, []);
+
+  // Initiate a group call
+  const initiateGroupCall = useCallback(async (
+    participants: CallParticipant[],
+    type: 'video' | 'audio'
+  ) => {
+    console.log('Initiating group call with', participants.length, 'participants');
+    
+    try {
+      setCallStatus('calling');
+      setIsGroupCall(true);
+      
+      // Generate a room ID for this group call
+      const roomId = `group-call-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      roomIdRef.current = roomId;
+      
+      // Create call data (use first participant as representative)
+      const callData: CallData = {
+        id: roomId,
+        caller: {
+          id: 'current-user',
+          name: 'John Doe',
+          email: 'john@example.com'
+        },
+        recipient: participants[0],
+        startTime: new Date(),
+        status: 'ringing',
+        type
+      };
+      
+      setCurrentCall(callData);
+      
+      // Get user media
+      const stream = await getUserMedia(type === 'video', true);
+      
+      // Set up group call participants
+      const initialParticipants: GroupCallParticipant[] = participants.map(p => ({
+        ...p,
+        isConnected: false,
+        isVideoEnabled: false,
+        isAudioEnabled: false,
+        isSpeaking: false
+      }));
+      setParticipants(initialParticipants);
+      
+      // Create peer connections for each participant
+      for (const participant of participants) {
+        // Create initiator peer for this participant
+        createPeer(true, stream, participant.id);
+        
+        // In a real app, you would send the offer to each participant through a signaling server
+      }
+      
+      // Set calling status
+      setTimeout(() => {
+        if (callStatus === 'calling') {
+          setCallStatus('ringing');
+        }
+      }, 1000);
+      
+      // For demo, auto-accept after delay
+      setTimeout(() => {
+        if (callStatus === 'ringing' || callStatus === 'calling') {
+          console.log('Demo auto-accepting group call');
+          setCallStatus('connected');
+        }
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error initiating group call:', error);
+      cleanup();
+      throw error;
+    }
+  }, [callStatus, getUserMedia, createPeer, cleanup]);
+
+  // Add a new participant to an ongoing call
+  const addParticipantToCall = useCallback(async (participant: CallParticipant) => {
+    if (!isGroupCall || !localStreamRef.current) {
+      throw new Error('Cannot add participant: not in a group call or no local stream');
+    }
+    
+    console.log('Adding participant to group call:', participant.name);
+    
+    // Add participant to state
+    setParticipants(prev => [
+      ...prev,
+      {
+        ...participant,
+        isConnected: false,
+        isVideoEnabled: false,
+        isAudioEnabled: false,
+        isSpeaking: false
+      }
+    ]);
+    
+    // Create peer connection for this participant
+    createPeer(true, localStreamRef.current, participant.id);
+    
+    // In a real app, you would send the offer to this participant through a signaling server
+    
+    return Promise.resolve();
+  }, [isGroupCall, createPeer]);
+
+  // Remove a participant from the call
+  const removeParticipantFromCall = useCallback((participantId: string) => {
+    console.log('Removing participant from call:', participantId);
+    
+    // Get peer connection for this participant
+    const peerConnection = peersRef.current.get(participantId);
+    
+    // Close and remove the connection
+    if (peerConnection) {
+      peerConnection.destroy();
+      peersRef.current.delete(participantId);
+    }
+    
+    // Remove participant from state
+    setParticipants(prev => prev.filter(p => p.id !== participantId));
   }, []);
 
   // Real connection quality monitoring
@@ -890,6 +1291,171 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const interval = setInterval(monitorConnection, 3000);
     return () => clearInterval(interval);
   }, [isInCall]);
+  
+  // Group call quality monitoring
+  useEffect(() => {
+    if (!isGroupCall || !isInCall) return;
+    
+    const monitorGroupConnections = async () => {
+      try {
+        const participantQuality: Record<string, 'excellent' | 'good' | 'poor' | 'disconnected'> = {};
+        
+        // Check each participant's connection
+        for (const [participantId, peerConn] of peersRef.current.entries()) {
+          const pc = (peerConn as any)?._pc;
+          if (!pc) continue;
+          
+          try {
+            const stats = await pc.getStats();
+            let packetsLost = 0;
+            let packetsReceived = 0;
+            let rtt = 0;
+
+            stats.forEach((report: any) => {
+              if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+                packetsLost += report.packetsLost || 0;
+                packetsReceived += report.packetsReceived || 0;
+              } else if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                rtt = report.currentRoundTripTime || 0;
+              }
+            });
+            
+            // Calculate quality
+            let quality: 'excellent' | 'good' | 'poor' | 'disconnected' = 'excellent';
+            
+            const lossRate = packetsReceived > 0 ? (packetsLost / packetsReceived) * 100 : 0;
+            const rttMs = rtt * 1000;
+
+            if (lossRate > 5 || rttMs > 300) {
+              quality = 'poor';
+            } else if (lossRate > 2 || rttMs > 150) {
+              quality = 'good';
+            } else if (pc.connectionState === 'connected') {
+              quality = 'excellent';
+            } else {
+              quality = 'disconnected';
+            }
+            
+            participantQuality[participantId] = quality;
+          } catch (statsError) {
+            console.warn(`Could not get stats for participant ${participantId}:`, statsError);
+            participantQuality[participantId] = 'poor';
+          }
+        }
+        
+        // Update participant connection status
+        setParticipants(prev => 
+          prev.map(participant => ({
+            ...participant,
+            connectionQuality: participantQuality[participant.id] || 'disconnected'
+          }))
+        );
+        
+        // Set overall quality (lowest of all participants)
+        const qualityPriority = { 'disconnected': 0, 'poor': 1, 'good': 2, 'excellent': 3 };
+        const qualityValues = Object.values(participantQuality);
+        
+        if (qualityValues.length > 0) {
+          const minQuality = qualityValues.reduce((min, quality) => 
+            qualityPriority[quality as keyof typeof qualityPriority] < qualityPriority[min as keyof typeof qualityPriority] ? quality : min
+          , 'excellent' as 'excellent' | 'good' | 'poor' | 'disconnected');
+          
+          setConnectionQuality(minQuality);
+        }
+      } catch (error) {
+        console.error('Error monitoring group call quality:', error);
+      }
+    };
+    
+    const interval = setInterval(monitorGroupConnections, 3000);
+    return () => clearInterval(interval);
+  }, [isGroupCall, isInCall, participants]);
+
+  // Audio level monitoring for "isSpeaking" detection
+  useEffect(() => {
+    if (!isGroupCall || !isInCall) return;
+    
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const analyzers: { [key: string]: { analyzer: AnalyserNode, source: MediaStreamAudioSourceNode } } = {};
+    
+    // Set up audio analyzers for each participant stream
+    participants.forEach(participant => {
+      if (participant.stream && participant.stream.getAudioTracks().length > 0) {
+        try {
+          const source = audioContext.createMediaStreamSource(participant.stream);
+          const analyzer = audioContext.createAnalyser();
+          analyzer.fftSize = 256;
+          analyzer.smoothingTimeConstant = 0.8;
+          source.connect(analyzer);
+          
+          analyzers[participant.id] = { analyzer, source };
+        } catch (error) {
+          console.warn(`Could not set up audio analyzer for participant ${participant.id}:`, error);
+        }
+      }
+    });
+    
+    // Also set up for local stream
+    if (localStreamRef.current && localStreamRef.current.getAudioTracks().length > 0) {
+      try {
+        const source = audioContext.createMediaStreamSource(localStreamRef.current);
+        const analyzer = audioContext.createAnalyser();
+        analyzer.fftSize = 256;
+        analyzer.smoothingTimeConstant = 0.8;
+        source.connect(analyzer);
+        
+        analyzers['local'] = { analyzer, source };
+      } catch (error) {
+        console.warn('Could not set up local audio analyzer:', error);
+      }
+    }
+    
+    // Analyze audio levels
+    const detectSpeaking = () => {
+      const speakingParticipants: string[] = [];
+      
+      Object.entries(analyzers).forEach(([id, { analyzer }]) => {
+        const dataArray = new Uint8Array(analyzer.frequencyBinCount);
+        analyzer.getByteFrequencyData(dataArray);
+        
+        // Calculate audio level
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+        
+        // Threshold for "speaking" (adjust as needed)
+        if (average > 30) {
+          if (id !== 'local') {
+            speakingParticipants.push(id);
+          }
+        }
+      });
+      
+      // Update speaking status
+      if (speakingParticipants.length > 0) {
+        setParticipants(prev => 
+          prev.map(participant => ({
+            ...participant,
+            isSpeaking: speakingParticipants.includes(participant.id)
+          }))
+        );
+      }
+    };
+    
+    const interval = setInterval(detectSpeaking, 200);
+    
+    return () => {
+      clearInterval(interval);
+      // Clean up audio analyzers
+      Object.values(analyzers).forEach(({ source }) => {
+        source.disconnect();
+      });
+      // Close audio context
+      audioContext.close().catch(err => console.warn('Error closing audio context:', err));
+    };
+  }, [isGroupCall, isInCall, participants]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -934,7 +1500,14 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Recording
     startRecording,
     stopRecording,
-    isRecording
+    isRecording,
+    
+    // Group Call Features
+    initiateGroupCall,
+    addParticipantToCall,
+    removeParticipantFromCall,
+    participants,
+    isGroupCall
   };
 
   return (

@@ -17,7 +17,11 @@ import {
   Settings,
   MoreVertical,
   X,
-  Plus
+  Plus,
+  UserPlus,
+  Zap,
+  MoreHorizontal,
+  CheckCircle
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
@@ -27,8 +31,16 @@ import { getInitials } from '../utils/avatars';
 
 const VideoCallPreviewWidget = () => {
   const { isDark } = useTheme();
-  const { currentCall, callStatus, initiateCall } = useVideoCall();
+  const { 
+    currentCall, 
+    callStatus, 
+    initiateCall, 
+    initiateGroupCall, 
+    isGroupCall, 
+    participants 
+  } = useVideoCall();
   const { contacts } = useContactStore();
+  
   const [isMinimized, setIsMinimized] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -36,7 +48,12 @@ const VideoCallPreviewWidget = () => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [callDuration] = useState(127); // Sample duration
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
+  const [isGroupCallSetup, setIsGroupCallSetup] = useState(false);
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [showDropdownMenu, setShowDropdownMenu] = useState(false);
+  
+  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
 
   // Show preview widget only when not in an actual call
   if (currentCall || callStatus !== 'idle') return null;
@@ -56,7 +73,7 @@ const VideoCallPreviewWidget = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Get first 6 contacts for contact list
+  // Get contacts for contact list
   const contactList = Object.values(contacts).slice(0, 6);
 
   // Handle starting a call with a selected contact
@@ -72,14 +89,186 @@ const VideoCallPreviewWidget = () => {
         avatar: contact.avatar
       }, type);
       setIsExpanded(false);
-      setSelectedContact(null);
+      setSelectedContacts([]);
     } catch (error) {
       console.error('Failed to start call:', error);
     }
   };
+  
+  // Handle starting a group call
+  const handleStartGroupCall = async (type: 'video' | 'audio') => {
+    if (selectedContacts.length === 0) return;
+    
+    // Get participant objects from selected contacts
+    const participantList = selectedContacts.map(id => {
+      const contact = contacts[id];
+      return {
+        id: contact.id,
+        name: contact.name,
+        email: contact.email,
+        avatar: contact.avatar
+      };
+    });
+    
+    try {
+      await initiateGroupCall(participantList, type);
+      setIsExpanded(false);
+      setIsGroupCallSetup(false);
+      setSelectedContacts([]);
+    } catch (error) {
+      console.error('Failed to start group call:', error);
+    }
+  };
+  
+  // Toggle contact selection for group calls
+  const toggleContactSelection = (contactId: string) => {
+    setSelectedContacts(prev => {
+      if (prev.includes(contactId)) {
+        return prev.filter(id => id !== contactId);
+      } else {
+        return [...prev, contactId];
+      }
+    });
+  };
 
+  // Group call setup view
+  if (isGroupCallSetup) {
+    return (
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl w-96 max-h-[80vh] flex flex-col`}>
+          {/* Header */}
+          <div className={`p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} flex items-center justify-between`}>
+            <div className="flex items-center space-x-2">
+              <Users className={isDark ? 'text-blue-400' : 'text-blue-600'} size={18} />
+              <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                New Group Call
+              </h3>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'
+              }`}>
+                {selectedContacts.length} selected
+              </span>
+              <button
+                onClick={() => setIsGroupCallSetup(false)}
+                className={`p-1 rounded-lg ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors`}
+              >
+                <X size={16} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
+              </button>
+            </div>
+          </div>
+
+          {/* Contact Selection */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="relative">
+                <input 
+                  type="text"
+                  placeholder="Search contacts..."
+                  className={`w-full pl-9 pr-4 py-2 rounded-lg border ${
+                    isDark 
+                      ? 'bg-gray-800 border-white/10 text-white placeholder:text-gray-500'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              </div>
+            </div>
+            
+            {contactList.length > 0 ? (
+              <div className={`divide-y ${isDark ? 'divide-white/10' : 'divide-gray-200'}`}>
+                {contactList.map((contact) => (
+                  <div
+                    key={contact.id}
+                    className={`p-4 ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'} transition-colors cursor-pointer`}
+                    onClick={() => toggleContactSelection(contact.id)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${
+                        selectedContacts.includes(contact.id)
+                          ? 'bg-blue-500 border-blue-500'
+                          : isDark 
+                            ? 'border-gray-600' 
+                            : 'border-gray-300'
+                      }`}>
+                        {selectedContacts.includes(contact.id) && (
+                          <CheckCircle size={12} className="text-white" />
+                        )}
+                      </div>
+                      
+                      <Avatar
+                        src={contact.avatar}
+                        alt={contact.name}
+                        size="md"
+                        fallback={getInitials(contact.name)}
+                        status="online"
+                      />
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {contact.name}
+                        </h4>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {contact.position} {contact.company ? `at ${contact.company}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <Users size={32} className={`mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No contacts found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className={`p-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setIsGroupCallSetup(false)}
+                className={`px-4 py-2 ${
+                  isDark ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                } rounded-lg transition-colors`}
+              >
+                Cancel
+              </button>
+              
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleStartGroupCall('audio')}
+                  disabled={selectedContacts.length === 0}
+                  className={`flex items-center space-x-2 px-4 py-2 ${
+                    isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
+                  } text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <Phone size={16} />
+                  <span>Audio Call</span>
+                </button>
+                
+                <button
+                  onClick={() => handleStartGroupCall('video')}
+                  disabled={selectedContacts.length === 0}
+                  className={`flex items-center space-x-2 px-4 py-2 ${
+                    isDark ? 'bg-green-600 hover:bg-green-700' : 'bg-green-600 hover:bg-green-700'
+                  } text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <Video size={16} />
+                  <span>Video Call</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Contact selection view
   if (isExpanded) {
-    // Expanded contact selection view
     return (
       <div className="fixed bottom-6 right-6 z-40">
         <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl w-80 max-h-96`}>
@@ -162,7 +351,13 @@ const VideoCallPreviewWidget = () => {
           {/* Quick Actions */}
           <div className={`p-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'} bg-gradient-to-r ${isDark ? 'from-gray-800/50 to-gray-700/50' : 'from-gray-50 to-gray-100'}`}>
             <div className="grid grid-cols-2 gap-3">
-              <button className={`flex items-center justify-center space-x-2 p-3 rounded-lg ${isDark ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} transition-colors`}>
+              <button 
+                onClick={() => {
+                  setIsGroupCallSetup(true);
+                  setIsExpanded(false);
+                }}
+                className={`flex items-center justify-center space-x-2 p-3 rounded-lg ${isDark ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} transition-colors`}
+              >
                 <Users size={16} />
                 <span className="text-sm font-medium">Group Call</span>
               </button>
@@ -282,6 +477,46 @@ const VideoCallPreviewWidget = () => {
                   >
                     <Minimize2 size={14} className="text-white" />
                   </button>
+                  
+                  {/* More options dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDropdownMenu(!showDropdownMenu);
+                      }}
+                      className="w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+                    >
+                      <MoreVertical size={14} className="text-white" />
+                    </button>
+                    
+                    {showDropdownMenu && (
+                      <div className={`absolute top-full right-0 mt-2 w-48 rounded-lg shadow-lg overflow-hidden z-10 ${
+                        isDark ? 'bg-gray-800 border border-white/10' : 'bg-white border border-gray-200'
+                      }`}>
+                        <div className="py-1">
+                          <button className={`w-full text-left px-4 py-2 text-sm ${
+                            isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-50 text-gray-700'
+                          } flex items-center space-x-2`}>
+                            <Settings size={14} className="text-gray-400" />
+                            <span>Call Settings</span>
+                          </button>
+                          <button className={`w-full text-left px-4 py-2 text-sm ${
+                            isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-50 text-gray-700'
+                          } flex items-center space-x-2`}>
+                            <Volume2 size={14} className="text-gray-400" />
+                            <span>Audio Settings</span>
+                          </button>
+                          <button className={`w-full text-left px-4 py-2 text-sm ${
+                            isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-50 text-gray-700'
+                          } flex items-center space-x-2`}>
+                            <Zap size={14} className="text-gray-400" />
+                            <span>Test Connection</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -341,10 +576,10 @@ const VideoCallPreviewWidget = () => {
                 {/* Center - Participant Info */}
                 <div className="flex-1 text-center">
                   <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {sampleParticipant.name}
+                    Call Preview
                   </p>
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Microsoft
+                    Ready to connect
                   </p>
                 </div>
 
@@ -358,10 +593,17 @@ const VideoCallPreviewWidget = () => {
                   </button>
                   
                   <button 
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'}`}
-                    title="More options"
+                    onClick={() => {
+                      setIsGroupCallSetup(true);
+                    }}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                      isDark 
+                        ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' 
+                        : 'bg-purple-100 hover:bg-purple-200 text-purple-600'
+                    }`}
+                    title="Group call"
                   >
-                    <MoreVertical size={16} />
+                    <Users size={16} />
                   </button>
                   
                   <button 
