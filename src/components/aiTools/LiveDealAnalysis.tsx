@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDealStore } from '../../store/dealStore';
+import { useContactStore } from '../../store/contactStore';
 import { useTheme } from '../../contexts/ThemeContext';
 import { TrendingUp, AlertTriangle, Clock, DollarSign, RefreshCw, Info } from 'lucide-react';
 import { useGemini } from '../../services/geminiService';
+import Avatar from '../ui/Avatar';
+import { getInitials } from '../../utils/avatars';
 
 interface DealInsight {
   icon: React.ElementType;
@@ -11,10 +14,12 @@ interface DealInsight {
   description: string;
   color: string;
   bgColor: string;
+  relatedContacts?: Array<{ id: string; name: string; avatar?: string; }>;
 }
 
 const LiveDealAnalysis: React.FC = () => {
   const { deals } = useDealStore();
+  const { contacts } = useContactStore();
   const { isDark } = useTheme();
   const gemini = useGemini();
   
@@ -52,6 +57,34 @@ const LiveDealAnalysis: React.FC = () => {
       const stalledDeals = activeDeals.filter(deal => deal.daysInStage && deal.daysInStage > 10);
       const hotDeals = activeDeals.filter(deal => deal.probability > 70);
       
+      // Get related contacts for each deal type
+      const highValueContacts = highValueDeals.map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      
+      const stalledContacts = stalledDeals.map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      
+      const hotContacts = hotDeals.map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      
       // Set initial insights
       const initialInsights: DealInsight[] = [
         {
@@ -60,7 +93,8 @@ const LiveDealAnalysis: React.FC = () => {
           value: highValueDeals.length,
           description: 'Deals over $50K',
           color: 'text-green-600',
-          bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
+          bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100',
+          relatedContacts: highValueContacts
         },
         {
           icon: AlertTriangle,
@@ -68,7 +102,8 @@ const LiveDealAnalysis: React.FC = () => {
           value: stalledDeals.length,
           description: 'Over 10 days in stage',
           color: 'text-orange-600',
-          bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
+          bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100',
+          relatedContacts: stalledContacts
         },
         {
           icon: Clock,
@@ -76,7 +111,8 @@ const LiveDealAnalysis: React.FC = () => {
           value: hotDeals.length,
           description: 'High probability deals',
           color: 'text-blue-600',
-          bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+          bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100',
+          relatedContacts: hotContacts
         }
       ];
       
@@ -94,7 +130,8 @@ const LiveDealAnalysis: React.FC = () => {
               stage: deal.stage,
               probability: deal.probability,
               daysInStage: deal.daysInStage || 0,
-              priority: deal.priority
+              priority: deal.priority,
+              contactId: deal.contactId
             })),
             summary: {
               totalCount: activeDeals.length,
@@ -123,7 +160,8 @@ const LiveDealAnalysis: React.FC = () => {
                 value: highValueDeals.length,
                 description: analysisResult.content.keyInsights[0] || 'Deals over $50K',
                 color: 'text-green-600',
-                bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100'
+                bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100',
+                relatedContacts: highValueContacts
               },
               {
                 icon: AlertTriangle,
@@ -131,7 +169,8 @@ const LiveDealAnalysis: React.FC = () => {
                 value: analysisResult.content.potentialBlockers ? analysisResult.content.potentialBlockers.length : stalledDeals.length,
                 description: analysisResult.content.potentialBlockers ? analysisResult.content.potentialBlockers[0] : 'Over 10 days in stage',
                 color: 'text-orange-600',
-                bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100'
+                bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100',
+                relatedContacts: stalledContacts
               },
               {
                 icon: Clock,
@@ -139,7 +178,8 @@ const LiveDealAnalysis: React.FC = () => {
                 value: `${Math.round(analysisResult.content.winProbability)}%`,
                 description: analysisResult.content.recommendedActions ? analysisResult.content.recommendedActions[0] : 'High probability deals',
                 color: 'text-blue-600',
-                bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100'
+                bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100',
+                relatedContacts: hotContacts
               }
             ];
             
@@ -158,6 +198,37 @@ const LiveDealAnalysis: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Render avatar stack
+  const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
+    const visibleContacts = contacts.slice(0, maxVisible);
+    const remainingCount = Math.max(0, contacts.length - maxVisible);
+    
+    return (
+      <div className="flex items-center mt-2">
+        <div className="flex -space-x-2">
+          {visibleContacts.map((contact, index) => (
+            <div key={contact.id} className="relative" style={{ zIndex: maxVisible - index }}>
+              <Avatar
+                src={contact.avatar}
+                alt={contact.name}
+                size="sm"
+                fallback={getInitials(contact.name)}
+                className="border-2 border-white dark:border-gray-900"
+              />
+            </div>
+          ))}
+          {remainingCount > 0 && (
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
+              +{remainingCount}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -215,6 +286,11 @@ const LiveDealAnalysis: React.FC = () => {
                 }`}>
                   {insight.description}
                 </p>
+                
+                {/* Avatar stack for related contacts */}
+                {insight.relatedContacts && insight.relatedContacts.length > 0 && 
+                  renderAvatarStack(insight.relatedContacts)
+                }
               </div>
             </div>
           </div>

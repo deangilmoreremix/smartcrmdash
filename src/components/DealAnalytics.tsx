@@ -31,6 +31,8 @@ import {
   PieChart as PieChartIcon,
   ZapOff
 } from 'lucide-react';
+import Avatar from './ui/Avatar';
+import { getInitials } from '../utils/avatars';
 
 interface KPIMetric {
   title: string;
@@ -39,6 +41,7 @@ interface KPIMetric {
   changeType: 'increase' | 'decrease';
   icon: React.ComponentType<{ className?: string }>;
   description: string;
+  relatedContacts?: Array<{ id: string; name: string; avatar?: string; }>;
 }
 
 interface PipelineStage {
@@ -54,6 +57,37 @@ const DealAnalytics: React.FC = () => {
   const { isDark } = useTheme();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('month');
 
+  // Render avatar stack
+  const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
+    const visibleContacts = contacts.slice(0, maxVisible);
+    const remainingCount = Math.max(0, contacts.length - maxVisible);
+    
+    return (
+      <div className="flex items-center mt-2">
+        <div className="flex -space-x-2">
+          {visibleContacts.map((contact, index) => (
+            <div key={contact.id} className="relative" style={{ zIndex: maxVisible - index }}>
+              <Avatar
+                src={contact.avatar}
+                alt={contact.name}
+                size="sm"
+                fallback={getInitials(contact.name)}
+                className="border-2 border-white dark:border-gray-900"
+              />
+            </div>
+          ))}
+          {remainingCount > 0 && (
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
+              +{remainingCount}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // Calculate KPI metrics
   const calculateKPIs = (): KPIMetric[] => {
     const dealsArray = deals ? Object.values(deals) : [];
@@ -66,6 +100,39 @@ const DealAnalytics: React.FC = () => {
     const totalContacts = Object.keys(contacts).length || 0;
     const avgDealSize = wonDeals > 0 ? totalRevenue / wonDeals : 0;
 
+    // Get representative contacts
+    const representativeContacts = Object.values(contacts).slice(0, 5).map(contact => ({
+      id: contact.id,
+      name: contact.name,
+      avatar: contact.avatar
+    }));
+
+    // Get contacts associated with won deals
+    const wonDealContacts = dealsArray
+      .filter(deal => deal.stage === 'closed-won')
+      .map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      })
+      .filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+
+    // Get contacts associated with high-value deals
+    const highValueDealContacts = dealsArray
+      .filter(deal => deal.value > 50000)
+      .map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      })
+      .filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+
     return [
       {
         title: 'Total Revenue',
@@ -73,7 +140,8 @@ const DealAnalytics: React.FC = () => {
         change: 12.5,
         changeType: 'increase',
         icon: DollarSign,
-        description: 'Revenue from closed deals'
+        description: 'Revenue from closed deals',
+        relatedContacts: wonDealContacts
       },
       {
         title: 'Conversion Rate',
@@ -81,7 +149,8 @@ const DealAnalytics: React.FC = () => {
         change: 8.2,
         changeType: 'increase',
         icon: Target,
-        description: 'Deals won vs total deals'
+        description: 'Deals won vs total deals',
+        relatedContacts: wonDealContacts
       },
       {
         title: 'Total Contacts',
@@ -89,7 +158,8 @@ const DealAnalytics: React.FC = () => {
         change: 15.3,
         changeType: 'increase',
         icon: Users,
-        description: 'Active contacts in pipeline'
+        description: 'Active contacts in pipeline',
+        relatedContacts: representativeContacts
       },
       {
         title: 'Avg Deal Size',
@@ -97,7 +167,8 @@ const DealAnalytics: React.FC = () => {
         change: -2.1,
         changeType: 'decrease',
         icon: TrendingUp,
-        description: 'Average revenue per deal'
+        description: 'Average revenue per deal',
+        relatedContacts: highValueDealContacts
       }
     ];
   };
@@ -114,9 +185,40 @@ const DealAnalytics: React.FC = () => {
     };
   };
 
-  // Calculate values by status
+  // Calculate values by status with representative contacts
   const calculateValuesByStatus = () => {
     const dealsArray = Object.values(deals);
+    
+    // Get active deals with contacts
+    const activeDealsWithContacts = dealsArray
+      .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+      .map(deal => ({
+        ...deal,
+        contact: contacts[deal.contactId]
+      }))
+      .filter(deal => deal.contact)
+      .slice(0, 5);
+    
+    // Get won deals with contacts
+    const wonDealsWithContacts = dealsArray
+      .filter(deal => deal.stage === 'closed-won')
+      .map(deal => ({
+        ...deal,
+        contact: contacts[deal.contactId]
+      }))
+      .filter(deal => deal.contact)
+      .slice(0, 5);
+    
+    // Get lost deals with contacts
+    const lostDealsWithContacts = dealsArray
+      .filter(deal => deal.stage === 'closed-lost')
+      .map(deal => ({
+        ...deal,
+        contact: contacts[deal.contactId]
+      }))
+      .filter(deal => deal.contact)
+      .slice(0, 5);
+    
     return {
       active: dealsArray
         .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
@@ -126,7 +228,10 @@ const DealAnalytics: React.FC = () => {
         .reduce((sum, deal) => sum + deal.value, 0),
       lost: dealsArray
         .filter(deal => deal.stage === 'closed-lost')
-        .reduce((sum, deal) => sum + deal.value, 0)
+        .reduce((sum, deal) => sum + deal.value, 0),
+      activeDealsWithContacts,
+      wonDealsWithContacts,
+      lostDealsWithContacts
     };
   };
 
@@ -266,6 +371,11 @@ const DealAnalytics: React.FC = () => {
               <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{metric.value}</p>
               <p className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{metric.title}</p>
               <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{metric.description}</p>
+              
+              {/* Avatar stack for related contacts */}
+              {metric.relatedContacts && metric.relatedContacts.length > 0 && (
+                renderAvatarStack(metric.relatedContacts)
+              )}
             </div>
           </div>
         ))}
@@ -283,6 +393,11 @@ const DealAnalytics: React.FC = () => {
               <Activity className={`h-5 w-5 ${isDark ? 'text-blue-300' : 'text-blue-700'}`} />
             </div>
           </div>
+          
+          {/* Avatar stack for active deals */}
+          {valuesByStatus.activeDealsWithContacts && valuesByStatus.activeDealsWithContacts.length > 0 && (
+            renderAvatarStack(valuesByStatus.activeDealsWithContacts.map(deal => deal.contact))
+          )}
         </div>
         
         <div className={`${isDark ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 border-green-500/30' : 'bg-gradient-to-r from-green-50 to-green-100 border-green-200'} border rounded-lg p-4`}>
@@ -295,6 +410,11 @@ const DealAnalytics: React.FC = () => {
               <TrendingUp className={`h-5 w-5 ${isDark ? 'text-green-300' : 'text-green-700'}`} />
             </div>
           </div>
+          
+          {/* Avatar stack for won deals */}
+          {valuesByStatus.wonDealsWithContacts && valuesByStatus.wonDealsWithContacts.length > 0 && (
+            renderAvatarStack(valuesByStatus.wonDealsWithContacts.map(deal => deal.contact))
+          )}
         </div>
         
         <div className={`${isDark ? 'bg-gradient-to-r from-red-500/20 to-red-600/20 border-red-500/30' : 'bg-gradient-to-r from-red-50 to-red-100 border-red-200'} border rounded-lg p-4`}>
@@ -307,6 +427,11 @@ const DealAnalytics: React.FC = () => {
               <ZapOff className={`h-5 w-5 ${isDark ? 'text-red-300' : 'text-red-700'}`} />
             </div>
           </div>
+          
+          {/* Avatar stack for lost deals */}
+          {valuesByStatus.lostDealsWithContacts && valuesByStatus.lostDealsWithContacts.length > 0 && (
+            renderAvatarStack(valuesByStatus.lostDealsWithContacts.map(deal => deal.contact))
+          )}
         </div>
       </div>
 
