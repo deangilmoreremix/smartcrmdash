@@ -223,6 +223,31 @@ class SupabaseAIService {
   }
 
   /**
+   * Validate customer ID for UUID compatibility
+   */
+  private validateCustomerId(customerId?: string): string | undefined {
+    if (!customerId || 
+        customerId === 'demo-customer-id' || 
+        customerId.includes('demo') || 
+        customerId.includes('placeholder') ||
+        customerId === 'test-customer' ||
+        customerId.startsWith('demo-') ||
+        customerId.startsWith('test-') ||
+        customerId.length < 10) {
+      return undefined;
+    }
+    
+    // Check if it's a valid UUID format (basic validation)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(customerId)) {
+      console.debug(`Invalid customer ID format: ${customerId}, treating as null`);
+      return undefined;
+    }
+    
+    return customerId;
+  }
+
+  /**
    * Get all available AI models from the database or fallback
    */
   async getAvailableModels(): Promise<AIModelConfig[]> {
@@ -422,10 +447,18 @@ class SupabaseAIService {
       return;
     }
 
+    // Validate customer ID before attempting to insert
+    const validCustomerId = this.validateCustomerId(usage.customer_id);
+    
+    const cleanedUsage = {
+      ...usage,
+      customer_id: validCustomerId // This will be undefined if invalid, which Supabase treats as NULL
+    };
+
     try {
       const { error } = await supabase
         .from('ai_usage_logs')
-        .insert([usage]);
+        .insert([cleanedUsage]);
 
       if (error) {
         console.warn('Failed to log AI usage to database (non-critical):', error);
@@ -476,8 +509,10 @@ class SupabaseAIService {
         `)
         .gte('created_at', startDate.toISOString());
 
-      if (customerId) {
-        query = query.eq('customer_id', customerId);
+      // Only filter by customer ID if it's valid
+      const validCustomerId = this.validateCustomerId(customerId);
+      if (validCustomerId) {
+        query = query.eq('customer_id', validCustomerId);
       }
 
       const { data, error } = await query;
