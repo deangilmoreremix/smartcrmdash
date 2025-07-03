@@ -7,6 +7,15 @@ import AIModelSelector from '../AIModelSelector';
 const IntegrationsSystem: React.FC = () => {
   const { isDark } = useTheme();
 
+  // Check for API keys
+  const googleApiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+  const openAiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  
+  const isGoogleConnected = !!googleApiKey && googleApiKey.length > 10 && !googleApiKey.includes('your_');
+  const isOpenAIConnected = !!openAiApiKey && openAiApiKey.length > 10 && !openAiApiKey.includes('your_');
+  const isSupabaseConnected = !!supabaseUrl && supabaseUrl.includes('supabase.co');
+
   return (
     <div className="mb-10">
       <div className="flex items-center mb-6">
@@ -62,21 +71,39 @@ const IntegrationsSystem: React.FC = () => {
                 <span className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Google AI API</span>
               </div>
               <div className={`px-2 py-1 rounded text-xs ${
-                isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'
+                isGoogleConnected
+                  ? (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700')
+                  : (isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700')
               }`}>
-                Connected
+                {isGoogleConnected ? 'Connected' : 'Not Connected'}
               </div>
             </div>
             
-            <div className={`p-3 ${isDark ? 'bg-white/5' : 'bg-gray-100'} rounded-lg flex items-center justify-between`}>
+            <div className={`p-3 ${isDark ? 'bg-white/5' : 'bg-gray-100'} rounded-lg flex items-center justify-between mb-3`}>
               <div className="flex items-center space-x-2">
                 <Cpu size={16} className={isDark ? 'text-purple-400' : 'text-purple-600'} />
                 <span className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>OpenAI API</span>
               </div>
               <div className={`px-2 py-1 rounded text-xs ${
-                isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700'
+                isOpenAIConnected
+                  ? (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700')
+                  : (isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700')
               }`}>
-                Not Connected
+                {isOpenAIConnected ? 'Connected' : 'Not Connected'}
+              </div>
+            </div>
+            
+            <div className={`p-3 ${isDark ? 'bg-white/5' : 'bg-gray-100'} rounded-lg flex items-center justify-between`}>
+              <div className="flex items-center space-x-2">
+                <Cpu size={16} className={isDark ? 'text-emerald-400' : 'text-emerald-600'} />
+                <span className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Supabase</span>
+              </div>
+              <div className={`px-2 py-1 rounded text-xs ${
+                isSupabaseConnected
+                  ? (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700')
+                  : (isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
+              }`}>
+                {isSupabaseConnected ? 'Connected' : 'Not Connected'}
               </div>
             </div>
           </div>
