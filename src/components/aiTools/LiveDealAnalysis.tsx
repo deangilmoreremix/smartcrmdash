@@ -88,6 +88,7 @@ const LiveDealAnalysis: React.FC = () => {
       // Set initial insights
       const initialInsights: DealInsight[] = [
         {
+          type: 'success',
           icon: TrendingUp,
           title: 'High-Value Opportunities',
           value: highValueDeals.length,
@@ -97,6 +98,7 @@ const LiveDealAnalysis: React.FC = () => {
           relatedContacts: highValueContacts
         },
         {
+          type: 'warning',
           icon: AlertTriangle,
           title: 'Stalled Deals',
           value: stalledDeals.length,
@@ -106,6 +108,7 @@ const LiveDealAnalysis: React.FC = () => {
           relatedContacts: stalledContacts
         },
         {
+          type: 'insight',
           icon: Clock,
           title: 'Hot Prospects',
           value: hotDeals.length,
@@ -148,7 +151,7 @@ const LiveDealAnalysis: React.FC = () => {
           // Use AI orchestrator for smart model routing
           const analysisResult = await gemini.analyzeDeal(dealData, {
             priority: 'balanced', // Balance of speed and quality
-            customerId: 'demo-customer-id' // For tracking
+            customerId: undefined // No customer ID for demo/testing
           });
           
           if (analysisResult.success && analysisResult.content) {

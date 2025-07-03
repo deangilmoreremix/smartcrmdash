@@ -62,6 +62,16 @@ class EnhancedGeminiService {
   }
 
   /**
+   * Validate and clean customer ID for UUID compatibility
+   */
+  private validateCustomerId(customerId?: string): string | undefined {
+    if (!customerId || customerId === 'demo-customer-id' || customerId.includes('demo') || customerId.includes('placeholder')) {
+      return undefined;
+    }
+    return customerId;
+  }
+
+  /**
    * Load available models from Supabase or fallback
    */
   private async loadAvailableModels(): Promise<void> {
@@ -86,16 +96,6 @@ class EnhancedGeminiService {
       await this.loadAvailableModels();
     }
     return this.availableModels;
-  }
-
-  /**
-   * Validate and clean customer ID for UUID compatibility
-   */
-  private validateCustomerId(customerId?: string): string | undefined {
-    if (!customerId || customerId === 'demo-customer-id' || customerId.includes('demo') || customerId.includes('placeholder')) {
-      return undefined;
-    }
-    return customerId;
   }
 
   /**
@@ -350,10 +350,6 @@ class EnhancedGeminiService {
     Recipient: ${context.recipient}
     Purpose: ${context.purpose}
     Additional Context: ${context.context || 'None'}
-    
-    Please provide:
-    1. A compelling subject line
-    2. A well-structured email body
     
     Format as JSON:
     {
