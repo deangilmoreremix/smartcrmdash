@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useDealStore } from '../../store/dealStore';
+import { useContactStore } from '../../store/contactStore';
+import Avatar from '../ui/Avatar';
+import { getInitials } from '../../utils/avatars';
 import { BarChart3, LineChart, PieChart as PieChartIcon, TrendingUp, Filter } from 'lucide-react';
 import {
   BarChart,
@@ -21,6 +25,70 @@ const ChartsSection: React.FC = () => {
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<'performance' | 'pipeline' | 'breakdown'>('performance');
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter'>('month');
+  const { deals } = useDealStore();
+  const { contacts } = useContactStore();
+
+  // Get contacts related to won deals
+  const wonDealsContacts = React.useMemo(() => {
+    return Object.values(deals)
+      .filter(deal => deal.stage === 'closed-won')
+      .map(deal => {
+        const contact = contacts[deal.contactId];
+        return contact ? {
+          id: contact.id,
+          name: contact.name,
+          avatar: contact.avatar
+        } : null;
+      })
+      .filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+  }, [deals, contacts]);
+
+  // Get contacts for average deal size calculation
+  const dealsForAvgSizeContacts = React.useMemo(() => {
+    const activeDeals = Object.values(deals).filter(deal => 
+      deal.stage !== 'closed-lost'
+    );
+    
+    return activeDeals.map(deal => {
+      const contact = contacts[deal.contactId];
+      return contact ? {
+        id: contact.id,
+        name: contact.name,
+        avatar: contact.avatar
+      } : null;
+    }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+  }, [deals, contacts]);
+
+  // Render avatar stack
+  const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
+    const visibleContacts = contacts.slice(0, maxVisible);
+    const remainingCount = Math.max(0, contacts.length - maxVisible);
+    
+    return (
+      <div className="flex items-center mt-2">
+        <div className="flex -space-x-2">
+          {visibleContacts.map((contact, index) => (
+            <div key={contact.id} className="relative" style={{ zIndex: maxVisible - index }}>
+              <Avatar
+                src={contact.avatar}
+                alt={contact.name}
+                size="sm"
+                fallback={getInitials(contact.name)}
+                className="border-2 border-white dark:border-gray-900"
+              />
+            </div>
+          ))}
+          {remainingCount > 0 && (
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
+              +{remainingCount}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   // Sample data for performance chart
   const performanceData = [
@@ -283,6 +351,8 @@ const ChartsSection: React.FC = () => {
               <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 $12,500
               </div>
+              {/* Add avatar stack for deals */}
+              {dealsForAvgSizeContacts.length > 0 && renderAvatarStack(dealsForAvgSizeContacts)}
             </div>
           </div>
         </div>
@@ -311,6 +381,8 @@ const ChartsSection: React.FC = () => {
               <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 64%
               </div>
+              {/* Add avatar stack for won deals */}
+              {wonDealsContacts.length > 0 && renderAvatarStack(wonDealsContacts)}
             </div>
           </div>
         </div>
