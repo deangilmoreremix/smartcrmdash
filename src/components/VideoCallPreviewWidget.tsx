@@ -34,15 +34,15 @@ const VideoCallPreviewWidget = () => {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  const [callDuration] = useState(127); // Demo duration
+  const [callDuration] = useState(127); // Sample duration
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
 
   // Show preview widget only when not in an actual call
   if (currentCall || callStatus !== 'idle') return null;
 
-  // Demo participant data
-  const demoParticipant = {
+  // Sample participant data
+  const sampleParticipant = {
     id: '1',
     name: 'Jane Doe',
     email: 'jane.doe@microsoft.com',
@@ -190,10 +190,10 @@ const VideoCallPreviewWidget = () => {
           >
             <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
               <Avatar
-                src={demoParticipant.avatar}
-                alt={demoParticipant.name}
+                src={sampleParticipant.avatar}
+                alt={sampleParticipant.name}
                 size="md"
-                fallback={getInitials(demoParticipant.name)}
+                fallback={getInitials(sampleParticipant.name)}
               />
             </div>
             
@@ -208,13 +208,6 @@ const VideoCallPreviewWidget = () => {
                 {formatDuration(callDuration)}
               </span>
             </div>
-
-            {/* Demo Label */}
-            <div className="absolute bottom-1 left-1 right-1">
-              <div className="bg-purple-500/80 rounded px-1 py-0.5">
-                <span className="text-xs text-white font-medium">DEMO</span>
-              </div>
-            </div>
           </div>
         ) : (
           // Expanded view
@@ -224,22 +217,22 @@ const VideoCallPreviewWidget = () => {
               className="relative w-full h-48 bg-gray-900"
               onMouseEnter={() => setShowControls(true)}
             >
-              {/* Demo Remote Video Background */}
+              {/* Remote Video Background */}
               <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative">
                 {/* Background avatar */}
                 <div className="text-center">
                   <Avatar
-                    src={demoParticipant.avatar}
-                    alt={demoParticipant.name}
+                    src={sampleParticipant.avatar}
+                    alt={sampleParticipant.name}
                     size="xl"
-                    fallback={getInitials(demoParticipant.name)}
+                    fallback={getInitials(sampleParticipant.name)}
                     className="mx-auto mb-3"
                   />
-                  <p className="text-white font-medium">{demoParticipant.name}</p>
+                  <p className="text-white font-medium">{sampleParticipant.name}</p>
                   <p className="text-white/70 text-sm">Connected</p>
                 </div>
 
-                {/* Demo video overlay */}
+                {/* Video overlay */}
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-2">
@@ -279,11 +272,6 @@ const VideoCallPreviewWidget = () => {
                   {/* Call Duration */}
                   <div className="bg-black/50 rounded-full px-3 py-1">
                     <span className="text-white text-xs">{formatDuration(callDuration)}</span>
-                  </div>
-
-                  {/* Demo Label */}
-                  <div className="bg-purple-500/80 rounded-full px-3 py-1">
-                    <span className="text-white text-xs font-medium">DEMO</span>
                   </div>
                 </div>
                 
@@ -353,7 +341,7 @@ const VideoCallPreviewWidget = () => {
                 {/* Center - Participant Info */}
                 <div className="flex-1 text-center">
                   <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {demoParticipant.name}
+                    {sampleParticipant.name}
                   </p>
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     Microsoft
