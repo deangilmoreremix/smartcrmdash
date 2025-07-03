@@ -351,10 +351,10 @@ const ChartsSection: React.FC = () => {
               <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 $12,500
               </div>
-              {/* Add avatar stack for deals */}
-              {dealsForAvgSizeContacts.length > 0 && renderAvatarStack(dealsForAvgSizeContacts)}
             </div>
           </div>
+          {/* Add avatar stack for deals */}
+          {dealsForAvgSizeContacts.length > 0 && renderAvatarStack(dealsForAvgSizeContacts)}
         </div>
         
         <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
@@ -381,10 +381,10 @@ const ChartsSection: React.FC = () => {
               <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 64%
               </div>
-              {/* Add avatar stack for won deals */}
-              {wonDealsContacts.length > 0 && renderAvatarStack(wonDealsContacts)}
             </div>
           </div>
+          {/* Add avatar stack for won deals */}
+          {wonDealsContacts.length > 0 && renderAvatarStack(wonDealsContacts)}
         </div>
       </div>
     </div>
