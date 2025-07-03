@@ -89,6 +89,16 @@ class EnhancedGeminiService {
   }
 
   /**
+   * Validate and clean customer ID for UUID compatibility
+   */
+  private validateCustomerId(customerId?: string): string | undefined {
+    if (!customerId || customerId === 'demo-customer-id' || customerId.includes('demo') || customerId.includes('placeholder')) {
+      return undefined;
+    }
+    return customerId;
+  }
+
+  /**
    * Generate content using Supabase-configured models
    */
   async generateContent(request: GenerateContentRequest): Promise<GenerateContentResponse> {
@@ -169,8 +179,11 @@ class EnhancedGeminiService {
       }
 
       const candidate = data.candidates[0];
-      const content = candidate.content?.parts?.[0]?.text || '';
+      let content = candidate.content?.parts?.[0]?.text || '';
       const responseTime = Date.now() - startTime;
+      
+      // Always strip markdown code blocks from the content before returning
+      content = this.stripMarkdownCodeBlocks(content);
       
       const result: GenerateContentResponse = {
         content,
@@ -185,12 +198,13 @@ class EnhancedGeminiService {
       };
 
       // Log usage to Supabase (gracefully handle failures)
-      if (request.customerId) {
+      const validCustomerId = this.validateCustomerId(request.customerId);
+      if (validCustomerId) {
         const cost = this.calculateCost(modelConfig, result.usage.totalTokens);
         
         try {
           await supabaseAIService.logUsage({
-            customer_id: request.customerId,
+            customer_id: validCustomerId,
             model_id: modelId,
             feature_used: request.featureUsed || 'text-generation',
             tokens_used: result.usage.totalTokens,
@@ -206,10 +220,11 @@ class EnhancedGeminiService {
       return result;
     } catch (error) {
       // Log failed usage (gracefully handle failures)
-      if (request.customerId) {
+      const validCustomerId = this.validateCustomerId(request.customerId);
+      if (validCustomerId) {
         try {
           await supabaseAIService.logUsage({
-            customer_id: request.customerId,
+            customer_id: validCustomerId,
             model_id: modelId,
             feature_used: request.featureUsed || 'text-generation',
             tokens_used: 0,
@@ -285,12 +300,20 @@ class EnhancedGeminiService {
         model: model || 'gemini-2.5-flash',
         customerId,
         featureUsed: 'business_analysis',
-        systemInstruction: "You are a CRM analytics expert. Provide concise, actionable insights in valid JSON format."
+        systemInstruction: "You are a CRM analytics expert. Provide concise, actionable insights in valid JSON format only. Do not wrap the JSON in markdown code blocks."
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.warn('Error generating insights:', error);
       return {
@@ -345,12 +368,20 @@ class EnhancedGeminiService {
         model: model || 'gemma-2-9b-it',
         customerId,
         featureUsed: 'email-generation',
-        systemInstruction: "You are a professional email writing assistant. Write clear, engaging emails that drive action."
+        systemInstruction: "You are a professional email writing assistant. Write clear, engaging emails that drive action. Return only valid JSON without markdown formatting."
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.warn('Error generating email:', error);
       return {

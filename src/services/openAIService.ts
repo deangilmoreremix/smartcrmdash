@@ -75,6 +75,16 @@ class OpenAIService {
   }
 
   /**
+   * Validate and clean customer ID for UUID compatibility
+   */
+  private validateCustomerId(customerId?: string): string | undefined {
+    if (!customerId || customerId === 'demo-customer-id' || customerId.includes('demo') || customerId.includes('placeholder')) {
+      return undefined;
+    }
+    return customerId;
+  }
+
+  /**
    * Generate content using OpenAI API
    */
   async generateContent(request: GenerateRequest): Promise<GenerateResponse> {
@@ -119,6 +129,8 @@ class OpenAIService {
         content = '';
       } else {
         content = data.choices[0]?.message?.content || '';
+        // Always strip markdown code blocks from the content before returning
+        content = this.stripMarkdownCodeBlocks(content);
       }
 
       const result: GenerateResponse = {
@@ -135,13 +147,14 @@ class OpenAIService {
       };
 
       // Log usage to Supabase (gracefully handle failures)
-      if (request.customerId) {
+      const validCustomerId = this.validateCustomerId(request.customerId);
+      if (validCustomerId) {
         try {
           const modelConfig = await supabaseAIService.getModelById(model);
           const cost = this.calculateCost(model, result.usage.totalTokens, modelConfig);
           
           await supabaseAIService.logUsage({
-            customer_id: request.customerId,
+            customer_id: validCustomerId,
             model_id: model,
             feature_used: request.featureUsed || 'chat-completion',
             tokens_used: result.usage.totalTokens,
@@ -157,10 +170,11 @@ class OpenAIService {
       return result;
     } catch (error) {
       // Log failed usage (gracefully handle failures)
-      if (request.customerId) {
+      const validCustomerId = this.validateCustomerId(request.customerId);
+      if (validCustomerId) {
         try {
           await supabaseAIService.logUsage({
-            customer_id: request.customerId,
+            customer_id: validCustomerId,
             model_id: model,
             feature_used: request.featureUsed || 'chat-completion',
             tokens_used: 0,
@@ -225,7 +239,7 @@ class OpenAIService {
     }
     
     const tone = context.tone || 'professional';
-    const systemPrompt = `You are a professional email writing assistant. Write clear, engaging emails that drive action. Always format your response as JSON with subject and body fields.`;
+    const systemPrompt = `You are a professional email writing assistant. Write clear, engaging emails that drive action. Always format your response as JSON with subject and body fields. Do not wrap the JSON in markdown code blocks.`;
 
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -251,9 +265,17 @@ class OpenAIService {
         temperature: 0.7
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.error('Error generating email with OpenAI:', error);
       return {
@@ -278,7 +300,7 @@ class OpenAIService {
       };
     }
     
-    const systemPrompt = `You are an AI specialized in sales analytics. Analyze the provided deal data and return insightful observations in JSON format.`;
+    const systemPrompt = `You are an AI specialized in sales analytics. Analyze the provided deal data and return insightful observations in JSON format only. Do not wrap the JSON in markdown code blocks.`;
     
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -305,9 +327,17 @@ class OpenAIService {
         temperature: 0.3
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.error('Error generating deal insights with OpenAI:', error);
       return {
@@ -335,7 +365,7 @@ class OpenAIService {
       };
     }
     
-    const systemPrompt = `You are an AI specialized in sales pipeline analysis. Examine the provided pipeline data and identify patterns, bottlenecks, and opportunities.`;
+    const systemPrompt = `You are an AI specialized in sales pipeline analysis. Examine the provided pipeline data and identify patterns, bottlenecks, and opportunities. Return only valid JSON without markdown formatting.`;
     
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -362,9 +392,17 @@ class OpenAIService {
         temperature: 0.3
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.error('Error analyzing pipeline health with OpenAI:', error);
       return {
@@ -404,7 +442,7 @@ class OpenAIService {
       };
     }
     
-    const systemPrompt = `You are an AI specialized in meeting planning and facilitation. Create clear, focused meeting agendas that make excellent use of time.`;
+    const systemPrompt = `You are an AI specialized in meeting planning and facilitation. Create clear, focused meeting agendas that make excellent use of time. Return only valid JSON without markdown formatting.`;
     
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -441,9 +479,17 @@ class OpenAIService {
         temperature: 0.7
       });
 
-      // Strip markdown code blocks before parsing
-      const cleanedContent = this.stripMarkdownCodeBlocks(response.content);
-      return JSON.parse(cleanedContent);
+      // Content is already stripped in generateContent, but parse safely
+      try {
+        return JSON.parse(response.content);
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response, attempting additional cleanup:', parseError);
+        // Additional cleanup attempt
+        const cleanedContent = response.content
+          .replace(/^[^{]*/, '') // Remove any text before the first {
+          .replace(/[^}]*$/, ''); // Remove any text after the last }
+        return JSON.parse(cleanedContent);
+      }
     } catch (error) {
       console.error('Error generating meeting agenda with OpenAI:', error);
       return {
