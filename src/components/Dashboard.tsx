@@ -70,23 +70,13 @@ import StreamingChat from './aiTools/StreamingChat';
 import SmartSearchRealtime from './aiTools/SmartSearchRealtime';
 import LiveDealAnalysis from './aiTools/LiveDealAnalysis';
 
-// Import recharts components for data visualization
-import { 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
+// Import section components
+import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
+import AISmartFeaturesHub from './sections/AISmartFeaturesHub';
+import SalesPipelineDealAnalytics from './sections/SalesPipelineDealAnalytics';
+import CustomerLeadManagement from './sections/CustomerLeadManagement';
+import ActivitiesCommunications from './sections/ActivitiesCommunications';
+import IntegrationsSystem from './sections/IntegrationsSystem';
 
 const Dashboard: React.FC = () => {
   const { 
@@ -215,169 +205,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Calculate metrics from deal data
-  const calculateMetrics = () => {
-    const now = new Date();
-    let totalActiveDeals = 0;
-    let totalClosingThisMonth = 0;
-    let totalAtRisk = 0;
-    let totalValue = 0;
-    let wonValue = 0;
-    
-    Object.values(deals).forEach(deal => {
-      // Count active deals (not closed)
-      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
-        totalActiveDeals++;
-        totalValue += deal.value;
-        
-        // Deals closing this month
-        if (deal.dueDate && deal.dueDate.getMonth() === now.getMonth()) {
-          totalClosingThisMonth++;
-        }
-        
-        // Deals at risk (high priority or stalled)
-        if (
-          deal.priority === 'high' || 
-          (deal.daysInStage && deal.daysInStage > 14)
-        ) {
-          totalAtRisk++;
-        }
-      }
-      
-      // Count won deals value
-      if (deal.stage === 'closed-won') {
-        wonValue += deal.value;
-      }
-    });
-    
-    return {
-      totalActiveDeals,
-      totalClosingThisMonth,
-      totalAtRisk,
-      totalValue,
-      avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
-      wonValue
-    };
-  };
-  
-  const metrics = calculateMetrics();
-
-  // Get active deals with their contacts
-  const getActiveDealsWithContacts = () => {
-    const activeDeals = Object.values(deals).filter(deal => 
-      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
-    );
-    
-    return activeDeals.map(deal => ({
-      ...deal,
-      contact: contacts[deal.contactId]
-    })).filter(deal => deal.contact); // Only include deals with valid contacts
-  };
-
-  // Get won deals with their contacts
-  const getWonDealsWithContacts = () => {
-    const wonDeals = Object.values(deals).filter(deal => 
-      deal.stage === 'closed-won'
-    );
-    
-    return wonDeals.map(deal => ({
-      ...deal,
-      contact: contacts[deal.contactId]
-    })).filter(deal => deal.contact); // Only include deals with valid contacts
-  };
-
-  const activeDealsWithContacts = getActiveDealsWithContacts();
-  const wonDealsWithContacts = getWonDealsWithContacts();
-
-  // Get overdue and today's tasks
-  const getImportantTasks = () => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const overdueTasks = Object.values(tasks).filter(task => 
-      !task.completed && task.dueDate && task.dueDate < now
-    );
-    
-    const todayTasks = Object.values(tasks).filter(task => 
-      !task.completed && task.dueDate && 
-      task.dueDate >= now && task.dueDate < tomorrow
-    );
-    
-    return [...overdueTasks, ...todayTasks].sort((a, b) => {
-      if (!a.dueDate || !b.dueDate) return 0;
-      return a.dueDate.getTime() - b.dueDate.getTime();
-    }).slice(0, 5);
-  };
-
-  const importantTasks = getImportantTasks();
-  
-  // Format currency values
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
-  
-  // Format date
-  const formatDate = (date?: Date) => {
-    if (!date) return 'No date';
-    
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-    
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  // Render avatar stack component
-  const renderAvatarStack = (deals: any[], maxAvatars: number = 3) => {
-    const displayDeals = deals.slice(0, maxAvatars);
-    const extraCount = Math.max(0, deals.length - maxAvatars);
-
-    return (
-      <div className="flex items-center space-x-1">
-        <div className="flex -space-x-2">
-          {displayDeals.map((deal, index) => (
-            <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
-              <Avatar
-                src={deal.contact.avatar}
-                alt={deal.contact.name}
-                size="sm"
-                fallback={getInitials(deal.contact.name)}
-                className="border-2 border-white dark:border-gray-900"
-              />
-            </div>
-          ))}
-          {extraCount > 0 && (
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
-              isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
-            }`}>
-              +{extraCount}
-            </div>
-          )}
-        </div>
-        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {deals.length}
-        </span>
-      </div>
-    );
-  };
-
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
+      case 'executive-overview-section':
+        return <ExecutiveOverviewSection />;
+
+      case 'ai-smart-features-hub':
+        return <AISmartFeaturesHub />;
+
+      case 'sales-pipeline-deal-analytics':
+        return <SalesPipelineDealAnalytics />;
+
+      case 'customer-lead-management':
+        return <CustomerLeadManagement />;
+
+      case 'activities-communications':
+        return <ActivitiesCommunications />;
+
+      case 'integrations-system':
+        return <IntegrationsSystem />;
+
+      // Legacy sections (kept for backward compatibility)
       case 'metrics-cards-section':
         return <MetricsCards />;
 
@@ -623,12 +472,6 @@ const Dashboard: React.FC = () => {
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 relative">
       {/* Dashboard Layout Controls */}
       <DashboardLayoutControls />
-
-      {/* Dashboard Header */}
-      <DashboardHeader />
-
-      {/* Render AI Insights Panel as a fixed component */}
-      <AIInsightsPanel />
 
       {/* Draggable Sections */}
       <div className="space-y-8">

@@ -31,24 +31,69 @@ export const useDashboardLayout = () => {
   return context;
 };
 
+// Updated defaultSectionOrder with new sections
 const defaultSectionOrder = [
-  'kpi-cards-section',
-  'quick-actions-section',
-  'ai-insights-section',
-  'metrics-cards-section',
-  'pipeline-section', 
-  'charts-section',
-  'contacts-section',
-  'interaction-history-section',
-  'tasks-section',
-  'customer-profile-section',
-  'recent-activity-section',
-  'tasks-and-funnel-section',
-  'apps-section',
-  'analytics-section'
+  'executive-overview-section',
+  'ai-smart-features-hub',
+  'sales-pipeline-deal-analytics',
+  'customer-lead-management', 
+  'activities-communications',
+  'integrations-system'
 ];
 
+// Updated sectionConfigs with new sections
 const sectionConfigs: Record<string, SectionConfig> = {
+  // New main sections
+  'executive-overview-section': {
+    id: 'executive-overview-section',
+    title: 'Executive Overview',
+    description: 'High-level dashboard with KPIs and quick actions',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-blue-500 to-green-500'
+  },
+  'ai-smart-features-hub': {
+    id: 'ai-smart-features-hub',
+    title: 'AI Smart Features Hub',
+    description: 'AI-powered insights and tools for enhanced productivity',
+    icon: 'Brain',
+    component: null,
+    color: 'from-purple-500 to-indigo-500'
+  },
+  'sales-pipeline-deal-analytics': {
+    id: 'sales-pipeline-deal-analytics',
+    title: 'Sales Pipeline & Analytics',
+    description: 'Comprehensive pipeline management and performance metrics',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-green-500 to-emerald-500'
+  },
+  'customer-lead-management': {
+    id: 'customer-lead-management',
+    title: 'Customer & Lead Management',
+    description: 'Contact profiles and lead nurturing tools',
+    icon: 'Users',
+    component: null,
+    color: 'from-blue-500 to-cyan-500'
+  },
+  'activities-communications': {
+    id: 'activities-communications',
+    title: 'Activities & Communications',
+    description: 'Task management and communication tracking',
+    icon: 'CheckSquare',
+    component: null,
+    color: 'from-orange-500 to-red-500'
+  },
+  'integrations-system': {
+    id: 'integrations-system',
+    title: 'Integrations & System',
+    description: 'Connected apps and system settings',
+    icon: 'Grid3X3',
+    component: null,
+    color: 'from-gray-500 to-gray-700'
+  },
+  
+  // Original sections (kept for backward compatibility)
   'kpi-cards-section': {
     id: 'kpi-cards-section',
     title: 'Key Performance Indicators',
