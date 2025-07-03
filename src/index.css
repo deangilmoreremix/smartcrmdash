@@ -13,9 +13,10 @@ html, body {
 
 /* Ensure the root div takes full height */
 #root {
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 /* Custom scrollbar for dark mode */

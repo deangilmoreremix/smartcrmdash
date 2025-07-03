@@ -80,10 +80,18 @@ const Navbar = () => {
   // Main navigation tabs (removed dashboard since users are already on it)
   const mainTabs = [
     {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: Home,
+      action: () => handleNavigation('executive-overview-section', 'dashboard'),
+      badge: null,
+      color: 'from-blue-500 to-green-500'
+    },
+    {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
-      action: () => handleNavigation('contacts', 'contacts'),
+      action: () => handleNavigation('customer-lead-management', 'contacts'),
       badge: counters.hotContacts,
       color: 'from-purple-500 to-indigo-500'
     },
@@ -91,25 +99,25 @@ const Navbar = () => {
       id: 'pipeline',
       label: 'Pipeline',
       icon: Briefcase,
-      action: () => handleNavigation('pipeline', 'pipeline'),
+      action: () => handleNavigation('sales-pipeline-deal-analytics', 'pipeline'),
       badge: counters.activeDeals,
       color: 'from-green-500 to-emerald-500'
     },
     {
-      id: 'ai-goals',
-      label: 'AI Goals',
-      icon: Target,
-      action: () => handleNavigation('ai-goals', 'ai-goals'),
-      badge: 5,
-      color: 'from-orange-500 to-red-500'
+      id: 'ai-tools',
+      label: 'AI Tools',
+      icon: Brain,
+      action: () => handleNavigation('ai-smart-features-hub', 'ai-tools'),
+      badge: null,
+      color: 'from-pink-500 to-rose-500'
     },
     {
       id: 'tasks',
       label: 'Tasks',
       icon: CheckSquare,
-      action: () => handleNavigation('tasks', 'tasks'),
+      action: () => handleNavigation('activities-communications', 'tasks'),
       badge: counters.pendingTasks,
-      color: 'from-indigo-500 to-purple-500'
+      color: 'from-orange-500 to-red-500'
     }
   ];
 
@@ -197,13 +205,6 @@ const Navbar = () => {
 
   // Dropdown menu configurations with color and badge counts
   const dropdownMenus = [
-    {
-      id: 'ai-tools',
-      label: 'AI Tools',
-      icon: Brain,
-      badge: aiTools.length,
-      color: 'from-pink-500 to-rose-500'
-    },
     {
       id: 'sales',
       label: 'Sales',
@@ -367,75 +368,6 @@ const Navbar = () => {
                       <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
                     )}
                   </button>
-
-                  {/* AI Tools Dropdown */}
-                  {menu.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                    <div className={`
-                      absolute top-14 right-0 w-[520px] max-h-96
-                      ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} 
-                      backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} 
-                      rounded-2xl shadow-2xl z-50 overflow-hidden
-                      animate-fade-in transform transition-all duration-300
-                    `}>
-                      <div className="p-4">
-                        <div className="flex items-center space-x-2 mb-4">
-                          <Brain size={18} className="text-purple-500" />
-                          <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            AI Tools
-                          </h3>
-                          <div className="ml-auto">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'
-                            }`}>
-                              {aiTools.length} tools
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {/* Organized by Category */}
-                        <div className="space-y-4 max-h-80 overflow-y-auto">
-                          {['Core AI Tools', 'Communication', 'Customer & Content', 'Advanced Features', 'Real-time Features', 'Reasoning Generators'].map((category) => {
-                            const tools = aiTools.filter(tool => tool.category === category);
-                            return (
-                              <div key={category}>
-                                <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
-                                  isDark ? 'text-gray-400' : 'text-gray-500'
-                                } flex items-center`}>
-                                  {category}
-                                  <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                                    isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
-                                  }`}>
-                                    {tools.length}
-                                  </span>
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                  {tools.map((tool, index) => (
-                                    <button
-                                      key={index}
-                                      onClick={() => handleAIToolClick(tool.tool)}
-                                      className={`
-                                        text-left p-3 rounded-xl transition-all duration-200 
-                                        ${isDark 
-                                          ? 'hover:bg-white/5 text-gray-300 hover:text-white' 
-                                          : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                                        }
-                                        group border border-transparent hover:border-purple-500/20
-                                      `}
-                                    >
-                                      <div className="flex items-center space-x-2 mb-1">
-                                        <tool.icon size={16} className="text-purple-500 group-hover:scale-110 transition-transform" />
-                                        <span className="text-sm font-medium">{tool.name}</span>
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Sales Dropdown */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (

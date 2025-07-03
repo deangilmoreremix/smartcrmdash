@@ -23,10 +23,12 @@ function App() {
           <NavigationProvider>
             <DashboardLayoutProvider>
               <EnhancedHelpProvider>
-                <div className="min-h-screen transition-all duration-300 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-gradient-to-br from-gray-50 via-white to-gray-100">
+                <div className="min-h-screen w-full flex flex-col transition-all duration-300 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-gradient-to-br from-gray-50 via-white to-gray-100">
                   <DevicePermissionChecker />
                   <Navbar />
-                  <Dashboard />
+                  <div className="flex-1 w-full overflow-x-hidden">
+                    <Dashboard />
+                  </div>
                   <VideoCallOverlay />
                   <VideoCallPreviewWidget />
                   
