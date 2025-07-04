@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { X, Search, User, UserPlus, Filter, MoreHorizontal, Check, Trash } from 'lucide-react';
+import { X, Search, User, UserPlus, Filter, MoreHorizontal, Check, Trash, Mail } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { useContactStore } from '../../store/contactStore';
 import { getInitials } from '../../utils/avatars';
@@ -12,7 +12,7 @@ interface ContactsModalProps {
   selectionMode?: boolean;
 }
 
-const ContactsModal: React.FC<ContactsModalProps> = ({ 
+export const ContactsModal: React.FC<ContactsModalProps> = ({ 
   isOpen, 
   onClose, 
   onSelectContact,
@@ -297,5 +297,3 @@ const ContactsModal: React.FC<ContactsModalProps> = ({
 };
 
 export default ContactsModal;
-
-export { ContactsModal }
