@@ -14,7 +14,7 @@ interface DealInsight {
   description: string;
   color: string;
   bgColor: string;
-  relatedContacts?: Array<{ id: string; name: string; avatar?: string; }>;
+  relatedContacts?: Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>;
 }
 
 const LiveDealAnalysis: React.FC = () => {
@@ -62,27 +62,30 @@ const LiveDealAnalysis: React.FC = () => {
         return contact ? {
           id: contact.id,
           name: contact.name,
-          avatar: contact.avatar
+          avatar: contact.avatar,
+          avatarSrc: contact.avatarSrc
         } : null;
-      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>;
       
       const stalledContacts = stalledDeals.map(deal => {
         const contact = contacts[deal.contactId];
         return contact ? {
           id: contact.id,
           name: contact.name,
-          avatar: contact.avatar
+          avatar: contact.avatar,
+          avatarSrc: contact.avatarSrc
         } : null;
-      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>;
       
       const hotContacts = hotDeals.map(deal => {
         const contact = contacts[deal.contactId];
         return contact ? {
           id: contact.id,
           name: contact.name,
-          avatar: contact.avatar
+          avatar: contact.avatar,
+          avatarSrc: contact.avatarSrc
         } : null;
-      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; }>;
+      }).filter(Boolean) as Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>;
       
       // Set initial insights
       const initialInsights: DealInsight[] = [
@@ -151,7 +154,7 @@ const LiveDealAnalysis: React.FC = () => {
           const analysisResult = await geminiService.generatePersonalizedMessage(dealData, 'email');
           
           if (analysisResult) {
-            // For now, keep the basic insights since we don't have the analyzeDeal method
+            // For now, keep the basic insights since the service doesn't have analyzeDeal method
             console.log('Generated deal analysis insight:', analysisResult);
           }
         } catch (aiError) {
@@ -169,7 +172,7 @@ const LiveDealAnalysis: React.FC = () => {
   };
 
   // Render avatar stack
-  const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
+  const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>, maxVisible: number = 3) => {
     const visibleContacts = contacts.slice(0, maxVisible);
     const remainingCount = Math.max(0, contacts.length - maxVisible);
     
@@ -179,7 +182,7 @@ const LiveDealAnalysis: React.FC = () => {
           {visibleContacts.map((contact, index) => (
             <div key={contact.id} className="relative" style={{ zIndex: maxVisible - index }}>
               <Avatar
-                src={contact.avatar}
+                src={contact.avatarSrc || contact.avatar}
                 alt={contact.name}
                 size="sm"
                 fallback={getInitials(contact.name)}

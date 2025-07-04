@@ -3,14 +3,10 @@ import { Video, Phone, MessageSquare } from 'lucide-react';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import { useTheme } from '../contexts/ThemeContext';
 import type { CallParticipant } from '../contexts/VideoCallContext';
+import { Contact } from '../types/contact';
 
 interface CallButtonProps {
-  contact: {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-  };
+  contact: Contact;
   variant?: 'icon' | 'full';
   size?: 'sm' | 'md' | 'lg';
 }
@@ -33,7 +29,7 @@ const CallButton: React.FC<CallButtonProps> = ({
         id: contact.id,
         name: contact.name,
         email: contact.email,
-        avatar: contact.avatar
+        avatar: contact.avatarSrc || contact.avatar
       };
       
       await initiateCall(participant, 'video');
@@ -54,7 +50,7 @@ const CallButton: React.FC<CallButtonProps> = ({
         id: contact.id,
         name: contact.name,
         email: contact.email,
-        avatar: contact.avatar
+        avatar: contact.avatarSrc || contact.avatar
       };
       
       await initiateCall(participant, 'audio');

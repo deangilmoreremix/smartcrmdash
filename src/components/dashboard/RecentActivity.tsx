@@ -94,7 +94,7 @@ const RecentActivity: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   {contact && (
                     <Avatar
-                      src={contact.avatar}
+                      src={contact.avatarSrc || contact.avatar}
                       alt={contact.name}
                       size="sm"
                       fallback={getInitials(contact.name)}

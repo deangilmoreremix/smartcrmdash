@@ -3,11 +3,12 @@
  * Provides easy access to enhanced AI capabilities with automatic model selection
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { enhancedGeminiService } from '../services/enhancedGeminiService';
 import { supabaseAIService } from '../services/supabaseAIService';
 import { aiOrchestratorService } from '../services/aiOrchestratorService';
 import { openAIService } from '../services/openAIService';
+import { Contact } from '../types/contact';
 
 // Define types for task optimization
 export type TaskType = 'contact_scoring' | 'categorization' | 'contact_enrichment' | 'lead_qualification';
@@ -40,16 +41,6 @@ export interface SmartAIState {
   errors: Record<string, string>;
   recommendations: Record<string, any>;
   performance: any;
-}
-
-export interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  company?: string;
-  position?: string;
-  status: string;
-  [key: string]: any;
 }
 
 interface EnhancedAIAnalysisRequest {
@@ -667,7 +658,7 @@ export const useTaskOptimization = () => {
   }, []);
   
   // Initialize performance metrics
-  React.useEffect(() => {
+  useEffect(() => {
     setPerformance(helper.getPerformance());
   }, []);
   

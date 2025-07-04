@@ -6,9 +6,19 @@ import { useContactStore } from '../../store/contactStore';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
+interface KPIMetric {
+  title: string;
+  value: string;
+  change: number;
+  changeType: 'increase' | 'decrease';
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  relatedContacts?: Array<{ id: string; name: string; avatar?: string; avatarSrc?: string }>;
+}
+
 const KPICards: React.FC = () => {
   const { isDark } = useTheme();
-  const { deals, totalPipelineValue } = useDealStore();
+  const { deals } = useDealStore();
   const { contacts } = useContactStore();
 
   // Get active deals with their contacts
@@ -87,7 +97,7 @@ const KPICards: React.FC = () => {
           {displayDeals.map((deal, index) => (
             <div key={deal.id} className="relative" style={{ zIndex: maxAvatars - index }}>
               <Avatar
-                src={deal.contact.avatar}
+                src={deal.contact.avatarSrc || deal.contact.avatar}
                 alt={deal.contact.name}
                 size="sm"
                 fallback={getInitials(deal.contact.name)}
@@ -126,14 +136,14 @@ const KPICards: React.FC = () => {
     },
     {
       title: 'Pipeline Value',
-      value: formatCurrency(totalPipelineValue),
+      value: formatCurrency(metrics.totalValue),
       change: '+8%',
       trend: 'up',
       icon: DollarSign,
       color: 'from-green-500 to-emerald-500',
       renderContent: () => 
         <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-          {formatCurrency(totalPipelineValue)}
+          {formatCurrency(metrics.totalValue)}
         </h3>
     },
     {

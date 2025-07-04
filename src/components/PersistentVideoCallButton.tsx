@@ -27,7 +27,7 @@ const PersistentVideoCallButton: React.FC = () => {
         id: contact.id,
         name: contact.name,
         email: contact.email,
-        avatar: contact.avatar
+        avatar: contact.avatarSrc || contact.avatar
       }, type);
       setIsExpanded(false);
       setSelectedContact(null);
@@ -68,18 +68,17 @@ const PersistentVideoCallButton: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Avatar
-                      src={contact.avatar}
+                      src={contact.avatarSrc || contact.avatar}
                       alt={contact.name}
                       size="md"
                       fallback={getInitials(contact.name)}
-                      status="online"
                     />
                     <div>
                       <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {contact.name}
                       </h4>
                       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {contact.position} at {contact.company}
+                        {contact.title || contact.position} at {contact.company}
                       </p>
                     </div>
                   </div>

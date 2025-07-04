@@ -4,30 +4,22 @@ import Avatar from './ui/Avatar';
 import CallButton from './CallButton';
 import { getInitials } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
+import { Contact } from '../types/contact';
 
 interface ContactCardProps {
-  contact: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    company?: string;
-    position?: string;
-    avatar?: string;
-    status: 'hot' | 'warm' | 'cold';
-    source: string;
-    tags: string[];
-  };
+  contact: Contact;
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
   const { isDark } = useTheme();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (interestLevel: string) => {
+    switch (interestLevel) {
       case 'hot': return isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-800';
-      case 'warm': return isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-800';
-      case 'cold': return isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-800';
+      case 'warm': 
+      case 'medium': return isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-800';
+      case 'cold': 
+      case 'low': return isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-800';
       default: return isDark ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-100 text-gray-800';
     }
   };
@@ -36,7 +28,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
     <div className={`${isDark ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl p-6 hover:${isDark ? 'bg-gray-800/70' : 'bg-gray-50'} transition-all duration-300 group`}>
       <div className="flex items-start justify-between mb-4">
         <Avatar 
-          src={contact.avatar}
+          src={contact.avatarSrc || contact.avatar}
           alt={contact.name}
           size="lg"
           fallback={getInitials(contact.name)}
@@ -52,7 +44,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
           <h3 className={`font-medium ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
             {contact.name}
           </h3>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{contact.position}</p>
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{contact.title || contact.position}</p>
           {contact.company && (
             <div className={`flex items-center mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
               <Building size={12} className="mr-1" />
@@ -63,12 +55,12 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
         
         <div className={`flex items-center space-x-2 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
           <span>Source:</span>
-          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{contact.source}</span>
+          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{contact.source || (contact.sources && contact.sources[0]) || 'Unknown'}</span>
         </div>
         
         <div className="flex flex-wrap gap-1">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(contact.status)}`}>
-            {contact.status}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(contact.interestLevel || contact.status)}`}>
+            {contact.interestLevel || contact.status}
           </span>
           {contact.tags.slice(0, 2).map((tag, i) => (
             <span

@@ -60,9 +60,9 @@ const SmartSearchRealtime: React.FC = () => {
             type: 'contact' as const,
             id: contact.id,
             title: contact.name,
-            subtitle: contact.position ? `${contact.position}${contact.company ? ` at ${contact.company}` : ''}` : '',
+            subtitle: contact.title || contact.position ? `${contact.title || contact.position}${contact.company ? ` at ${contact.company}` : ''}` : '',
             icon: User,
-            value: contact.status === 'hot' ? 'High Value' : 'Contact'
+            value: (contact.interestLevel === 'hot' || contact.status === 'hot') ? 'High Value' : 'Contact'
           })),
           ...filteredDeals.map(deal => ({
             type: 'deal' as const,
@@ -73,7 +73,9 @@ const SmartSearchRealtime: React.FC = () => {
             value: `$${deal.value.toLocaleString()}`
           })),
           ...uniqueCompanies.map((company, index) => {
+            // Filter contacts for this company
             const companyContacts = Object.values(contacts).filter(c => c.company === company);
+            // Filter deals with contacts from this company
             const companyDeals = Object.values(deals).filter(d => {
               const contact = contacts[d.contactId];
               return contact && contact.company === company;
@@ -106,7 +108,7 @@ const SmartSearchRealtime: React.FC = () => {
                 name: c.name,
                 company: c.company,
                 email: c.email,
-                status: c.status,
+                status: c.interestLevel || c.status,
                 tags: c.tags
               })),
               deals: filteredDeals.map(d => ({
@@ -165,7 +167,7 @@ const SmartSearchRealtime: React.FC = () => {
     <div className="p-4 h-full">
       <div className="relative mb-4">
         <Search size={16} className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
-          isDark ? 'text-gray-400' : 'text-gray-400'
+          isDark ? 'text-gray-500' : 'text-gray-400'
         }`} />
         <input
           type="text"
@@ -174,7 +176,7 @@ const SmartSearchRealtime: React.FC = () => {
           placeholder="Search contacts, deals, companies..."
           className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
             isDark 
-              ? 'bg-gray-800/60 border-gray-700 text-white placeholder:text-gray-500'
+              ? 'bg-gray-800/60 border-gray-700 text-white placeholder:text-gray-500' 
               : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'
           }`}
         />

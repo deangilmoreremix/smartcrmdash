@@ -85,6 +85,11 @@ const TaskAssignees: React.FC<{
     <div className="flex -space-x-2">
       {visibleAssignees.map((assigneeId) => {
         const contact = contacts[assigneeId];
+        // Map interestLevel to Avatar status
+        let status: 'online' | 'away' | 'offline' = 'offline';
+        if (contact.interestLevel === 'hot') status = 'online';
+        else if (contact.interestLevel === 'warm' || contact.interestLevel === 'medium') status = 'away';
+        
         return (
           <div 
             key={assigneeId} 
@@ -93,10 +98,10 @@ const TaskAssignees: React.FC<{
             title={contact.name}
           >
             <Avatar
-              src={contact.avatar}
+              src={contact.avatarSrc || contact.avatar}
               alt={contact.name}
               size={size}
-              status={contact.status === 'hot' ? 'online' : contact.status === 'warm' ? 'away' : 'offline'}
+              status={status}
             />
           </div>
         );
@@ -334,14 +339,19 @@ const TasksAndFunnel: React.FC = () => {
                 const contact = contacts[assigneeId];
                 const taskCount = taskData.filter(t => t.assigneeIds.includes(assigneeId)).length;
                 
+                // Map interestLevel to status
+                let status: 'online' | 'away' | 'offline' = 'offline';
+                if (contact.interestLevel === 'hot') status = 'online';
+                else if (contact.interestLevel === 'warm' || contact.interestLevel === 'medium') status = 'away';
+                
                 return (
                   <div key={assigneeId} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Avatar
-                        src={contact.avatar}
+                        src={contact.avatarSrc || contact.avatar}
                         alt={contact.name}
                         size="sm"
-                        status={contact.status === 'hot' ? 'online' : contact.status === 'warm' ? 'away' : 'offline'}
+                        status={status}
                       />
                       <span className={`text-sm font-medium ${isDark ? 'text-blue-100' : 'text-blue-800'}`}>{contact.name}</span>
                     </div>
