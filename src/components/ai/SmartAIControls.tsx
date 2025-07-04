@@ -1,301 +1,428 @@
-import React, { useState, useEffect } from 'react';
-import { Brain, Zap, Settings, Check, X, Info, RefreshCw, Sparkles } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
-import AIModelSelector from '../AIModelSelector';
-import { AI_MODEL_RECOMMENDATIONS } from '../../services/aiModels';
+import React, { useState } from 'react';
+import { useSmartAI, useTaskOptimization } from '../../hooks/useSmartAI';
+import { ModernButton } from '../ui/ModernButton';
+import { GlassCard } from '../ui/GlassCard';
+import { Contact } from '../../types/contact';
+import {
+  Brain,
+  Zap,
+  Target,
+  BarChart3,
+  Settings,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Layers,
+  RefreshCw
+} from 'lucide-react';
 
-export const SmartAIControls: React.FC = () => {
-  const { isDark } = useTheme();
-  const [selectedModelIds, setSelectedModelIds] = useState<Record<string, string>>({
-    email_generation: 'gemini-2.5-flash',
-    business_analysis: 'gemma-2-9b-it',
-    content_creation: 'gemini-2.5-flash',
-    quick_responses: 'gemma-2-2b-it'
+interface SmartAIControlsProps {
+  contact?: Contact;
+  contacts?: Contact[];
+  onAnalysisComplete?: (results: any) => void;
+}
+
+export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
+  contact,
+  contacts = [],
+  onAnalysisComplete
+}) => {
+  const {
+    smartScoreContact,
+    smartEnrichContact,
+    smartCategorizeAndTag,
+    smartQualifyLead,
+    smartBulkAnalysis,
+    analyzing,
+    enriching,
+    results,
+    errors
+  } = useSmartAI();
+
+  const { getRecommendations, getInsights, performance } = useTaskOptimization();
+
+  const [selectedOperation, setSelectedOperation] = useState<string>('score');
+  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium');
+  const [bulkSettings, setBulkSettings] = useState({
+    costLimit: 1.0,
+    timeLimit: 30000,
+    analysisType: 'contact_scoring' as const
   });
-  const [usageProfiles, setUsageProfiles] = useState({
-    performance: {
-      enabled: true,
-      threshold: 0.8
-    },
-    cost: {
-      enabled: true,
-      threshold: 0.6
-    },
-    routing: {
-      enabled: true,
-      auto: true
+
+  const handleSingleAnalysis = async () => {
+    if (!contact) return;
+
+    try {
+      let result;
+      
+      switch (selectedOperation) {
+        case 'score':
+          result = await smartScoreContact(contact.id, contact, urgency);
+          break;
+        case 'enrich':
+          result = await smartEnrichContact(contact.id, contact, urgency === 'high' ? 'premium' : 'standard');
+          break;
+        case 'categorize':
+          result = await smartCategorizeAndTag(contact.id, contact);
+          break;
+        case 'qualify':
+          result = await smartQualifyLead(contact.id, contact);
+          break;
+      }
+      
+      if (onAnalysisComplete && result) {
+        onAnalysisComplete(result);
+      }
+    } catch (error) {
+      console.error('Analysis failed:', error);
     }
-  });
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleModelChange = (useCase: string, modelId: string) => {
-    setSelectedModelIds(prev => ({
-      ...prev,
-      [useCase]: modelId
-    }));
   };
 
-  const toggleProfileSetting = (profile: string, setting: string) => {
-    setUsageProfiles(prev => ({
-      ...prev,
-      [profile]: {
-        ...prev[profile as keyof typeof prev],
-        [setting]: !prev[profile as keyof typeof prev][setting as keyof typeof prev[typeof profile]]
+  const handleBulkAnalysis = async () => {
+    if (contacts.length === 0) return;
+
+    try {
+      const contactData = contacts.map(c => ({ contactId: c.id, contact: c }));
+      
+      const result = await smartBulkAnalysis(contactData, bulkSettings.analysisType, {
+        urgency,
+        costLimit: bulkSettings.costLimit,
+        timeLimit: bulkSettings.timeLimit
+      });
+      
+      if (onAnalysisComplete) {
+        onAnalysisComplete(result);
       }
-    }));
+    } catch (error) {
+      console.error('Bulk analysis failed:', error);
+    }
   };
 
-  const updateThreshold = (profile: string, value: number) => {
-    setUsageProfiles(prev => ({
-      ...prev,
-      [profile]: {
-        ...prev[profile as keyof typeof prev],
-        threshold: value
-      }
-    }));
+  const getRecommendationsForTask = (taskType: string) => {
+    const recommendations = getRecommendations(taskType);
+    return recommendations;
   };
 
-  const saveSettings = () => {
-    setIsSaving(true);
-    // Simulate API call to save settings
-    setTimeout(() => {
-      setIsSaving(false);
-      // Show success notification
-    }, 1500);
-  };
+  const operations = [
+    {
+      id: 'score',
+      name: 'Smart Scoring',
+      description: 'AI-powered contact scoring with optimal model selection',
+      icon: Target,
+      color: 'bg-blue-500',
+      estimatedTime: '2-5s',
+      bestModel: 'Auto-selected'
+    },
+    {
+      id: 'enrich',
+      name: 'Smart Enrichment',
+      description: 'Comprehensive data enrichment using best available models',
+      icon: Sparkles,
+      color: 'bg-purple-500',
+      estimatedTime: '3-8s',
+      bestModel: 'Auto-selected'
+    },
+    {
+      id: 'categorize',
+      name: 'Quick Categorize',
+      description: 'Fast categorization and tagging with optimized models',
+      icon: Layers,
+      color: 'bg-green-500',
+      estimatedTime: '1-3s',
+      bestModel: 'Gemma preferred'
+    },
+    {
+      id: 'qualify',
+      name: 'Lead Qualification',
+      description: 'Comprehensive lead qualification with business context',
+      icon: CheckCircle,
+      color: 'bg-orange-500',
+      estimatedTime: '4-10s',
+      bestModel: 'High accuracy'
+    }
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Smart Routing Controls */}
-      <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
-        <div className="flex items-start space-x-3">
-          <Zap className={`w-5 h-5 mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-          <div>
-            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>Smart Routing</h3>
-            <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-              Automatically route requests to the optimal model based on task complexity, performance requirements, and cost considerations.
-            </p>
-            
-            <div className="flex items-center space-x-4 mt-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={usageProfiles.routing.enabled}
-                  onChange={() => toggleProfileSetting('routing', 'enabled')}
-                  className="form-checkbox rounded text-blue-600 border-gray-300 focus:ring-blue-500"
-                />
-                <span className={`ml-2 text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>Enable Smart Routing</span>
-              </label>
-              
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={usageProfiles.routing.auto}
-                  onChange={() => toggleProfileSetting('routing', 'auto')}
-                  disabled={!usageProfiles.routing.enabled}
-                  className="form-checkbox rounded text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
-                />
-                <span className={`ml-2 text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'} ${!usageProfiles.routing.enabled ? 'opacity-50' : ''}`}>
-                  Auto-optimize based on usage patterns
-                </span>
-              </label>
+      {/* AI Model Performance Overview */}
+      {performance && (
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <BarChart3 className="w-5 h-5 mr-2 text-blue-500" />
+            AI Performance Overview
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{performance.totalTasks}</div>
+              <div className="text-sm text-gray-600">Total Tasks</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {Math.round(performance.overallSuccessRate * 100)}%
+              </div>
+              <div className="text-sm text-gray-600">Success Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {Math.round(performance.avgResponseTime)}ms
+              </div>
+              <div className="text-sm text-gray-600">Avg Response</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {performance.modelPerformance.length}
+              </div>
+              <div className="text-sm text-gray-600">Active Models</div>
             </div>
           </div>
-        </div>
-      </div>
+        </GlassCard>
+      )}
 
-      {/* Model Selection for Different Use Cases */}
-      <div className="space-y-4">
-        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Default Model Selection</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>Email Generation</h4>
-            <AIModelSelector
-              selectedModel={selectedModelIds.email_generation}
-              onModelChange={(modelId) => handleModelChange('email_generation', modelId)}
-              useCase="EMAIL_GENERATION"
-            />
-          </div>
+      {/* Single Contact Analysis */}
+      {contact && (
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Brain className="w-5 h-5 mr-2 text-purple-600" />
+            Smart AI Analysis - {contact.name}
+          </h3>
           
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>Business Analysis</h4>
-            <AIModelSelector
-              selectedModel={selectedModelIds.business_analysis}
-              onModelChange={(modelId) => handleModelChange('business_analysis', modelId)}
-              useCase="BUSINESS_ANALYSIS"
-            />
-          </div>
-          
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>Content Creation</h4>
-            <AIModelSelector
-              selectedModel={selectedModelIds.content_creation}
-              onModelChange={(modelId) => handleModelChange('content_creation', modelId)}
-              useCase="CONTENT_CREATION"
-            />
-          </div>
-          
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>Quick Responses</h4>
-            <AIModelSelector
-              selectedModel={selectedModelIds.quick_responses}
-              onModelChange={(modelId) => handleModelChange('quick_responses', modelId)}
-              useCase="QUICK_RESPONSES"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Optimization Profiles */}
-      <div className="space-y-4">
-        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Optimization Profiles</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Performance Profile */}
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-start space-x-3">
-                <Zap className={`w-5 h-5 mt-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
-                <div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Performance Focus</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Prioritize response quality and speed
-                  </p>
+          {/* Operation Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {operations.map((op) => {
+              const Icon = op.icon;
+              const recommendations = getRecommendationsForTask(op.id.replace('score', 'contact_scoring'));
+              
+              return (
+                <div
+                  key={op.id}
+                  onClick={() => setSelectedOperation(op.id)}
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedOperation === op.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 mb-2">
+                    <div className={`p-2 rounded-lg ${op.color}`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{op.name}</h4>
+                      <p className="text-sm text-gray-600">{op.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{op.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Target className="w-3 h-3" />
+                      <span>{op.bestModel}</span>
+                    </div>
+                  </div>
+                  
+                  {recommendations && (
+                    <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+                      <strong>Recommended:</strong> {recommendations.recommendedProvider}/{recommendations.recommendedModel}
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={usageProfiles.performance.enabled}
-                  onChange={() => toggleProfileSetting('performance', 'enabled')}
-                  className="sr-only peer"
-                />
-                <div className={`w-11 h-6 ${
-                  isDark 
-                    ? 'bg-gray-700 peer-checked:bg-purple-600' 
-                    : 'bg-gray-200 peer-checked:bg-purple-600'
-                } rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
-              </label>
-            </div>
-            
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Quality threshold</span>
-                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {usageProfiles.performance.threshold * 100}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={usageProfiles.performance.threshold}
-                onChange={(e) => updateThreshold('performance', parseFloat(e.target.value))}
-                disabled={!usageProfiles.performance.enabled}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
-              />
-            </div>
+              );
+            })}
           </div>
-          
-          {/* Cost Profile */}
-          <div className={`p-4 rounded-lg ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-start space-x-3">
-                <DollarSign className={`w-5 h-5 mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`} />
-                <div>
-                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Cost Efficiency</h4>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Optimize for lower token consumption
-                  </p>
-                </div>
-              </div>
-              
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={usageProfiles.cost.enabled}
-                  onChange={() => toggleProfileSetting('cost', 'enabled')}
-                  className="sr-only peer"
-                />
-                <div className={`w-11 h-6 ${
-                  isDark 
-                    ? 'bg-gray-700 peer-checked:bg-green-600' 
-                    : 'bg-gray-200 peer-checked:bg-green-600'
-                } rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
-              </label>
-            </div>
-            
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Efficiency threshold</span>
-                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {usageProfiles.cost.threshold * 100}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={usageProfiles.cost.threshold}
-                onChange={(e) => updateThreshold('cost', parseFloat(e.target.value))}
-                disabled={!usageProfiles.cost.enabled}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Tips */}
-      <div className={`p-4 rounded-lg ${
-        isDark ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'
-      }`}>
-        <div className="flex items-start space-x-3">
-          <Info className={`w-5 h-5 mt-0.5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
-          <div>
-            <h4 className={`font-medium ${isDark ? 'text-yellow-300' : 'text-yellow-800'}`}>
-              Optimization Tips
-            </h4>
-            <ul className={`text-sm space-y-1 mt-1 ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>
-              <li>• Enable Smart Routing to automatically select the best model for each task</li>
-              <li>• Gemma models are ideal for cost-sensitive, high-volume operations</li>
-              <li>• Gemini Flash models balance performance and cost effectively</li>
-              <li>• Fine-tune thresholds to match your specific quality and budget needs</li>
-            </ul>
+          {/* Urgency Setting */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Analysis Urgency (affects model selection)
+            </label>
+            <div className="flex space-x-2">
+              {[
+                { value: 'low', label: 'Low', desc: 'Cost-optimized' },
+                { value: 'medium', label: 'Medium', desc: 'Balanced' },
+                { value: 'high', label: 'High', desc: 'Accuracy-focused' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setUrgency(option.value as any)}
+                  className={`flex-1 p-3 rounded-lg border text-center transition-colors ${
+                    urgency === option.value
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="font-medium">{option.label}</div>
+                  <div className="text-xs text-gray-500">{option.desc}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={saveSettings}
-          disabled={isSaving}
-          className={`px-6 py-2 rounded-lg flex items-center space-x-2 ${
-            isDark 
-              ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white' 
-              : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
-          } transition-all duration-200 disabled:opacity-50`}
-        >
-          {isSaving ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Saving...</span>
-            </>
-          ) : (
-            <>
-              <Check className="w-4 h-4" />
-              <span>Save Settings</span>
-            </>
+          {/* Execute Button */}
+          <ModernButton
+            onClick={handleSingleAnalysis}
+            loading={analyzing || enriching}
+            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600"
+          >
+            <Zap className="w-4 h-4" />
+            <span>
+              {analyzing || enriching 
+                ? 'Analyzing with optimal model...' 
+                : `Run ${operations.find(op => op.id === selectedOperation)?.name}`}
+            </span>
+          </ModernButton>
+
+          {/* Results Display */}
+          {Object.keys(results).length > 0 && (
+            <div className="mt-6 p-4 bg-green-50 rounded-lg">
+              <h4 className="font-semibold text-green-900 mb-2 flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Analysis Complete
+              </h4>
+              <div className="space-y-2">
+                {Object.entries(results).map(([key, result]: [string, any]) => (
+                  <div key={key} className="text-sm">
+                    <span className="font-medium text-green-800">{key}:</span>
+                    <span className="text-green-700 ml-2">
+                      {result.modelUsed && `Used ${result.modelUsed}`}
+                      {result.results && Object.keys(result.results).length > 0 && ` - ${Object.keys(result.results).length} tasks completed`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
-        </button>
-      </div>
+
+          {/* Errors Display */}
+          {Object.keys(errors).length > 0 && (
+            <div className="mt-6 p-4 bg-red-50 rounded-lg">
+              <h4 className="font-semibold text-red-900 mb-2 flex items-center">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Analysis Errors
+              </h4>
+              <div className="space-y-1">
+                {Object.entries(errors).map(([key, error]) => (
+                  <div key={key} className="text-sm text-red-700">
+                    <span className="font-medium">{key}:</span> {error}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </GlassCard>
+      )}
+
+      {/* Bulk Analysis */}
+      {contacts.length > 1 && (
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Layers className="w-5 h-5 mr-2 text-green-600" />
+            Smart Bulk Analysis ({contacts.length} contacts)
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Analysis Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bulk Analysis Type
+              </label>
+              <select
+                value={bulkSettings.analysisType}
+                onChange={(e) => setBulkSettings(prev => ({ ...prev, analysisType: e.target.value as any }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="contact_scoring">Contact Scoring</option>
+                <option value="categorization">Categorization</option>
+                <option value="tagging">Tagging</option>
+                <option value="lead_qualification">Lead Qualification</option>
+              </select>
+            </div>
+
+            {/* Constraints */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cost Limit ($)
+              </label>
+              <input
+                type="number"
+                step="0.10"
+                value={bulkSettings.costLimit}
+                onChange={(e) => setBulkSettings(prev => ({ ...prev, costLimit: parseFloat(e.target.value) }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="1.00"
+              />
+            </div>
+          </div>
+
+          {/* Estimated Metrics */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-3 bg-blue-50 rounded-lg text-center">
+              <DollarSign className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+              <div className="text-sm font-medium text-blue-900">Est. Cost</div>
+              <div className="text-xs text-blue-700">${(contacts.length * 0.05).toFixed(2)}</div>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg text-center">
+              <Clock className="w-4 h-4 text-green-600 mx-auto mb-1" />
+              <div className="text-sm font-medium text-green-900">Est. Time</div>
+              <div className="text-xs text-green-700">{Math.ceil(contacts.length / 10)}s</div>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg text-center">
+              <Brain className="w-4 h-4 text-purple-600 mx-auto mb-1" />
+              <div className="text-sm font-medium text-purple-900">Auto Model</div>
+              <div className="text-xs text-purple-700">Optimized</div>
+            </div>
+          </div>
+
+          <ModernButton
+            onClick={handleBulkAnalysis}
+            loading={analyzing}
+            className="w-full mt-6 flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600"
+          >
+            <Layers className="w-4 h-4" />
+            <span>
+              {analyzing 
+                ? `Processing ${contacts.length} contacts...` 
+                : `Analyze ${contacts.length} Contacts`}
+            </span>
+          </ModernButton>
+        </GlassCard>
+      )}
+
+      {/* Model Performance Stats */}
+      {performance?.modelPerformance && performance.modelPerformance.length > 0 && (
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+            Model Performance Stats
+          </h3>
+          
+          <div className="space-y-3">
+            {performance.modelPerformance.slice(0, 5).map((model: any, index: number) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <div className="font-medium text-gray-900">{model.model}</div>
+                  <div className="text-sm text-gray-600">
+                    {Math.round(model.successRate * 100)}% success • {Math.round(model.avgTime)}ms avg
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">
+                    ${model.avgCost.toFixed(4)}
+                  </div>
+                  <div className="text-xs text-gray-500">avg cost</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
     </div>
   );
 };
-
-import { DollarSign } from 'lucide-react';
