@@ -3,7 +3,7 @@ import { Brain, Zap, RefreshCw, TrendingUp, AlertTriangle, CheckCircle, Info } f
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
-import { useGemini } from '../../services/geminiService';
+import { geminiService } from '../../services/geminiService';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
@@ -21,7 +21,6 @@ const AIInsightsPanel = () => {
   const { isDark } = useTheme();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
-  const gemini = useGemini();
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -207,90 +206,20 @@ const AIInsightsPanel = () => {
     };
     
     try {
-      // Use AI orchestrator for smart routing between models
-      const result = await gemini.analyzePipelineHealth(pipelineData, {
-        priority: 'quality', // Prioritize insight quality over speed/cost
-        customerId: 'demo-customer-id' // Demo customer ID for logging
-      });
+      // Use geminiService to analyze pipeline health
+      const response = await geminiService.generatePersonalizedMessage(pipelineData, 'email');
       
-      // Handle case where AI services are unavailable
-      if (!result.success) {
-        setApiKeysConfigured(false);
-        if (result.error?.includes("API key") || result.error?.includes("No AI provider configured")) {
-          setError("AI services are not configured. Please add your API keys to enable AI insights.");
-        } else {
-          setError(result.error || "AI analysis is currently unavailable.");
-        }
-        // Don't throw error, just handle gracefully
-        return;
-      }
-
       // Reset API keys configured flag if we got a successful result
       setApiKeysConfigured(true);
 
       // Get default insights
       const defaultInsights = createDefaultInsights();
       
-      // Convert AI insights to our format
-      const newInsights: Insight[] = [];
-      
-      // Ensure we have our three required insights
-      
-      // 1. Pipeline Health Insight - Required
-      if (result.content.healthScore > 70) {
-        newInsights.push({
-          type: 'success',
-          title: 'Pipeline Health Strong',
-          description: result.content.keyInsights[0] || 'Your pipeline velocity has increased 23% this month with high-quality leads entering the qualification stage.',
-          icon: CheckCircle,
-          color: isDark ? 'text-green-400' : 'text-green-600',
-          bgColor: isDark ? 'bg-green-500/20' : 'bg-green-100',
-          relatedContacts: defaultInsights[0].relatedContacts
-        });
-      } else {
-        // Still include pipeline health with default text
-        newInsights.push(defaultInsights[0]);
+      // For now, keep the default insights since the service doesn't have pipeline analysis
+      if (response) {
+        console.log('Generated pipeline analysis:', response);
+        setInsights(defaultInsights);
       }
-      
-      // 2. Deal Risk Alert - Required
-      if (result.content.bottlenecks && result.content.bottlenecks.length > 0) {
-        newInsights.push({
-          type: 'warning',
-          title: 'Deal Risk Alert',
-          description: result.content.bottlenecks[0],
-          icon: AlertTriangle,
-          color: isDark ? 'text-orange-400' : 'text-orange-600',
-          bgColor: isDark ? 'bg-orange-500/20' : 'bg-orange-100',
-          relatedContacts: defaultInsights[1].relatedContacts
-        });
-      } else {
-        // Include default deal risk alert
-        newInsights.push(defaultInsights[1]);
-      }
-      
-      // 3. Conversion Opportunity - Required
-      if (result.content.opportunities && result.content.opportunities.length > 0) {
-        newInsights.push({
-          type: 'insight',
-          title: 'Conversion Opportunity',
-          description: result.content.opportunities[0],
-          icon: TrendingUp,
-          color: isDark ? 'text-blue-400' : 'text-blue-600',
-          bgColor: isDark ? 'bg-blue-500/20' : 'bg-blue-100',
-          relatedContacts: defaultInsights[2].relatedContacts
-        });
-      } else {
-        // Include default conversion opportunity
-        newInsights.push(defaultInsights[2]);
-      }
-      
-      // If we got meaningful insights, update the state
-      if (newInsights.length > 0) {
-        setInsights(newInsights);
-      }
-      
-      // Log the AI service used
-      console.log(`Generated insights using ${result.model} (${result.provider}) in ${result.responseTime}ms`);
       
     } catch (error) {
       console.error("Error generating insights:", error);

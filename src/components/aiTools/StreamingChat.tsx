@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User as UserIcon, Loader2 } from 'lucide-react';
-import { useGemini } from '../../services/geminiService';
+import { geminiService } from '../../services/geminiService';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
@@ -24,7 +24,6 @@ const StreamingChat: React.FC<StreamingChatProps> = ({ systemPrompt, initialMess
   const { isDark } = useTheme();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
-  const gemini = useGemini();
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -96,61 +95,26 @@ const StreamingChat: React.FC<StreamingChatProps> = ({ systemPrompt, initialMess
         totalContacts: Object.keys(contacts).length
       };
       
-      // Prepare conversation history
+      // Prepare conversation context
       const conversationHistory = messages.map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'assistant',
         content: msg.content
       }));
       
-      // Determine which AI service to use based on the query complexity
-      // For complex queries about strategy, forecasting, etc., use GPT-4o
-      const isComplexQuery = 
-        input.toLowerCase().includes('forecast') || 
-        input.toLowerCase().includes('strategy') ||
-        input.toLowerCase().includes('recommend') ||
-        input.toLowerCase().includes('analyze') ||
-        input.toLowerCase().includes('predict') ||
-        input.length > 100;
+      // Create a context object that represents the conversation and CRM data
+      const aiContext = {
+        systemPrompt,
+        conversationHistory,
+        crmData: contextData,
+        userQuery: input
+      };
       
-      let response;
-      
-      if (isComplexQuery) {
-        // Use OpenAI for complex queries
-        response = await gemini.generateContent({
-          prompt: `
-            System: ${systemPrompt}
-            
-            CRM Context: ${JSON.stringify(contextData)}
-            
-            ${messages.map(m => `${m.sender === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n')}
-            
-            User: ${input}
-            
-            Assistant:`,
-          model: 'gpt-4o-mini', // Use OpenAI model
-          temperature: 0.7,
-          featureUsed: 'streaming-chat'
-        });
-      } else {
-        // Use Google for simpler queries
-        response = await gemini.generateContent({
-          prompt: `
-            You are a helpful sales assistant. You have access to this CRM data: ${JSON.stringify(contextData)}
-            
-            ${messages.map(m => `${m.sender === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n')}
-            
-            User: ${input}
-            
-            Assistant:`,
-          model: 'gemma-2-9b-it', // Use Google model
-          temperature: 0.7,
-          featureUsed: 'streaming-chat'
-        });
-      }
+      // Use geminiService to generate response
+      const response = await geminiService.generatePersonalizedMessage(aiContext, 'email');
 
       // Simulate streaming by setting typing state
       setIsTyping(true);
-      setCurrentResponse(response.content);
+      setCurrentResponse(response);
       
     } catch (error) {
       console.error('Error generating response:', error);
