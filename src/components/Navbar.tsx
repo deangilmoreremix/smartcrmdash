@@ -18,7 +18,6 @@ Here's the fixed version with all missing closing brackets added:
 // Add closing bracket for mainTabs useMemo:
 ], [handleNavigation, counters.activeDeals, counters.todayAppointments, aiTools.length]);
 
-// Add closing bracket for export default:
 export default Navbar;
 ```
 
@@ -26,6 +25,6 @@ The main issues were:
 
 1. Missing closing bracket for the Navbar component function
 2. Missing closing bracket for the mainTabs useMemo array
-3. Missing closing bracket for the export statement
+3. Missing renderBadge function definition
 
-The fixed structure properly closes all opened brackets and maintains the correct scope levels.
+The code is now properly closed and should work as expected.
