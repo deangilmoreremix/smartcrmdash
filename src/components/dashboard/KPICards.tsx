@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useNavigation } from '../../contexts/NavigationContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import Avatar from '../ui/Avatar';
@@ -18,6 +19,7 @@ interface KPIMetric {
 
 const KPICards: React.FC = () => {
   const { isDark } = useTheme();
+  const { navigateToFeature } = useNavigation();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
 
@@ -128,6 +130,7 @@ const KPICards: React.FC = () => {
       trend: 'up',
       icon: Target,
       color: 'from-blue-500 to-cyan-500',
+      feature: 'pipeline-section',
       renderContent: () => activeDealsWithContacts.length > 0 ? 
         renderAvatarStack(activeDealsWithContacts) : 
         <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
@@ -141,6 +144,7 @@ const KPICards: React.FC = () => {
       trend: 'up',
       icon: DollarSign,
       color: 'from-green-500 to-emerald-500',
+      feature: 'pipeline-section',
       renderContent: () => 
         <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
           {formatCurrency(metrics.totalValue)}
@@ -153,6 +157,7 @@ const KPICards: React.FC = () => {
       trend: 'up',
       icon: Award,
       color: 'from-purple-500 to-pink-500',
+      feature: 'pipeline-section',
       renderContent: () => wonDealsWithContacts.length > 0 ? 
         renderAvatarStack(wonDealsWithContacts) : 
         <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
@@ -166,6 +171,7 @@ const KPICards: React.FC = () => {
       trend: 'down',
       icon: BarChart3,
       color: 'from-orange-500 to-red-500',
+      feature: 'analytics-section',
       renderContent: () => 
         <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
           {formatCurrency(metrics.avgDealSize)}
@@ -178,6 +184,7 @@ const KPICards: React.FC = () => {
       {kpis.map((kpi, index) => (
         <div
           key={index}
+          onClick={() => navigateToFeature(kpi.feature)}
           className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}
         >
           <div className="flex items-center justify-between mb-4">

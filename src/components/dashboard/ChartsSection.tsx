@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import Avatar from '../ui/Avatar';
@@ -23,6 +24,7 @@ import {
 
 const ChartsSection: React.FC = () => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'performance' | 'pipeline' | 'breakdown'>('performance');
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter'>('month');
   const { deals } = useDealStore();
