@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAppointmentStore } from '../store/appointmentStore';
-import { Calendar, Clock, Video, Phone, MoreHorizontal } from 'lucide-react';
+import { Calendar, Clock, Video, Phone, MoreHorizontal, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AppointmentWidgetProps {
   limit?: number;
@@ -8,6 +10,8 @@ interface AppointmentWidgetProps {
 
 const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ limit = 5 }) => {
   const { appointments } = useAppointmentStore();
+  const { isDark } = useTheme();
+  const navigate = useNavigate();
 
   const upcomingAppointments = Object.values(appointments)
     .filter(apt => apt.status === 'scheduled' && apt.startTime > new Date())
@@ -57,7 +61,18 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ limit = 5 }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
+      {/* Add Appointment Button */}
+      <button 
+        onClick={() => navigate('/appointments/new')}
+        className={`absolute top-4 right-4 p-1 rounded-full ${
+          isDark ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
+        }`}
+        title="New appointment"
+      >
+        <Plus size={16} />
+      </button>
+      
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-white flex items-center">
           <Calendar size={20} className="text-blue-400 mr-2" />
@@ -74,7 +89,11 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ limit = 5 }) => {
             const TypeIcon = getTypeIcon(appointment.type);
             
             return (
-              <div key={appointment.id} className="border border-white/10 rounded-lg p-4 hover:bg-white/5 transition-colors group">
+              <div 
+                key={appointment.id} 
+                className="border border-white/10 rounded-lg p-4 hover:bg-white/5 transition-colors group cursor-pointer" 
+                onClick={() => navigate(`/appointments/${appointment.id}`)}
+              >
                 <div className="flex items-start space-x-3">
                   <div className={`p-2 rounded-lg ${getTypeColor(appointment.type)}`}>
                     <TypeIcon size={16} />
@@ -114,9 +133,12 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ limit = 5 }) => {
       ) : (
         <div className="text-center py-10">
           <Calendar size={32} className="mx-auto text-gray-600 mb-3" />
-          <p className="text-gray-400">No upcoming appointments</p>
-          <button className="mt-2 text-blue-400 hover:text-blue-300 text-sm">
-            Schedule an appointment
+          <p className="text-gray-400 mb-3">No upcoming appointments</p>
+          <button 
+            onClick={() => navigate('/appointments/new')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm transition-colors"
+          >
+            Schedule Appointment
           </button>
         </div>
       )}
