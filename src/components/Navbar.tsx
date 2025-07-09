@@ -18,7 +18,7 @@ Here's the fixed version with all missing closing brackets added:
 // Add closing bracket for mainTabs useMemo:
 ], [handleNavigation, counters.activeDeals, counters.todayAppointments, aiTools.length]);
 
-// Add closing bracket for the export default:
+// Add closing bracket for export default:
 export default Navbar;
 ```
 
@@ -28,4 +28,4 @@ The main issues were:
 2. Missing closing bracket for the mainTabs useMemo array
 3. Missing closing bracket for the export statement
 
-The fixed structure properly closes all opened brackets and maintains the correct scope levels throughout the code.
+The fixed structure properly closes all opened brackets and maintains the correct scope levels.
