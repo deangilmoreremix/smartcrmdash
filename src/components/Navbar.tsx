@@ -8,6 +8,99 @@ import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
 
+// Properly define all tool arrays and other variables at the top before they are used elsewhere
+// Complete AI Tools list - 29+ tools organized by category
+const aiTools = [
+  // Core AI Tools (8 tools)
+  { name: 'Email Analysis', tool: 'email-analysis', icon: Mail, category: 'Core AI Tools' },
+  { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video, category: 'Core AI Tools' },
+  { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Core AI Tools' },
+  { name: 'Call Script Generator', tool: 'call-script', icon: Phone, category: 'Core AI Tools' },
+  { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail, category: 'Core AI Tools' },
+  { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield, category: 'Core AI Tools' },
+  { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp, category: 'Core AI Tools' },
+  { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3, category: 'Core AI Tools' },
+  { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart, category: 'Core AI Tools' },
+
+  // Communication (4 tools)
+  { name: 'Email Composer', tool: 'email-composer', icon: Mail, category: 'Communication' },
+  { name: 'Objection Handler', tool: 'objection-handler', icon: MessageSquare, category: 'Communication' },
+  { name: 'Email Response', tool: 'email-response', icon: Mail, category: 'Communication' },
+  { name: 'Voice Tone Optimizer', tool: 'voice-tone', icon: Volume2, category: 'Communication' },
+
+  // Customer & Content (3 tools)
+  { name: 'Customer Persona', tool: 'customer-persona', icon: User, category: 'Customer & Content' },
+  { name: 'Visual Content Generator', tool: 'visual-content', icon: Image, category: 'Customer & Content' },
+  { name: 'Meeting Agenda', tool: 'meeting-agenda', icon: Calendar, category: 'Customer & Content' },
+
+  // Advanced Features (5 tools)
+  { name: 'AI Assistant', tool: 'ai-assistant', icon: Bot, category: 'Advanced Features' },
+  { name: 'Vision Analyzer', tool: 'vision-analyzer', icon: Eye, category: 'Advanced Features' },
+  { name: 'Image Generator', tool: 'image-generator', icon: Camera, category: 'Advanced Features' },
+  { name: 'Semantic Search', tool: 'semantic-search', icon: Search, category: 'Advanced Features' },
+  { name: 'Function Assistant', tool: 'function-assistant', icon: Code, category: 'Advanced Features' },
+
+  // Real-time Features (6 tools)
+  { name: 'Streaming Chat', tool: 'streaming-chat', icon: MessageCircle, category: 'Real-time Features' },
+  { name: 'Form Validation', tool: 'form-validation', icon: CheckSquare, category: 'Real-time Features' },
+  { name: 'Live Deal Analysis', tool: 'live-deal-analysis', icon: Activity, category: 'Real-time Features' },
+  { name: 'Instant Response', tool: 'instant-response', icon: Zap, category: 'Real-time Features' },
+  { name: 'Real-time Email Composer', tool: 'realtime-email', icon: Mail, category: 'Real-time Features' },
+  { name: 'Voice Analysis Real-time', tool: 'voice-analysis', icon: Mic, category: 'Real-time Features' },
+
+  // Reasoning Generators (5 tools)
+  { name: 'Reasoning Email', tool: 'reasoning-email', icon: Brain, category: 'Reasoning Generators' },
+  { name: 'Reasoning Proposal', tool: 'reasoning-proposal', icon: FileText, category: 'Reasoning Generators' },
+  { name: 'Reasoning Script', tool: 'reasoning-script', icon: Phone, category: 'Reasoning Generators' },
+  { name: 'Reasoning Objection', tool: 'reasoning-objection', icon: AlertTriangle, category: 'Reasoning Generators' },
+  { name: 'Reasoning Social', tool: 'reasoning-social', icon: Users, category: 'Reasoning Generators' }
+];
+
+// Tasks dropdown tools
+const taskTools = [
+  { name: 'Task Management', tool: 'task-management', icon: CheckSquare },
+  { name: 'Task Automation', tool: 'task-automation', icon: Bot },
+  { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },
+  { name: 'Time Tracking', tool: 'time-tracking', icon: Clock },
+  { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat },
+  { name: 'Deadline Manager', tool: 'deadline-manager', icon: AlertTriangle }
+];
+
+// Sales dropdown tools
+const salesTools = [
+  { name: 'Sales Tools', tool: 'sales-tools', icon: DollarSign },
+  { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
+  { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: Target },
+  { name: 'Appointments', tool: 'appointments', icon: Calendar },
+  { name: 'Phone System', tool: 'phone-system', icon: Phone },
+  { name: 'Invoicing', tool: 'invoicing', icon: Receipt }
+];
+
+// Communication dropdown tools
+const communicationTools = [
+  { name: 'Video Email', tool: 'video-email', icon: Video },
+  { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
+  { name: 'Email Composer', tool: 'email-composer', icon: Mail },
+  { name: 'Campaigns', tool: 'campaigns', icon: Megaphone }
+];
+
+// Content dropdown tools
+const contentTools = [
+  { name: 'Content Library', tool: 'content-library', icon: BookOpen },
+  { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
+  { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3 },
+  { name: 'Image Generator', tool: 'image-generator', icon: Camera },
+  { name: 'Forms', tool: 'forms', icon: FileText }
+];
+
+// Connected apps
+const connectedApps = [
+  { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
+  { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
+  { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
+  { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
+];
+
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -56,132 +149,6 @@ const Navbar = () => {
   const counters = getCounters();
 
   // Tasks dropdown tools
-
-  // Complete AI Tools list - 29+ tools organized by category
-  const aiTools = [
-    // Core AI Tools (8 tools)
-    { name: 'Email Analysis', tool: 'email-analysis', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video, category: 'Core AI Tools' },
-    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Core AI Tools' },
-    { name: 'Call Script Generator', tool: 'call-script', icon: Phone, category: 'Core AI Tools' },
-    { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield, category: 'Core AI Tools' },
-    { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp, category: 'Core AI Tools' },
-    { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3, category: 'Core AI Tools' },
-    { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart, category: 'Core AI Tools' },
-
-    // Communication (4 tools)
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail, category: 'Communication' },
-    { name: 'Objection Handler', tool: 'objection-handler', icon: MessageSquare, category: 'Communication' },
-    { name: 'Email Response', tool: 'email-response', icon: Mail, category: 'Communication' },
-    { name: 'Voice Tone Optimizer', tool: 'voice-tone', icon: Volume2, category: 'Communication' },
-
-    // Customer & Content (3 tools)
-    { name: 'Customer Persona', tool: 'customer-persona', icon: User, category: 'Customer & Content' },
-    { name: 'Visual Content Generator', tool: 'visual-content', icon: Image, category: 'Customer & Content' },
-    { name: 'Meeting Agenda', tool: 'meeting-agenda', icon: Calendar, category: 'Customer & Content' },
-
-    // Advanced Features (5 tools)
-    { name: 'AI Assistant', tool: 'ai-assistant', icon: Bot, category: 'Advanced Features' },
-    { name: 'Vision Analyzer', tool: 'vision-analyzer', icon: Eye, category: 'Advanced Features' },
-    { name: 'Image Generator', tool: 'image-generator', icon: Camera, category: 'Advanced Features' },
-    { name: 'Semantic Search', tool: 'semantic-search', icon: Search, category: 'Advanced Features' },
-    { name: 'Function Assistant', tool: 'function-assistant', icon: Code, category: 'Advanced Features' },
-
-    // Real-time Features (6 tools)
-    { name: 'Streaming Chat', tool: 'streaming-chat', icon: MessageCircle, category: 'Real-time Features' },
-    { name: 'Form Validation', tool: 'form-validation', icon: CheckSquare, category: 'Real-time Features' },
-    { name: 'Live Deal Analysis', tool: 'live-deal-analysis', icon: Activity, category: 'Real-time Features' },
-    { name: 'Instant Response', tool: 'instant-response', icon: Zap, category: 'Real-time Features' },
-    { name: 'Real-time Email Composer', tool: 'realtime-email', icon: Mail, category: 'Real-time Features' },
-    { name: 'Voice Analysis Real-time', tool: 'voice-analysis', icon: Mic, category: 'Real-time Features' },
-
-    // Reasoning Generators (5 tools)
-    { name: 'Reasoning Email', tool: 'reasoning-email', icon: Brain, category: 'Reasoning Generators' },
-    { name: 'Reasoning Proposal', tool: 'reasoning-proposal', icon: FileText, category: 'Reasoning Generators' },
-    { name: 'Reasoning Script', tool: 'reasoning-script', icon: Phone, category: 'Reasoning Generators' },
-    { name: 'Reasoning Objection', tool: 'reasoning-objection', icon: AlertTriangle, category: 'Reasoning Generators' },
-    { name: 'Reasoning Social', tool: 'reasoning-social', icon: Users, category: 'Reasoning Generators' }
-  ];
-
-  const taskTools = [
-    { name: 'Task Management', tool: 'task-management', icon: CheckSquare },
-    { name: 'Task Automation', tool: 'task-automation', icon: Bot },
-    { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },
-    { name: 'Time Tracking', tool: 'time-tracking', icon: Clock },
-    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat },
-    { name: 'Deadline Manager', tool: 'deadline-manager', icon: AlertTriangle }
-  ];
-
-  const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
-  };
-
-  const handleNavigation = (route: string, tabName: string) => {
-    navigate(route);
-    setActiveTab(tabName || 'dashboard');
-    setActiveDropdown(null);
-    setIsMobileMenuOpen(false);
-  };
-
-  const handleAIToolClick = (toolName: string) => {
-    if (toolName === 'sales-tools') navigate('/sales-tools');
-    else if (toolName === 'lead-automation') navigate('/lead-automation');
-    else if (toolName === 'circle-prospecting') navigate('/circle-prospecting');
-    else if (toolName === 'appointments') navigate('/appointments');
-    else if (toolName === 'phone-system') navigate('/phone-system');
-    else if (toolName === 'invoicing') navigate('/invoicing');
-    else if (toolName === 'video-email') navigate('/video-email');
-    else if (toolName === 'text-messages') navigate('/text-messages');
-    else if (toolName === 'content-library') navigate('/content-library');
-    else if (toolName === 'voice-profiles') navigate('/voice-profiles');
-    else if (toolName === 'business-analysis') navigate('/business-analysis');
-    else if (toolName === 'forms') navigate('/forms');
-    else if (toolName === 'sales-analytics') navigate('/sales-analytics');
-    else if (toolName === 'deal-pipeline') navigate('/pipeline');
-    else if (toolName === 'quote-builder') navigate('/quote-builder');
-    else if (toolName === 'commission-tracker') navigate('/commission-tracker');
-    else if (toolName === 'follow-up-reminders') navigate('/follow-up-reminders');
-    else if (toolName === 'territory-management') navigate('/territory-management');
-    else if (toolName === 'task-management') navigate('/tasks');
-    else if (toolName === 'task-automation') navigate('/task-automation');
-    else if (toolName === 'project-tracker') navigate('/project-tracker');
-    else if (toolName === 'time-tracking') navigate('/time-tracking');
-    else if (toolName === 'workflow-builder') navigate('/workflow-builder');
-    else if (toolName === 'deadline-manager') navigate('/deadline-manager');
-    else if (toolName === 'email-composer') navigate('/email-composer');
-    else if (toolName === 'campaigns') navigate('/campaigns');
-    else if (toolName === 'image-generator') navigate('/image-generator');
-    else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
-    else {
-      // For other AI tools, open in AI tools page
-      openAITool(toolName);
-    }
-    setActiveDropdown(null);
-    setIsMobileMenuOpen(false);
-  };
-  
-  // Update active tab based on current route
-  useEffect(() => {
-    const path = location.pathname;
-    if (path === '/dashboard') setActiveTab('dashboard');
-    else if (path === '/contacts') setActiveTab('contacts');
-    else if (path === '/pipeline') setActiveTab('pipeline');
-    else if (path === '/tasks') setActiveTab('tasks');
-    else if (path === '/ai-tools') setActiveTab('ai-tools');
-    else if (path === '/appointments') setActiveTab('appointments');
-    else setActiveTab('');
-  }, [location.pathname]);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setActiveDropdown(null);
-      setIsMobileMenuOpen(false);
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
 
   // Main navigation tabs
   const mainTabs = [
@@ -234,40 +201,64 @@ const Navbar = () => {
       color: 'from-cyan-500 to-blue-500'
     }
   ];
-  // Sales dropdown tools
-  const salesTools = [
-    { name: 'Sales Tools', tool: 'sales-tools', icon: DollarSign },
-    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
-    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: Target },
-    { name: 'Appointments', tool: 'appointments', icon: Calendar },
-    { name: 'Phone System', tool: 'phone-system', icon: Phone },
-    { name: 'Invoicing', tool: 'invoicing', icon: Receipt }
-  ];
 
-  // Communication dropdown tools
-  const communicationTools = [
-    { name: 'Video Email', tool: 'video-email', icon: Video },
-    { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
-    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone }
-  ];
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+      setIsMobileMenuOpen(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
-  // Content dropdown tools
-  const contentTools = [
-    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
-    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
-    { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3 },
-    { name: 'Image Generator', tool: 'image-generator', icon: Camera },
-    { name: 'Forms', tool: 'forms', icon: FileText }
-  ];
+  const toggleDropdown = (dropdown: string) => {
+    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+  };
 
-  // Connected apps
-  const connectedApps = [
-    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
-    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
-    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
-    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
-  ];
+  const handleNavigation = (route: string, tabName: string) => {
+    navigate(route);
+    setActiveTab(tabName || 'dashboard');
+    setActiveDropdown(null);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAIToolClick = (toolName: string) => {
+    if (toolName === 'sales-tools') navigate('/sales-tools');
+    else if (toolName === 'lead-automation') navigate('/lead-automation');
+    else if (toolName === 'circle-prospecting') navigate('/circle-prospecting');
+    else if (toolName === 'appointments') navigate('/appointments');
+    else if (toolName === 'phone-system') navigate('/phone-system');
+    else if (toolName === 'invoicing') navigate('/invoicing');
+    else if (toolName === 'video-email') navigate('/video-email');
+    else if (toolName === 'text-messages') navigate('/text-messages');
+    else if (toolName === 'content-library') navigate('/content-library');
+    else if (toolName === 'voice-profiles') navigate('/voice-profiles');
+    else if (toolName === 'business-analysis') navigate('/business-analysis');
+    else if (toolName === 'forms') navigate('/forms');
+    else if (toolName === 'sales-analytics') navigate('/sales-analytics');
+    else if (toolName === 'deal-pipeline') navigate('/pipeline');
+    else if (toolName === 'quote-builder') navigate('/quote-builder');
+    else if (toolName === 'commission-tracker') navigate('/commission-tracker');
+    else if (toolName === 'follow-up-reminders') navigate('/follow-up-reminders');
+    else if (toolName === 'territory-management') navigate('/territory-management');
+    else if (toolName === 'task-management') navigate('/tasks');
+    else if (toolName === 'task-automation') navigate('/task-automation');
+    else if (toolName === 'project-tracker') navigate('/project-tracker');
+    else if (toolName === 'time-tracking') navigate('/time-tracking');
+    else if (toolName === 'workflow-builder') navigate('/workflow-builder');
+    else if (toolName === 'deadline-manager') navigate('/deadline-manager');
+    else if (toolName === 'email-composer') navigate('/email-composer');
+    else if (toolName === 'campaigns') navigate('/campaigns');
+    else if (toolName === 'image-generator') navigate('/image-generator');
+    else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
+    else {
+      // For other AI tools, open in AI tools page
+      openAITool(toolName);
+    }
+    setActiveDropdown(null);
+    setIsMobileMenuOpen(false);
+  };
 
   // Dropdown menu configurations
   const dropdownMenus = [
