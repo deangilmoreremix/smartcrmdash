@@ -1,8 +1,10 @@
 import React from 'react';
 import { Plus, UserPlus, Calendar, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
+import { useAITools } from '../../components/AIToolsProvider';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
@@ -10,6 +12,8 @@ const QuickActions = () => {
   const { isDark } = useTheme();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
+  const { openTool } = useAITools();
+  const navigate = useNavigate();
   
   // Get active deals
   const activeDeals = Object.values(deals).filter(deal => 
@@ -67,6 +71,33 @@ const QuickActions = () => {
     );
   };
 
+  const handleActionClick = (action: string) => {
+    switch(action) {
+      case 'newDeal':
+        // Open a modal or navigate to new deal page
+        console.log('Creating new deal...');
+        navigate('/deals/new');
+        break;
+      case 'addContact':
+        // Open a modal or navigate to new contact page
+        console.log('Adding new contact...');
+        navigate('/contacts/new');
+        break;
+      case 'scheduleMeeting':
+        // Open meeting scheduler
+        console.log('Scheduling meeting...');
+        openTool('meeting-scheduler');
+        break;
+      case 'sendEmail':
+        // Open email composer
+        console.log('Composing email...');
+        openTool('email-composer');
+        break;
+      default:
+        console.log('Action not implemented yet');
+    }
+  };
+
   const actions = [
     {
       title: 'New Deal',
@@ -74,6 +105,7 @@ const QuickActions = () => {
       icon: Plus,
       color: 'from-green-500 to-emerald-500',
       hoverColor: 'hover:from-green-600 hover:to-emerald-600',
+      action: 'newDeal'
       data: dealsWithContacts
     },
     {
@@ -82,6 +114,7 @@ const QuickActions = () => {
       icon: UserPlus,
       color: 'from-blue-500 to-cyan-500',
       hoverColor: 'hover:from-blue-600 hover:to-cyan-600',
+      action: 'addContact'
       data: activeContacts
     },
     {
@@ -89,14 +122,16 @@ const QuickActions = () => {
       description: 'Book a meeting',
       icon: Calendar,
       color: 'from-purple-500 to-pink-500',
-      hoverColor: 'hover:from-purple-600 hover:to-pink-600'
+      hoverColor: 'hover:from-purple-600 hover:to-pink-600',
+      action: 'scheduleMeeting'
     },
     {
       title: 'Send Email',
       description: 'Compose email',
       icon: Mail,
       color: 'from-orange-500 to-red-500',
-      hoverColor: 'hover:from-orange-600 hover:to-red-600'
+      hoverColor: 'hover:from-orange-600 hover:to-red-600',
+      action: 'sendEmail'
     }
   ];
 
@@ -107,7 +142,8 @@ const QuickActions = () => {
         {actions.map((action, index) => (
           <button
             key={index}
-            className={`bg-gradient-to-r ${action.color} ${action.hoverColor} rounded-2xl p-6 text-left transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl`}
+            onClick={() => handleActionClick(action.action)}
+            className={`bg-gradient-to-r ${action.color} ${action.hoverColor} rounded-2xl p-6 text-left transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer`}
           >
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-white/20 rounded-xl">
