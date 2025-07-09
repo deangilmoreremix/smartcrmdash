@@ -85,23 +85,24 @@ const Dashboard: React.FC = () => {
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
+      // Check if section component exists before rendering
       case 'executive-overview-section':
-        return <ExecutiveOverviewSection />;
+        return typeof ExecutiveOverviewSection === 'function' ? <ExecutiveOverviewSection /> : null;
 
       case 'ai-smart-features-hub':
-        return <AISmartFeaturesHub />;
+        return typeof AISmartFeaturesHub === 'function' ? <AISmartFeaturesHub /> : null;
 
       case 'sales-pipeline-deal-analytics':
-        return <SalesPipelineDealAnalytics />;
+        return typeof SalesPipelineDealAnalytics === 'function' ? <SalesPipelineDealAnalytics /> : null;
 
       case 'customer-lead-management':
-        return <CustomerLeadManagement />;
+        return typeof CustomerLeadManagement === 'function' ? <CustomerLeadManagement /> : null;
 
       case 'activities-communications':
-        return <ActivitiesCommunications />;
+        return typeof ActivitiesCommunications === 'function' ? <ActivitiesCommunications /> : null;
 
       case 'integrations-system':
-        return <IntegrationsSystem />;
+        return typeof IntegrationsSystem === 'function' ? <IntegrationsSystem /> : null;
 
       // Legacy sections (kept for backward compatibility)
       case 'metrics-cards-section':

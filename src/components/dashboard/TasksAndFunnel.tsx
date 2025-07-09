@@ -163,7 +163,7 @@ const CalendarDay: React.FC<{
 
 const TasksAndFunnel: React.FC = () => {
   const { isDark } = useTheme();
-  const { contacts } = useContactStore();
+  const { contacts = {} } = useContactStore();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const today = new Date().getDate();
 

@@ -40,10 +40,18 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const navigateToFeature = (feature: string) => {
     switch (feature) {
       case 'dashboard':
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        try {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+          console.error("Error scrolling to top:", error);
+        }
         break;
       case 'contacts':
-        scrollToSection('contacts-section');
+        try {
+          scrollToSection('customer-lead-management');
+        } catch (error) {
+          console.error("Error navigating to contacts:", error);
+        }
         break;
       case 'pipeline':
         scrollToSection('pipeline-section');

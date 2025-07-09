@@ -58,7 +58,7 @@ const Navbar = () => {
 
   const handleNavigation = (feature: string, tabName: string) => {
     navigateToFeature(feature);
-    setActiveTab(tabName);
+    setActiveTab(tabName || 'dashboard');
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
   };
