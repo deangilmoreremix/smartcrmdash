@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import VideoCallOverlay from './components/VideoCallOverlay';
@@ -27,10 +27,16 @@ function App() {
                 <BrowserRouter>
                   <div className="min-h-screen h-full w-full flex flex-col transition-all duration-300 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 bg-gradient-to-br from-gray-50 via-white to-gray-100">
                     <DevicePermissionChecker />
-                    <Navbar />
-                    <div className="flex-1 w-full overflow-hidden">
-                      <Dashboard />
-                    </div>
+                    <Routes>
+                      <Route path="*" element={
+                        <>
+                          <Navbar />
+                          <div className="flex-1 w-full overflow-hidden">
+                            <Dashboard />
+                          </div>
+                        </>
+                      } />
+                    </Routes>
                     <VideoCallOverlay />
                     <VideoCallPreviewWidget />
                     

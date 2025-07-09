@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TaskCard from './TaskCard';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -55,7 +55,7 @@ const TasksSection = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Your Days Tasks</h2>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tasks.length} active tasks</p>
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tasks?.length || 0} active tasks</p>
         </div>
         <button
           onClick={() => navigate('/tasks/new')}
