@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAITools } from '../components/AIToolsProvider';
 
 interface NavigationContextType {
@@ -19,6 +20,7 @@ export const useNavigation = () => {
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { openTool } = useAITools();
+  const navigate = useNavigate();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -46,8 +48,8 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       case 'pipeline':
         scrollToSection('pipeline-section');
         break;
-      case 'ai-goals':
-        scrollToSection('ai-section');
+      case 'ai-tools':
+        scrollToSection('ai-smart-features-hub');
         break;
       case 'tasks':
         scrollToSection('tasks-section');
@@ -57,6 +59,12 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         break;
       case 'apps':
         scrollToSection('apps-section');
+        break;
+      case '/deals':
+      case '/contacts':
+      case '/tasks':
+      case '/settings':
+        navigate(feature);
         break;
       default:
         console.log(`Navigation to ${feature} not implemented`);

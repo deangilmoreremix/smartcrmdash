@@ -59,8 +59,19 @@ const Dashboard: React.FC = () => {
     // Fetch all data when component mounts
     fetchDeals();
     fetchContacts();
-    fetchTasks();
-    fetchAppointments();
+    
+    // Wrap in try/catch to prevent errors from breaking the app
+    try {
+      fetchTasks();
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+    
+    try {
+      fetchAppointments();
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
     
     // Set up timer to refresh data periodically
     const intervalId = setInterval(() => {
