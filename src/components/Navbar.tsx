@@ -112,8 +112,19 @@ const Navbar = () => {
   // Get data for dynamic counters
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
-  const { tasks } = useTaskStore();
-  const { appointments } = useAppointmentStore();
+  // Try-catch to avoid errors if these stores aren't fully initialized yet
+  let tasks = {};
+  let appointments = {};
+  try {
+    tasks = useTaskStore().tasks;
+  } catch (error) {
+    console.warn("Tasks store not available");
+  }
+  try {
+    appointments = useAppointmentStore().appointments;
+  } catch (error) {
+    console.warn("Appointments store not available");
+  }
 
   // Calculate dynamic counters
   const getCounters = () => {
@@ -215,7 +226,12 @@ const Navbar = () => {
   }, []);
 
   const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+    // Close current dropdown if clicking the same one, otherwise open the new one
+    if (activeDropdown === dropdown) {
+      setActiveDropdown(null);
+    } else {
+      setActiveDropdown(dropdown);
+    }
   };
 
   const handleNavigation = (route: string, tabName: string) => {
