@@ -2,6 +2,7 @@ import React from 'react';
 import { MoreHorizontal, Mail, Phone, MapPin, Building } from 'lucide-react';
 import Avatar from './ui/Avatar';
 import CallButton from './CallButton';
+import { useNavigate } from 'react-router-dom';
 import { getInitials } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
 import { Contact } from '../types/contact';
@@ -12,6 +13,8 @@ interface ContactCardProps {
 
 const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const getStatusColor = (interestLevel: string) => {
     switch (interestLevel) {
@@ -25,7 +28,10 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl p-6 hover:${isDark ? 'bg-gray-800/70' : 'bg-gray-50'} transition-all duration-300 group`}>
+    <div 
+      onClick={() => navigate(`/contacts/${contact.id}`)}
+      className={`${isDark ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl p-6 hover:${isDark ? 'bg-gray-800/70' : 'bg-gray-50'} transition-all duration-300 group cursor-pointer`}
+    >
       <div className="flex items-start justify-between mb-4">
         <Avatar 
           src={contact.avatarSrc || contact.avatar}
@@ -34,8 +40,49 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact }) => {
           fallback={getInitials(contact.name)}
           status="online"
         />
-        <button className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100`}>
+        <button 
+          className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100 relative`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpen(!menuOpen);
+          }}
+        >
           <MoreHorizontal className="h-4 w-4" />
+          
+          {menuOpen && (
+            <div 
+              className={`absolute right-0 mt-1 w-40 ${
+                isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'
+              } border rounded-lg shadow-lg z-10 py-1`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                className={`w-full text-left px-3 py-2 text-sm ${
+                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                } flex items-center space-x-2`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/contacts/${contact.id}/edit`);
+                }}
+              >
+                <MapPin size={14} className="text-gray-400" />
+                <span>Edit Contact</span>
+              </button>
+              
+              <button 
+                className={`w-full text-left px-3 py-2 text-sm ${
+                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                } flex items-center space-x-2`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`mailto:${contact.email}`, '_blank');
+                }}
+              >
+                <Mail size={14} className="text-gray-400" />
+                <span>Send Email</span>
+              </button>
+            </div>
+          )}
         </button>
       </div>
       

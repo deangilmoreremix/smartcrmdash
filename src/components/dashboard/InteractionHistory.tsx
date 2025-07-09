@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useContactStore } from '../../store/contactStore';
+import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, ArrowRight } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
@@ -8,6 +9,7 @@ import { getInitials } from '../../utils/avatars';
 const InteractionHistory: React.FC = () => {
   const { isDark } = useTheme();
   const { contacts } = useContactStore();
+  const navigate = useNavigate();
   
   // Updated interactions with contactIds instead of direct participant arrays
   const interactions = [
@@ -73,6 +75,12 @@ const InteractionHistory: React.FC = () => {
     }
   ];
 
+  const handleInteractionClick = (interactionId: number) => {
+    // Navigate to the detailed view of the interaction
+    console.log(`Opening interaction ${interactionId}`);
+    navigate(`/interactions/${interactionId}`);
+  };
+
   return (
     <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 mb-6`}>
       <div className="flex items-center justify-between mb-6">
@@ -90,6 +98,7 @@ const InteractionHistory: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {interactions.map((interaction) => (
           <div 
+            onClick={() => handleInteractionClick(interaction.id)}
             key={interaction.id} 
             className={`
               ${interaction.bgColor} ${interaction.textColor} 

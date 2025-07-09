@@ -1,12 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useContactStore } from '../../store/contactStore';
-import { Calendar, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { Calendar, CheckCircle, AlertCircle, TrendingUp, ArrowRight } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
 const RecentActivity: React.FC = () => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const { contacts } = useContactStore();
   
   // Updated upcomingDeals with contactId instead of direct avatar
@@ -81,7 +83,13 @@ const RecentActivity: React.FC = () => {
       <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Upcoming Deals</h3>
-          <Calendar className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
+          <button 
+            onClick={() => navigate('/deals')}
+            className={`flex items-center space-x-1 text-sm ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+          >
+            <span>View All</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
         
         <div className="space-y-4">
@@ -90,7 +98,11 @@ const RecentActivity: React.FC = () => {
             const contact = contacts[deal.contactId];
             
             return (
-              <div key={deal.id} className={`flex items-center justify-between p-4 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50/80 hover:bg-gray-100/80'} rounded-xl transition-colors`}>
+              <div 
+                key={deal.id} 
+                className={`flex items-center justify-between p-4 ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50/80 hover:bg-gray-100/80'} rounded-xl transition-colors cursor-pointer`}
+                onClick={() => navigate(`/deals/${deal.id}`)}
+              >
                 <div className="flex items-center space-x-3">
                   {contact && (
                     <Avatar

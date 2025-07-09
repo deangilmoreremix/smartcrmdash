@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Brain, Zap, RefreshCw, TrendingUp, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAITools } from '../../components/AIToolsProvider';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import { geminiService } from '../../services/geminiService';
@@ -19,6 +20,7 @@ interface Insight {
 
 const AIInsightsPanel = () => {
   const { isDark } = useTheme();
+  const { openTool } = useAITools();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
   
@@ -234,7 +236,7 @@ const AIInsightsPanel = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
-            <Brain className={`h-6 w-6 ${isDark ? 'text-white' : 'text-white'}`} />
+            <Brain className="h-6 w-6 text-white" />
           </div>
           <div>
             <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Pipeline Intelligence</h2>
@@ -245,12 +247,8 @@ const AIInsightsPanel = () => {
         </div>
         <button
           onClick={generateInsights}
-          disabled={isGenerating || !apiKeysConfigured}
-          className={`flex items-center space-x-2 px-4 py-2 ${
-            isDark 
-              ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' 
-              : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-          } text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+          disabled={isGenerating}
+          className={`flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isGenerating ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -290,7 +288,18 @@ const AIInsightsPanel = () => {
             key={index}
             className={`${
               isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-100'
-            } rounded-xl p-4 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all group`}
+            } rounded-xl p-4 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all group cursor-pointer`}
+            onClick={() => {
+              // Open the corresponding AI tool based on insight type
+              const toolMap: Record<string, string> = {
+                'success': 'pipeline-analysis',
+                'warning': 'deal-alerts',
+                'insight': 'smart-insights'
+              };
+              
+              const toolName = toolMap[insight.type] || 'ai-insights';
+              openTool(toolName);
+            }}
           >
             <div className="flex items-start space-x-3">
               <div className={`p-2 rounded-lg ${insight.bgColor}`}>

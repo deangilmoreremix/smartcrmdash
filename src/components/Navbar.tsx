@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown, User, Bell, Search, Settings, LogOut, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Building2, Megaphone, Activity, CheckSquare, Home, Sparkles, Presentation as PresentationChart, UserPlus, ClipboardList, Lightbulb, PieChart, Clock, Shield, Globe, Database, Headphones, Camera, Layers, Repeat, Palette, HelpCircle, Plus, DollarSign, HeartHandshake, Edit3, Monitor, MoreHorizontal, ExternalLink, Eye, Zap as ZapIcon, Workflow, Bot, Image, Hash, MessageCircle, Volume2, AlertTriangle, LineChart, TrendingDown, Workflow as WorkflowIcon, Map, Cpu, Code, TestTube, FileImage, Brush, Palette as PaletteIcon, Menu, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -9,6 +10,7 @@ import { useAppointmentStore } from '../store/appointmentStore';
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
@@ -65,6 +67,9 @@ const Navbar = () => {
     openAITool(toolName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
+    
+    // Log and redirect for debugging purposes
+    console.log(`Opening AI tool: ${toolName}`);
   };
 
   // Close dropdowns when clicking outside
@@ -523,14 +528,24 @@ const Navbar = () => {
                       </div>
                       
                       <div className="space-y-1">
-                        <button className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/10 text-white hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}>
+                        <button 
+                          onClick={() => navigate('/settings')}
+                          className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/10 text-white hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                        >
                           <Settings size={16} />
                           <span className="text-sm font-medium">Settings</span>
                         </button>
                         
                         <hr className={`my-2 ${isDark ? 'border-white/20' : 'border-gray-200'}`} />
                         
-                        <button className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 text-red-400 hover:bg-red-500/10">
+                        <button 
+                          onClick={() => {
+                            console.log('User signed out');
+                            // In a real app, you would call an auth logout function here
+                            navigate('/login');
+                          }}
+                          className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 text-red-400 hover:bg-red-500/10"
+                        >
                           <LogOut size={16} />
                           <span className="text-sm font-medium">Sign Out</span>
                         </button>

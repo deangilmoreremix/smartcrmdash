@@ -1,5 +1,6 @@
 import React from 'react';
 import { useContactStore } from '../store/contactStore';
+import { useNavigate } from 'react-router-dom';
 import ContactCard from './ContactCard';
 import { Plus } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -7,6 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 const LeadsSection = () => {
   const { contacts } = useContactStore();
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   
   // Get first 4 contacts as new leads, preferring hot leads
   const newLeads = Object.values(contacts)
@@ -24,7 +26,10 @@ const LeadsSection = () => {
           <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {newLeads.filter(lead => lead.interestLevel === 'hot' || lead.status === 'hot').length} hot
           </span>
-          <button className={`px-4 py-2 ${isDark ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-green-100 text-green-700 border-green-200'} border rounded-lg hover:${isDark ? 'bg-green-500/30' : 'bg-green-200'} transition-colors flex items-center`}>
+          <button 
+            onClick={() => navigate('/contacts/new')}
+            className={`px-4 py-2 ${isDark ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-green-100 text-green-700 border-green-200'} border rounded-lg hover:${isDark ? 'bg-green-500/30' : 'bg-green-200'} transition-colors flex items-center`}
+          >
             <Plus size={16} className="mr-1" />
             Add Lead
           </button>

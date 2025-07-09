@@ -1,6 +1,7 @@
 import React from 'react';
-import { Calendar, Clock, Mail, Video, FileText, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Mail, Video, FileText, MoreHorizontal, CheckCircle, Check, MoreVertical } from 'lucide-react';
 import Avatar from './ui/Avatar';
+import { useTaskStore } from '../store/taskStore';
 import { getInitials, getAvatarByIndex } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -19,12 +20,15 @@ interface TaskCardProps {
     priority?: 'high' | 'medium' | 'low';
     dueDate?: Date;
     isHighlighted?: boolean;
+    completed?: boolean;
   };
   index: number;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
   const { isDark } = useTheme();
+  const { updateTask } = useTaskStore();
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
   const getCardClass = (highlighted: boolean) => {
     if (highlighted) {
@@ -51,13 +55,26 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
     }
   };
 
+  const handleCompleteTask = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateTask(task.id, { completed: !task.completed });
+  };
+
   const TypeIcon = getTypeIcon(task.type);
 
   // Generate avatar for assignee if not provided
   const assigneeAvatar = task.assignee?.avatar || getAvatarByIndex(index, 'executives');
 
   return (
-    <div className={`backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-gray-800/70' : 'bg-gray-50'} transition-all duration-300 group ${getCardClass(task.isHighlighted)}`}>
+    <div 
+      className={`${isDark ? 'bg-gray-800/50' : 'bg-white'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-gray-800/70' : 'bg-gray-50'} transition-all duration-300 group ${getCardClass(task.isHighlighted)} ${task.completed ? 'opacity-70' : ''} relative`}
+      onClick={() => window.location.href = `/tasks/${task.id}`}
+    >
+      {task.completed && (
+        <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full">
+          <Check size={12} />
+        </div>
+      )}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <Avatar 
@@ -76,8 +93,46 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
             </p>
           </div>
         </div>
-        <button className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100`}>
-          <MoreHorizontal className="h-4 w-4" />
+        <button 
+          className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100 relative`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpen(!menuOpen);
+          }}
+        >
+          <MoreVertical className="h-4 w-4" />
+          
+          {menuOpen && (
+            <div className={`absolute right-0 mt-1 w-36 ${
+              isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'
+            } border rounded-lg shadow-lg z-10 py-1`}>
+              <button 
+                className={`w-full text-left px-3 py-2 text-sm ${
+                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                } flex items-center space-x-2`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCompleteTask(e);
+                }}
+              >
+                <CheckCircle size={14} className={task.completed ? 'text-green-400' : 'text-gray-400'} />
+                <span>{task.completed ? 'Mark Incomplete' : 'Mark Complete'}</span>
+              </button>
+              
+              <button 
+                className={`w-full text-left px-3 py-2 text-sm ${
+                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                } flex items-center space-x-2`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = `/tasks/${task.id}/edit`;
+                }}
+              >
+                <FileText size={14} className="text-gray-400" />
+                <span>Edit Task</span>
+              </button>
+            </div>
+          )}
         </button>
       </div>
       

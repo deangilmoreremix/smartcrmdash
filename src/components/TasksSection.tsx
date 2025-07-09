@@ -1,9 +1,11 @@
 import React from 'react';
 import TaskCard from './TaskCard';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 
 const TasksSection = () => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   
   const tasks = [
     {
@@ -55,9 +57,15 @@ const TasksSection = () => {
           <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Your Days Tasks</h2>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tasks.length} active tasks</p>
         </div>
-        <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          {tasks.filter(task => task.priority === 'high').length} high priority
-        </span>
+        <button
+          onClick={() => navigate('/tasks/new')}
+          className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm ${
+            isDark ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-green-100 text-green-700 hover:bg-green-200'
+          } transition-colors`}
+        >
+          <Plus size={14} />
+          <span>New Task</span>
+        </button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

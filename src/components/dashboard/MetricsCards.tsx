@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const MetricsCards: React.FC = () => {
   const { isDark } = useTheme();
+  const { navigateToFeature } = useNavigation();
 
   const kpis = [
     {
@@ -12,7 +14,8 @@ const MetricsCards: React.FC = () => {
       change: '+12%',
       trend: 'up',
       icon: Target,
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
+      feature: 'pipeline-section'
     },
     {
       title: 'Pipeline Value',
@@ -20,7 +23,8 @@ const MetricsCards: React.FC = () => {
       change: '+8%',
       trend: 'up',
       icon: DollarSign,
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
+      feature: 'pipeline-section'
     },
     {
       title: 'Won Deals',
@@ -28,7 +32,8 @@ const MetricsCards: React.FC = () => {
       change: '+15%',
       trend: 'up',
       icon: Award,
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-pink-500',
+      feature: 'analytics-section'
     },
     {
       title: 'Avg Deal Size',
@@ -36,7 +41,8 @@ const MetricsCards: React.FC = () => {
       change: '-3%',
       trend: 'down',
       icon: BarChart3,
-      color: 'from-orange-500 to-red-500'
+      color: 'from-orange-500 to-red-500',
+      feature: 'analytics-section'
     }
   ];
 
@@ -45,6 +51,7 @@ const MetricsCards: React.FC = () => {
       {kpis.map((kpi, index) => (
         <div
           key={index}
+          onClick={() => navigateToFeature(kpi.feature)}
           className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}
         >
           <div className="flex items-center justify-between mb-4">

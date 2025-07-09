@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Brain, Zap, Settings, BarChart3 } from 'lucide-react';
+import { useAITools } from '../../components/AIToolsProvider';
 import AIInsightsPanel from '../dashboard/AIInsightsPanel';
 import { SmartAIControls } from '../ai/SmartAIControls';
 import AIModelUsageStats from '../AIModelUsageStats';
@@ -9,6 +10,7 @@ import SmartSearchRealtime from '../aiTools/SmartSearchRealtime';
 
 const AISmartFeaturesHub: React.FC = () => {
   const { isDark } = useTheme();
+  const { openTool } = useAITools();
   const [activeTab, setActiveTab] = useState<'insights' | 'controls' | 'performance' | 'tools'>('insights');
 
   // Tab configuration
@@ -78,8 +80,21 @@ const AISmartFeaturesHub: React.FC = () => {
               <div className={`p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} flex justify-between items-center`}>
                 <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   <Zap size={18} className="text-purple-600 mr-2" />
-                  Live Deal Analysis
+                  <button 
+                    onClick={() => openTool('live-deal-analysis')} 
+                    className="text-inherit hover:underline focus:outline-none"
+                  >
+                    Live Deal Analysis
+                  </button>
                 </h3>
+                <button 
+                  onClick={() => openTool('live-deal-analysis')}
+                  className={`text-xs px-2 py-1 rounded ${
+                    isDark ? 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  Open Tool
+                </button>
               </div>
               <div className="p-4">
                 <LiveDealAnalysis />
@@ -90,8 +105,21 @@ const AISmartFeaturesHub: React.FC = () => {
               <div className={`p-4 border-b ${isDark ? 'border-white/10' : 'border-gray-200'} flex justify-between items-center`}>
                 <h3 className={`font-semibold flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   <Search size={18} className="text-blue-600 mr-2" />
-                  Smart Search
+                  <button 
+                    onClick={() => openTool('semantic-search')} 
+                    className="text-inherit hover:underline focus:outline-none"
+                  >
+                    Smart Search
+                  </button>
                 </h3>
+                <button 
+                  onClick={() => openTool('semantic-search')}
+                  className={`text-xs px-2 py-1 rounded ${
+                    isDark ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  }`}
+                >
+                  Open Tool
+                </button>
               </div>
               <SmartSearchRealtime />
             </div>
