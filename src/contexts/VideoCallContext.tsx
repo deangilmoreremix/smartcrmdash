@@ -902,16 +902,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
     }
-    // Cleanup function to stop tracks
-    const stopPreviewStream = () => {
-      if (!previewStream) return;
-      previewStream.getTracks().forEach(track => track.stop());
-      setPreviewStream(null);
-    };
-    
-    // Exit early if not visible or video not enabled
-    if (!isVisible || !videoEnabled) {
-      stopPreviewStream();
+    if (!isInCall || !localStreamRef.current) {
       throw new Error('Cannot start recording: not in call or no local stream');
     }
 
@@ -1094,9 +1085,11 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [isInCall]);
 
   // Cleanup on unmount
-    
-    // Proper cleanup on unmount or dependency changes
-    return stopPreviewStream;
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
 
   const value: VideoCallContextType = {
     // Call State
