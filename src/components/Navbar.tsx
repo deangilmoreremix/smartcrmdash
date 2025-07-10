@@ -13,7 +13,8 @@ interface NavbarProps {
   onOpenPipelineModal?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
+// Memoize Navbar to prevent unnecessary re-renders
+const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,9 +29,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
   const { tasks } = useTaskStore();
   const { appointments } = useAppointmentStore();
 
-  // Optimize counter calculation with useCallback to prevent recalculation on every render
-  const getCounters = useCallback(() => {
-    const activeDeals = Object.values(deals).filter(deal => 
+  // Use useMemo to calculate counters and prevent recalculation on every render
+  const counters = React.useMemo(() => {
+    const activeDeals = Object.values(deals).filter(deal =>
       deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
     ).length;
     
@@ -57,9 +58,6 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
       totalNotifications: hotContacts + pendingTasks + todayAppointments
     };
   }, [deals, contacts, tasks, appointments]);
-
-  // Use useMemo for the counters to prevent unnecessary recalculations
-  const counters = React.useMemo(() => getCounters(), [getCounters]);
 
   // Tasks dropdown tools
   const taskTools = [
@@ -115,18 +113,21 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (activeDropdown !== null || isMobileMenuOpen) {
-        setActiveDropdown(null);
-        setIsMobileMenuOpen(false);
+    const handleClickOutside = (e: MouseEvent) => {
+      // Don't close if clicking on a dropdown toggle button
+      if ((e.target as HTMLElement).closest('[data-dropdown-toggle]')) {
+        return;
       }
+      setActiveDropdown(null);
+      setIsMobileMenuOpen(false);
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [activeDropdown, isMobileMenuOpen]);
+  }, []);
 
-  // Optimize toggle function with useCallback
-  const toggleDropdown = useCallback((dropdown: string) => {
+  // Use useCallback to prevent recreation on every render
+  const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
   }, [activeDropdown]);
 
@@ -442,8 +443,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleDropdown(menu.id);
+                      toggleDropdown(menu.id, e);
                     }}
+                    data-dropdown-toggle="true"
                     className={`
                       relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                       transition-all duration-300 transform hover:scale-105
@@ -763,6 +765,6 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
       </div>
     </nav>
   );
-};
+});
 
 export default Navbar;

@@ -65,32 +65,44 @@ const VideoCallOverlay = () => {
   const [showRecording, setShowRecording] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const controlsTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  // Use refs with useRef to avoid re-renders when updating refs
+  const localVideoRef = useRef<HTMLVideoElement>(null); 
+  const controlsTimerRef = useRef<NodeJS.Timeout | null>(null); 
+  const remoteVideoRef = useRef<HTMLVideoElement>(null); 
+  const lastRenderTimeRef = useRef<number>(Date.now());
 
   // Update video elements when streams change
   useEffect(() => {
     if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
+      // Only update if the stream has actually changed to prevent unnecessary layout shifts
+      if (localVideoRef.current.srcObject !== localStream) {
+        localVideoRef.current.srcObject = localStream;
+      }
     }
-  }, [localStream]);
+  }, [localStream]); // Keep the dependency array slim
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
+      // Only update if the stream has actually changed
+      if (remoteVideoRef.current.srcObject !== remoteStream) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
     }
   }, [remoteStream]);
 
-  // Optimized call duration timer
+  // Throttled call duration timer to prevent excessive renders
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isInCall) {
-      // Use callback form of setState to avoid potential stale closures
       interval = setInterval(() => {
-        setCallDuration(prevDuration => prevDuration + 1);
-      }, 1000);
+        // Throttle updates to once per second maximum
+        const now = Date.now();
+        if (now - lastRenderTimeRef.current >= 1000) {
+          lastRenderTimeRef.current = now;
+          setCallDuration(prevDuration => prevDuration + 1);
+        }
+      }, 500); // Check twice per second but only update when needed
     } else {
       setCallDuration(0);
     }
@@ -136,7 +148,7 @@ const VideoCallOverlay = () => {
   // Incoming call notification
   if (callStatus === 'ringing') {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hardware-accelerated">
         <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-3xl overflow-hidden shadow-2xl max-w-md w-full mx-4`}>
           {/* Caller Info */}
           <div className="p-8 text-center">
@@ -195,7 +207,7 @@ const VideoCallOverlay = () => {
   }
 
   return (
-    <>
+    <div className="contain-layout">
       <div className="fixed bottom-4 right-4 z-50">
         <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
           isMinimized ? 'w-20 h-20' : 'w-96 h-72'
@@ -461,8 +473,9 @@ const VideoCallOverlay = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
-export default VideoCallOverlay;
+// Wrap with React.memo to prevent unnecessary re-renders
+export default React.memo(VideoCallOverlay);

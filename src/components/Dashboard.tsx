@@ -32,7 +32,8 @@ import NewLeadsSection from './dashboard/NewLeadsSection';
 import KPICards from './dashboard/KPICards';
 import QuickActions from './dashboard/QuickActions';
 
-const Dashboard: React.FC = () => {
+// Memo Dashboard component to prevent unnecessary re-renders
+const Dashboard: React.FC = React.memo(() => {
   const { 
     deals, 
     fetchDeals, 
@@ -55,7 +56,14 @@ const Dashboard: React.FC = () => {
   
   const gemini = useGemini();
   
+  // Prevent repeated data fetching by using a ref to track initialization
+  const initializedRef = useRef(false);
+  
   useEffect(() => {
+    // Only fetch data once
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
     // Fetch all data when component mounts
     fetchDeals();
     fetchContacts();
@@ -74,12 +82,13 @@ const Dashboard: React.FC = () => {
     }
     
     // Set up timer to refresh data periodically
-    const intervalId = setInterval(() => {
+    const intervalId = window.setInterval(() => {
       fetchDeals();
       fetchContacts();
-    }, 300000); // refresh every 5 minutes
-    
-    return () => clearInterval(intervalId);
+    }, 300000); // Refresh every 5 minutes
+
+    // Proper cleanup
+    return () => window.clearInterval(intervalId);
   }, []);
   
   // Render section content based on section ID
@@ -164,6 +173,6 @@ const Dashboard: React.FC = () => {
       </div>
     </main>
   );
-};
+});
 
 export default Dashboard;

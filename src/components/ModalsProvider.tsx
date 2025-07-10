@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
-import PipelineModal from './PipelineModal';
+
+// Lazy load modal components to prevent initial load performance issues
+const PipelineModal = React.lazy(() => import('./PipelineModal'));
 
 interface ModalsContextType {
   openPipelineModal: () => void;
@@ -25,7 +27,12 @@ export const ModalsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   return (
     <ModalsContext.Provider value={{ openPipelineModal, closePipelineModal }}>
       {children}
-      <PipelineModal isOpen={isPipelineModalOpen} onClose={closePipelineModal} />
+      {/* Only render modal when it's open to prevent unnecessary DOM elements */}
+      {isPipelineModalOpen && (
+        <React.Suspense fallback={null}>
+          <PipelineModal isOpen={isPipelineModalOpen} onClose={closePipelineModal} />
+        </React.Suspense>
+      )}
     </ModalsContext.Provider>
   );
 };

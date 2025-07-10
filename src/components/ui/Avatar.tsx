@@ -9,7 +9,8 @@ interface AvatarProps {
   className?: string;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ 
+// Use React.memo to prevent unnecessary re-renders
+const Avatar: React.FC<AvatarProps> = React.memo(({ 
   src, 
   alt = '', 
   size = 'md', 
@@ -69,8 +70,14 @@ const Avatar: React.FC<AvatarProps> = ({
       {status && (
         <div className={`absolute -bottom-0.5 -right-0.5 ${statusSizes[size]} ${statusClasses[status]} rounded-full border-2 border-white dark:border-gray-900`}></div>
       )}
-    </div>
-  );
-};
+    </div>  
+  );  
+}, (prevProps, nextProps) => {
+  // Custom comparison function to optimize re-renders
+  return prevProps.src === nextProps.src && 
+         prevProps.size === nextProps.size &&
+         prevProps.status === nextProps.status &&
+         prevProps.fallback === nextProps.fallback;
+});
 
 export default Avatar;

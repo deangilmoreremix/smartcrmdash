@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface ThemeContextType {
   isDark: boolean;
-  toggleTheme: () => void;
+  toggleTheme: () => void; 
+  isThemeChanging: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,6 +18,7 @@ export const useTheme = () => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
+    // Try to get from local storage synchronously to avoid flash of wrong theme
     // Check localStorage first, then system preference
     const saved = localStorage.getItem('theme');
     if (saved) {
@@ -25,23 +27,37 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
+  // Add a state to track theme transitions
+  const [isThemeChanging, setIsThemeChanging] = useState(false);
+
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    
-    // Update document class for global styling
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    // Use localStorage asynchronously to avoid blocking the main thread
+    setTimeout(() => {
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }, 0);
   }, [isDark]);
+
+  // Helper to handle theme transition state
+  const handleThemeChange = useCallback(() => {
+    setIsThemeChanging(true);
+    setIsDark(prev => !prev);
+    
+    // Reset the transition state after animation completes
+    setTimeout(() => setIsThemeChanging(false), 300);
+  }, []);
 
   const toggleTheme = () => {
     setIsDark(prev => !prev);
   };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme, isThemeChanging }}>
       {children}
     </ThemeContext.Provider>
   );

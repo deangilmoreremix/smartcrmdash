@@ -248,23 +248,21 @@ const DevicePermissionChecker: React.FC = () => {
   ];
 
   // Settings button
-  if (!showChecker) {
-    return (
-      <button
-        onClick={() => setShowChecker(true)}
-        className={`fixed top-4 left-4 p-3 rounded-xl ${
-          isDark 
-            ? 'bg-gray-800/90 hover:bg-gray-700/90 border-white/10' 
-            : 'bg-white/90 hover:bg-gray-50/90 border-gray-200'
-        } backdrop-blur-xl border shadow-lg transition-all duration-200 z-40`}
-        title="Settings"
-      >
-        <Settings size={20} className={`${isDark ? 'text-white' : 'text-gray-700'}`} />
-      </button>
-    );
-  }
+  // Prevent unnecessary re-renders by returning null when !showChecker
+  return !showChecker ? (
+    <button
+      onClick={() => setShowChecker(true)}
+      className="fixed top-4 left-4 p-3 rounded-xl backdrop-blur-xl border shadow-lg z-40 hardware-accelerated"
+      style={{
+        backgroundColor: isDark ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(229, 231, 235, 1)',
+      }}
+      title="Settings"
+    >
+      <Settings size={20} style={{color: isDark ? 'white' : '#374151'}} />
+    </button>
+  ) : (
 
-  return (
     <div className="fixed top-4 left-4 z-50">
       <div className={`w-80 ${
         isDark ? 'bg-gray-900/95' : 'bg-white/95'
@@ -623,6 +621,7 @@ const DevicePermissionChecker: React.FC = () => {
       </div>
     </div>
   );
+};
 };
 
 export default DevicePermissionChecker;

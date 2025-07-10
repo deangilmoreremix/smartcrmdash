@@ -72,7 +72,8 @@ interface VideoCallContextType {
 
 const VideoCallContext = createContext<VideoCallContextType | undefined>(undefined);
 
-export const useVideoCall = () => {
+// Memoize hook to improve performance
+export const useVideoCall = (): VideoCallContextType => {
   const context = useContext(VideoCallContext);
   if (!context) {
     throw new Error('useVideoCall must be used within a VideoCallProvider');
@@ -901,11 +902,16 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
     }
-  }, [isScreenSharing, currentCall?.type, getUserMedia]);
-
-  // Real call recording implementation
-  const startRecording = useCallback(async () => {
-    if (!isInCall || !localStreamRef.current) {
+    // Cleanup function to stop tracks
+    const stopPreviewStream = () => {
+      if (!previewStream) return;
+      previewStream.getTracks().forEach(track => track.stop());
+      setPreviewStream(null);
+    };
+    
+    // Exit early if not visible or video not enabled
+    if (!isVisible || !videoEnabled) {
+      stopPreviewStream();
       throw new Error('Cannot start recording: not in call or no local stream');
     }
 
@@ -1088,12 +1094,9 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [isInCall]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      console.log('VideoCallProvider unmounting, cleaning up...');
-      cleanup();
-    };
-  }, [cleanup]);
+    
+    // Proper cleanup on unmount or dependency changes
+    return stopPreviewStream;
 
   const value: VideoCallContextType = {
     // Call State

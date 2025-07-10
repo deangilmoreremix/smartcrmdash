@@ -373,8 +373,8 @@ const VideoCallPreviewWidget = React.memo(() => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
-      <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
+    <div className="fixed bottom-6 right-6 z-40 hardware-accelerated contain-layout">
+      <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl w-96 max-h-[80vh] flex flex-col hardware-accelerated`}>
         isMinimized ? 'w-20 h-20' : 'w-96 h-72'
       }`}>
         {isMinimized ? (
@@ -625,6 +625,6 @@ const VideoCallPreviewWidget = React.memo(() => {
       </div>
     </div>
   );
-});
+}, (prevProps, nextProps) => true); // Always return true to prevent re-renders from parent changes
 
 export default VideoCallPreviewWidget;
