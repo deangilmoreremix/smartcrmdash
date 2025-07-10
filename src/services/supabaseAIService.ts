@@ -197,7 +197,7 @@ class SupabaseAIService {
 
       // Skip testing connection if URL is invalid
       if (!supabaseUrl.startsWith('http')) {
-        console.warn('Invalid Supabase URL. Using fallback configurations.');
+        console.warn('Supabase connection failed. Using fallback configurations:', error);
         this.supabaseAvailable = false;
       } else {
         // Test connection with a simple query
