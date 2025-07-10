@@ -27,7 +27,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import { useContactStore } from '../store/contactStore';
 // Memoize Avatar to prevent unnecessary re-renders
-import React from 'react';
 const Avatar = React.memo(require('./ui/Avatar').default);
 import { getInitials } from '../utils/avatars';
 
