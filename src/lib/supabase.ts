@@ -1,17 +1,43 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use runtime environment variables or empty strings to prevent build-time embedding
-const supabaseUrl = typeof window !== 'undefined' 
-  ? window.ENV_VARS?.SUPABASE_URL || '' 
-  : '';
-const supabaseAnonKey = typeof window !== 'undefined' 
-  ? window.ENV_VARS?.SUPABASE_ANON_KEY || '' 
-  : '';
+// Get environment variables with fallbacks
+const getSupabaseUrl = () => {
+  if (typeof window !== 'undefined' && window.ENV_VARS?.SUPABASE_URL) {
+    return window.ENV_VARS.SUPABASE_URL;
+  }
+  return import.meta.env.VITE_SUPABASE_URL || '';
+};
 
-// Only validate if values are provided
-const isConfigured = supabaseUrl && supabaseAnonKey;
+const getSupabaseAnonKey = () => {
+  if (typeof window !== 'undefined' && window.ENV_VARS?.SUPABASE_ANON_KEY) {
+    return window.ENV_VARS.SUPABASE_ANON_KEY;
+  }
+  return import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = getSupabaseUrl();
+const supabaseAnonKey = getSupabaseAnonKey();
+
+// Check if configuration is valid
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return url !== '' && !url.includes('your_') && !url.includes('placeholder');
+  } catch {
+    return false;
+  }
+};
+
+const isValidKey = (key: string) => {
+  return key !== '' && !key.includes('your_') && !key.includes('placeholder') && key.length > 20;
+};
+
+const isConfigured = isValidUrl(supabaseUrl) && isValidKey(supabaseAnonKey);
+
+// Create Supabase client with proper error handling
+export const supabase = isConfigured 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createClient('https://placeholder.supabase.co', 'placeholder-key-that-prevents-errors');
 
 // Storage bucket names
 export const STORAGE_BUCKETS = {
@@ -22,5 +48,10 @@ export const STORAGE_BUCKETS = {
 
 // Add a helper to check if Supabase is properly configured
 export const isSupabaseConfigured = () => {
-  return !!supabaseUrl && !!supabaseAnonKey;
+  return isConfigured;
 };
+
+// Log configuration status for debugging
+if (!isConfigured) {
+  console.warn('Supabase is not properly configured. Some features may not work.');
+}
