@@ -43,8 +43,9 @@ function App() {
                         </>
                       } />
                     </Routes>
-                    <VideoCallOverlay />
-                    <VideoCallPreviewWidget />
+                    {/* Temporarily disabled to isolate flashing issues */}
+                    {/* <VideoCallOverlay />
+                    <VideoCallPreviewWidget /> */}
                     
                     {/* ContactsModal rendered at the root level */}
                     <ContactsModal

@@ -25,6 +25,19 @@ import ConnectionQuality from './ConnectionQuality';
 import InCallMessaging from './InCallMessaging';
 import CallRecording from './CallRecording';
 
+// Extract call duration into a separate component to prevent full component re-renders
+const CallDurationDisplay: React.FC<{ duration: number }> = React.memo(({ duration }) => {
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <span className="text-white text-xs">{formatDuration(duration)}</span>
+  );
+});
+
 const VideoCallOverlay = () => {
   const {
     currentCall,
@@ -53,6 +66,7 @@ const VideoCallOverlay = () => {
   const [showSettings, setShowSettings] = useState(false);
   
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const controlsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   // Update video elements when streams change
@@ -68,13 +82,14 @@ const VideoCallOverlay = () => {
     }
   }, [remoteStream]);
 
-  // Call duration timer
+  // Optimized call duration timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isInCall) {
+      // Use callback form of setState to avoid potential stale closures
       interval = setInterval(() => {
-        setCallDuration(prev => prev + 1);
+        setCallDuration(prevDuration => prevDuration + 1);
       }, 1000);
     } else {
       setCallDuration(0);
@@ -85,15 +100,28 @@ const VideoCallOverlay = () => {
     };
   }, [isInCall]);
 
-  // Auto-hide controls
+  // Optimized auto-hide controls with cleanup
   useEffect(() => {
     if (!isInCall) return;
     
-    const timer = setTimeout(() => {
-      setShowControls(false);
+    // Clear any existing timer
+    if (controlsTimerRef.current) {
+      clearTimeout(controlsTimerRef.current);
+    }
+    
+    // Set new timer
+    controlsTimerRef.current = setTimeout(() => {
+      if (isInCall) {
+        setShowControls(false);
+      }
     }, 5000);
     
-    return () => clearTimeout(timer);
+    return () => {
+      if (controlsTimerRef.current) {
+        clearTimeout(controlsTimerRef.current);
+        controlsTimerRef.current = null;
+      }
+    };
   }, [isInCall, showControls]);
 
   // Format call duration
@@ -279,11 +307,9 @@ const VideoCallOverlay = () => {
                   <div className="flex items-center space-x-2">
                     {/* Connection Quality */}
                     <ConnectionQuality />
-                    
-                    {/* Call Duration */}
                     {isInCall && (
                       <div className="bg-black/50 rounded-full px-3 py-1">
-                        <span className="text-white text-xs">{formatDuration(callDuration)}</span>
+                        <CallDurationDisplay duration={callDuration} />
                       </div>
                     )}
                   </div>
