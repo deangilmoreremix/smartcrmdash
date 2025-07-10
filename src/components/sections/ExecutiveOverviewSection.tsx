@@ -3,6 +3,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import DashboardHeader from '../dashboard/DashboardHeader';
 import KPICards from '../dashboard/KPICards';
 import QuickActions from '../dashboard/QuickActions';
+import AIGoalsCard from '../AIGoalsCard'; // Import the new AIGoalsCard component
 import MetricsCards from '../dashboard/MetricsCards';
 
 const ExecutiveOverviewSection: React.FC = () => {
@@ -28,6 +29,12 @@ const ExecutiveOverviewSection: React.FC = () => {
       <div className="mb-8">
         <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Performance Overview</h2>
         <MetricsCards />
+      </div>
+      
+      {/* AI Goals Card */}
+      <div className="mb-8">
+        <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>AI Goals Tracking</h2>
+        <AIGoalsCard />
       </div>
     </div>
   );
