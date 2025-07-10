@@ -17,4 +17,4 @@
 
 [context.production]
   # Production environment settings
-  environment = { NODE_ENV = "production" }
+  environment = { NODE_ENV = "production", NPM_FLAGS = "" }
