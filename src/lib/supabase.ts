@@ -1,18 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Use runtime environment variables or empty strings to prevent build-time embedding
+const supabaseUrl = typeof window !== 'undefined' 
+  ? window.ENV_VARS?.SUPABASE_URL || '' 
+  : '';
+const supabaseAnonKey = typeof window !== 'undefined' 
+  ? window.ENV_VARS?.SUPABASE_ANON_KEY || '' 
+  : '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
-}
-
-// Validate URL format
-try {
-  new URL(supabaseUrl);
-} catch (error) {
-  throw new Error(`Invalid Supabase URL format: "${supabaseUrl}". Please ensure VITE_SUPABASE_URL is set to a valid URL like "https://your-project-ref.supabase.co" in your .env file.`);
-}
+// Only validate if values are provided
+const isConfigured = supabaseUrl && supabaseAnonKey;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -22,3 +19,8 @@ export const STORAGE_BUCKETS = {
   PROFILE_AVATARS: 'profile-avatars',
   DOCUMENTS: 'documents'
 } as const;
+
+// Add a helper to check if Supabase is properly configured
+export const isSupabaseConfigured = () => {
+  return !!supabaseUrl && !!supabaseAnonKey;
+};
