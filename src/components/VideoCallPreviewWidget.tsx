@@ -26,10 +26,12 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import { useContactStore } from '../store/contactStore';
-import Avatar from './ui/Avatar';
+// Memoize Avatar to prevent unnecessary re-renders
+const Avatar = React.memo(require('./ui/Avatar').default);
 import { getInitials } from '../utils/avatars';
 
-const VideoCallPreviewWidget = () => {
+// Convert to React.memo to prevent unnecessary re-renders of the entire component
+const VideoCallPreviewWidget = React.memo(() => {
   const { isDark } = useTheme();
   const { 
     currentCall, 
@@ -427,7 +429,7 @@ const VideoCallPreviewWidget = () => {
 
                 {/* Video overlay */}
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <div className="text-center">
+                  <div className="text-center transform transition-none">
                     <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-2">
                       <Video className="w-8 h-8 text-white" />
                     </div>
@@ -623,6 +625,6 @@ const VideoCallPreviewWidget = () => {
       </div>
     </div>
   );
-};
+});
 
 export default VideoCallPreviewWidget;

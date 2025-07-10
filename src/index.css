@@ -61,7 +61,13 @@ html, body {
 
 /* Smooth transitions for theme changes */
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  /* Reduce scope of global transitions to avoid performance issues */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Apply text transitions only to specific elements to prevent flashing */
+h1, h2, h3, h4, h5, h6, p, span, button, a {
+  transition: color 0.3s ease;
 }
 
 /* Custom animations for modern navigation */
