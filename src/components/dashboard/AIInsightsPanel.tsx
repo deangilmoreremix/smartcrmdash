@@ -113,7 +113,7 @@ const AIInsightsPanel = () => {
 
   const generateInitialInsights = async () => {
     // Only generate if we have enough data
-    if (Object.keys(deals).length < 2 || Object.keys(contacts).length < 2) {
+    if (Object.keys(deals).length < 2 || Object.keys(contacts).length < 2 || !geminiService.isApiKeyConfigured()) {
       return;
     }
 
@@ -173,6 +173,12 @@ const AIInsightsPanel = () => {
   };
 
   const generateRealInsights = async () => {
+    if (!geminiService.isApiKeyConfigured()) {
+      setError("Gemini API key is not configured. Please add VITE_GOOGLE_AI_API_KEY to your environment.");
+      setApiKeysConfigured(false);
+      return;
+    }
+    
     // Convert to arrays for analysis
     const dealsArray = Object.values(deals);
     const contactsArray = Object.values(contacts);

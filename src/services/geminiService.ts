@@ -9,6 +9,10 @@ class GeminiAIService {
   private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
   private model = 'gemini-1.5-flash:generateContent';
 
+  isApiKeyConfigured() {
+    return !!this.apiKey && this.apiKey.length > 10 && !this.apiKey.includes('your_') && !this.apiKey.startsWith('your_');
+  }
+  
   setApiKey(key: string) {
     this.apiKey = key;
   }
@@ -16,7 +20,7 @@ class GeminiAIService {
   async researchContactByName(firstName: string, lastName: string, company?: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching contact with Gemini: ${firstName} ${lastName} ${company ? `at ${company}` : ''}`);
     
-    if (!this.apiKey) {
+    if (!this.isApiKeyConfigured()) {
       throw new Error('Gemini API key is not configured. Please set the VITE_GEMINI_API_KEY environment variable.');
     }
     
