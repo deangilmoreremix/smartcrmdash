@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
-import VideoCallOverlay from './components/VideoCallOverlay';
-import VideoCallPreviewWidget from './components/VideoCallPreviewWidget';
+const VideoCallOverlay = React.lazy(() => import('./components/VideoCallOverlay'));
+const VideoCallPreviewWidget = React.lazy(() => import('./components/VideoCallPreviewWidget'));
 import DevicePermissionChecker from './components/DevicePermissionChecker';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
@@ -16,7 +16,18 @@ import { ContactsModal } from './components/modals/ContactsModal';
 import './components/styles/design-system.css';
 
 function App() {
+  // Prevent unnecessary re-renders with useState instead of using a boolean directly
   const [isContactsModalOpen, setIsContactsModalOpen] = useState(false);
+  const [shouldRenderVideoComponents, setShouldRenderVideoComponents] = useState(false);
+  
+  // Delay loading video components to improve initial render performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldRenderVideoComponents(true);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ThemeProvider>
@@ -43,9 +54,14 @@ function App() {
                         </>
                       } />
                     </Routes>
-                    {/* Temporarily disabled to isolate flashing issues */}
-                    {/* <VideoCallOverlay />
-                    <VideoCallPreviewWidget /> */}
+                  
+                  {/* Lazy load video components with suspense to prevent layout shifts */}
+                  {shouldRenderVideoComponents && (
+                    <React.Suspense fallback={null}>
+                      <VideoCallOverlay />
+                      <VideoCallPreviewWidget />
+                    </React.Suspense>
+                  )}
                     
                     {/* ContactsModal rendered at the root level */}
                     <ContactsModal
