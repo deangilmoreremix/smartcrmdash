@@ -27,7 +27,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import { useContactStore } from '../store/contactStore';
 import Avatar from './ui/Avatar';
-import { getInitials } from '../utils/avatars';
 
 // Convert to React.memo to prevent unnecessary re-renders of the entire component
 const VideoCallPreviewWidget = React.memo(() => {
@@ -373,7 +372,13 @@ const VideoCallPreviewWidget = React.memo(() => {
 
   return (
     <div className="fixed bottom-6 right-6 z-40 hardware-accelerated contain-layout">
-      <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${isMinimized ? 'w-20 h-20' : 'w-96 h-72'}`}>
+      <div 
+        className={`backdrop-blur-2xl border rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
+          isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'
+        } ${
+          isMinimized ? 'w-20 h-20' : 'w-96 h-72'
+        }`}
+      >
         {isMinimized ? (
           // Minimized view
           <div 
@@ -622,6 +627,6 @@ const VideoCallPreviewWidget = React.memo(() => {
       </div>
     </div>
   );
-}, (prevProps, nextProps) => true); // Always return true to prevent re-renders from parent changes
+});
 
 export default VideoCallPreviewWidget;
