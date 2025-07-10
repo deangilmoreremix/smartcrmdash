@@ -27,6 +27,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import { useContactStore } from '../store/contactStore';
 import Avatar from './ui/Avatar';
+import { getInitials } from '../utils/avatars';
 
 // Convert to React.memo to prevent unnecessary re-renders of the entire component
 const VideoCallPreviewWidget = React.memo(() => {
