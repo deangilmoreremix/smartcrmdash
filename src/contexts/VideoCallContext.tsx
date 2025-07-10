@@ -902,6 +902,10 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
     }
+  }, [isInCall, localStreamRef, remoteStream]);
+
+  // Start recording function
+  const startRecording = useCallback(async () => {
     if (!isInCall || !localStreamRef.current) {
       throw new Error('Cannot start recording: not in call or no local stream');
     }
@@ -995,8 +999,9 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setIsRecording(false);
       throw error;
     }
-  }, [isInCall, localStreamRef, remoteStream]);
+  }, [isInCall, remoteStream]);
 
+  // Stop recording function
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       console.log('Stopping recording...');
