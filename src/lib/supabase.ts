@@ -21,7 +21,10 @@ const supabaseAnonKey = getSupabaseAnonKey();
 // Check if configuration is valid
 const isValidUrl = (url: string) => {
   try {
-    new URL(url);
+    // Only try to create URL if it's a non-empty string
+    if (url) {
+      new URL(url);
+    }
     return url !== '' && !url.includes('your_') && !url.includes('placeholder');
   } catch {
     return false;
@@ -36,8 +39,18 @@ const isConfigured = isValidUrl(supabaseUrl) && isValidKey(supabaseAnonKey);
 
 // Create Supabase client with proper error handling
 export const supabase = isConfigured 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createClient('https://placeholder.supabase.co', 'placeholder-key-that-prevents-errors');
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true
+      }
+    })
+  : createClient('https://example.org', 'placeholder-key', {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
+    });
 
 // Storage bucket names
 export const STORAGE_BUCKETS = {
