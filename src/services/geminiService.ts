@@ -5,7 +5,7 @@ import { aiOrchestratorService } from './aiOrchestratorService';
 import { enhancedGeminiService } from './enhancedGeminiService';
 
 class GeminiAIService {
-  private apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  private apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
   private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
   private model = 'gemini-1.5-flash:generateContent';
 
