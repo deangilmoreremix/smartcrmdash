@@ -622,6 +622,5 @@ const DevicePermissionChecker: React.FC = () => {
     </div>
   );
 };
-};
 
 export default DevicePermissionChecker;
