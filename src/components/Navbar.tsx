@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, User, Bell, Search, Settings, LogOut, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Megaphone, Activity, CheckSquare, Home, Sparkles, Presentation as PresentationChart, UserPlus, ClipboardList, Lightbulb, PieChart, Clock, Shield, Globe, Database, Headphones, Camera, Layers, Repeat, Palette, HelpCircle, Plus, DollarSign, HeartHandshake, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart, Edit3, ExternalLink, Menu, X, Key } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useCallback, memo } from 'react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
@@ -27,8 +28,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
   const { tasks } = useTaskStore();
   const { appointments } = useAppointmentStore();
 
-  // Calculate dynamic counters
-  const getCounters = () => {
+  // Optimize counter calculation with useCallback to prevent recalculation on every render
+  const getCounters = useCallback(() => {
     const activeDeals = Object.values(deals).filter(deal => 
       deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
     ).length;
@@ -55,9 +56,10 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
       todayAppointments,
       totalNotifications: hotContacts + pendingTasks + todayAppointments
     };
-  };
+  }, [deals, contacts, tasks, appointments]);
 
-  const counters = getCounters();
+  // Use useMemo for the counters to prevent unnecessary recalculations
+  const counters = React.useMemo(() => getCounters(), [getCounters]);
 
   // Tasks dropdown tools
   const taskTools = [
@@ -114,25 +116,30 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
-      setActiveDropdown(null);
-      setIsMobileMenuOpen(false);
+      if (activeDropdown !== null || isMobileMenuOpen) {
+        setActiveDropdown(null);
+        setIsMobileMenuOpen(false);
+      }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [activeDropdown, isMobileMenuOpen]);
 
-  const toggleDropdown = (dropdown: string) => {
+  // Optimize toggle function with useCallback
+  const toggleDropdown = useCallback((dropdown: string) => {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
-  };
+  }, [activeDropdown]);
 
-  const handleNavigation = (route: string, tabName: string) => {
+  // Optimize navigation handler with useCallback
+  const handleNavigation = useCallback((route: string, tabName: string) => {
     navigate(route);
     setActiveTab(tabName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-  };
+  }, [navigate]);
 
-  const handleAIToolClick = (toolName: string) => {
+  // Optimize AI tool click handler with useCallback
+  const handleAIToolClick = useCallback((toolName: string) => {
     if (toolName === 'sales-tools') navigate('/sales-tools');
     else if (toolName === 'lead-automation') navigate('/lead-automation');
     else if (toolName === 'circle-prospecting') navigate('/circle-prospecting');
@@ -170,7 +177,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
     }
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-  };
+  }, [navigate, openAITool, onOpenPipelineModal]);
 
   // Update active tab based on current route
   useEffect(() => {
@@ -340,7 +347,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
     }
   ];
 
-  const renderBadge = (count: number | null, color: string = 'bg-red-500') => {
+  // Optimize badge rendering with useCallback
+  const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
     if (!count || count === 0) return null;
     
     return (
@@ -348,21 +356,13 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPipelineModal }) => {
         {count > 99 ? '99+' : count}
       </div>
     );
-  };
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 p-4">
       {/* Main Navigation Container */}
-      <div className="max-w-7xl mx-auto">
-        <div className={`
-          ${isDark 
-            ? 'bg-gray-900/95 border-white/20' 
-            : 'bg-white/95 border-gray-200'
-          } 
-          backdrop-blur-xl border rounded-full shadow-2xl 
-          transition-all duration-500 hover:shadow-3xl
-          ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}
-        `}>
+      <div className="max-w-7xl mx-auto will-change-transform">
+        <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
           <div className="flex items-center justify-between px-4 py-2">
             
             {/* Logo */}
