@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "smartcrmdash",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,12 +10,13 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:all": "npm run build && npm run build --workspace=packages/pipelinedeals2",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev --workspace=packages/pipelinedeals2\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.2",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -23,6 +24,7 @@
     "recharts": "^2.5.0",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.4",
+    "vite": "^7.0.5",
     "zustand": "^4.3.6"
   },
   "devDependencies": {
@@ -39,5 +41,11 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "imports": {
+    "pipelinedeals2": "./packages/pipelinedeals2/src/index.js"
   }
 }
