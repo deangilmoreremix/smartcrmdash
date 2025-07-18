@@ -10,6 +10,7 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
+import Contacts from './pages/Contacts';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -86,7 +87,7 @@ function App() {
         
         <Route path="/contacts" element={
           <ProtectedRoute>
-            <PlaceholderPage title="Contacts" description="Contact management page coming soon" />
+            <Contacts />
           </ProtectedRoute>
         } />
         
