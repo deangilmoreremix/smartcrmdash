@@ -1,34 +1,47 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AIToolsProvider } from './components/AIToolsProvider';
+import { ModalsProvider } from './components/ModalsProvider';
+import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
+import { VideoCallProvider } from './contexts/VideoCallContext';
+import { NavigationProvider } from './contexts/NavigationContext';
+import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
+import Navbar from './components/Navbar';
+import Tasks from './pages/Tasks';
 import './components/styles/design-system.css';
 
-// Temporary placeholder component for pages we haven't migrated yet
-const PlaceholderPage: React.FC<{ title: string; description?: string }> = ({ title, description }) => (
-  <div className="container mx-auto px-4 py-8 max-w-7xl">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{title}</h1>
-      {description && (
-        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">{description}</p>
-      )}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-        <p className="text-blue-800 dark:text-blue-300">
-          🚧 This page is coming soon! We're migrating the full functionality from SDRButtons.
-        </p>
+// Placeholder component for routes not yet implemented
+const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
+  <div className="min-h-screen bg-gray-50 p-8">
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">{title}</h1>
+      <div className="bg-white rounded-lg shadow p-6">
+        <p className="text-gray-600">{description || "This page is coming soon..."}</p>
       </div>
     </div>
   </div>
 );
 
-// Protected route wrapper (temporarily allow all routes during migration)
+// Protected Route component (placeholder for future auth)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // During migration, we'll allow all routes. Auth will be added in the final phase.
+  // TODO: Add authentication logic here when auth is implemented
   return <>{children}</>;
 };
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Routes>
+    <ThemeProvider>
+      <AIToolsProvider>
+        <ModalsProvider>
+          <EnhancedHelpProvider>
+            <VideoCallProvider>
+              <NavigationProvider>
+                <DashboardLayoutProvider>
+                  <Router>
+                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                      <Navbar />
+                      <Routes>
         {/* Landing Page */}
         <Route path="/" element={
           <div className="min-h-screen flex items-center justify-center">
@@ -76,13 +89,12 @@ function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/tasks" element={
-          <ProtectedRoute>
-            <PlaceholderPage title="Tasks" description="Task management coming soon" />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/ai-tools" element={
+              {/* Tasks */}
+              <Route path="/tasks" element={
+                <ProtectedRoute>
+                  <Tasks />
+                </ProtectedRoute>
+              } />        <Route path="/ai-tools" element={
           <ProtectedRoute>
             <PlaceholderPage title="AI Tools" description="AI tools page coming soon" />
           </ProtectedRoute>
@@ -114,7 +126,15 @@ function App() {
         {/* Catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </div>
+                    </div>
+                  </Router>
+                </DashboardLayoutProvider>
+              </NavigationProvider>
+            </VideoCallProvider>
+          </EnhancedHelpProvider>
+        </ModalsProvider>
+      </AIToolsProvider>
+    </ThemeProvider>
   );
 }
 
