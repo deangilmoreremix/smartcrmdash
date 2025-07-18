@@ -10,11 +10,11 @@
   VITE_OPENAI_API_KEY = "Optional OpenAI API key"
   VITE_ANTHROPIC_API_KEY = "Optional Anthropic API key"
 
+[context.production]
+  # Production environment settings
+  environment = { NODE_ENV = "production", NPM_FLAGS = "" }
+
 [context.production.processing.html]
   # Add placeholder replacement for environment variables
   pretty_urls = true
   transformers = ["./netlify/transforms/html.js"]
-
-[context.production]
-  # Production environment settings
-  environment = { NODE_ENV = "production", NPM_FLAGS = "" }

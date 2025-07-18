@@ -44,8 +44,5 @@
   },
   "workspaces": [
     "packages/*"
-  ],
-  "imports": {
-    "pipelinedeals2": "./packages/pipelinedeals2/src/index.js"
-  }
+  ]
 }
