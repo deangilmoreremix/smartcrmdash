@@ -85,12 +85,18 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Territory Management', tool: 'territory-management', icon: Globe }
   ];
 
-  // Communication dropdown tools
+  // Communication dropdown tools - Enhanced with SDRButtons features
   const communicationTools = [
     { name: 'Video Email', tool: 'video-email', icon: Video },
     { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
     { name: 'Email Composer', tool: 'email-composer', icon: Mail },
-    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone }
+    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone },
+    // Enhanced SDRButtons Communication Features
+    { name: 'Group Calls', tool: 'group-calls', icon: Users },
+    { name: 'Call Recording', tool: 'call-recording', icon: Mic },
+    { name: 'In-Call Messaging', tool: 'in-call-messaging', icon: MessageCircle },
+    { name: 'Call Analytics', tool: 'call-analytics', icon: BarChart3 },
+    { name: 'Connection Quality Monitor', tool: 'connection-quality', icon: Activity }
   ];
 
   // Content dropdown tools
@@ -172,6 +178,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else if (toolName === 'campaigns') navigate('/campaigns');
     else if (toolName === 'image-generator') navigate('/image-generator');
     else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
+    // Enhanced SDRButtons Communication Features
+    else if (toolName === 'group-calls') navigate('/group-calls');
+    else if (toolName === 'call-recording') navigate('/call-recording');
+    else if (toolName === 'in-call-messaging') navigate('/in-call-messaging');
+    else if (toolName === 'call-analytics') navigate('/call-analytics');
+    else if (toolName === 'connection-quality') navigate('/connection-quality');
     else {
       // For other AI tools, open in AI tools page
       openAITool(toolName);
