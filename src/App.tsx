@@ -9,6 +9,7 @@ import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
+import Dashboard from './pages/Dashboard';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -79,7 +80,7 @@ function App() {
         {/* Main Application Routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <PlaceholderPage title="Dashboard" description="Dashboard coming soon - will integrate existing dashboard" />
+            <Dashboard />
           </ProtectedRoute>
         } />
         
