@@ -179,8 +179,8 @@ class SupabaseAIService {
   private async checkSupabaseConnection(): Promise<void> {
     try {
       // Check if environment variables are set to actual values (not placeholders)
-      let supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      let supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
       if (!supabaseUrl || !supabaseKey || 
           supabaseUrl.includes('your_supabase_project_url') ||

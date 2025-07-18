@@ -28,7 +28,7 @@ const AIGoalsPanel: React.FC = () => {
         setError(null);
         
         // Try to fetch from Supabase
-        let { data, error } = await supabase
+        const { data, error } = await supabase
           .from('user_goals')
           .select('*')
           .order('category');
