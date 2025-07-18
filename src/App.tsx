@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
+import Pipeline from './pages/Pipeline';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -65,13 +66,19 @@ function App() {
                   href="/tasks" 
                   className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  View Tasks (Placeholder)
+                  View Tasks
                 </a>
                 <a 
                   href="/contacts" 
                   className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
                 >
-                  View Contacts (Placeholder)
+                  View Contacts
+                </a>
+                <a 
+                  href="/pipeline" 
+                  className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  View Pipeline
                 </a>
               </div>
             </div>
@@ -110,7 +117,7 @@ function App() {
         
         <Route path="/pipeline" element={
           <ProtectedRoute>
-            <PlaceholderPage title="Sales Pipeline" description="Pipeline management coming soon" />
+            <Pipeline />
           </ProtectedRoute>
         } />
         
