@@ -12,6 +12,7 @@ import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import Pipeline from './pages/Pipeline';
+import AITools from './pages/AITools';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -80,6 +81,12 @@ function App() {
                 >
                   View Pipeline
                 </a>
+                <a 
+                  href="/ai-tools" 
+                  className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  AI Tools Hub
+                </a>
               </div>
             </div>
           </div>
@@ -105,7 +112,7 @@ function App() {
                 </ProtectedRoute>
               } />        <Route path="/ai-tools" element={
           <ProtectedRoute>
-            <PlaceholderPage title="AI Tools" description="AI tools page coming soon" />
+            <AITools />
           </ProtectedRoute>
         } />
         
