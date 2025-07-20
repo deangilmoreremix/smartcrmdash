@@ -10,4 +10,11 @@ export default defineConfig({
   define: {
     global: 'window',
   },
+  resolve: {
+    alias: {
+      events: 'events',
+      util: 'util',
+      stream: 'stream-browserify',
+    },
+  },
 });

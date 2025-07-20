@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
@@ -42,55 +42,11 @@ function App() {
             <VideoCallProvider>
               <NavigationProvider>
                 <DashboardLayoutProvider>
-                  <Router>
                     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                       <Navbar />
                       <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                🚀 Smart CRM Dashboard
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-                Phase 1: Routing Infrastructure Complete!
-              </p>
-              <div className="space-x-4">
-                <a 
-                  href="/dashboard" 
-                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Go to Dashboard
-                </a>
-                <a 
-                  href="/tasks" 
-                  className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  View Tasks
-                </a>
-                <a 
-                  href="/contacts" 
-                  className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  View Contacts
-                </a>
-                <a 
-                  href="/pipeline" 
-                  className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
-                >
-                  View Pipeline
-                </a>
-                <a 
-                  href="/ai-tools" 
-                  className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  AI Tools Hub
-                </a>
-              </div>
-            </div>
-          </div>
-        } />
+        {/* Redirect root to dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
         {/* Main Application Routes */}
         <Route path="/dashboard" element={
@@ -143,7 +99,6 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
                     </div>
-                  </Router>
                 </DashboardLayoutProvider>
               </NavigationProvider>
             </VideoCallProvider>

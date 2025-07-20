@@ -32,6 +32,11 @@ import NewLeadsSection from './dashboard/NewLeadsSection';
 import KPICards from './dashboard/KPICards';
 import QuickActions from './dashboard/QuickActions';
 
+// Video call components
+import PersistentVideoCallButton from './PersistentVideoCallButton';
+import VideoCallPreviewWidget from './VideoCallPreviewWidget';
+import VideoCallOverlay from './VideoCallOverlay';
+
 // Memo Dashboard component to prevent unnecessary re-renders
 const Dashboard: React.FC = React.memo(() => {
   const { 
@@ -171,6 +176,11 @@ const Dashboard: React.FC = React.memo(() => {
           </DraggableSection>
         ))}
       </div>
+
+      {/* Video Call Components */}
+      <PersistentVideoCallButton />
+      <VideoCallPreviewWidget />
+      <VideoCallOverlay />
     </main>
   );
 });

@@ -1,10 +1,11 @@
 import React from 'react';
-import { Plus, UserPlus, Calendar, Mail } from 'lucide-react';
+import { Plus, UserPlus, Calendar, Mail, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
 import { useAITools } from '../../components/AIToolsProvider';
+import { useVideoCall } from '../../contexts/VideoCallContext';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 
@@ -13,6 +14,7 @@ const QuickActions = () => {
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
   const { openTool } = useAITools();
+  const { initiateCall } = useVideoCall();
   const navigate = useNavigate();
   
   // Get active deals
@@ -93,6 +95,18 @@ const QuickActions = () => {
         console.log('Composing email...');
         openTool('email-composer');
         break;
+      case 'videoCall':
+        // Start video call interface
+        console.log('Opening video call interface...');
+        // For quick action, we'll open the video call interface
+        // In a real app, you might show a contact picker first
+        const dummyRecipient = {
+          id: 'demo',
+          name: 'Demo Call',
+          email: 'demo@example.com'
+        };
+        initiateCall(dummyRecipient, 'video');
+        break;
       default:
         console.log('Action not implemented yet');
     }
@@ -132,6 +146,14 @@ const QuickActions = () => {
       color: 'from-orange-500 to-red-500',
       hoverColor: 'hover:from-orange-600 hover:to-red-600',
       action: 'sendEmail'
+    },
+    {
+      title: 'Video Call',
+      description: 'Start video call',
+      icon: Video,
+      color: 'from-indigo-500 to-purple-500',
+      hoverColor: 'hover:from-indigo-600 hover:to-purple-600',
+      action: 'videoCall'
     }
   ];
 
@@ -156,7 +178,7 @@ const QuickActions = () => {
             </div>
             
             {/* Render avatar stack if data is available */}
-            {'data' in action && action.data.length > 0 && renderAvatarStack(action.data)}
+            {'data' in action && action.data && action.data.length > 0 && renderAvatarStack(action.data)}
           </button>
         ))}
       </div>

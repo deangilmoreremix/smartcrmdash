@@ -23,6 +23,7 @@ import {
   Tag,
   Eye
 } from 'lucide-react';
+import { ContactsModal } from '../components/modals/ContactsModal';
 
 // Sample contact interface (this would normally come from types)
 interface Contact {
@@ -120,6 +121,7 @@ const Contacts: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [showAddContactModal, setShowAddContactModal] = useState(false);
+  const [showContactsModal, setShowContactsModal] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
   const [sortBy, setSortBy] = useState<'name' | 'company' | 'score' | 'lastContact'>('name');
@@ -394,6 +396,13 @@ const Contacts: React.FC = () => {
             >
               <Plus size={18} className="mr-1" />
               Add Contact
+            </button>
+            <button 
+              onClick={() => setShowContactsModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md transition-colors"
+            >
+              <User size={18} className="mr-1" />
+              Browse Contacts
             </button>
           </div>
         </div>
@@ -770,6 +779,17 @@ const Contacts: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Enhanced Contacts Modal */}
+      <ContactsModal
+        isOpen={showContactsModal}
+        onClose={() => setShowContactsModal(false)}
+        onSelectContact={(contactId) => {
+          console.log('Selected contact:', contactId);
+          // You can add navigation or other actions here
+        }}
+        selectionMode={false}
+      />
     </div>
   );
 };
