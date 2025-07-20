@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
+import ContactsEnhanced from './pages/ContactsEnhanced';
 import Pipeline from './pages/Pipeline';
 import AITools from './pages/AITools';
 import './components/styles/design-system.css';
@@ -58,6 +59,12 @@ function App() {
         <Route path="/contacts" element={
           <ProtectedRoute>
             <Contacts />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/contacts-enhanced" element={
+          <ProtectedRoute>
+            <ContactsEnhanced />
           </ProtectedRoute>
         } />
         
