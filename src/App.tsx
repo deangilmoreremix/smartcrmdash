@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
@@ -38,7 +38,6 @@ function App() {
             <VideoCallProvider>
               <NavigationProvider>
                 <DashboardLayoutProvider>
-                  <Router>
                     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                       <Navbar />
                       <Routes>
@@ -127,7 +126,6 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
                     </div>
-                  </Router>
                 </DashboardLayoutProvider>
               </NavigationProvider>
             </VideoCallProvider>
