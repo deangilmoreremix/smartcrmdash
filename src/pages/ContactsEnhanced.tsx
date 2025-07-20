@@ -7,12 +7,23 @@ import {
   List,
   ChevronDown,
   Users,
-  Sliders
+  Sliders,
+  MessageSquare,
+  Calendar,
+  Phone,
+  Zap
 } from 'lucide-react';
 import { useContactStore } from '../store/contactStore';
 import { ContactsModal } from '../components/modals/ContactsModal';
 import EnhancedContactCard from '../components/contacts/EnhancedContactCard';
 import AdvancedContactFilter from '../components/contacts/AdvancedContactFilter';
+import ProfessionalContactModal from '../components/contacts/ProfessionalContactModal';
+import EmailComposer from '../components/communications/EmailComposer';
+import CommunicationHub from '../components/communications/CommunicationHub';
+import ContactAutomation from '../components/communications/ContactAutomation';
+import CallLogging from '../components/communications/CallLogging';
+import MeetingScheduler from '../components/communications/MeetingScheduler';
+import { Contact } from '../types/contact';
 
 interface FilterCriteria {
   status: string[];
@@ -48,6 +59,9 @@ const ContactsEnhanced: React.FC = () => {
   const [showContactsModal, setShowContactsModal] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeTab, setActiveTab] = useState<'contacts' | 'communication' | 'automation' | 'calls' | 'meetings'>('contacts');
+  const [selectedContactForModal, setSelectedContactForModal] = useState<Contact | null>(null);
+  const [contactModalMode, setContactModalMode] = useState<'view' | 'edit' | 'create'>('view');
   const [sortBy, setSortBy] = useState<'name' | 'company' | 'score' | 'lastContact'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -192,6 +206,20 @@ const ContactsEnhanced: React.FC = () => {
       selectedContacts.forEach(id => deleteContact(id));
       clearSelection();
     }
+  };
+
+  const handleViewContact = (contact: Contact) => {
+    setSelectedContactForModal(contact);
+    setContactModalMode('view');
+  };
+
+  const handleEditContact = (contact: Contact) => {
+    setSelectedContactForModal(contact);
+    setContactModalMode('edit');
+  };
+
+  const handleCloseContactModal = () => {
+    setSelectedContactForModal(null);
   };
 
   const handleApplyFilters = (filters: FilterCriteria) => {
@@ -406,8 +434,156 @@ const ContactsEnhanced: React.FC = () => {
         </div>
       </div>
 
-      {/* Contacts Grid/List */}
-      {filteredContacts.length === 0 ? (
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('contacts')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'contacts'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Users size={18} />
+                <span>Contacts</span>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('communication')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'communication'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <MessageSquare size={18} />
+                <span>Communication Hub</span>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('automation')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'automation'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Zap size={18} />
+                <span>Automation</span>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('calls')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'calls'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Phone size={18} />
+                <span>Call Logging</span>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('meetings')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'meetings'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Calendar size={18} />
+                <span>Meeting Scheduler</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'contacts' && (
+        <>
+          {/* Contacts Grid/List */}
+          {filteredContacts.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {searchTerm || hasActiveFilters() 
+                  ? 'Try adjusting your search or filters'
+                  : 'Get started by adding your first contact'
+                }
+              </p>
+              {(!searchTerm && !hasActiveFilters()) && (
+                <div className="mt-6">
+                  <button
+                    onClick={() => setShowContactsModal(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="mr-2 h-5 w-5" />
+                    Add Contact
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'space-y-4'
+            }>
+              {filteredContacts.map((contact) => (
+                <EnhancedContactCard
+                  key={contact.id}
+                  contact={contact}
+                  isSelected={selectedContacts.includes(contact.id)}
+                  onSelect={toggleContactSelection}
+                  onEdit={(contact) => {
+                    // Handle edit - open modal with contact data
+                    console.log('Edit contact:', contact);
+                  }}
+                  onDelete={(id) => {
+                    if (confirm('Delete this contact? This action cannot be undone.')) {
+                      deleteContact(id);
+                    }
+                  }}
+                  onView={(contact) => {
+                    // Handle view - could open a detailed modal or navigate
+                    console.log('View contact:', contact);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab === 'communication' && (
+        <div className="space-y-6">
+          <EmailComposer />
+          <CommunicationHub />
+        </div>
+      )}
+
+      {activeTab === 'automation' && <ContactAutomation />}
+
+      {activeTab === 'calls' && <CallLogging />}
+
+      {activeTab === 'meetings' && <MeetingScheduler />}
+
+      {/* Contacts Grid/List - Legacy (remove after tab content is working) */}
+      {false && filteredContacts.length === 0 ? (
         <div className="text-center py-12">
           <Users className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
@@ -429,7 +605,7 @@ const ContactsEnhanced: React.FC = () => {
             </div>
           )}
         </div>
-      ) : (
+      ) : (false &&
         <div className={
           viewMode === 'grid'
             ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
@@ -441,19 +617,13 @@ const ContactsEnhanced: React.FC = () => {
               contact={contact}
               isSelected={selectedContacts.includes(contact.id)}
               onSelect={toggleContactSelection}
-              onEdit={(_contact) => {
-                // Handle edit
-                setShowContactsModal(true);
-              }}
+              onEdit={handleEditContact}
               onDelete={(id) => {
                 if (confirm('Delete this contact? This action cannot be undone.')) {
                   deleteContact(id);
                 }
               }}
-              onView={(contact) => {
-                // Handle view - could open a detailed modal or navigate
-                console.log('View contact:', contact);
-              }}
+              onView={handleViewContact}
             />
           ))}
         </div>
@@ -472,6 +642,13 @@ const ContactsEnhanced: React.FC = () => {
         onClearFilters={handleClearFilters}
         contacts={contactsArray}
         currentFilters={currentFilters}
+      />
+
+      <ProfessionalContactModal
+        isOpen={!!selectedContactForModal}
+        onClose={handleCloseContactModal}
+        contact={selectedContactForModal || undefined}
+        mode={contactModalMode}
       />
     </div>
   );

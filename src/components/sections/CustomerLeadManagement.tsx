@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Users, UserPlus, Plus } from 'lucide-react';
+import { Users, UserPlus } from 'lucide-react';
 import LeadsSection from '../LeadsSection';
 import NewLeadsSection from '../dashboard/NewLeadsSection';
 import CustomerProfile from '../dashboard/CustomerProfile';
+import ProfessionalContactModal from '../contacts/ProfessionalContactModal';
+import { Contact } from '../../types/contact';
 
 const CustomerLeadManagement: React.FC = () => {
   const { isDark } = useTheme();
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [contactModalMode, setContactModalMode] = useState<'view' | 'edit' | 'create'>('view');
+
+  const handleContactClick = (contact: Contact) => {
+    setSelectedContact(contact);
+    setContactModalMode('view');
+  };
+
+  const handleCloseContactModal = () => {
+    setSelectedContact(null);
+  };
 
   return (
     <div className="mb-10">
@@ -34,7 +47,7 @@ const CustomerLeadManagement: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Contact Cards / Leads Section - takes 2 columns */}
         <div className="lg:col-span-2">
-          <NewLeadsSection />
+          <NewLeadsSection onContactClick={handleContactClick} />
         </div>
         
         {/* Customer Profile */}
@@ -45,8 +58,16 @@ const CustomerLeadManagement: React.FC = () => {
       
       {/* Full Leads Section as fallback/alternative */}
       <div className="mb-8 hidden">
-        <LeadsSection />
+        <LeadsSection onContactClick={handleContactClick} />
       </div>
+
+      {/* Contact Modal */}
+      <ProfessionalContactModal
+        isOpen={!!selectedContact}
+        onClose={handleCloseContactModal}
+        contact={selectedContact || undefined}
+        mode={contactModalMode}
+      />
     </div>
   );
 };
