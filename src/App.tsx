@@ -9,6 +9,7 @@ import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
+import TasksNew from './pages/TasksNew';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import ContactsEnhanced from './pages/ContactsEnhanced';
@@ -71,7 +72,7 @@ function App() {
               {/* Tasks */}
               <Route path="/tasks" element={
                 <ProtectedRoute>
-                  <Tasks />
+                  <TasksNew />
                 </ProtectedRoute>
               } />        <Route path="/ai-tools" element={
           <ProtectedRoute>
