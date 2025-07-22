@@ -10,11 +10,15 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
 import Tasks from './pages/Tasks';
 import TasksNew from './pages/TasksNew';
+import Communication from './pages/Communication';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import ContactsEnhanced from './pages/ContactsEnhanced';
 import Pipeline from './pages/Pipeline';
 import AITools from './pages/AITools';
+import Analytics from './pages/Analytics';
+import AIIntegration from './pages/AIIntegration';
+import SystemOverview from './pages/SystemOverview';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -48,7 +52,14 @@ function App() {
                       <Navbar />
                       <Routes>
         {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/system-overview" replace />} />
+        
+        {/* System Overview - Main Landing Page */}
+        <Route path="/system-overview" element={
+          <ProtectedRoute>
+            <SystemOverview />
+          </ProtectedRoute>
+        } />
         
         {/* Main Application Routes */}
         <Route path="/dashboard" element={
@@ -74,7 +85,28 @@ function App() {
                 <ProtectedRoute>
                   <TasksNew />
                 </ProtectedRoute>
-              } />        <Route path="/ai-tools" element={
+              } />
+              
+              {/* Communication */}
+              <Route path="/communication" element={
+                <ProtectedRoute>
+                  <Communication />
+                </ProtectedRoute>
+              } />
+
+              {/* Analytics */}
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              } />              {/* AI Integration */}
+              <Route path="/ai-integration" element={
+                <ProtectedRoute>
+                  <AIIntegration />
+                </ProtectedRoute>
+              } />
+
+        <Route path="/ai-tools" element={
           <ProtectedRoute>
             <AITools />
           </ProtectedRoute>

@@ -282,6 +282,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       color: 'from-green-500 to-emerald-500'
     },
     {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      action: () => handleNavigation('/analytics', 'analytics'),
+      badge: null,
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
       id: 'ai-goals',
       label: 'AI Goals',
       icon: Target,
