@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
@@ -61,7 +61,7 @@ export default function CompetitorAnalysis() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (field: keyof CompetitorData, value: any) => {
+  const handleInputChange = (field: keyof CompetitorData, value: string | string[] | undefined) => {
     setCompetitorData(prev => ({
       ...prev,
       [field]: value

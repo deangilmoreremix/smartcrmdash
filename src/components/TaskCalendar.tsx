@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, momentLocalizer, View, Event } from 'react-big-calendar';
+import { Calendar, momentLocalizer, View, Event, NavigateAction, ToolbarProps } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
@@ -321,8 +321,8 @@ export const TaskCalendar: React.FC = () => {
   };
 
   // Custom toolbar
-  const CustomToolbar = ({ date, view, onNavigate, onView }: any) => {
-    const navigate = (action: string) => {
+  const CustomToolbar = ({ date, view, onNavigate, onView }: ToolbarProps<TaskEvent, object>) => {
+    const navigate = (action: NavigateAction) => {
       onNavigate(action);
     };
 
@@ -398,7 +398,7 @@ export const TaskCalendar: React.FC = () => {
                 key={viewName}
                 variant={view === viewName ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => onView(viewName)}
+                onClick={() => onView(viewName as View)}
                 className="rounded-none first:rounded-l-md last:rounded-r-md"
               >
                 {viewName.charAt(0).toUpperCase() + viewName.slice(1)}

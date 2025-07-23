@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format, isToday, isYesterday, isThisWeek, subDays } from 'date-fns';
 import {
-  Clock,
   CheckCircle2,
   Circle,
   Plus,
@@ -22,7 +21,6 @@ import { Activity } from '../types/task';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +37,7 @@ import {
   SelectValue,
 } from './ui/select';
 
-const activityIcons = {
+const activityIcons: Record<Activity['type'], React.ElementType> = {
   task_created: Plus,
   task_updated: Edit,
   task_completed: CheckCircle2,
@@ -54,9 +52,17 @@ const activityIcons = {
   email_sent: Mail,
   meeting_scheduled: Calendar,
   reminder_set: AlertCircle,
-} as const;
+  // fallback icons for any missing types
+  call_made: Phone,
+  meeting_held: Calendar,
+  note_added: MessageSquare,
+  deal_moved: Edit,
+  contact_updated: User,
+  file_uploaded: FileText,
+  reminder_sent: AlertCircle,
+};
 
-const activityColors = {
+const activityColors: Partial<Record<Activity['type'], string>> = {
   task_created: 'text-green-600 bg-green-100',
   task_updated: 'text-blue-600 bg-blue-100',
   task_completed: 'text-green-600 bg-green-100',
@@ -71,7 +77,15 @@ const activityColors = {
   email_sent: 'text-blue-600 bg-blue-100',
   meeting_scheduled: 'text-purple-600 bg-purple-100',
   reminder_set: 'text-orange-600 bg-orange-100',
-} as const;
+  // fallback colors for any missing types
+  call_made: 'text-green-600 bg-green-100',
+  meeting_held: 'text-purple-600 bg-purple-100',
+  note_added: 'text-blue-600 bg-blue-100',
+  deal_moved: 'text-orange-600 bg-orange-100',
+  contact_updated: 'text-purple-600 bg-purple-100',
+  file_uploaded: 'text-gray-600 bg-gray-100',
+  reminder_sent: 'text-orange-600 bg-orange-100',
+};
 
 interface ActivityItemProps {
   activity: Activity;

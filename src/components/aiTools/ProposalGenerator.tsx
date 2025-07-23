@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
@@ -33,7 +33,7 @@ export default function ProposalGenerator() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (field: keyof ProposalData, value: any) => {
+  const handleInputChange = (field: keyof ProposalData, value: string | number | undefined) => {
     setProposalData(prev => ({
       ...prev,
       [field]: value

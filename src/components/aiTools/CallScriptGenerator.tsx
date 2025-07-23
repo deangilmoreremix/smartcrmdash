@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
@@ -39,7 +39,7 @@ export default function CallScriptGenerator() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (field: keyof CallScriptData, value: any) => {
+  const handleInputChange = (field: keyof CallScriptData, value: string | number | undefined) => {
     setScriptData(prev => ({
       ...prev,
       [field]: value

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, createElement } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
@@ -239,7 +239,7 @@ export default function SentimentAnalysis() {
               <div className={`p-4 rounded-lg border ${getSentimentBg(sentimentResult.sentiment)}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center">
-                    {React.createElement(getSentimentIcon(sentimentResult.sentiment), { 
+                    {createElement(getSentimentIcon(sentimentResult.sentiment), { 
                       className: `w-6 h-6 mr-2 ${getSentimentColor(sentimentResult.sentiment)}` 
                     })}
                     <span className={`text-lg font-semibold capitalize ${getSentimentColor(sentimentResult.sentiment)}`}>
