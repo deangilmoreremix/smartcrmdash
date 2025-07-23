@@ -15,23 +15,20 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
   Clock,
   User,
   MapPin,
-  MoreHorizontal,
   Plus,
   Filter,
   Eye,
   EyeOff,
 } from 'lucide-react';
 import { useTaskStore } from '../store/taskStore';
-import { Task } from '../../types/task';
+import { Task } from '../types/task';
 import { TaskDetailsModal } from './TaskDetailsModal';
 
 const localizer = momentLocalizer(moment);
@@ -73,9 +70,9 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit 
     switch (status) {
       case 'pending': return 'bg-gray-100 text-gray-800';
       case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'on-hold': return 'bg-yellow-100 text-yellow-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -184,9 +181,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit 
 export const TaskCalendar: React.FC = () => {
   const { 
     tasks, 
-    calendarEvents, 
-    calendars,
-    setSelectedTask,
+    calendarEvents,
   } = useTaskStore();
   
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -194,6 +189,15 @@ export const TaskCalendar: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<TaskEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  // Mock calendars data for now
+  const calendars = [
+    { id: 'default', name: 'Default', color: '#3174ad', isVisible: true },
+    { id: 'personal', name: 'Personal', color: '#10b981', isVisible: true },
+    { id: 'work', name: 'Work', color: '#f59e0b', isVisible: true },
+  ];
+
   const [visibleCalendars, setVisibleCalendars] = useState<string[]>(
     calendars.filter(cal => cal.isVisible).map(cal => cal.id)
   );
@@ -279,7 +283,7 @@ export const TaskCalendar: React.FC = () => {
       if (status === 'completed') {
         backgroundColor = '#10b981';
         borderColor = '#10b981';
-      } else if (status === 'on-hold') {
+      } else if (status === 'cancelled') {
         backgroundColor = '#f59e0b';
         borderColor = '#f59e0b';
       } else if (priority === 'urgent') {
@@ -448,9 +452,9 @@ export const TaskCalendar: React.FC = () => {
       />
 
       {/* Task Details Modal */}
-      {showTaskModal && (
+      {showTaskModal && selectedTask && (
         <TaskDetailsModal
-          task={selectedEvent?.resource.type === 'task' ? selectedEvent.resource.data : null}
+          task={selectedTask}
           isOpen={showTaskModal}
           onClose={() => {
             setShowTaskModal(false);
