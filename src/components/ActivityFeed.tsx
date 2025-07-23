@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, isToday, isYesterday, isThisWeek, subDays } from 'date-fns';
 import {
   Clock,
@@ -17,12 +17,12 @@ import {
   Search,
   AlertCircle,
 } from 'lucide-react';
-import { useTaskStore } from '../../store/taskStore';
-import { Activity } from '../../types/task';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { useTaskStore } from '../store/taskStore';
+import { Activity } from '../types/task';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Badge } from './ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,14 +30,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
-} from '../ui/dropdown-menu';
+} from './ui/dropdown-menu';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from './ui/select';
 
 const activityIcons = {
   task_created: Plus,

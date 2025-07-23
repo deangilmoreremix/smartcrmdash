@@ -7,16 +7,16 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '../ui/dropdown-menu';
+} from './ui/dropdown-menu';
 import {
   ChevronLeft,
   ChevronRight,
@@ -30,7 +30,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { useTaskStore } from '../../store/taskStore';
+import { useTaskStore } from '../store/taskStore';
 import { Task } from '../../types/task';
 import { TaskDetailsModal } from './TaskDetailsModal';
 

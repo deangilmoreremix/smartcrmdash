@@ -5,27 +5,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Badge } from '../ui/badge';
-import { Label } from '../ui/label';
-import { Calendar } from '../ui/calendar';
+} from './ui/select';
+import { Badge } from './ui/badge';
+import { Label } from './ui/label';
+import { Calendar } from './ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../ui/popover';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+} from './ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import {
   Plus,
   X,
@@ -48,8 +48,8 @@ import {
   Bell,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useTaskStore } from '../../store/taskStore';
-import { Task, SubTask, TaskAttachment } from '../../types/task';
+import { useTaskStore } from '../store/taskStore';
+import { Task, SubTask, TaskAttachment } from '../types/task';
 
 interface TaskDetailsModalProps {
   task?: Task | null;
