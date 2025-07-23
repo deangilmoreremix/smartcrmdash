@@ -193,7 +193,7 @@ interface ActivityFilters {
 }
 
 export const ActivityFeed: React.FC = () => {
-  const { activities, getRecentActivities } = useTaskStore();
+  const { activities } = useTaskStore();
   
   const [filters, setFilters] = useState<ActivityFilters>({
     dateRange: 'week'

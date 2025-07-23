@@ -3,22 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Upload, 
-  Database, 
-  Zap,
-  Settings,
-  Shield,
-  Activity,
+import {
+  TrendingUp,
+  Target,
+  Building2,
   BarChart3,
-  Clock,
-  Users,
+  Settings,
+  Brain,
+  Zap,
+  CheckCircle,
+  Activity,
+  Search,
+  Database,
+  Download,
+  Upload,
+  Shield,
   FileText,
-  Globe,
-  Lock
 } from 'lucide-react';
 
 export default function AdvancedFeaturesDashboard() {
