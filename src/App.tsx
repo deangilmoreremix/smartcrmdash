@@ -19,6 +19,7 @@ import AITools from './pages/AITools';
 import Analytics from './pages/Analytics';
 import AIIntegration from './pages/AIIntegration';
 import SystemOverview from './pages/SystemOverview';
+import MobileResponsiveness from './pages/MobileResponsiveness';
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -127,6 +128,13 @@ function App() {
         <Route path="/settings" element={
           <ProtectedRoute>
             <PlaceholderPage title="Settings" description="Settings page coming soon" />
+          </ProtectedRoute>
+        } />
+        
+        {/* Mobile Responsiveness */}
+        <Route path="/mobile" element={
+          <ProtectedRoute>
+            <MobileResponsiveness />
           </ProtectedRoute>
         } />
         
