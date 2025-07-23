@@ -171,9 +171,9 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
                   : 'bg-white border-gray-300 text-gray-900'
               } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             >
-              <option value="low">Low (>30% risk)</option>
-              <option value="medium">Medium (>50% risk)</option>
-              <option value="high">High (>70% risk)</option>
+              <option value="low">Low (&gt;30% risk)</option>
+              <option value="medium">Medium (&gt;50% risk)</option>
+              <option value="high">High (&gt;70% risk)</option>
             </select>
           </div>
         </div>
