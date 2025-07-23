@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { 
   Brain, 
   Target, 
@@ -33,16 +33,20 @@ import {
 import { SmartAIControls } from '../components/ai/SmartAIControls';
 import AIModelUsageStats from '../components/AIModelUsageStats';
 import AIInsightsPanel from '../components/dashboard/AIInsightsPanel';
-import LiveDealAnalysis from '../components/aiTools/LiveDealAnalysis';
-import SmartSearchRealtime from '../components/aiTools/SmartSearchRealtime';
-import ProposalGenerator from '../components/aiTools/ProposalGenerator';
-import CallScriptGenerator from '../components/aiTools/CallScriptGenerator';
-import CompetitorAnalysis from '../components/aiTools/CompetitorAnalysis';
-import SentimentAnalysis from '../components/aiTools/SentimentAnalysis';
-import AIUsageStatsPanel from '../components/aiTools/AIUsageStatsPanel';
-import MarketTrendsAnalysis from '../components/aiTools/MarketTrendsAnalysis';
-import ChurnPrediction from '../components/aiTools/ChurnPrediction';
-import SocialMediaGenerator from '../components/aiTools/SocialMediaGenerator';
+import { AIToolLoadingSkeleton } from '../components/ui/LoadingSpinner';
+
+// Lazy load AI Tools for performance optimization
+const LiveDealAnalysis = lazy(() => import('../components/aiTools/LiveDealAnalysis'));
+const SmartSearchRealtime = lazy(() => import('../components/aiTools/SmartSearchRealtime'));
+const ProposalGenerator = lazy(() => import('../components/aiTools/ProposalGenerator'));
+const CallScriptGenerator = lazy(() => import('../components/aiTools/CallScriptGenerator'));
+const CompetitorAnalysis = lazy(() => import('../components/aiTools/CompetitorAnalysis'));
+const SentimentAnalysis = lazy(() => import('../components/aiTools/SentimentAnalysis'));
+const AIUsageStatsPanel = lazy(() => import('../components/aiTools/AIUsageStatsPanel'));
+const MarketTrendsAnalysis = lazy(() => import('../components/aiTools/MarketTrendsAnalysis'));
+const ChurnPrediction = lazy(() => import('../components/aiTools/ChurnPrediction'));
+const SocialMediaGenerator = lazy(() => import('../components/aiTools/SocialMediaGenerator'));
+
 import { aiUsageTracker } from '../services/aiUsageTracker';
 
 // AI Tool Category Interface
@@ -439,7 +443,11 @@ const AITools: React.FC = () => {
             ← Back to AI Tools Hub
           </button>
         </div>
-        {renderToolComponent()}
+        <div className="container mx-auto px-4 pb-8">
+          <Suspense fallback={<AIToolLoadingSkeleton />}>
+            {renderToolComponent()}
+          </Suspense>
+        </div>
       </div>
     );
   }

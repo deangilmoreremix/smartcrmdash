@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
@@ -135,28 +136,47 @@ export default function ProposalGenerator() {
   };
 
   return (
-    <div className={`max-w-6xl mx-auto p-6 ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <motion.div 
+      className={`max-w-6xl mx-auto p-4 sm:p-6 ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl mr-4">
-          <FileText className="h-8 w-8 text-white" />
+      <motion.div 
+        className="flex flex-col sm:flex-row sm:items-center mb-6 sm:mb-8 text-center sm:text-left"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+      >
+        <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl mx-auto sm:mx-0 sm:mr-4 mb-4 sm:mb-0">
+          <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">AI Proposal Generator</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">AI Proposal Generator</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
             Create professional business proposals with AI assistance
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Input Form */}
-        <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className="text-xl font-semibold mb-6">Proposal Details</h2>
+        <motion.div 
+          className={`p-4 sm:p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Proposal Details</h2>
           
           {/* Basic Information */}
           <div className="space-y-4">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
               <label className="block text-sm font-medium mb-2">Client Name *</label>
               <input
                 type="text"
@@ -166,12 +186,16 @@ export default function ProposalGenerator() {
                   isDark 
                     ? 'bg-gray-700 border-gray-600 text-white' 
                     : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation`}
                 placeholder="Enter client name"
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+            >
               <label className="block text-sm font-medium mb-2">Company Name *</label>
               <input
                 type="text"
@@ -181,12 +205,16 @@ export default function ProposalGenerator() {
                   isDark 
                     ? 'bg-gray-700 border-gray-600 text-white' 
                     : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation`}
                 placeholder="Enter company name"
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+            >
               <label className="block text-sm font-medium mb-2">Project Description *</label>
               <textarea
                 value={proposalData.projectDescription}

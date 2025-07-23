@@ -1,22 +1,58 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { enhancedGeminiService } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
-import { AlertTriangle, Download, Search, TrendingDown, Users, Calendar, Target, Mail, Phone } from 'lucide-react';
+import { AlertTriangle, Download, Search, TrendingDown, Users, Target, Mail, Phone } from 'lucide-react';
+
+interface ChurnPredictionFormData {
+  timeframe: string;
+  includeContactData: boolean;
+  includeDealHistory: boolean;
+  includeEngagementMetrics: boolean;
+  riskThreshold: string;
+}
+
+interface ChurnMetrics {
+  highRisk: number;
+  mediumRisk: number;
+  lowRisk: number;
+  totalCustomers: number;
+}
+
+interface RiskCustomer {
+  name?: string;
+  company?: string;
+  churnProbability?: number;
+  riskLevel?: string;
+  lastContact?: string;
+  dealValue?: string;
+  engagementScore?: string;
+  riskFactors?: string[];
+}
+
+interface ChurnPredictionResult {
+  summary?: string;
+  metrics?: ChurnMetrics;
+  highRiskCustomers?: RiskCustomer[];
+  riskFactors?: string[];
+  recommendations?: string[];
+  retentionStrategies?: string[];
+}
 
 export default function ChurnPrediction() {
   const { isDark } = useTheme();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ChurnPredictionFormData>({
     timeframe: '90',
     includeContactData: true,
     includeDealHistory: true,
     includeEngagementMetrics: true,
     riskThreshold: 'medium'
   });
-  const [prediction, setPrediction] = useState<any>(null);
+  const [prediction, setPrediction] = useState<ChurnPredictionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -26,34 +62,43 @@ export default function ChurnPrediction() {
 
     try {
       const result = await enhancedGeminiService.predictChurnRisk({
-        timeframe: `${formData.timeframe} days`,
-        includeContactData: formData.includeContactData,
-        includeDealHistory: formData.includeDealHistory,
-        includeEngagementMetrics: formData.includeEngagementMetrics,
-        riskThreshold: formData.riskThreshold
+        customerId: 'demo-customer-id',
+        engagementData: {
+          lastContact: new Date(Date.now() - parseInt(formData.timeframe) * 24 * 60 * 60 * 1000),
+          emailOpens: 15,
+          websiteVisits: 8,
+          supportTickets: 2,
+          purchaseHistory: []
+        },
+        customerProfile: {
+          includeContactData: formData.includeContactData,
+          includeDealHistory: formData.includeDealHistory,
+          includeEngagementMetrics: formData.includeEngagementMetrics,
+          riskThreshold: formData.riskThreshold
+        }
       });
 
       setPrediction(result);
 
       // Track usage
-      aiUsageTracker.recordUsage(
-        'churn-prediction',
-        'Churn Prediction',
-        'Analytics',
-        Date.now() - startTime,
-        true
-      );
+      aiUsageTracker.trackUsage({
+        toolId: 'churn-prediction',
+        toolName: 'Churn Prediction',
+        category: 'Analytics',
+        executionTime: Date.now() - startTime,
+        success: true
+      });
     } catch (error) {
       console.error('Error generating churn prediction:', error);
       alert('Failed to generate churn prediction. Please try again.');
       
-      aiUsageTracker.recordUsage(
-        'churn-prediction',
-        'Churn Prediction',
-        'Analytics',
-        Date.now() - startTime,
-        false
-      );
+      aiUsageTracker.trackUsage({
+        toolId: 'churn-prediction',
+        toolName: 'Churn Prediction',
+        category: 'Analytics',
+        executionTime: Date.now() - startTime,
+        success: false
+      });
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +117,7 @@ EXECUTIVE SUMMARY:
 ${prediction.summary}
 
 HIGH RISK CUSTOMERS:
-${prediction.highRiskCustomers?.map((customer: any, index: number) => 
+${prediction.highRiskCustomers?.map((customer: RiskCustomer, index: number) => 
   `${index + 1}. ${customer.name || 'Customer'} (${customer.churnProbability}% risk)`
 ).join('\n') || 'No high-risk customers identified'}
 
@@ -116,40 +161,66 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+      >
         <div className="flex items-center">
           <AlertTriangle className="w-6 h-6 mr-2 text-red-600" />
-          <h2 className="text-2xl font-bold">Churn Prediction Analysis</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Churn Prediction Analysis</h2>
         </div>
-        {prediction && (
-          <button
-            onClick={downloadReport}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Report
-          </button>
-        )}
-      </div>
+        <AnimatePresence>
+          {prediction && (
+            <motion.button
+              onClick={downloadReport}
+              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Report
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Configuration Form */}
-      <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <motion.div 
+        className={`p-4 sm:p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
         <h3 className="text-lg font-semibold mb-4">Analysis Configuration</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Timeframe */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             <label className="block text-sm font-medium mb-2">Prediction Timeframe</label>
             <select
               value={formData.timeframe}
               onChange={(e) => handleInputChange('timeframe', e.target.value)}
-              className={`w-full p-3 rounded-lg border ${
+              className={`w-full p-3 rounded-lg border touch-manipulation ${
                 isDark 
                   ? 'bg-gray-700 border-gray-600 text-white' 
                   : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
             >
               <option value="30">30 Days</option>
               <option value="60">60 Days</option>
@@ -157,25 +228,29 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
               <option value="180">180 Days</option>
               <option value="365">1 Year</option>
             </select>
-          </div>
+          </motion.div>
 
           {/* Risk Threshold */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             <label className="block text-sm font-medium mb-2">Risk Threshold</label>
             <select
               value={formData.riskThreshold}
               onChange={(e) => handleInputChange('riskThreshold', e.target.value)}
-              className={`w-full p-3 rounded-lg border ${
+              className={`w-full p-3 rounded-lg border touch-manipulation ${
                 isDark 
                   ? 'bg-gray-700 border-gray-600 text-white' 
                   : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
             >
               <option value="low">Low (&gt;30% risk)</option>
               <option value="medium">Medium (&gt;50% risk)</option>
               <option value="high">High (&gt;70% risk)</option>
             </select>
-          </div>
+          </motion.div>
         </div>
 
         {/* Data Sources */}
@@ -213,15 +288,26 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
         </div>
 
         {/* Generate Button */}
-        <div className="mt-6">
-          <button
+        <motion.div 
+          className="mt-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
+          <motion.button
             onClick={generatePrediction}
             disabled={isLoading}
-            className="w-full md:w-auto flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-h-[3rem] touch-manipulation"
+            whileHover={{ scale: isLoading ? 1 : 1.02 }}
+            whileTap={{ scale: isLoading ? 1 : 0.98 }}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <motion.div 
+                  className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
                 Analyzing Churn Risk...
               </>
             ) : (
@@ -230,76 +316,78 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
                 Generate Prediction
               </>
             )}
-          </button>
-        </div>
-      </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
 
       {/* Prediction Results */}
-      {prediction && (
-        <div className="space-y-6">
-          {/* Summary */}
-          <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <TrendingDown className="w-5 h-5 mr-2" />
-              Churn Risk Summary
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {prediction.summary}
-            </p>
-          </div>
+      <AnimatePresence mode="wait">
+        {prediction && (
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Summary */}
+            <motion.div 
+              className={`p-4 sm:p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+            >
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <TrendingDown className="w-5 h-5 mr-2" />
+                Churn Risk Summary
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {prediction.summary}
+              </p>
+            </motion.div>
 
-          {/* Risk Metrics */}
-          {prediction.metrics && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="flex items-center">
-                  <div className="p-3 bg-red-100 rounded-lg mr-4">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">High Risk</p>
-                    <p className="text-2xl font-bold">{prediction.metrics.highRisk || 0}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="flex items-center">
-                  <div className="p-3 bg-yellow-100 rounded-lg mr-4">
-                    <TrendingDown className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Medium Risk</p>
-                    <p className="text-2xl font-bold">{prediction.metrics.mediumRisk || 0}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-lg mr-4">
-                    <Target className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Low Risk</p>
-                    <p className="text-2xl font-bold">{prediction.metrics.lowRisk || 0}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-lg mr-4">
-                    <Users className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Analyzed</p>
-                    <p className="text-2xl font-bold">{prediction.metrics.totalCustomers || 0}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+            {/* Risk Metrics */}
+            {prediction.metrics && (
+              <motion.div 
+                className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                {[
+                  { key: 'highRisk', label: 'High Risk', value: prediction.metrics.highRisk || 0, color: 'red', icon: AlertTriangle },
+                  { key: 'mediumRisk', label: 'Medium Risk', value: prediction.metrics.mediumRisk || 0, color: 'yellow', icon: TrendingDown },
+                  { key: 'lowRisk', label: 'Low Risk', value: prediction.metrics.lowRisk || 0, color: 'green', icon: Target },
+                  { key: 'totalCustomers', label: 'Total Analyzed', value: prediction.metrics.totalCustomers || 0, color: 'blue', icon: Users }
+                ].map((metric, index) => (
+                  <motion.div 
+                    key={metric.key}
+                    className={`p-4 sm:p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="flex items-center">
+                      <div className={`p-2 sm:p-3 bg-${metric.color}-100 rounded-lg mr-3 sm:mr-4`}>
+                        <metric.icon className={`h-4 w-4 sm:h-6 sm:w-6 text-${metric.color}-600`} />
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{metric.label}</p>
+                        <motion.p 
+                          className="text-lg sm:text-2xl font-bold"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 + index * 0.1, duration: 0.3, type: "spring" }}
+                        >
+                          {metric.value}
+                        </motion.p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
 
           {/* High Risk Customers */}
           {prediction.highRiskCustomers && prediction.highRiskCustomers.length > 0 && (
@@ -309,7 +397,7 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
                 High Risk Customers
               </h3>
               <div className="space-y-4">
-                {prediction.highRiskCustomers.map((customer: any, index: number) => (
+                {prediction.highRiskCustomers.map((customer: RiskCustomer, index: number) => (
                   <div key={index} className={`p-4 rounded-lg border ${
                     isDark ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'
                   }`}>
@@ -327,9 +415,9 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
                       </div>
                       <div className="text-right">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          getRiskColor(customer.riskLevel)
+                          getRiskColor(customer.riskLevel || 'unknown')
                         }`}>
-                          {getRiskIcon(customer.riskLevel)}
+                          {getRiskIcon(customer.riskLevel || 'unknown')}
                           <span className="ml-1">{customer.churnProbability}%</span>
                         </span>
                       </div>
@@ -420,8 +508,9 @@ ${prediction.retentionStrategies?.map((strategy: string, index: number) => `${in
               </div>
             )}
           </div>
-        </div>
-      )}
-    </div>
+        </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

@@ -1,20 +1,26 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { enhancedGeminiService } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
-import { Share2, Download, Copy, Check, RefreshCw, Hash, Calendar, Target, TrendingUp } from 'lucide-react';
+import { Share2, Download, Copy, Check, RefreshCw, Hash, Target, TrendingUp } from 'lucide-react';
 
 export default function SocialMediaGenerator() {
   const { isDark } = useTheme();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    platform: 'linkedin' | 'twitter' | 'facebook' | 'instagram';
+    topic: string;
+    tone: 'professional' | 'casual' | 'engaging' | 'promotional';
+    keywords: string;
+    callToAction: string;
+    variations: number;
+  }>({
     platform: 'linkedin',
-    postType: 'promotion',
-    tone: 'professional',
     topic: '',
-    targetAudience: '',
-    includeHashtags: true,
-    includeCallToAction: true,
-    contentLength: 'medium'
+    tone: 'professional',
+    keywords: '',
+    callToAction: '',
+    variations: 3
   });
   const [generatedPosts, setGeneratedPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,15 +33,7 @@ export default function SocialMediaGenerator() {
     { value: 'instagram', label: 'Instagram', color: 'bg-pink-600' }
   ];
 
-  const postTypes = [
-    'promotion', 'educational', 'industry-news', 'company-update', 
-    'case-study', 'tip', 'question', 'behind-the-scenes'
-  ];
-
-  const tones = [
-    'professional', 'casual', 'friendly', 'authoritative', 
-    'conversational', 'inspirational', 'humorous', 'urgent'
-  ];
+  const tones = ['professional', 'casual', 'engaging', 'promotional'];
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -51,27 +49,22 @@ export default function SocialMediaGenerator() {
     const startTime = Date.now();
 
     try {
-      const result = await enhancedGeminiService.generateSocialMediaPost({
-        platform: formData.platform,
-        postType: formData.postType,
-        tone: formData.tone,
-        topic: formData.topic,
-        targetAudience: formData.targetAudience,
-        includeHashtags: formData.includeHashtags,
-        includeCallToAction: formData.includeCallToAction,
-        contentLength: formData.contentLength
-      });
+      const keywords = formData.keywords 
+        ? formData.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
+        : [];
 
       // Generate multiple variations
       const variations = [];
       for (let i = 0; i < 3; i++) {
         const variation = await enhancedGeminiService.generateSocialMediaPost({
-          ...formData,
+          platform: formData.platform,
           topic: formData.topic,
-          targetAudience: formData.targetAudience
+          tone: formData.tone,
+          keywords: keywords.length > 0 ? keywords : undefined,
+          callToAction: formData.callToAction || undefined
         });
         variations.push({
-          ...variation,
+          content: variation,
           id: i + 1,
           engagement: Math.floor(Math.random() * 100) + 50, // Mock engagement score
           readability: Math.floor(Math.random() * 20) + 80,  // Mock readability score
@@ -81,24 +74,24 @@ export default function SocialMediaGenerator() {
       setGeneratedPosts(variations);
 
       // Track usage
-      aiUsageTracker.recordUsage(
-        'social-media-generator',
-        'Social Media Generator',
-        'Content',
-        Date.now() - startTime,
-        true
-      );
+      aiUsageTracker.trackUsage({
+        toolId: 'social-media-generator',
+        toolName: 'Social Media Generator',
+        category: 'Content',
+        executionTime: Date.now() - startTime,
+        success: true
+      });
     } catch (error) {
       console.error('Error generating social media posts:', error);
       alert('Failed to generate posts. Please try again.');
       
-      aiUsageTracker.recordUsage(
-        'social-media-generator',
-        'Social Media Generator',
-        'Content',
-        Date.now() - startTime,
-        false
-      );
+      aiUsageTracker.trackUsage({
+        toolId: 'social-media-generator',
+        toolName: 'Social Media Generator',
+        category: 'Content',
+        executionTime: Date.now() - startTime,
+        success: false
+      });
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +112,6 @@ export default function SocialMediaGenerator() {
 SOCIAL MEDIA POST - ${formData.platform.toUpperCase()}
 Generated: ${new Date().toLocaleDateString()}
 Platform: ${formData.platform}
-Type: ${formData.postType}
 Tone: ${formData.tone}
 
 CONTENT:
@@ -163,29 +155,48 @@ Readability Score: ${post.readability}/100
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+      >
         <div className="flex items-center">
           <Share2 className="w-6 h-6 mr-2 text-blue-600" />
-          <h2 className="text-2xl font-bold">Social Media Post Generator</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Social Media Post Generator</h2>
         </div>
-      </div>
+      </motion.div>
 
       {/* Configuration Form */}
-      <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <motion.div 
+        className={`p-4 sm:p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
         <h3 className="text-lg font-semibold mb-4">Post Configuration</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Platform Selection */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             <label className="block text-sm font-medium mb-2">Platform *</label>
             <div className="grid grid-cols-2 gap-2">
               {platforms.map(platform => (
-                <button
+                <motion.button
                   key={platform.value}
                   onClick={() => handleInputChange('platform', platform.value)}
-                  className={`p-3 rounded-lg border text-left transition-colors ${
+                  className={`p-3 rounded-lg border text-left transition-all duration-200 touch-manipulation ${
                     formData.platform === platform.value
                       ? `${platform.color} text-white border-transparent`
                       : isDark
@@ -200,26 +211,6 @@ Readability Score: ${post.readability}/100
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Post Type */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Post Type</label>
-            <select
-              value={formData.postType}
-              onChange={(e) => handleInputChange('postType', e.target.value)}
-              className={`w-full p-3 rounded-lg border ${
-                isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-            >
-              {postTypes.map(type => (
-                <option key={type} value={type}>
-                  {type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Tone */}
@@ -242,22 +233,36 @@ Readability Score: ${post.readability}/100
             </select>
           </div>
 
-          {/* Content Length */}
+          {/* Keywords */}
           <div>
-            <label className="block text-sm font-medium mb-2">Content Length</label>
-            <select
-              value={formData.contentLength}
-              onChange={(e) => handleInputChange('contentLength', e.target.value)}
+            <label className="block text-sm font-medium mb-2">Keywords (Optional)</label>
+            <input
+              type="text"
+              value={formData.keywords}
+              onChange={(e) => handleInputChange('keywords', e.target.value)}
+              placeholder="Enter keywords separated by commas..."
               className={`w-full p-3 rounded-lg border ${
                 isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-900'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
               } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-            >
-              <option value="short">Short</option>
-              <option value="medium">Medium</option>
-              <option value="long">Long</option>
-            </select>
+            />
+          </div>
+
+          {/* Call to Action */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Call to Action (Optional)</label>
+            <input
+              type="text"
+              value={formData.callToAction}
+              onChange={(e) => handleInputChange('callToAction', e.target.value)}
+              placeholder="e.g., Visit our website, Book a demo..."
+              className={`w-full p-3 rounded-lg border ${
+                isDark 
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            />
           </div>
         </div>
 
@@ -275,44 +280,6 @@ Readability Score: ${post.readability}/100
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
             } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
           />
-        </div>
-
-        {/* Target Audience */}
-        <div className="mt-4">
-          <label className="block text-sm font-medium mb-2">Target Audience (Optional)</label>
-          <input
-            type="text"
-            value={formData.targetAudience}
-            onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-            placeholder="e.g., Small business owners, Marketing professionals..."
-            className={`w-full p-3 rounded-lg border ${
-              isDark 
-                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-            } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-          />
-        </div>
-
-        {/* Options */}
-        <div className="mt-6 space-y-2">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={formData.includeHashtags}
-              onChange={(e) => handleInputChange('includeHashtags', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm">Include relevant hashtags</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={formData.includeCallToAction}
-              onChange={(e) => handleInputChange('includeCallToAction', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm">Include call-to-action</span>
-          </label>
         </div>
 
         {/* Generate Button */}
@@ -352,7 +319,7 @@ Readability Score: ${post.readability}/100
                   <div>
                     <h4 className="font-semibold">Post Variation {index + 1}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formData.platform.charAt(0).toUpperCase() + formData.platform.slice(1)} • {formData.postType}
+                      {formData.platform.charAt(0).toUpperCase() + formData.platform.slice(1)} • {formData.tone}
                     </p>
                   </div>
                 </div>

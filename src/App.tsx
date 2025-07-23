@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
@@ -8,18 +8,24 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
-import Tasks from './pages/Tasks';
-import TasksNew from './pages/TasksNew';
-import Communication from './pages/Communication';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
+
+// Critical pages - load immediately
 import Dashboard from './pages/Dashboard';
-import Contacts from './pages/Contacts';
-import ContactsEnhanced from './pages/ContactsEnhanced';
-import Pipeline from './pages/Pipeline';
-import AITools from './pages/AITools';
-import Analytics from './pages/Analytics';
-import AIIntegration from './pages/AIIntegration';
 import SystemOverview from './pages/SystemOverview';
-import MobileResponsiveness from './pages/MobileResponsiveness';
+
+// Heavy pages - lazy load for better performance
+const Tasks = lazy(() => import('./pages/Tasks'));
+const TasksNew = lazy(() => import('./pages/TasksNew'));
+const Communication = lazy(() => import('./pages/Communication'));
+const Contacts = lazy(() => import('./pages/Contacts'));
+const ContactsEnhanced = lazy(() => import('./pages/ContactsEnhanced'));
+const Pipeline = lazy(() => import('./pages/Pipeline'));
+const AITools = lazy(() => import('./pages/AITools'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const AIIntegration = lazy(() => import('./pages/AIIntegration'));
+const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
+
 import './components/styles/design-system.css';
 
 // Placeholder component for routes not yet implemented
@@ -49,8 +55,9 @@ function App() {
             <VideoCallProvider>
               <NavigationProvider>
                 <DashboardLayoutProvider>
-                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                      <Navbar />
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                    <Navbar />
+                    <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
                       <Routes>
         {/* Redirect root to dashboard */}
         <Route path="/" element={<Navigate to="/system-overview" replace />} />
@@ -145,7 +152,8 @@ function App() {
         
         {/* Catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+                      </Routes>
+                    </Suspense>
                     </div>
                 </DashboardLayoutProvider>
               </NavigationProvider>
