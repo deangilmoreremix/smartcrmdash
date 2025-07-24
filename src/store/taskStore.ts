@@ -14,6 +14,9 @@ interface TaskStore {
   activities: any[];
   calendarEvents: CalendarEvent[];
   analytics: any;
+  calendars: any[];
+  selectedTask: Task | null;
+  filters: any;
   
   // Filter states
   statusFilter: Task['status'] | 'all';
@@ -28,6 +31,25 @@ interface TaskStore {
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   getTask: (id: string) => Task | undefined;
+  duplicateTask: (id: string) => void;
+  
+  // Subtask actions
+  addSubtask: (taskId: string, subtask: any) => void;
+  updateSubtask: (taskId: string, subtaskId: string, updates: any) => void;
+  deleteSubtask: (taskId: string, subtaskId: string) => void;
+  completeSubtask: (taskId: string, subtaskId: string) => void;
+  
+  // Activity actions
+  addActivity: (activity: any) => void;
+  getActivitiesForEntity: (entityId: string, entityType: string) => any[];
+  getRecentActivities: () => any[];
+  
+  // Template actions
+  createTaskFromTemplate: (templateId: string) => void;
+  
+  // UI state actions
+  setSelectedTask: (task: Task | null) => void;
+  setFilters: (filters: any) => void;
   
   // Computed properties
   getFilteredTasks: () => Task[];
@@ -59,6 +81,15 @@ export const useTaskStore = create<TaskStore>()(
       templates: [],
       activities: [],
       calendarEvents: [],
+      calendars: [],
+      selectedTask: null,
+      filters: {
+        status: 'all',
+        priority: 'all',
+        assignee: 'all',
+        dueDate: 'all',
+        search: ''
+      },
       analytics: {
         totalTasks: 0,
         completedTasks: 0,
@@ -125,6 +156,173 @@ export const useTaskStore = create<TaskStore>()(
       
       getTask: (id) => {
         return get().tasks.find((task) => task.id === id);
+      },
+
+      duplicateTask: (id) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
+        
+        const duplicatedTask: Task = {
+          ...task,
+          id: crypto.randomUUID(),
+          title: `${task.title} (Copy)`,
+          status: 'pending',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        set((state) => ({ 
+          tasks: [...state.tasks, duplicatedTask] 
+        }));
+      },
+
+      // Subtask actions
+      addSubtask: (taskId, subtask) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { 
+                  ...task, 
+                  subtasks: [...(task.subtasks || []), { 
+                    ...subtask, 
+                    id: crypto.randomUUID(),
+                    createdAt: new Date()
+                  }],
+                  updatedAt: new Date()
+                }
+              : task
+          )
+        }));
+      },
+
+      updateSubtask: (taskId, subtaskId, updates) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { 
+                  ...task, 
+                  subtasks: (task.subtasks || []).map((subtask: any) =>
+                    subtask.id === subtaskId ? { ...subtask, ...updates } : subtask
+                  ),
+                  updatedAt: new Date()
+                }
+              : task
+          )
+        }));
+      },
+
+      deleteSubtask: (taskId, subtaskId) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { 
+                  ...task, 
+                  subtasks: (task.subtasks || []).filter((subtask: any) => subtask.id !== subtaskId),
+                  updatedAt: new Date()
+                }
+              : task
+          )
+        }));
+      },
+
+      completeSubtask: (taskId, subtaskId) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { 
+                  ...task, 
+                  subtasks: (task.subtasks || []).map((subtask: any) =>
+                    subtask.id === subtaskId 
+                      ? { ...subtask, completed: true, completedAt: new Date() } 
+                      : subtask
+                  ),
+                  updatedAt: new Date()
+                }
+              : task
+          )
+        }));
+      },
+
+      // Activity actions
+      addActivity: (activity) => {
+        const newActivity = {
+          ...activity,
+          id: crypto.randomUUID(),
+          timestamp: new Date()
+        };
+        
+        set((state) => ({ 
+          activities: [...state.activities, newActivity] 
+        }));
+      },
+
+      getActivitiesForEntity: (entityId, entityType) => {
+        return get().activities.filter(
+          (activity: any) => activity.entityId === entityId && activity.entityType === entityType
+        );
+      },
+
+      getRecentActivities: () => {
+        return get().activities
+          .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 10);
+      },
+
+      // Template actions
+      createTaskFromTemplate: (templateId) => {
+        const template = get().templates.find((t) => t.id === templateId);
+        if (!template) return;
+        
+        const newTask: Task = {
+          id: crypto.randomUUID(),
+          title: template.name,
+          description: template.description,
+          priority: template.priority,
+          status: 'pending',
+          type: template.type,
+          completed: false,
+          category: template.type === 'call' ? 'call' : 
+                   template.type === 'email' ? 'email' :
+                   template.type === 'meeting' ? 'meeting' :
+                   template.type === 'follow-up' ? 'follow-up' :
+                   template.type === 'proposal' ? 'proposal' :
+                   template.type === 'research' ? 'research' :
+                   template.type === 'administrative' ? 'administrative' : 'other',
+          tags: template.tags || [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdBy: 'current-user',
+          attachments: [],
+          subtasks: template.subtasks.map(st => ({
+            ...st,
+            id: crypto.randomUUID(),
+            parentTaskId: '',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })),
+          reminders: [],
+          dependencies: [],
+          customFields: template.customFields || {}
+        };
+        
+        // Update the parentTaskId for subtasks after creating the task
+        newTask.subtasks = newTask.subtasks.map(st => ({
+          ...st,
+          parentTaskId: newTask.id
+        }));
+        
+        set((state) => ({ 
+          tasks: [...state.tasks, newTask] 
+        }));
+      },
+
+      // UI state actions
+      setSelectedTask: (task) => {
+        set({ selectedTask: task });
+      },
+
+      setFilters: (filters) => {
+        set({ filters });
       },
       
       // Computed properties

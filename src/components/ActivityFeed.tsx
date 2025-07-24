@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { format, isToday, isYesterday, isThisWeek, subDays } from 'date-fns';
 import {
-  Clock,
   CheckCircle2,
   Circle,
   Plus,
   Edit,
-  Trash2,
   User,
   Calendar,
   FileText,
@@ -17,12 +15,11 @@ import {
   Search,
   AlertCircle,
 } from 'lucide-react';
-import { useTaskStore } from '../../store/taskStore';
-import { Activity } from '../../types/task';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { useTaskStore } from '@store/taskStore';
+import { Activity } from '@/types/task';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Badge } from './ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,47 +27,41 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
-} from '../ui/dropdown-menu';
+} from './ui/dropdown-menu';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from './ui/select';
 
 const activityIcons = {
   task_created: Plus,
   task_updated: Edit,
   task_completed: CheckCircle2,
-  task_deleted: Trash2,
-  task_assigned: User,
-  task_due_date_changed: Calendar,
-  subtask_created: Plus,
-  subtask_completed: CheckCircle2,
-  comment_added: MessageSquare,
-  file_attached: FileText,
-  call_logged: Phone,
+  call_made: Phone,
   email_sent: Mail,
-  meeting_scheduled: Calendar,
-  reminder_set: AlertCircle,
+  meeting_held: Calendar,
+  note_added: MessageSquare,
+  deal_moved: Edit,
+  contact_updated: User,
+  file_uploaded: FileText,
+  reminder_sent: AlertCircle,
 } as const;
 
 const activityColors = {
   task_created: 'text-green-600 bg-green-100',
   task_updated: 'text-blue-600 bg-blue-100',
   task_completed: 'text-green-600 bg-green-100',
-  task_deleted: 'text-red-600 bg-red-100',
-  task_assigned: 'text-purple-600 bg-purple-100',
-  task_due_date_changed: 'text-orange-600 bg-orange-100',
-  subtask_created: 'text-green-600 bg-green-100',
-  subtask_completed: 'text-green-600 bg-green-100',
-  comment_added: 'text-blue-600 bg-blue-100',
-  file_attached: 'text-gray-600 bg-gray-100',
-  call_logged: 'text-green-600 bg-green-100',
+  call_made: 'text-green-600 bg-green-100',
   email_sent: 'text-blue-600 bg-blue-100',
-  meeting_scheduled: 'text-purple-600 bg-purple-100',
-  reminder_set: 'text-orange-600 bg-orange-100',
+  meeting_held: 'text-purple-600 bg-purple-100',
+  note_added: 'text-blue-600 bg-blue-100',
+  deal_moved: 'text-orange-600 bg-orange-100',
+  contact_updated: 'text-purple-600 bg-purple-100',
+  file_uploaded: 'text-gray-600 bg-gray-100',
+  reminder_sent: 'text-orange-600 bg-orange-100',
 } as const;
 
 interface ActivityItemProps {
@@ -179,7 +170,7 @@ interface ActivityFilters {
 }
 
 export const ActivityFeed: React.FC = () => {
-  const { activities, getRecentActivities } = useTaskStore();
+  const { activities } = useTaskStore();
   
   const [filters, setFilters] = useState<ActivityFilters>({
     dateRange: 'week'
@@ -380,7 +371,7 @@ export const ActivityFeed: React.FC = () => {
               <DropdownMenuItem className="font-medium">
                 Entity Type
               </DropdownMenuItem>
-              {(['task', 'deal', 'contact', 'calendar'] as const).map((entityType) => (
+              {(['task', 'deal', 'contact', 'company', 'lead'] as const).map((entityType) => (
                 <DropdownMenuCheckboxItem
                   key={entityType}
                   checked={filters.entityTypes?.includes(entityType)}

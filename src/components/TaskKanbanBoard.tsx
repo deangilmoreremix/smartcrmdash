@@ -15,10 +15,10 @@ import {
   FileText,
   Settings
 } from 'lucide-react';
-import { useTaskStore } from '../../store/taskStore';
+import { useTaskStore } from '@store/taskStore';
 import { Task } from '../../types/task';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +26,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
-} from '../ui/dropdown-menu';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader } from '../ui/card';
+} from './ui/dropdown-menu';
+import { Badge } from './ui/badge';
+import { Card, CardContent, CardHeader } from './ui/card';
 import { TaskDetailsModal } from './TaskDetailsModal';
 
 const statusColumns = [
