@@ -15,7 +15,7 @@ import { TaskCalendar } from '../components/TaskCalendar';
 import { ActivityFeed } from '../components/ActivityFeed';
 import { TaskDetailsModal } from '../components/TaskDetailsModal';
 
-export const Tasks: React.FC = () => {
+const TasksNew: React.FC = () => {
   const { getTaskMetrics, getOverdueTasks, getTasksDueToday, getTasksDueThisWeek } = useTaskStore();
   const [activeTab, setActiveTab] = useState('board');
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -214,7 +214,7 @@ export const Tasks: React.FC = () => {
                       {Object.entries(metrics.tasksByPriority).map(([priority, count]) => (
                         <div key={priority} className="flex items-center justify-between">
                           <span className="capitalize text-sm">{priority}</span>
-                          <Badge variant="secondary">{count}</Badge>
+                          <Badge variant="secondary">{String(count)}</Badge>
                         </div>
                       ))}
                     </div>
@@ -231,7 +231,7 @@ export const Tasks: React.FC = () => {
                       {Object.entries(metrics.tasksByType).map(([type, count]) => (
                         <div key={type} className="flex items-center justify-between">
                           <span className="capitalize text-sm">{type.replace('-', ' ')}</span>
-                          <Badge variant="secondary">{count}</Badge>
+                          <Badge variant="secondary">{String(count)}</Badge>
                         </div>
                       ))}
                     </div>
@@ -248,7 +248,7 @@ export const Tasks: React.FC = () => {
                       {Object.entries(metrics.tasksByStatus).map(([status, count]) => (
                         <div key={status} className="flex items-center justify-between">
                           <span className="capitalize text-sm">{status.replace('-', ' ')}</span>
-                          <Badge variant="secondary">{count}</Badge>
+                          <Badge variant="secondary">{String(count)}</Badge>
                         </div>
                       ))}
                     </div>
@@ -298,3 +298,5 @@ export const Tasks: React.FC = () => {
     </div>
   );
 };
+
+export default TasksNew;

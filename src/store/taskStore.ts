@@ -1,34 +1,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isSameDay, isWithinInterval, add } from 'date-fns';
 import { 
   Task, 
-  SubTask, 
-  TaskAttachment, 
-  TaskReminder, 
   TaskTemplate, 
-  TaskActivity, 
-  TaskAnalytics, 
-  CalendarEvent, 
-  ActivityFilter, 
-  TaskPriority, 
-  TaskStatus 
+  CalendarEvent
 } from '../types/task';
 
 interface TaskStore {
   // State
   tasks: Task[];
   templates: TaskTemplate[];
-  activities: TaskActivity[];
+  activities: any[];
   calendarEvents: CalendarEvent[];
-  analytics: TaskAnalytics;
+  analytics: any;
   
   // Filter states
-  statusFilter: TaskStatus | 'all';
-  priorityFilter: TaskPriority | 'all';
+  statusFilter: Task['status'] | 'all';
+  priorityFilter: Task['priority'] | 'all';
   assigneeFilter: string | 'all';
   dueDateFilter: 'all' | 'overdue' | 'today' | 'week' | 'month';
   searchQuery: string;
-  activityFilter: ActivityFilter;
+  activityFilter: any;
   
   // Actions - Tasks
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -38,7 +31,24 @@ interface TaskStore {
   
   // Computed properties
   getFilteredTasks: () => Task[];
-  getTasksByStatus: (status: TaskStatus) => Task[];
+  getTasksByStatus: (status: Task['status']) => Task[];
+  getTaskMetrics: () => {
+    totalTasks: number;
+    completedTasks: number;
+    pendingTasks: number;
+    overdueTasks: number;
+    tasksDueToday: number;
+    tasksDueThisWeek: number;
+    completionRate: number;
+    productivityScore: number;
+    tasksByPriority: Record<string, number>;
+    tasksByType: Record<string, number>;
+    tasksByStatus: Record<string, number>;
+    tasksCompletedThisWeek: number;
+  };
+  getOverdueTasks: () => Task[];
+  getTasksDueToday: () => Task[];
+  getTasksDueThisWeek: () => Task[];
 }
 
 export const useTaskStore = create<TaskStore>()(
@@ -147,6 +157,85 @@ export const useTaskStore = create<TaskStore>()(
       
       getTasksByStatus: (status) => {
         return get().tasks.filter((task) => task.status === status);
+      },
+
+      getTaskMetrics: () => {
+        const { tasks } = get();
+        const now = new Date();
+        const completedTasks = tasks.filter(t => t.status === 'completed');
+        const overdueTasks = tasks.filter(t => 
+          t.dueDate && new Date(t.dueDate) < now && t.status !== 'completed'
+        );
+        const todayTasks = tasks.filter(t =>
+          t.dueDate && isSameDay(new Date(t.dueDate), now)
+        );
+        const weekTasks = tasks.filter(t => {
+          if (!t.dueDate) return false;
+          const d = new Date(t.dueDate);
+          return isWithinInterval(d, { start: now, end: add(now, { days: 7 }) });
+        });
+
+        // Count tasks by priority
+        const tasksByPriority = tasks.reduce((acc, task) => {
+          acc[task.priority] = (acc[task.priority] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        // Count tasks by type (using category as type)
+        const tasksByType = tasks.reduce((acc, task) => {
+          const type = task.category || 'uncategorized';
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        // Count tasks by status
+        const tasksByStatus = tasks.reduce((acc, task) => {
+          acc[task.status] = (acc[task.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const completionRate = tasks.length > 0 ? (completedTasks.length / tasks.length) * 100 : 0;
+        const productivityScore = Math.min(100, completionRate + (tasks.length > 0 ? 20 : 0));
+
+        return {
+          totalTasks: tasks.length,
+          completedTasks: completedTasks.length,
+          pendingTasks: tasks.filter(t => t.status === 'pending').length,
+          overdueTasks: overdueTasks.length,
+          tasksDueToday: todayTasks.length,
+          tasksDueThisWeek: weekTasks.length,
+          completionRate,
+          productivityScore,
+          tasksByPriority,
+          tasksByType,
+          tasksByStatus,
+          tasksCompletedThisWeek: completedTasks.filter(t => {
+            if (!t.updatedAt) return false;
+            const weekStart = add(now, { days: -7 });
+            return isWithinInterval(new Date(t.updatedAt), { start: weekStart, end: now });
+          }).length
+        };
+      },
+
+      getOverdueTasks: () => {
+        return get().tasks.filter(t => 
+          t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
+        );
+      },
+
+      getTasksDueToday: () => {
+        return get().tasks.filter(t =>
+          t.dueDate ? isSameDay(new Date(t.dueDate), new Date()) : false
+        );
+      },
+
+      getTasksDueThisWeek: () => {
+        const now = new Date();
+        return get().tasks.filter(t => {
+          if (!t.dueDate) return false;
+          const d = new Date(t.dueDate);
+          return isWithinInterval(d, { start: now, end: add(now, { days: 7 }) });
+        });
       }
     }),
     {
