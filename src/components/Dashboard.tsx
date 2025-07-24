@@ -1,11 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
-import { useGemini } from '../services/geminiService';
-import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
-import { useAITools } from './AIToolsProvider';
-import { useTheme } from '../contexts/ThemeContext';
 import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
 import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';
@@ -24,11 +20,9 @@ import InteractionHistory from './dashboard/InteractionHistory';
 import TasksAndFunnel from './dashboard/TasksAndFunnel';
 import CustomerProfile from './dashboard/CustomerProfile';
 import RecentActivity from './dashboard/RecentActivity';
-import DashboardHeader from './dashboard/DashboardHeader';
 import ChartsSection from './dashboard/ChartsSection';
 import ConnectedApps from './dashboard/ConnectedApps';
 import AIInsightsPanel from './dashboard/AIInsightsPanel';
-import NewLeadsSection from './dashboard/NewLeadsSection';
 import KPICards from './dashboard/KPICards';
 import QuickActions from './dashboard/QuickActions';
 
@@ -39,27 +33,10 @@ import VideoCallOverlay from './VideoCallOverlay';
 
 // Memo Dashboard component to prevent unnecessary re-renders
 const Dashboard: React.FC = React.memo(() => {
-  const { 
-    deals, 
-    fetchDeals, 
-    isLoading,
-    stageValues,
-    totalPipelineValue 
-  } = useDealStore();
-  
-  const { 
-    contacts, 
-    fetchContacts, 
-    isLoading: contactsLoading 
-  } = useContactStore();
-  
-  const { tasks, fetchTasks } = useTaskStore();
+  const { fetchDeals } = useDealStore();
+  const { fetchContacts } = useContactStore();
   const { fetchAppointments } = useAppointmentStore();
-  const { openTool } = useAITools();
-  const { isDark } = useTheme();
   const { sectionOrder } = useDashboardLayout();
-  
-  const gemini = useGemini();
   
   // Prevent repeated data fetching by using a ref to track initialization
   const initializedRef = useRef(false);
@@ -74,12 +51,6 @@ const Dashboard: React.FC = React.memo(() => {
     fetchContacts();
     
     // Wrap in try/catch to prevent errors from breaking the app
-    try {
-      fetchTasks();
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    }
-    
     try {
       fetchAppointments();
     } catch (error) {

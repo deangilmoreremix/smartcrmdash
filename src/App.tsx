@@ -8,7 +8,6 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import Navbar from './components/Navbar';
-import Tasks from './pages/Tasks';
 import TasksNew from './pages/TasksNew';
 import Communication from './pages/Communication';
 import Dashboard from './pages/Dashboard';
@@ -52,9 +51,9 @@ function App() {
                       <Navbar />
                       <Routes>
         {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/system-overview" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
-        {/* System Overview - Main Landing Page */}
+        {/* System Overview - Development Status Page */}
         <Route path="/system-overview" element={
           <ProtectedRoute>
             <SystemOverview />
