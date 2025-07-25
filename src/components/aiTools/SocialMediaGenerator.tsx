@@ -208,10 +208,10 @@ Readability Score: ${post.readability}/100
                   <div className="text-xs opacity-75">
                     {getCharacterLimit(platform.value)} chars
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Tone */}
           <div>
@@ -302,7 +302,7 @@ Readability Score: ${post.readability}/100
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Generated Posts */}
       {generatedPosts.length > 0 && (
@@ -418,6 +418,6 @@ Readability Score: ${post.readability}/100
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

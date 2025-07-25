@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  color: #333;
+  background-color: #fff;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Fix for input backgrounds */
+input, textarea, select {
+  background-color: white !important;
+  color: #333 !important;
+}
+
+/* Fix for pipeline card buttons */
+.card-modern .text-blue-600,
+.card-modern .text-indigo-600,
+.card-modern .text-purple-600,
+.card-modern .text-emerald-600,
+.card-modern .text-amber-600,
+.card-modern .text-cyan-600,
+.card-modern .text-rose-600 {
+  color: inherit;
+}
+
+.card-modern:hover .text-blue-600 {
+  color: #2563eb !important;
+}
+
+.card-modern:hover .text-indigo-600 {
+  color: #4f46e5 !important;
+}
+
+.card-modern:hover .text-purple-600 {
+  color: #9333ea !important;
+}
+
+.card-modern:hover .text-emerald-600 {
+  color: #059669 !important;
+}
+
+.card-modern:hover .text-amber-600 {
+  color: #d97706 !important;
+}
+
+.card-modern:hover .text-cyan-600 {
+  color: #0891b2 !important;
+}
+
+.card-modern:hover .text-rose-600 {
+  color: #e11d48 !important;
+}
+
+/* Animation fix */
+.animation-fix {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Debug styles */
+.debug-outline * {
+  outline: 1px solid rgba(255, 0, 0, 0.2) !important;
+}
+
+.debug-grid {
+  background-image: linear-gradient(to right, rgba(0, 0, 255, 0.1) 1px, transparent 1px), 
+                    linear-gradient(to bottom, rgba(0, 0, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Fix for react-calendar */
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  font-family: inherit !important;
+}
+
+.react-calendar__tile--active {
+  background-color: #4f46e5 !important;
+  color: white !important;
+}
+
+.react-calendar__tile--now {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.react-calendar__tile.has-appointment {
+  position: relative;
+}
+
+.react-calendar__tile.has-appointment::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+}
+
+/* Help prevent background loading issues */
+.content-stable {
+  content-visibility: auto;
+}

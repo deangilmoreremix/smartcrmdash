@@ -12,6 +12,7 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Critical pages - load immediately
 import Dashboard from './pages/Dashboard';
+import LandingPage from './pages/Landing/LandingPage';
 import SystemOverview from './pages/SystemOverview';
 
 // Heavy pages - lazy load for better performance
@@ -59,10 +60,10 @@ function App() {
                     <Navbar />
                     <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
                       <Routes>
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/system-overview" replace />} />
+        {/* Landing Page - Root Route */}
+        <Route path="/" element={<LandingPage />} />
         
-        {/* System Overview - Main Landing Page */}
+        {/* System Overview - Development Status Page */}
         <Route path="/system-overview" element={
           <ProtectedRoute>
             <SystemOverview />
