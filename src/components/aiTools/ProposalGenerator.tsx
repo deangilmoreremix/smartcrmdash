@@ -227,7 +227,7 @@ export default function ProposalGenerator() {
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="Describe the project in detail"
               />
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -359,7 +359,7 @@ export default function ProposalGenerator() {
               <span className="text-green-700">Proposal generated successfully!</span>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Generated Proposal */}
         <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
@@ -401,6 +401,6 @@ export default function ProposalGenerator() {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

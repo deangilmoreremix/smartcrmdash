@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
@@ -12,10 +12,10 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Critical pages - load immediately
 import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
 import SystemOverview from './pages/SystemOverview';
 
 // Heavy pages - lazy load for better performance
-const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts'));
@@ -55,106 +55,7 @@ function App() {
             <VideoCallProvider>
               <NavigationProvider>
                 <DashboardLayoutProvider>
-                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                    <Navbar />
-                    <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-                      <Routes>
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/system-overview" replace />} />
-        
-        {/* System Overview - Main Landing Page */}
-        <Route path="/system-overview" element={
-          <ProtectedRoute>
-            <SystemOverview />
-          </ProtectedRoute>
-        } />
-        
-        {/* Main Application Routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/contacts" element={
-          <ProtectedRoute>
-            <Contacts />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/contacts-enhanced" element={
-          <ProtectedRoute>
-            <ContactsEnhanced />
-          </ProtectedRoute>
-        } />
-        
-              {/* Tasks */}
-              <Route path="/tasks" element={
-                <ProtectedRoute>
-                  <TasksNew />
-                </ProtectedRoute>
-              } />
-              
-              {/* Communication */}
-              <Route path="/communication" element={
-                <ProtectedRoute>
-                  <Communication />
-                </ProtectedRoute>
-              } />
-
-              {/* Analytics */}
-              <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <Analytics />
-                </ProtectedRoute>
-              } />              {/* AI Integration */}
-              <Route path="/ai-integration" element={
-                <ProtectedRoute>
-                  <AIIntegration />
-                </ProtectedRoute>
-              } />
-
-        <Route path="/ai-tools" element={
-          <ProtectedRoute>
-            <AITools />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/sales-tools" element={
-          <ProtectedRoute>
-            <PlaceholderPage title="Sales Tools" description="Sales tools collection coming soon" />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/pipeline" element={
-          <ProtectedRoute>
-            <Pipeline />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <PlaceholderPage title="Settings" description="Settings page coming soon" />
-          </ProtectedRoute>
-        } />
-        
-        {/* Mobile Responsiveness */}
-        <Route path="/mobile" element={
-          <ProtectedRoute>
-            <MobileResponsiveness />
-          </ProtectedRoute>
-        } />
-        
-        {/* Feature Pages */}
-        <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
-        <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
-        <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
-        
-        {/* Catch-all route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Suspense>
-                    </div>
+                  <AppLayout />
                 </DashboardLayoutProvider>
               </NavigationProvider>
             </VideoCallProvider>
@@ -162,6 +63,114 @@ function App() {
         </ModalsProvider>
       </AIToolsProvider>
     </ThemeProvider>
+  );
+}
+
+function AppLayout() {
+  const location = useLocation();
+  const showNavbar = location.pathname !== '/';
+  
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {showNavbar && <Navbar />}
+      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+        <Routes>
+          {/* Landing Page - Root Route */}
+          <Route path="/" element={<Landing />} />
+          
+          {/* System Overview - Development Status Page */}
+          <Route path="/system-overview" element={
+            <ProtectedRoute>
+              <SystemOverview />
+            </ProtectedRoute>
+          } />
+          
+          {/* Main Application Routes */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/contacts" element={
+            <ProtectedRoute>
+              <Contacts />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/contacts-enhanced" element={
+            <ProtectedRoute>
+              <ContactsEnhanced />
+            </ProtectedRoute>
+          } />
+          
+                {/* Tasks */}
+                <Route path="/tasks" element={
+                  <ProtectedRoute>
+                    <TasksNew />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Communication */}
+                <Route path="/communication" element={
+                  <ProtectedRoute>
+                    <Communication />
+                  </ProtectedRoute>
+                } />
+
+                {/* Analytics */}
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                } />              {/* AI Integration */}
+                <Route path="/ai-integration" element={
+                  <ProtectedRoute>
+                    <AIIntegration />
+                  </ProtectedRoute>
+                } />
+
+          <Route path="/ai-tools" element={
+            <ProtectedRoute>
+              <AITools />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/sales-tools" element={
+            <ProtectedRoute>
+              <PlaceholderPage title="Sales Tools" description="Sales tools collection coming soon" />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/pipeline" element={
+            <ProtectedRoute>
+              <Pipeline />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <PlaceholderPage title="Settings" description="Settings page coming soon" />
+            </ProtectedRoute>
+          } />
+          
+          {/* Mobile Responsiveness */}
+          <Route path="/mobile" element={
+            <ProtectedRoute>
+              <MobileResponsiveness />
+            </ProtectedRoute>
+          } />
+          
+          {/* Feature Pages */}
+          <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
+          <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
+          <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
+          
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 
