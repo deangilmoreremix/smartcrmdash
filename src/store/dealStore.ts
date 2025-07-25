@@ -1,474 +1,554 @@
 import { create } from 'zustand';
+import { Deal } from '../types';
 import { 
-  Deal, 
-  DealStage, 
-  Pipeline, 
-  SalesMetrics, 
-  DealForecast, 
-  DealFilter, 
-  DealSortOption 
-} from '../types/deal';
+  fetchDealsFromSupabase, 
+  createDealInSupabase, 
+  updateDealInSupabase, 
+  deleteDealFromSupabase 
+} from '../services/dealService';
 
-// Default pipeline stages
-const defaultStages: DealStage[] = [
-  { id: 'qualification', name: 'Qualification', order: 1, color: '#3B82F6', probability: 20, isActive: true },
-  { id: 'proposal', name: 'Proposal', order: 2, color: '#F59E0B', probability: 40, isActive: true },
-  { id: 'negotiation', name: 'Negotiation', order: 3, color: '#8B5CF6', probability: 70, isActive: true },
-  { id: 'closed-won', name: 'Closed Won', order: 4, color: '#10B981', probability: 100, isActive: true },
-  { id: 'closed-lost', name: 'Closed Lost', order: 5, color: '#EF4444', probability: 0, isActive: true },
-];
-
-const defaultPipeline: Pipeline = {
-  id: 'default',
-  name: 'Sales Pipeline',
-  description: 'Default sales pipeline',
-  stages: defaultStages,
-  isDefault: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-interface DealStore {
-  // State
-  deals: Deal[];
-  pipelines: Record<string, Pipeline>;
-  activePipelineId: string;
+interface DealState {
+  deals: Record<string, Deal>;
+  columns: Record<string, Column>;
+  columnOrder: string[];
   isLoading: boolean;
   error: string | null;
-  filters: DealFilter;
-  sortOption: DealSortOption;
+  selectedDeal: string | null;
+  aiInsight: string | null;
+  isAnalyzing: boolean;
+  
+  // Pipeline view statistics
+  stageValues: Record<string, number>;
+  totalPipelineValue: number;
   
   // Actions
   fetchDeals: () => Promise<void>;
-  addDeal: (deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
-  updateDeal: (id: string, updates: Partial<Deal>) => Promise<void>;
+  createDeal: (deal: Partial<Deal>) => Promise<void>;
+  updateDeal: (id: string, deal: Partial<Deal>) => Promise<void>;
   deleteDeal: (id: string) => Promise<void>;
-  moveDeal: (dealId: string, newStageId: string, newIndex?: number) => Promise<void>;
-  bulkUpdateDeals: (dealIds: string[], updates: Partial<Deal>) => Promise<void>;
-  
-  // Pipeline management
-  fetchPipelines: () => Promise<void>;
-  addPipeline: (pipeline: Omit<Pipeline, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
-  updatePipeline: (id: string, updates: Partial<Pipeline>) => Promise<void>;
-  deletePipeline: (id: string) => Promise<void>;
-  setActivePipeline: (pipelineId: string) => void;
-  
-  // Stage management
-  updateStage: (pipelineId: string, stageId: string, updates: Partial<DealStage>) => Promise<void>;
-  reorderStages: (pipelineId: string, stages: DealStage[]) => Promise<void>;
-  
-  // Filtering and sorting
-  setFilters: (filters: Partial<DealFilter>) => void;
-  setSortOption: (sortOption: DealSortOption) => void;
-  clearFilters: () => void;
-  
-  // Computed getters
-  getFilteredDeals: () => Deal[];
-  getStageValues: () => Record<string, number>;
-  getTotalPipelineValue: () => number;
-  getSalesMetrics: () => SalesMetrics;
-  calculateForecast: () => DealForecast;
-  getConversionRates: () => Record<string, number>;
-  getSalesVelocity: () => number;
-  getActivePipeline: () => Pipeline | null;
+  moveDealToStage: (dealId: string, sourceStage: string, destinationStage: string, destinationIndex: number) => void;
+  selectDeal: (dealId: string | null) => void;
+  generateAiInsight: (dealId: string) => Promise<void>;
 }
 
-export const useDealStore = create<DealStore>((set, get) => ({
-  // Initial state
-  deals: [
-    {
-      id: '1',
-      title: 'Enterprise Software License',
-      description: 'Annual license for enterprise software suite',
+interface Column {
+  id: string;
+  title: string;
+  dealIds: string[];
+}
+
+export const useDealStore = create<DealState>((set, get) => ({
+  deals: {
+    'deal-1': {
+      id: 'deal-1',
+      title: 'Enterprise License',
       value: 75000,
-      stage: defaultStages[2], // negotiation
-      probability: 85,
-      contactId: '1',
-      dueDate: new Date('2024-02-15'),
-      priority: 'high',
+      stage: 'qualification',
+      company: 'Acme Inc',
+      contact: 'John Doe',
+      contactId: 'contact-1',
+      dueDate: new Date('2025-07-15'),
+      createdAt: new Date('2025-06-01'),
+      updatedAt: new Date('2025-06-01'),
+      probability: 10,
       daysInStage: 5,
-      source: 'referral',
-      tags: ['enterprise', 'software'],
-      customFields: {},
-      activities: [],
-      attachments: [],
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-15'),
-      currency: 'USD',
-      expectedCloseDate: new Date('2024-02-15'),
-      status: 'active',
+      priority: 'high'
     },
-    {
-      id: '2',
-      title: 'Marketing Automation Platform',
-      description: 'Complete marketing automation solution',
+    'deal-2': {
+      id: 'deal-2',
+      title: 'Software Renewal',
       value: 45000,
-      stage: defaultStages[1], // proposal
-      probability: 65,
-      contactId: '2',
-      dueDate: new Date('2024-03-01'),
-      priority: 'medium',
-      daysInStage: 12,
-      source: 'website',
-      tags: ['marketing', 'automation'],
-      customFields: {},
-      activities: [],
-      attachments: [],
-      createdAt: new Date('2024-01-10'),
-      updatedAt: new Date('2024-01-20'),
-      currency: 'USD',
-      expectedCloseDate: new Date('2024-03-01'),
-      status: 'active',
+      stage: 'proposal',
+      company: 'Globex Corp',
+      contact: 'Jane Smith',
+      contactId: 'contact-2',
+      dueDate: new Date('2025-06-30'),
+      createdAt: new Date('2025-05-15'),
+      updatedAt: new Date('2025-06-01'),
+      probability: 50,
+      daysInStage: 3,
+      priority: 'medium'
     },
-    {
-      id: '3',
-      title: 'CRM Integration Services',
-      description: 'Custom CRM integration and setup',
+    'deal-3': {
+      id: 'deal-3',
+      title: 'Support Contract',
       value: 25000,
-      stage: defaultStages[0], // qualification
-      probability: 30,
-      contactId: '3',
-      priority: 'low',
-      daysInStage: 8,
-      source: 'cold-call',
-      tags: ['crm', 'integration'],
-      customFields: {},
-      activities: [],
-      attachments: [],
-      createdAt: new Date('2024-01-20'),
-      updatedAt: new Date('2024-01-25'),
-      currency: 'USD',
-      expectedCloseDate: new Date('2024-04-01'),
-      status: 'active',
+      stage: 'negotiation',
+      company: 'Initech',
+      contact: 'Robert Johnson',
+      contactId: 'contact-3',
+      dueDate: new Date('2025-07-10'),
+      createdAt: new Date('2025-05-20'),
+      updatedAt: new Date('2025-06-01'),
+      probability: 75,
+      daysInStage: 7,
+      priority: 'low'
     },
-    {
-      id: '4',
-      title: 'Cloud Infrastructure Setup',
-      description: 'Complete cloud migration and setup',
-      value: 120000,
-      stage: defaultStages[3], // closed-won
+    'deal-4': {
+      id: 'deal-4',
+      title: 'Implementation Services',
+      value: 50000,
+      stage: 'negotiation',
+      company: 'Umbrella Corp',
+      contact: 'Sarah Williams',
+      contactId: 'contact-4',
+      dueDate: new Date('2025-06-25'),
+      createdAt: new Date('2025-05-25'),
+      updatedAt: new Date('2025-06-01'),
+      probability: 75,
+      daysInStage: 2,
+      priority: 'medium'
+    },
+    'deal-5': {
+      id: 'deal-5',
+      title: 'Cloud Migration',
+      value: 95000,
+      stage: 'qualification',
+      company: 'Wayne Enterprises',
+      contact: 'Bruce Wayne',
+      contactId: 'contact-5',
+      dueDate: new Date('2025-08-05'),
+      createdAt: new Date('2025-06-01'),
+      updatedAt: new Date('2025-06-01'),
+      probability: 10,
+      daysInStage: 1,
+      priority: 'high'
+    },
+    'deal-6': {
+      id: 'deal-6',
+      title: 'Annual Subscription',
+      value: 36000,
+      stage: 'closed-won',
+      company: 'Stark Industries',
+      contact: 'Tony Stark',
+      contactId: 'contact-6',
+      dueDate: new Date('2025-07-20'),
+      createdAt: new Date('2025-05-01'),
+      updatedAt: new Date('2025-06-01'),
       probability: 100,
-      contactId: '4',
-      priority: 'high',
       daysInStage: 0,
-      source: 'referral',
-      tags: ['cloud', 'infrastructure'],
-      customFields: {},
-      activities: [],
-      attachments: [],
-      createdAt: new Date('2023-12-01'),
-      updatedAt: new Date('2024-01-10'),
-      closedAt: new Date('2024-01-10'),
-      actualCloseDate: new Date('2024-01-10'),
-      currency: 'USD',
-      status: 'won',
-    }
-  ],
-  
-  pipelines: {
-    'default': defaultPipeline
+      priority: 'medium'
+    },
   },
-  
-  activePipelineId: 'default',
+  columns: {
+    'qualification': {
+      id: 'qualification',
+      title: 'Qualification',
+      dealIds: ['deal-1', 'deal-5']
+    },
+    'proposal': {
+      id: 'proposal',
+      title: 'Proposal',
+      dealIds: ['deal-2']
+    },
+    'negotiation': {
+      id: 'negotiation',
+      title: 'Negotiation',
+      dealIds: ['deal-3', 'deal-4']
+    },
+    'closed-won': {
+      id: 'closed-won',
+      title: 'Closed Won',
+      dealIds: ['deal-6']
+    },
+    'closed-lost': {
+      id: 'closed-lost',
+      title: 'Closed Lost',
+      dealIds: []
+    }
+  },
+  columnOrder: ['qualification', 'proposal', 'negotiation', 'closed-won', 'closed-lost'],
   isLoading: false,
   error: null,
-  filters: {},
-  sortOption: { field: 'updatedAt', direction: 'desc' },
-
-  // Actions
+  selectedDeal: null,
+  aiInsight: null,
+  isAnalyzing: false,
+  stageValues: {
+    'qualification': 170000,
+    'proposal': 45000,
+    'negotiation': 75000,
+    'closed-won': 36000,
+    'closed-lost': 0
+  },
+  totalPipelineValue: 326000,
+  
   fetchDeals: async () => {
     set({ isLoading: true, error: null });
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      set({ isLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch deals', isLoading: false });
-    }
-  },
-
-  addDeal: async (dealData) => {
-    const id = `deal_${Date.now()}`;
-    const newDeal: Deal = {
-      ...dealData,
-      id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      activities: [],
-      attachments: [],
-      customFields: dealData.customFields || {},
-      tags: dealData.tags || [],
-      status: 'active',
-    };
-    
-    set(state => ({
-      deals: [...state.deals, newDeal]
-    }));
-    
-    return id;
-  },
-
-  updateDeal: async (id, updates) => {
-    set(state => ({
-      deals: state.deals.map(deal =>
-        deal.id === id ? { ...deal, ...updates, updatedAt: new Date() } : deal
-      )
-    }));
-  },
-
-  deleteDeal: async (id) => {
-    set(state => ({
-      deals: state.deals.filter(deal => deal.id !== id)
-    }));
-  },
-
-  moveDeal: async (dealId, newStageId) => {
-    const { pipelines, activePipelineId } = get();
-    const pipeline = pipelines[activePipelineId];
-    const newStage = pipeline?.stages.find(s => s.id === newStageId);
-    
-    if (newStage) {
-      await get().updateDeal(dealId, { 
-        stage: newStage,
-        probability: newStage.probability 
-      });
-    }
-  },
-
-  bulkUpdateDeals: async (dealIds, updates) => {
-    const promises = dealIds.map(id => get().updateDeal(id, updates));
-    await Promise.all(promises);
-  },
-
-  // Pipeline management
-  fetchPipelines: async () => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 200));
-  },
-
-  addPipeline: async (pipelineData) => {
-    const id = `pipeline_${Date.now()}`;
-    const newPipeline: Pipeline = {
-      ...pipelineData,
-      id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    
-    set(state => ({
-      pipelines: { ...state.pipelines, [id]: newPipeline }
-    }));
-    
-    return id;
-  },
-
-  updatePipeline: async (id, updates) => {
-    set(state => ({
-      pipelines: {
-        ...state.pipelines,
-        [id]: {
-          ...state.pipelines[id],
-          ...updates,
-          updatedAt: new Date()
-        }
-      }
-    }));
-  },
-
-  deletePipeline: async (id) => {
-    set(state => {
-      const { [id]: deleted, ...remaining } = state.pipelines;
-      return { pipelines: remaining };
-    });
-  },
-
-  setActivePipeline: (pipelineId) => {
-    set({ activePipelineId: pipelineId });
-  },
-
-  // Stage management
-  updateStage: async (pipelineId, stageId, updates) => {
-    set(state => ({
-      pipelines: {
-        ...state.pipelines,
-        [pipelineId]: {
-          ...state.pipelines[pipelineId],
-          stages: state.pipelines[pipelineId].stages.map(stage =>
-            stage.id === stageId ? { ...stage, ...updates } : stage
-          ),
-          updatedAt: new Date()
-        }
-      }
-    }));
-  },
-
-  reorderStages: async (pipelineId, stages) => {
-    set(state => ({
-      pipelines: {
-        ...state.pipelines,
-        [pipelineId]: {
-          ...state.pipelines[pipelineId],
-          stages: stages.map((stage, index) => ({ ...stage, order: index + 1 })),
-          updatedAt: new Date()
-        }
-      }
-    }));
-  },
-
-  // Filtering and sorting
-  setFilters: (filters) => {
-    set(state => ({
-      filters: { ...state.filters, ...filters }
-    }));
-  },
-
-  setSortOption: (sortOption) => {
-    set({ sortOption });
-  },
-
-  clearFilters: () => {
-    set({ filters: {} });
-  },
-
-  // Computed getters
-  getFilteredDeals: () => {
-    const { deals, filters, sortOption } = get();
-    let filteredDeals = [...deals];
-
-    // Apply filters
-    if (filters.stages?.length) {
-      filteredDeals = filteredDeals.filter(deal => 
-        filters.stages!.includes(deal.stage.id)
-      );
-    }
-
-    if (filters.priorities?.length) {
-      filteredDeals = filteredDeals.filter(deal => 
-        filters.priorities!.includes(deal.priority)
-      );
-    }
-
-    if (filters.searchTerm) {
-      const term = filters.searchTerm.toLowerCase();
-      filteredDeals = filteredDeals.filter(deal => 
-        deal.title.toLowerCase().includes(term) ||
-        deal.description?.toLowerCase().includes(term)
-      );
-    }
-
-    if (filters.valueRange) {
-      filteredDeals = filteredDeals.filter(deal => 
-        deal.value >= filters.valueRange!.min && 
-        deal.value <= filters.valueRange!.max
-      );
-    }
-
-    // Apply sorting
-    filteredDeals.sort((a, b) => {
-      const aValue = a[sortOption.field];
-      const bValue = b[sortOption.field];
+      const { data, error } = await fetchDealsFromSupabase();
       
-      if (aValue < bValue) return sortOption.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOption.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    return filteredDeals;
-  },
-
-  getStageValues: () => {
-    const deals = get().getFilteredDeals();
-    const stageValues: Record<string, number> = {};
-    
-    deals.forEach(deal => {
-      if (deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost') {
-        stageValues[deal.stage.id] = (stageValues[deal.stage.id] || 0) + deal.value;
+      if (error) throw new Error(error.message);
+      
+      if (!data) {
+        set({ isLoading: false });
+        return;
       }
-    });
-    
-    return stageValues;
-  },
-
-  getTotalPipelineValue: () => {
-    const deals = get().getFilteredDeals();
-    return deals
-      .filter(deal => deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
-      .reduce((total, deal) => total + deal.value, 0);
-  },
-
-  getSalesMetrics: () => {
-    const deals = get().deals;
-    const wonDeals = deals.filter(d => d.stage.id === 'closed-won');
-    const lostDeals = deals.filter(d => d.stage.id === 'closed-lost');
-    const totalValue = deals.reduce((sum, d) => sum + d.value, 0);
-    const wonValue = wonDeals.reduce((sum, d) => sum + d.value, 0);
-    const lostValue = lostDeals.reduce((sum, d) => sum + d.value, 0);
-    const pipelineValue = get().getTotalPipelineValue();
-
-    return {
-      totalDeals: deals.length,
-      totalValue,
-      totalPipelineValue: pipelineValue,
-      wonDeals: wonDeals.length,
-      wonValue,
-      lostDeals: lostDeals.length,
-      lostValue,
-      averageDealSize: deals.length ? totalValue / deals.length : 0,
-      averageSalesCycle: 30, // placeholder
-      conversionRate: deals.length ? (wonDeals.length / deals.length) * 100 : 0,
-      winRate: (wonDeals.length + lostDeals.length) ? (wonDeals.length / (wonDeals.length + lostDeals.length)) * 100 : 0,
-      salesVelocity: 1000, // placeholder
-      forecastedRevenue: pipelineValue,
-    };
-  },
-
-  calculateForecast: () => {
-    const deals = get().deals;
-    const pipelineDeals = deals.filter(d => 
-      d.stage.id !== 'closed-won' && d.stage.id !== 'closed-lost'
-    );
-    
-    const totalPipeline = pipelineDeals.reduce((sum, d) => sum + d.value, 0);
-    const weightedPipeline = pipelineDeals.reduce((sum, d) => sum + (d.value * d.probability / 100), 0);
-    
-    return {
-      totalPipeline,
-      weightedPipeline,
-      bestCase: totalPipeline,
-      worstCase: weightedPipeline * 0.5,
-      committedForecast: weightedPipeline,
-      upside: totalPipeline - weightedPipeline,
-    };
-  },
-
-  getConversionRates: () => {
-    const { pipelines, activePipelineId } = get();
-    const pipeline = pipelines[activePipelineId];
-    const rates: Record<string, number> = {};
-    
-    if (pipeline) {
-      pipeline.stages.forEach(stage => {
-        rates[stage.id] = stage.probability;
+      
+      // Transform the deals into the required format
+      const dealsRecord: Record<string, Deal> = {};
+      const columnsRecord: Record<string, Column> = {
+        'qualification': { id: 'qualification', title: 'Qualification', dealIds: [] },
+        'proposal': { id: 'proposal', title: 'Proposal', dealIds: [] },
+        'negotiation': { id: 'negotiation', title: 'Negotiation', dealIds: [] },
+        'closed-won': { id: 'closed-won', title: 'Closed Won', dealIds: [] },
+        'closed-lost': { id: 'closed-lost', title: 'Closed Lost', dealIds: [] }
+      };
+      
+      data.forEach(deal => {
+        // Map the API response to our Deal type
+        dealsRecord[deal.id] = {
+          id: deal.id,
+          title: deal.title,
+          value: deal.value || deal.amount,
+          stage: deal.stage,
+          contactId: deal.contact_id || 'unknown',
+          company: deal.company,
+          contact: deal.contact,
+          dueDate: new Date(deal.dueDate),
+          createdAt: new Date(deal.created_at || Date.now()),
+          updatedAt: new Date(deal.updated_at || Date.now()),
+          probability: deal.probability,
+          priority: deal.priority,
+          daysInStage: deal.days_in_stage
+        };
+        
+        // Add deal ID to the appropriate column
+        if (columnsRecord[deal.stage]) {
+          columnsRecord[deal.stage].dealIds.push(deal.id);
+        } else {
+          // If the stage doesn't exist, default to qualification
+          columnsRecord['qualification'].dealIds.push(deal.id);
+        }
+      });
+      
+      // Calculate stage values and total pipeline value
+      const stageValues: Record<string, number> = {};
+      
+      Object.keys(columnsRecord).forEach(columnId => {
+        const column = columnsRecord[columnId];
+        const totalValue = column.dealIds.reduce((sum, dealId) => {
+          return sum + dealsRecord[dealId].value;
+        }, 0);
+        
+        stageValues[columnId] = totalValue;
+      });
+      
+      const totalPipelineValue = Object.values(stageValues).reduce((a, b) => a + b, 0);
+      
+      // Use the mock data for now instead of the API response
+      // In a real implementation, we would use the transformed data from the API
+      // set({ deals: dealsRecord, columns: columnsRecord, isLoading: false });
+      
+      // Recalculate stage values based on the current deals in the store
+      const currentDeals = get().deals;
+      const currentColumns = get().columns;
+      const currentStageValues = calculateStageValues(currentDeals, currentColumns);
+      
+      set({ 
+        isLoading: false,
+        stageValues: currentStageValues,
+        totalPipelineValue: Object.values(currentStageValues).reduce((a, b) => a + b, 0)
+      });
+    } catch (err) {
+      console.error('Error fetching deals:', err);
+      set({ 
+        isLoading: false, 
+        error: err instanceof Error ? err.message : 'Failed to fetch deals' 
       });
     }
-    
-    return rates;
   },
+  
+  createDeal: async (dealData: Partial<Deal>) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const { data, error } = await createDealInSupabase(dealData);
+      
+      if (error) throw new Error(error.message);
+      
+      if (!data) {
+        set({ isLoading: false });
+        return;
+      }
+      
+      // Update local state with the new deal
+      const { deals, columns } = get();
+      
+      // Create a new deal object
+      const newDeal: Deal = {
+        ...data,
+        id: data.id,
+        contactId: data.contactId || 'unknown',
+        createdAt: new Date(data.created_at || Date.now()),
+        updatedAt: new Date(data.updated_at || Date.now()),
+        stage: data.stage || 'qualification'
+      };
+      
+      // Update the deals record
+      const updatedDeals = {
+        ...deals,
+        [newDeal.id]: newDeal
+      };
+      
+      // Update the column dealIds array
+      const stage = newDeal.stage || 'qualification';
+      const updatedColumns = {
+        ...columns,
+        [stage]: {
+          ...columns[stage],
+          dealIds: [...columns[stage].dealIds, newDeal.id]
+        }
+      };
+      
+      // Recalculate stage values
+      const stageValues = calculateStageValues(updatedDeals, updatedColumns);
+      
+      set({ 
+        deals: updatedDeals, 
+        columns: updatedColumns,
+        isLoading: false,
+        stageValues,
+        totalPipelineValue: Object.values(stageValues).reduce((a, b) => a + b, 0)
+      });
+    } catch (err) {
+      console.error('Error creating deal:', err);
+      set({ 
+        isLoading: false, 
+        error: err instanceof Error ? err.message : 'Failed to create deal' 
+      });
+    }
+  },
+  
+  updateDeal: async (id: string, dealData: Partial<Deal>) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const { data, error } = await updateDealInSupabase(id, dealData);
+      
+      if (error) throw new Error(error.message);
+      
+      if (!data) {
+        set({ isLoading: false });
+        return;
+      }
+      
+      // Update local state with the updated deal
+      const { deals } = get();
+      
+      const updatedDeal = {
+        ...deals[id],
+        ...data,
+        updatedAt: new Date(data.updated_at || Date.now())
+      };
+      
+      // Check if the stage has changed
+      if (data.stage && data.stage !== deals[id].stage) {
+        // Need to update columns
+        const oldStage = deals[id].stage;
+        const newStage = data.stage;
+        
+        get().moveDealToStage(id, oldStage, newStage, 0);
+      } else {
+        // Just update the deal
+        const updatedDeals = {
+          ...deals,
+          [id]: updatedDeal
+        };
+        
+        const stageValues = calculateStageValues(updatedDeals, get().columns);
+        
+        set({ 
+          deals: updatedDeals,
+          isLoading: false,
+          stageValues,
+          totalPipelineValue: Object.values(stageValues).reduce((a, b) => a + b, 0)
+        });
+      }
+    } catch (err) {
+      console.error('Error updating deal:', err);
+      set({ 
+        isLoading: false, 
+        error: err instanceof Error ? err.message : 'Failed to update deal' 
+      });
+    }
+  },
+  
+  deleteDeal: async (id: string) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const { error } = await deleteDealFromSupabase(id);
+      
+      if (error) throw new Error(error.message);
+      
+      // Update local state
+      const { deals, columns } = get();
+      
+      const stage = deals[id].stage;
+      
+      // Remove the deal from the deals object
+      const { [id]: deletedDeal, ...remainingDeals } = deals;
+      
+      // Remove the deal ID from the column
+      const updatedColumns = {
+        ...columns,
+        [stage]: {
+          ...columns[stage],
+          dealIds: columns[stage].dealIds.filter(dealId => dealId !== id)
+        }
+      };
+      
+      // Recalculate stage values
+      const stageValues = calculateStageValues(remainingDeals, updatedColumns);
+      
+      set({ 
+        deals: remainingDeals, 
+        columns: updatedColumns,
+        isLoading: false,
+        stageValues,
+        totalPipelineValue: Object.values(stageValues).reduce((a, b) => a + b, 0),
+        selectedDeal: null
+      });
+    } catch (err) {
+      console.error('Error deleting deal:', err);
+      set({ 
+        isLoading: false, 
+        error: err instanceof Error ? err.message : 'Failed to delete deal' 
+      });
+    }
+  },
+  
+  moveDealToStage: (dealId, sourceStage, destinationStage, destinationIndex) => {
+    const { deals, columns } = get();
+    
+    // No change if the stages are the same
+    if (sourceStage === destinationStage) return;
+    
+    // Start by removing the deal from the source column
+    const sourceColumn = columns[sourceStage];
+    const destinationColumn = columns[destinationStage];
+    
+    const newSourceDealIds = sourceColumn.dealIds.filter(id => id !== dealId);
+    
+    // Then add it to the destination column at the specified index
+    const newDestinationDealIds = [...destinationColumn.dealIds];
+    newDestinationDealIds.splice(destinationIndex, 0, dealId);
+    
+    // Update the columns
+    const updatedColumns = {
+      ...columns,
+      [sourceStage]: {
+        ...sourceColumn,
+        dealIds: newSourceDealIds
+      },
+      [destinationStage]: {
+        ...destinationColumn,
+        dealIds: newDestinationDealIds
+      }
+    };
+    
+    // Update the deal's stage
+    const updatedDeals = {
+      ...deals,
+      [dealId]: {
+        ...deals[dealId],
+        stage: destinationStage,
+        updatedAt: new Date()
+      }
+    };
+    
+    // Recalculate stage values
+    const stageValues = calculateStageValues(updatedDeals, updatedColumns);
+    
+    // Update state
+    set({ 
+      deals: updatedDeals,
+      columns: updatedColumns,
+      stageValues,
+      totalPipelineValue: Object.values(stageValues).reduce((a, b) => a + b, 0)
+    });
+    
+    // Persist the change to the backend
+    updateDealInSupabase(dealId, { 
+      stage: destinationStage,
+      updated_at: new Date().toISOString()
+    });
+  },
+  
+  selectDeal: (dealId) => {
+    set({ 
+      selectedDeal: dealId,
+      aiInsight: null 
+    });
+  },
+  
+  generateAiInsight: async (dealId) => {
+    const { deals } = get();
+    const deal = deals[dealId];
+    
+    if (!deal) return;
+    
+    set({ isAnalyzing: true });
+    
+    try {
+      // In a real implementation, we would call the AI service
+      // For demo purposes, we'll simulate a response after a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const randomProbability = Math.floor(Math.random() * (deal.stage === 'negotiation' ? 30 : 20) + 
+                                (deal.stage === 'negotiation' ? 60 : 
+                                 deal.stage === 'proposal' ? 40 : 
+                                 deal.stage === 'qualification' ? 15 : 5));
+                                 
+      const insights = `# Deal Analysis for ${deal.title}
 
-  getSalesVelocity: () => {
-    const deals = get().deals;
-    const wonDeals = deals.filter(d => d.stage.id === 'closed-won');
-    
-    if (wonDeals.length === 0) return 0;
-    
-    const totalValue = wonDeals.reduce((sum, d) => sum + d.value, 0);
-    const avgCycleTime = 30; // placeholder - should calculate from actual data
-    
-    return totalValue / avgCycleTime;
-  },
+## Win Probability: ${randomProbability}%
 
-  getActivePipeline: () => {
-    const { pipelines, activePipelineId } = get();
-    return pipelines[activePipelineId] || null;
-  },
+### Key Risk Factors:
+1. Competition from established vendors in this space
+2. Budget constraints indicated in previous discussions
+3. Decision timeline may be extended due to stakeholder alignment
+
+### Opportunities:
+1. Strong need for our specific features that solve their pain points
+2. Champion within the organization is supportive
+3. Potential for expanded deployment in other departments
+
+### Recommended Actions:
+1. Schedule a technical deep dive with their IT team
+2. Prepare ROI analysis demonstrating 18-month value
+3. Identify and engage additional stakeholders in the finance department
+4. Consider offering phased implementation to reduce initial investment
+
+This deal is currently in the ${deal.stage} stage and has been there for ${deal.daysInStage || 0} days. The average deal at this value point typically closes within 30 days from this stage.`;
+      
+      set({ 
+        aiInsight: insights,
+        isAnalyzing: false
+      });
+    } catch (error) {
+      console.error('Error generating AI insight:', error);
+      set({ 
+        isAnalyzing: false,
+        error: error instanceof Error ? error.message : 'Failed to generate AI insight'
+      });
+    }
+  }
 }));
+
+// Helper function to calculate stage values
+function calculateStageValues(deals: Record<string, Deal>, columns: Record<string, Column>) {
+  const stageValues: Record<string, number> = {};
+  
+  Object.keys(columns).forEach(columnId => {
+    const column = columns[columnId];
+    const totalValue = column.dealIds.reduce((sum, dealId) => {
+      return sum + (deals[dealId]?.value || 0);
+    }, 0);
+    
+    stageValues[columnId] = totalValue;
+  });
+  
+  return stageValues;
+}
