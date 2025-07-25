@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
@@ -12,10 +12,10 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Critical pages - load immediately
 import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
 import SystemOverview from './pages/SystemOverview';
 
 // Heavy pages - lazy load for better performance
-const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts'));
@@ -55,19 +55,35 @@ function App() {
             <VideoCallProvider>
               <NavigationProvider>
                 <DashboardLayoutProvider>
-                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                    <Navbar />
-                    <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-                      <Routes>
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/system-overview" replace />} />
-        
-        {/* System Overview - Main Landing Page */}
-        <Route path="/system-overview" element={
-          <ProtectedRoute>
-            <SystemOverview />
-          </ProtectedRoute>
-        } />
+                  <AppLayout />
+                </DashboardLayoutProvider>
+              </NavigationProvider>
+            </VideoCallProvider>
+          </EnhancedHelpProvider>
+        </ModalsProvider>
+      </AIToolsProvider>
+    </ThemeProvider>
+  );
+}
+
+function AppLayout() {
+  const location = useLocation();
+  const showNavbar = location.pathname !== '/';
+  
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {showNavbar && <Navbar />}
+      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+        <Routes>
+          {/* Landing Page - Root Route */}
+          <Route path="/" element={<Landing />} />
+          
+          {/* System Overview - Development Status Page */}
+          <Route path="/system-overview" element={
+            <ProtectedRoute>
+              <SystemOverview />
+            </ProtectedRoute>
+          } />
         
         {/* Main Application Routes */}
         <Route path="/dashboard" element={
@@ -152,16 +168,9 @@ function App() {
         
         {/* Catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Suspense>
-                    </div>
-                </DashboardLayoutProvider>
-              </NavigationProvider>
-            </VideoCallProvider>
-          </EnhancedHelpProvider>
-        </ModalsProvider>
-      </AIToolsProvider>
-    </ThemeProvider>
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 
