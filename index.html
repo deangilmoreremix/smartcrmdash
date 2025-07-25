@@ -1,20 +1,13 @@
-<!doctype html>
-<html lang="en" class="h-full">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Modern CRM Dashboard with Glassmorphism Design</title>
-    <script>
-      // Create a global ENV_VARS object to hold runtime environment variables
-      window.ENV_VARS = {
-        SUPABASE_URL: '%SUPABASE_URL%',
-        SUPABASE_ANON_KEY: '%SUPABASE_ANON_KEY%'
-      };
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart CRM</title>
+    <link rel="stylesheet" href="/animations.css">
   </head>
-  <body class="h-full m-0 p-0 overflow-x-hidden">
-    <div id="root" class="h-full w-full"></div>
+  <body>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
