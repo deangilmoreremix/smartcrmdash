@@ -17,15 +17,15 @@ const ParallaxHero: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-in">
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-            The Future of
+            AI-Powered
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
-              Smart CRM
+              CRM Revolution
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Transform your sales pipeline with AI-powered insights, automated workflows, 
-            and intelligent customer relationship management that grows with your business.
+            Transform your sales process with intelligent automation, predictive analytics, 
+            and AI-driven insights that help you close more deals faster than ever before.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

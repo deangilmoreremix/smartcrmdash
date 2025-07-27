@@ -19,7 +19,6 @@ import {
   User,
   Clock,
   Star,
-  ExternalLink,
   BarChart,
   Users,
   Briefcase,
@@ -28,7 +27,8 @@ import {
   Mic,
   Search,
   Zap,
-  Calendar
+  Upload,
+  DollarSign
 } from 'lucide-react';
 
 import LandingHeader from './components/LandingHeader';
@@ -37,7 +37,6 @@ import PricingCard from './components/PricingCard';
 import FeatureCard from './components/FeatureCard';
 import TestimonialCard from './components/TestimonialCard';
 import AnimatedFeatureIcon from '../../components/Landing/AnimatedFeatureIcon';
-import FloatingIcons from '../../components/Landing/FloatingIcons';
 import ProductDemo from '../../components/Landing/ProductDemo';
 import ClientLogos from '../../components/Landing/ClientLogos';
 import StatCounter from '../../components/Landing/StatCounter';
@@ -47,6 +46,7 @@ import ScrollAnimationWrapper from '../../components/Landing/ScrollAnimationWrap
 import FeatureDemo from '../../components/Landing/FeatureDemo';
 import InteractiveFeaturesGrid from '../../components/Landing/InteractiveFeaturesGrid';
 import ParticleBackground from '../../components/Landing/ParticleBackground';
+import CallToAction from '../../components/Landing/CallToAction';
 
 const LandingPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -137,9 +137,9 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-in">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">The Impact of Smart CRM</h2>
+              <h2 className="text-3xl font-bold mb-4">The SmartCRM Difference</h2>
               <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-                Real results from businesses using our AI-powered CRM platform
+                Real results from businesses using our AI-powered CRM platform to accelerate growth
               </p>
             </div>
           </ScrollAnimationWrapper>
@@ -148,8 +148,8 @@ const LandingPage = () => {
             <ScrollAnimationWrapper animation="fade-up" delay={100}>
               <StatCounter 
                 icon={<TrendingUp size={24} />} 
-                label="Sales Growth" 
-                value={32} 
+                label="Revenue Growth" 
+                value={35} 
                 suffix="%" 
               />
             </ScrollAnimationWrapper>
@@ -157,17 +157,18 @@ const LandingPage = () => {
             <ScrollAnimationWrapper animation="fade-up" delay={200}>
               <StatCounter 
                 icon={<Clock size={24} />} 
-                label="Hours Saved Weekly" 
-                value={9.5} 
-                decimals={1} 
+                label="Time Saved Weekly" 
+                value={12} 
+                decimals={0} 
+                suffix=" hrs"
               />
             </ScrollAnimationWrapper>
             
             <ScrollAnimationWrapper animation="fade-up" delay={300}>
               <StatCounter 
                 icon={<BarChart size={24} />} 
-                label="Lead Conversion" 
-                value={24} 
+                label="Conversion Rate" 
+                value={28} 
                 suffix="%" 
               />
             </ScrollAnimationWrapper>
@@ -175,8 +176,8 @@ const LandingPage = () => {
             <ScrollAnimationWrapper animation="fade-up" delay={400}>
               <StatCounter 
                 icon={<Users size={24} />} 
-                label="Happy Customers" 
-                value={5000} 
+                label="Active Users" 
+                value={10000} 
                 suffix="+" 
               />
             </ScrollAnimationWrapper>
@@ -189,9 +190,9 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">See Smart CRM in Action</h2>
+              <h2 className="text-3xl font-bold mb-4">See SmartCRM in Action</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover how our AI-powered CRM transforms your sales process
+                Discover how our AI-powered platform transforms your sales process and drives results
               </p>
             </div>
             
@@ -219,6 +220,58 @@ const LandingPage = () => {
           />
         </div>
       </section>
+
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How SmartCRM Works
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Streamline your sales process and boost productivity in three simple steps with intelligent automation.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <ScrollAnimationWrapper animation="fade-up" delay={100}>
+              <div className="text-center bg-white rounded-xl shadow-lg p-8 border border-gray-100 h-full flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                  <Upload size={32} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">1. Connect & Organize</h3>
+                <p className="text-gray-600 flex-grow">
+                  Easily import your existing contacts and deals, and set up your sales pipeline in minutes.
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+            
+            <ScrollAnimationWrapper animation="fade-up" delay={200}>
+              <div className="text-center bg-white rounded-xl shadow-lg p-8 border border-gray-100 h-full flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                  <Zap size={32} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">2. Engage & Automate</h3>
+                <p className="text-gray-600 flex-grow">
+                  Leverage AI for personalized communication, automate follow-ups, and streamline daily tasks.
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+            
+            <ScrollAnimationWrapper animation="fade-up" delay={300}>
+              <div className="text-center bg-white rounded-xl shadow-lg p-8 border border-gray-100 h-full flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                  <DollarSign size={32} />
+                </div>
+                <h3 className="text-xl font-bold mb-3">3. Analyze & Grow</h3>
+                <p className="text-gray-600 flex-grow">
+                  Gain deep AI-powered insights into your sales performance to make data-driven decisions and close more deals.
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+          </div>
+        </div>
+      </section>
       
       {/* Feature Showcase */}
       <FeatureShowcase />
@@ -229,10 +282,10 @@ const LandingPage = () => {
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                All the Features You Need to Succeed
+                Powerful Features for Modern Sales Teams
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Smart CRM combines powerful sales tools with advanced AI capabilities to streamline your workflow and boost your results.
+                SmartCRM combines powerful sales tools with advanced AI capabilities to streamline your workflow and boost your results.
               </p>
             </div>
           </ScrollAnimationWrapper>
@@ -402,7 +455,7 @@ const LandingPage = () => {
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                How Smart CRM Transforms Your Sales
+                How SmartCRM Transforms Your Sales
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 See the real benefits our customers experience every day
@@ -416,7 +469,7 @@ const LandingPage = () => {
                 <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <PieChart className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">27% Higher Win Rate</h3>
+                <h3 className="text-2xl font-bold mb-3">35% Higher Win Rate</h3>
                 <p className="text-gray-600">
                   AI-driven insights and personalization help you target the right prospects with the right approach, significantly increasing win rates.
                 </p>
@@ -428,7 +481,7 @@ const LandingPage = () => {
                 <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <BarChart3 className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">35% Faster Sales Cycle</h3>
+                <h3 className="text-2xl font-bold mb-3">40% Faster Sales Cycle</h3>
                 <p className="text-gray-600">
                   Automated workflows, smart follow-ups, and AI tools help you move deals through your pipeline more efficiently.
                 </p>
@@ -440,7 +493,7 @@ const LandingPage = () => {
                 <div className="w-20 h-20 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Clock className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3">9+ Hours Saved Weekly</h3>
+                <h3 className="text-2xl font-bold mb-3">12+ Hours Saved Weekly</h3>
                 <p className="text-gray-600">
                   Automation of routine tasks and AI-powered content generation save your team valuable time to focus on relationship building.
                 </p>
@@ -467,10 +520,10 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <ScrollAnimationWrapper animation="fade-up" delay={100}>
               <TestimonialCard
-                quote="Smart CRM has completely transformed our sales process. The AI tools save us hours each week and provide insights we never had before."
+                quote="SmartCRM has revolutionized our sales operations. The AI tools save us 12+ hours weekly and our win rate increased by 28%. The insights are invaluable."
                 name="Sarah Johnson"
                 position="VP of Sales"
-                company="TechCorp"
+                company="TechFlow Solutions"
                 image="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                 stars={5}
               />
@@ -478,10 +531,10 @@ const LandingPage = () => {
             
             <ScrollAnimationWrapper animation="fade-up" delay={300}>
               <TestimonialCard
-                quote="The AI assistant is like having an extra team member. It handles routine tasks, provides insights, and helps us close more deals."
+                quote="The AI assistant is like having a senior sales rep on every deal. It anticipates next steps, suggests optimal timing, and helps us close 35% faster."
                 name="Michael Rodriguez"
                 position="Sales Director"
-                company="Global Solutions"
+                company="Global Dynamics Inc"
                 image="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                 stars={5}
               />
@@ -489,10 +542,10 @@ const LandingPage = () => {
             
             <ScrollAnimationWrapper animation="fade-up" delay={500}>
               <TestimonialCard
-                quote="We've seen a 32% increase in our sales since implementing Smart CRM. The AI-powered features are a game-changer!"
+                quote="We've achieved 42% revenue growth since implementing SmartCRM. The AI-powered pipeline management and lead scoring are absolute game-changers!"
                 name="Jennifer Lee"
-                position="CEO"
-                company="Startup Innovations"
+                position="CEO & Founder"
+                company="Innovate Ventures"
                 image="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                 stars={5}
               />
@@ -585,34 +638,14 @@ const LandingPage = () => {
       </section>
       
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white relative overflow-hidden gpu-accelerated">
-        <ParticleBackground color="#ffffff" particleCount={30} speed={0.5} />
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Transform Your Sales Process?
-            </h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of sales professionals already using Smart CRM to close more deals.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/dashboard" className="px-8 py-4 bg-white text-blue-700 font-medium rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105">
-                Start Your Free Trial
-              </Link>
-              <Link to="/dashboard" className="px-8 py-4 bg-green-500 bg-opacity-90 hover:bg-opacity-100 text-white font-medium rounded-lg hover:shadow-lg transition duration-300 flex items-center">
-                <ExternalLink size={18} className="mr-1.5" />
-                Go to Dashboard
-              </Link>
-            </div>
-            <p className="mt-4 opacity-80">No credit card required • Free for 14 days</p>
-          </div>
-          
-          {/* Background floating elements */}
-          <div className="absolute top-10 left-1/4 w-12 h-12 bg-white opacity-5 rounded-full transform animate-pulse animation-fix" style={{animationDuration: '4s'}}></div>
-          <div className="absolute bottom-10 right-1/4 w-24 h-24 bg-white opacity-5 rounded-full transform animate-pulse animation-fix" style={{animationDuration: '7s'}}></div>
-          <div className="absolute top-1/3 right-1/3 w-8 h-8 bg-white opacity-5 rounded-full transform animate-pulse animation-fix" style={{animationDuration: '5s'}}></div>
-        </div>
-      </section>
+      <CallToAction
+        title="Ready to Transform Your Sales Process?"
+        description="Join thousands of sales professionals already using SmartCRM to close more deals."
+        primaryCtaText="Start Your Free Trial"
+        primaryCtaLink="/register"
+        secondaryCtaText="Go to Dashboard"
+        secondaryCtaLink="/dashboard"
+      />
       
       {/* FAQ Preview */}
       <section className="py-20 bg-white content-stable">
@@ -623,7 +656,7 @@ const LandingPage = () => {
                 Frequently Asked Questions
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Find answers to common questions about Smart CRM
+                Find answers to common questions about SmartCRM
               </p>
             </div>
           </ScrollAnimationWrapper>
@@ -632,10 +665,10 @@ const LandingPage = () => {
             <ScrollAnimationWrapper animation="fade-up" delay={100}>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-300 hover:shadow-md">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  How does the 14-day free trial work?
+                  How quickly can I see results with SmartCRM?
                 </h3>
                 <p className="text-gray-700">
-                  Our free trial gives you full access to all features in the Professional plan for 14 days. No credit card is required to start, and you can cancel anytime before the trial ends with no obligation.
+                  Most customers see immediate productivity gains within the first week. Our AI tools start providing insights from day one, and the average customer reports 25% time savings within their first month of use.
                 </p>
               </div>
             </ScrollAnimationWrapper>
@@ -643,10 +676,10 @@ const LandingPage = () => {
             <ScrollAnimationWrapper animation="fade-up" delay={200}>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-300 hover:shadow-md">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Do I need my own AI API keys?
+                  What makes SmartCRM different from other CRM platforms?
                 </h3>
                 <p className="text-gray-700">
-                  For the paid plans, you do not need your own API keys. We provide all API access as part of your subscription. For the demo or development version, you can use your own OpenAI or Google Gemini API keys.
+                  SmartCRM is built AI-first with 20+ intelligent tools that work together seamlessly. Unlike traditional CRMs with bolted-on AI features, our platform uses AI to enhance every aspect of your sales process - from lead scoring to deal forecasting to automated follow-ups.
                 </p>
               </div>
             </ScrollAnimationWrapper>
@@ -657,7 +690,18 @@ const LandingPage = () => {
                   Can I import my existing CRM data?
                 </h3>
                 <p className="text-gray-700">
-                  Yes, Smart CRM supports importing data from CSV, Excel, and direct connections with other popular CRM systems. Our onboarding team can assist with migrating your existing data seamlessly.
+                  Yes, SmartCRM supports importing data from CSV, Excel, and direct connections with other popular CRM systems. Our onboarding team can assist with migrating your existing data seamlessly.
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+            
+            <ScrollAnimationWrapper animation="fade-up" delay={400}>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-300 hover:shadow-md">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  How secure is my data with SmartCRM?
+                </h3>
+                <p className="text-gray-700">
+                  We use enterprise-grade security with SOC 2 Type II compliance, end-to-end encryption, and regular security audits. Your data is hosted on secure cloud infrastructure with 99.9% uptime guarantee and daily backups.
                 </p>
               </div>
             </ScrollAnimationWrapper>

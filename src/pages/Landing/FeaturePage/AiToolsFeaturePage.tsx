@@ -19,6 +19,10 @@ import {
   User,
   Clock,
   Star,
+  Zap,
+  Shield,
+  Globe,
+  Quote
 } from 'lucide-react';
 
 import LandingHeader from '../components/LandingHeader';

@@ -16,7 +16,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Critical pages - load immediately
 import Dashboard from './pages/Dashboard';
-import EmbeddedLandingPage from './pages/Landing/EmbeddedLandingPage';
+import LandingPage from './pages/Landing/LandingPage';
 
 // Auth pages
 const SignInPage = lazy(() => import('./pages/auth/SignInPage'));
@@ -24,15 +24,13 @@ const SignUpPage = lazy(() => import('./pages/auth/SignUpPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
 
 // Main pages
-const Contacts = lazy(() => import('../pages/Contacts'));
-const ContactDetail = lazy(() => import('../pages/ContactDetail'));
-const Pipeline = lazy(() => import('../pages/Pipeline'));
-const TasksNew = lazy(() => import('../pages/Tasks'));
-const AITools = lazy(() => import('../pages/AITools'));
-const Settings = lazy(() => import('../pages/Settings'));
-const FAQ = lazy(() => import('../pages/FAQ'));
-const PricingPage = lazy(() => import('./pages/PricingPage'));
-const Appointments = lazy(() => import('../pages/Appointments'));
+const Contacts = lazy(() => import('./pages/Contacts'));
+const ContactDetail = lazy(() => import('./pages/ContactDetail'));
+const Pipeline = lazy(() => import('./pages/Pipeline'));
+const TasksNew = lazy(() => import('./pages/Tasks'));
+const AITools = lazy(() => import('./pages/AITools'));
+const Settings = lazy(() => import('./pages/Settings'));
+const FAQ = lazy(() => import('./pages/FAQ'));
 const WhiteLabelPage = lazy(() => import('./pages/WhiteLabelPage'));
 
 // Layout wrapper that conditionally shows navbar
@@ -77,7 +75,7 @@ function App() {
                           <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
                             <Routes>
                               {/* Public Routes */}
-                              <Route path="/" element={<EmbeddedLandingPage />} />
+                              <Route path="/" element={<LandingPage />} />
                               
                               {/* Auth Routes */}
                               <Route path="/sign-in" element={<SignInPage />} />
@@ -114,27 +112,13 @@ function App() {
                               <Route path="/contacts/:id" element={<ProtectedRoute><ContactDetail /></ProtectedRoute>} />
                               <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
                               <Route path="/tasks" element={<ProtectedRoute><TasksNew /></ProtectedRoute>} />
-                              <Route path="/ai-tools/*" element={
+                              <Route path="/ai-tools" element={
                                 <ProtectedRoute requireFeature="aiTools">
                                   <AITools />
                                 </ProtectedRoute>
                               } />
                               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                               <Route path="/faq" element={<FAQ />} />
-                              <Route path="/pricing" element={<PricingPage />} />
-                              
-                              {/* Additional routes that navbar tries to navigate to */}
-                              <Route path="/analytics" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/ai-goals" element={<ProtectedRoute><AITools /></ProtectedRoute>} />
-                              <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
-                              
-                              {/* Other tool routes - temporarily redirect to appropriate pages */}
-                              <Route path="/video-email" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/text-messages" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/content-library" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/voice-profiles" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/business-analysis" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                              <Route path="/forms" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
                               {/* Catch-all route */}
                               <Route path="*" element={<Navigate to="/" replace />} />

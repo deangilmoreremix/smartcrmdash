@@ -2,11 +2,11 @@ import React from 'react';
 
 const ClientLogos: React.FC = () => {
   const logos = [
-    { name: "TechCorp", initial: "TC" },
-    { name: "InnovateCo", initial: "IC" },
-    { name: "GlobalTech", initial: "GT" },
-    { name: "StartupInc", initial: "SI" },
-    { name: "Enterprise", initial: "EN" },
+    { name: "Microsoft", initial: "MS" },
+    { name: "Salesforce", initial: "SF" },
+    { name: "HubSpot", initial: "HS" },
+    { name: "Slack", initial: "SL" },
+    { name: "Zoom", initial: "ZM" },
   ];
 
   return (
