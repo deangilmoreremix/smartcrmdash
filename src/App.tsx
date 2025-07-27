@@ -23,6 +23,7 @@ const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
 const OrganizationSelectionPage = lazy(() => import('./pages/OrganizationSelectionPage'));
+const OrganizationProfilePage = lazy(() => import('./pages/OrganizationProfilePage'));
 
 // Main pages
 const Contacts = lazy(() => import('../pages/Contacts'));
@@ -91,6 +92,11 @@ function App() {
                               <Route path="/organizations" element={
                                 <ProtectedRoute>
                                   <OrganizationSelectionPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/organization-profile/*" element={
+                                <ProtectedRoute>
+                                  <OrganizationProfilePage />
                                 </ProtectedRoute>
                               } />
 

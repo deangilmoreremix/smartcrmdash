@@ -8,6 +8,7 @@ import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
+import { OrganizationSwitcher as CustomOrganizationSwitcher } from './organizations/OrganizationSwitcher';
 import { OrganizationSwitcher } from './organizations/OrganizationSwitcher';
 
 interface NavbarProps {
@@ -788,6 +789,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
+
+              {/* Organization Switcher */}
+              <CustomOrganizationSwitcher />
 
               {/* Theme Toggle */}
               <button
