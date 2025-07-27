@@ -35,12 +35,12 @@ export const ClerkWrapper: React.FC<ClerkWrapperProps> = ({ children }) => {
           footerActionLink: 'text-blue-600 hover:text-blue-800 font-medium',
         }
       }}
-      signInFallbackRedirectUrl="/dashboard"
+      signInFallbackRedirectUrl="/organizations"
       signUpFallbackRedirectUrl="/onboarding"
       localization={{
         signIn: {
           start: {
-            title: 'Welcome to SmartCRM',
+            title: 'Welcome back to SmartCRM',
             subtitle: 'Sign in to access your dashboard',
           }
         },

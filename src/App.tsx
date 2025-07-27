@@ -22,6 +22,7 @@ import EmbeddedLandingPage from './pages/Landing/EmbeddedLandingPage';
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
+const OrganizationSelectionPage = lazy(() => import('./pages/OrganizationSelectionPage'));
 
 // Main pages
 const Contacts = lazy(() => import('../pages/Contacts'));
@@ -85,6 +86,11 @@ function App() {
                               <Route path="/onboarding" element={
                                 <ProtectedRoute>
                                   <OnboardingPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/organizations" element={
+                                <ProtectedRoute>
+                                  <OrganizationSelectionPage />
                                 </ProtectedRoute>
                               } />
 

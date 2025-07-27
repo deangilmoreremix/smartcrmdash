@@ -8,6 +8,7 @@ import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
+import { OrganizationSwitcher } from './organizations/OrganizationSwitcher';
 
 interface NavbarProps {
   onOpenPipelineModal?: () => void;
@@ -774,6 +775,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
             {/* Right Side Controls */}
             <div className="hidden lg:flex items-center space-x-2">
+              {/* Organization Switcher */}
+              <OrganizationSwitcher />
+              
               {/* Search */}
               <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />

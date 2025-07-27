@@ -176,3 +176,5 @@ export const OrganizationSelectionPage: React.FC = () => {
     </div>
   );
 };
+
+export default OrganizationSelectionPage;
