@@ -19,8 +19,8 @@ import Dashboard from './pages/Dashboard';
 import EmbeddedLandingPage from './pages/Landing/EmbeddedLandingPage';
 
 // Auth pages
-const SignInPage = lazy(() => import('./pages/auth/SignInPage'));
-const SignUpPage = lazy(() => import('./pages/auth/SignUpPage'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const OnboardingPage = lazy(() => import('./pages/auth/OnboardingPage'));
 
 // Main pages

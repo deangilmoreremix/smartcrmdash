@@ -1,8 +1,17 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 const EmbeddedLandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isSignedIn, isLoaded } = useUser();
+
+  // If user is already signed in, redirect to dashboard
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      navigate('/dashboard');
+    }
+  }, [isLoaded, isSignedIn, navigate]);
 
   useEffect(() => {
     // Function to handle messages from the iframe
@@ -19,12 +28,16 @@ const EmbeddedLandingPage: React.FC = () => {
         // Map landing page paths to your app routes
         switch (path) {
           case '/dashboard':
+            navigate('/dashboard');
+            break;
           case '/register':
           case '/signup':
-            navigate('/dashboard');
+          case '/sign-up':
+            navigate('/sign-up');
             break;
           case '/signin':
           case '/login':
+          case '/sign-in':
             navigate('/sign-in');
             break;
           case '/pricing':
@@ -86,12 +99,14 @@ const EmbeddedLandingPage: React.FC = () => {
       
       {/* Optional: Add overlay for specific link interception */}
       <div className="fixed bottom-4 right-4 z-50">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition-colors font-medium"
-        >
-          Go to Dashboard
-        </button>
+        {isLoaded && (
+          <button
+            onClick={() => navigate(isSignedIn ? '/dashboard' : '/sign-up')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition-colors font-medium"
+          >
+            {isSignedIn ? 'Go to Dashboard' : 'Get Started'}
+          </button>
+        )}
       </div>
     </div>
   );
