@@ -227,7 +227,7 @@ export default function ProposalGenerator() {
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="Describe the project in detail"
               />
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -362,7 +362,12 @@ export default function ProposalGenerator() {
         </div>
 
         {/* Generated Proposal */}
-        <div className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <motion.div 
+          className={`p-6 rounded-xl shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Generated Proposal</h2>
             {generatedProposal && (
@@ -399,8 +404,8 @@ export default function ProposalGenerator() {
               <p>Your generated proposal will appear here</p>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
