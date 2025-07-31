@@ -359,7 +359,7 @@ export default function ProposalGenerator() {
               <span className="text-green-700">Proposal generated successfully!</span>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Generated Proposal */}
         <motion.div 

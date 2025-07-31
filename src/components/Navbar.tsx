@@ -2,11 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat, Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart, Edit3, ExternalLink, Menu, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useWhiteLabel } from '../contexts/WhiteLabelContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
+import { OrganizationSwitcher as CustomOrganizationSwitcher } from './organizations/OrganizationSwitcher';
+import { OrganizationSwitcher } from './organizations/OrganizationSwitcher';
 
 interface NavbarProps {
   onOpenPipelineModal?: () => void;
@@ -18,6 +21,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const { brandingConfig } = useWhiteLabel();
   const { openAITool } = useNavigation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -147,50 +151,89 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   // Optimize AI tool click handler with useCallback
   const handleAIToolClick = useCallback((toolName: string) => {
-    if (toolName === 'sales-tools') navigate('/sales-tools');
+    // AI Tools Individual Routes
+    if (toolName === 'email-analysis') navigate('/ai-tools/email-analysis');
+    else if (toolName === 'meeting-summarizer') navigate('/ai-tools/meeting-summarizer');
+    else if (toolName === 'proposal-generator') navigate('/ai-tools/proposal-generator');
+    else if (toolName === 'call-script') navigate('/ai-tools/call-script');
+    else if (toolName === 'subject-optimizer') navigate('/ai-tools/subject-optimizer');
+    else if (toolName === 'competitor-analysis') navigate('/ai-tools/competitor-analysis');
+    else if (toolName === 'market-trends') navigate('/ai-tools/market-trends');
+    else if (toolName === 'sales-insights') navigate('/ai-tools/sales-insights');
+    else if (toolName === 'sales-forecast') navigate('/ai-tools/sales-forecast');
+    else if (toolName === 'email-composer') navigate('/ai-tools/email-composer');
+    else if (toolName === 'objection-handler') navigate('/ai-tools/objection-handler');
+    else if (toolName === 'email-response') navigate('/ai-tools/email-response');
+    else if (toolName === 'voice-tone') navigate('/ai-tools/voice-tone');
+    else if (toolName === 'customer-persona') navigate('/ai-tools/customer-persona');
+    else if (toolName === 'visual-content') navigate('/ai-tools/visual-content');
+    else if (toolName === 'meeting-agenda') navigate('/ai-tools/meeting-agenda');
+    else if (toolName === 'ai-assistant') navigate('/ai-tools/ai-assistant');
+    else if (toolName === 'vision-analyzer') navigate('/ai-tools/vision-analyzer');
+    else if (toolName === 'image-generator') navigate('/ai-tools/image-generator');
+    else if (toolName === 'semantic-search') navigate('/ai-tools/semantic-search');
+    else if (toolName === 'function-assistant') navigate('/ai-tools/function-assistant');
+    else if (toolName === 'streaming-chat') navigate('/ai-tools/streaming-chat');
+    else if (toolName === 'form-validation') navigate('/ai-tools/form-validation');
+    else if (toolName === 'live-deal-analysis') navigate('/ai-tools/live-deal-analysis');
+    else if (toolName === 'instant-response') navigate('/ai-tools/instant-response');
+    else if (toolName === 'realtime-email') navigate('/ai-tools/realtime-email');
+    else if (toolName === 'voice-analysis') navigate('/ai-tools/voice-analysis');
+    else if (toolName === 'reasoning-email') navigate('/ai-tools/reasoning-email');
+    else if (toolName === 'reasoning-proposal') navigate('/ai-tools/reasoning-proposal');
+    else if (toolName === 'reasoning-script') navigate('/ai-tools/reasoning-script');
+    else if (toolName === 'reasoning-objection') navigate('/ai-tools/reasoning-objection');
+    // Sales Tools Routes
+    else if (toolName === 'sales-tools') navigate('/sales-tools');
     else if (toolName === 'lead-automation') navigate('/lead-automation');
     else if (toolName === 'circle-prospecting') navigate('/circle-prospecting');
     else if (toolName === 'appointments') navigate('/appointments');
     else if (toolName === 'phone-system') navigate('/phone-system');
     else if (toolName === 'invoicing') navigate('/invoicing');
-    else if (toolName === 'video-email') navigate('/video-email');
-    else if (toolName === 'text-messages') navigate('/text-messages');
-    else if (toolName === 'content-library') navigate('/content-library');
-    else if (toolName === 'voice-profiles') navigate('/voice-profiles');
-    else if (toolName === 'business-analysis') navigate('/business-analysis');
-    else if (toolName === 'forms') navigate('/forms');
     else if (toolName === 'sales-analytics') navigate('/sales-analytics');
-    else if (toolName === 'deal-pipeline') {
-      onOpenPipelineModal?.();
-      setActiveDropdown(null);
-    }
     else if (toolName === 'quote-builder') navigate('/quote-builder');
     else if (toolName === 'commission-tracker') navigate('/commission-tracker');
     else if (toolName === 'follow-up-reminders') navigate('/follow-up-reminders');
     else if (toolName === 'territory-management') navigate('/territory-management');
+    // Task Tools Routes
     else if (toolName === 'task-management') navigate('/tasks');
     else if (toolName === 'task-automation') navigate('/task-automation');
     else if (toolName === 'project-tracker') navigate('/project-tracker');
     else if (toolName === 'time-tracking') navigate('/time-tracking');
     else if (toolName === 'workflow-builder') navigate('/workflow-builder');
     else if (toolName === 'deadline-manager') navigate('/deadline-manager');
-    else if (toolName === 'email-composer') navigate('/email-composer');
+    // Communication Tools Routes
+    else if (toolName === 'video-email') navigate('/video-email');
+    else if (toolName === 'text-messages') navigate('/text-messages');
     else if (toolName === 'campaigns') navigate('/campaigns');
-    else if (toolName === 'image-generator') navigate('/image-generator');
-    else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
-    // Enhanced SDRButtons Communication Features
     else if (toolName === 'group-calls') navigate('/group-calls');
     else if (toolName === 'call-recording') navigate('/call-recording');
     else if (toolName === 'in-call-messaging') navigate('/in-call-messaging');
     else if (toolName === 'call-analytics') navigate('/call-analytics');
     else if (toolName === 'connection-quality') navigate('/connection-quality');
+    // Content Tools Routes
+    else if (toolName === 'content-library') navigate('/content-library');
+    else if (toolName === 'voice-profiles') navigate('/voice-profiles');
+    else if (toolName === 'business-analysis') navigate('/business-analysis');
+    else if (toolName === 'forms') navigate('/forms');
+    else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
+    // AI Suite Routes
+    else if (toolName === 'ai-suite') navigate('/ai-suite');
+    else if (toolName === 'ai-insights') navigate('/ai-insights');
+    else if (toolName === 'ai-model-stats') navigate('/ai-model-stats');
+    else if (toolName === 'ai-model-selector') navigate('/ai-model-selector');
+    // Special cases
+    else if (toolName === 'deal-pipeline') {
+      onOpenPipelineModal?.();
+      setActiveDropdown(null);
+    }
     else {
-      // For other AI tools, open in AI tools page
-      openAITool(toolName);
+      // Fallback to AI tools page for any missed tools
+      navigate('/ai-tools');
     }
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-  }, [navigate, openAITool, onOpenPipelineModal]);
+  }, [navigate, onOpenPipelineModal]);
 
   // Update active tab based on current route
   useEffect(() => {
@@ -389,16 +432,35 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
+                {brandingConfig.logoUrl ? (
+                  <img
+                    src={brandingConfig.logoUrl}
+                    alt={`${brandingConfig.companyName} Logo`}
+                    className="w-10 h-10 object-contain rounded-full"
+                  />
+                ) : (
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+                    style={{ backgroundColor: brandingConfig.colorScheme.primary }}
+                  >
+                    <span className="text-white font-bold text-lg">
+                      {brandingConfig.companyName.charAt(0)}
+                    </span>
+                  </div>
+                )}
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 </div>
               </div>
               <div className="hidden md:block">
-                <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Smart<span className="text-green-400">CRM</span>
+                <h1 
+                  className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
+                  style={{ 
+                    fontFamily: brandingConfig.typography.primaryFont,
+                    color: isDark ? 'white' : brandingConfig.colorScheme.text.primary
+                  }}
+                >
+                  {brandingConfig.companyName}
                 </h1>
               </div>
             </div>
@@ -714,6 +776,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
             {/* Right Side Controls */}
             <div className="hidden lg:flex items-center space-x-2">
+              {/* Organization Switcher */}
+              <OrganizationSwitcher />
+              
               {/* Search */}
               <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
@@ -724,6 +789,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
+
+              {/* Organization Switcher */}
+              <CustomOrganizationSwitcher />
 
               {/* Theme Toggle */}
               <button

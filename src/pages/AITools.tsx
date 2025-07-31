@@ -1,4 +1,5 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Brain, 
   Target, 
@@ -46,6 +47,23 @@ const AIUsageStatsPanel = lazy(() => import('../components/aiTools/AIUsageStatsP
 const MarketTrendsAnalysis = lazy(() => import('../components/aiTools/MarketTrendsAnalysis'));
 const ChurnPrediction = lazy(() => import('../components/aiTools/ChurnPrediction'));
 const SocialMediaGenerator = lazy(() => import('../components/aiTools/SocialMediaGenerator'));
+
+// Import additional AI tool components
+const EmailComposerContent = lazy(() => import('../../components/aiTools/EmailComposerContent'));
+const SalesInsightsContent = lazy(() => import('../../components/aiTools/SalesInsightsContent'));
+const SalesForecastContent = lazy(() => import('../../components/aiTools/SalesForecastContent'));
+const EmailAnalysisContent = lazy(() => import('../../components/aiTools/EmailAnalysisContent'));
+const MeetingSummaryContent = lazy(() => import('../../components/aiTools/MeetingSummaryContent'));
+const CustomerPersonaContent = lazy(() => import('../../components/aiTools/CustomerPersonaContent'));
+const CompetitorAnalysisContent = lazy(() => import('../../components/aiTools/CompetitorAnalysisContent'));
+const CallScriptContent = lazy(() => import('../../components/aiTools/CallScriptContent'));
+const ObjectionHandlerContent = lazy(() => import('../../components/aiTools/ObjectionHandlerContent'));
+const VoiceAnalysisRealtime = lazy(() => import('../../components/aiTools/VoiceAnalysisRealtime'));
+const ImageGeneratorContent = lazy(() => import('../../components/aiTools/ImageGeneratorContent'));
+const FunctionAssistantContent = lazy(() => import('../../components/aiTools/FunctionAssistantContent'));
+const ReasoningEmailGenerator = lazy(() => import('../../components/aiTools/ReasoningEmailGenerator'));
+const ReasoningProposalGenerator = lazy(() => import('../../components/aiTools/ReasoningProposalGenerator'));
+const ReasoningObjectionHandler = lazy(() => import('../../components/aiTools/ReasoningObjectionHandler'));
 
 import { aiUsageTracker } from '../services/aiUsageTracker';
 
@@ -318,12 +336,22 @@ const categories = [
 ];
 
 const AITools: React.FC = () => {
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState('All Tools');
   const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const [runningTools, setRunningTools] = useState<Set<string>>(new Set());
   const [activeToolView, setActiveToolView] = useState<string | null>(null);
+
+  // Extract tool name from URL path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.startsWith('/ai-tools/')) {
+      const toolName = path.replace('/ai-tools/', '');
+      setActiveToolView(toolName);
+    }
+  }, [location.pathname]);
 
   // Get usage stats and update tool data with real metrics
   const usageStats = aiUsageTracker.getUsageStats();
@@ -406,24 +434,91 @@ const AITools: React.FC = () => {
   // Render specific tool component
   const renderToolComponent = () => {
     switch (activeToolView) {
+      // Core AI Tools
+      case 'email-analysis':
+        return <EmailAnalysisContent />;
+      case 'meeting-summarizer':
+        return <MeetingSummaryContent />;
       case 'proposal-generator':
         return <ProposalGenerator />;
+      case 'call-script':
+        return <CallScriptContent />;
+      case 'subject-optimizer':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Subject Line Optimizer</h2><p>AI subject line optimization tool coming soon...</p></div>;
+      case 'competitor-analysis':
+        return <CompetitorAnalysisContent />;
+      case 'market-trends':
+        return <MarketTrendsAnalysis />;
+      case 'sales-insights':
+        return <SalesInsightsContent />;
+      case 'sales-forecast':
+        return <SalesForecastContent />;
+      
+      // Communication Tools
+      case 'email-composer':
+        return <EmailComposerContent />;
+      case 'objection-handler':
+        return <ObjectionHandlerContent />;
+      case 'email-response':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Email Response Generator</h2><p>AI email response tool coming soon...</p></div>;
+      case 'voice-tone':
+        return <VoiceAnalysisRealtime />;
+      
+      // Customer & Content Tools
+      case 'customer-persona':
+        return <CustomerPersonaContent />;
+      case 'visual-content':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Visual Content Generator</h2><p>AI visual content generation coming soon...</p></div>;
+      case 'meeting-agenda':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Meeting Agenda Generator</h2><p>AI meeting agenda tool coming soon...</p></div>;
+      
+      // Advanced Features
+      case 'ai-assistant':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">AI Assistant</h2><p>Advanced AI assistant coming soon...</p></div>;
+      case 'vision-analyzer':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Vision Analyzer</h2><p>AI vision analysis tool coming soon...</p></div>;
+      case 'image-generator':
+        return <ImageGeneratorContent />;
+      case 'semantic-search':
+        return <SmartSearchRealtime />;
+      case 'function-assistant':
+        return <FunctionAssistantContent />;
+      
+      // Real-time Features
+      case 'streaming-chat':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Streaming Chat</h2><p>Real-time AI chat coming soon...</p></div>;
+      case 'form-validation':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Form Validation</h2><p>AI form validation coming soon...</p></div>;
+      case 'live-deal-analysis':
+        return <LiveDealAnalysis />;
+      case 'instant-response':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Instant Response</h2><p>AI instant response tool coming soon...</p></div>;
+      case 'realtime-email':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Real-time Email</h2><p>Real-time email AI coming soon...</p></div>;
+      case 'voice-analysis':
+        return <VoiceAnalysisRealtime />;
+      
+      // Reasoning Generators
+      case 'reasoning-email':
+        return <ReasoningEmailGenerator />;
+      case 'reasoning-proposal':
+        return <ReasoningProposalGenerator />;
+      case 'reasoning-script':
+        return <div className="p-6 bg-white rounded-lg shadow"><h2 className="text-2xl font-bold mb-4">Reasoning Script Generator</h2><p>AI reasoning script tool coming soon...</p></div>;
+      case 'reasoning-objection':
+        return <ReasoningObjectionHandler />;
+      
+      // Legacy tools
       case 'call-script-generator':
         return <CallScriptGenerator />;
-      case 'competitor-analysis':
-        return <CompetitorAnalysis />;
       case 'sentiment-analysis':
         return <SentimentAnalysis />;
       case 'usage-stats':
         return <AIUsageStatsPanel />;
-      case 'market-trends':
-        return <MarketTrendsAnalysis />;
       case 'churn-prediction':
         return <ChurnPrediction />;
       case 'social-media-posts':
         return <SocialMediaGenerator />;
-      case 'live-deal-analysis':
-        return <LiveDealAnalysis />;
       case 'smart-search':
         return <SmartSearchRealtime />;
       default:
