@@ -377,13 +377,21 @@ export const useDealStore = create<DealStore>((set, get) => ({
   },
 
   getStageValues: () => {
+    const { pipelines, activePipelineId } = get();
+    const activePipeline = pipelines[activePipelineId];
     const deals = get().getFilteredDeals();
     const stageValues: Record<string, number> = {};
     
+    // Initialize all stage values to 0
+    if (activePipeline) {
+      activePipeline.stages.forEach(stage => {
+        stageValues[stage.id] = 0;
+      });
+    }
+    
+    // Sum up deal values for each stage
     deals.forEach(deal => {
-      if (deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost') {
-        stageValues[deal.stage.id] = (stageValues[deal.stage.id] || 0) + deal.value;
-      }
+      stageValues[deal.stage.id] = (stageValues[deal.stage.id] || 0) + deal.value;
     });
     
     return stageValues;
