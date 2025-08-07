@@ -60,7 +60,7 @@ function App() {
                     <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
                       <Routes>
         {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/system-overview" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
         {/* System Overview - Main Landing Page */}
         <Route path="/system-overview" element={
