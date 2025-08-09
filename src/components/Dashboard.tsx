@@ -54,6 +54,7 @@ const Dashboard: React.FC = React.memo(() => {
   } = useContactStore();
   
   const { tasks, fetchTasks } = useTaskStore();
+  const { tasks } = useTaskStore();
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { openTool } = useAITools();
   const { isDark } = useTheme();
@@ -74,12 +75,6 @@ const Dashboard: React.FC = React.memo(() => {
     fetchContacts();
     
     // Wrap in try/catch to prevent errors from breaking the app
-    try {
-      fetchTasks();
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    }
-    
     try {
       fetchAppointments();
     } catch (error) {
