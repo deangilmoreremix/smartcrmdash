@@ -404,22 +404,6 @@ export const useDealStore = create<DealStore>((set, get) => ({
       .filter(deal => deal.status === 'active' && deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
       .reduce((total, deal) => total + deal.value, 0);
   },
-    }
-    
-    // Sum up deal values for each stage
-    deals.forEach(deal => {
-      stageValues[deal.stage.id] = (stageValues[deal.stage.id] || 0) + deal.value;
-    });
-    
-    return stageValues;
-  },
-
-  getTotalPipelineValue: () => {
-    const deals = get().getFilteredDeals();
-    return deals
-      .filter(deal => deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
-      .reduce((total, deal) => total + deal.value, 0);
-  },
 
   getSalesMetrics: () => {
     const deals = get().deals;
