@@ -52,10 +52,13 @@ interface PipelineStage {
 }
 
 const DealAnalytics: React.FC = () => {
-  const { deals, stageValues } = useDealStore();
+  const { deals, getStageValues } = useDealStore();
   const { contacts } = useContactStore();
   const { isDark } = useTheme();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('month');
+
+  // Get stage values by calling the getter function
+  const stageValues = getStageValues();
 
   // Render avatar stack
   const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
