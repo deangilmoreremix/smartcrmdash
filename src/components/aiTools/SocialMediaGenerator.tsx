@@ -193,7 +193,7 @@ Readability Score: ${post.readability}/100
             <label className="block text-sm font-medium mb-2">Platform *</label>
             <div className="grid grid-cols-2 gap-2">
               {platforms.map(platform => (
-                <motion.button
+                <button
                   key={platform.value}
                   onClick={() => handleInputChange('platform', platform.value)}
                   className={`p-3 rounded-lg border text-left transition-all duration-200 touch-manipulation ${
@@ -211,7 +211,7 @@ Readability Score: ${post.readability}/100
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Tone */}
           <div>
@@ -302,7 +302,7 @@ Readability Score: ${post.readability}/100
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Generated Posts */}
       {generatedPosts.length > 0 && (
@@ -418,6 +418,6 @@ Readability Score: ${post.readability}/100
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
