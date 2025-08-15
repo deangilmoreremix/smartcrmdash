@@ -23,10 +23,7 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: {
               cacheName: 'gemini-api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 5 * 60, // 5 minutes
-              },
+              expiration: { maxEntries: 50, maxAgeSeconds: 5 * 60 },
             },
           },
           {
@@ -34,10 +31,7 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 60, // 30 minutes
-              },
+              expiration: { maxEntries: 100, maxAgeSeconds: 30 * 60 },
             },
           },
         ],
@@ -53,25 +47,17 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          {
-            src: '/android-chrome-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/android-chrome-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
+          { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
         ],
       },
     }),
   ],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ['lucide-react'], // add '@supabase/supabase-js' here only if needed
   },
   define: {
-    global: 'window',
+    global: 'globalThis', // <- changed from 'window'
   },
   resolve: {
     alias: {
@@ -94,12 +80,12 @@ export default defineConfig({
           if (id.includes('node_modules/recharts') || id.includes('node_modules/react-big-calendar')) {
             return 'chart-vendor';
           }
-          
-          // AI Tools - let Vite handle automatic chunking for lazy-loaded components
+
+          // AI Tools
           if (id.includes('src/components/aiTools/')) {
             return 'ai-tools';
           }
-          
+
           // Services
           if (id.includes('src/services/')) {
             return 'services';
