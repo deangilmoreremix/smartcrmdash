@@ -1,3 +1,5 @@
+// src/pages/Contacts.tsx (formerly ContactsEnhanced.tsx)
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Plus, 
@@ -13,7 +15,7 @@ import {
   Phone,
   Zap
 } from 'lucide-react';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '../hooks/useContactStore'; // Line 19: CHANGE THIS LINE
 import { ContactsModal } from '../components/modals/ContactsModal';
 import EnhancedContactCard from '../components/contacts/EnhancedContactCard';
 import AdvancedContactFilter from '../components/contacts/AdvancedContactFilter';
@@ -86,7 +88,7 @@ const ContactsEnhanced: React.FC = () => {
   const filteredContacts = useMemo(() => {
     let filtered = contactsArray;
 
-    // Apply search
+    // Apply search filter
     if (searchTerm.trim()) {
       filtered = searchContacts(searchTerm);
     }
@@ -347,7 +349,7 @@ const ContactsEnhanced: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Search contacts by name, email, company, position, tags..."
+                placeholder="Search contacts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
