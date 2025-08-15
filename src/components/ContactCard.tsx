@@ -5,7 +5,7 @@ import CallButton from './CallButton';
 import { getInitials } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
 import { Contact } from '../types/contact';
-import { useContactStore } from '../hooks/useContactStore'; // Added useContactStore import
+import { useContactStore } from '../hooks/useContactStore';
 
 interface ContactCardProps {
   contact: Contact;
