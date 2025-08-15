@@ -113,7 +113,12 @@ const AIInsightsPanel = () => {
 
   const generateInitialInsights = async () => {
     // Only generate if we have enough data
-    if (Object.keys(deals).length < 2 || Object.keys(contacts).length < 2 || !geminiService.isApiKeyConfigured()) {
+    if (Object.keys(deals).length < 2 || Object.keys(contacts).length < 2) {
+      return;
+    }
+    
+    if (!geminiService.isApiKeyConfigured()) {
+      setApiKeysConfigured(false);
       return;
     }
 
@@ -121,6 +126,7 @@ const AIInsightsPanel = () => {
       await generateRealInsights();
     } catch (error) {
       console.error("Failed to generate initial insights:", error);
+      setApiKeysConfigured(false);
       // Don't set error state for initial load failures
     }
   };
