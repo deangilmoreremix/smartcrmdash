@@ -1,10 +1,10 @@
 // src/pages/Contacts.tsx (formerly ContactsEnhanced.tsx)
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Brain, 
+import {
+  Plus,
+  Search,
+  Brain,
   Grid3X3,
   List,
   ChevronDown,
@@ -15,8 +15,8 @@ import {
   Phone,
   Zap
 } from 'lucide-react';
-import { useContactStore } from '../hooks/useContactStore'; // Line 19: CHANGE THIS LINE
-import { ContactsModal } from '../components/modals/ContactsModal';
+import { useContactStore } from '../hooks/useContactStore';
+// REMOVE THIS LINE: import { ContactsModal } from '../components/modals/ContactsModal';
 import EnhancedContactCard from '../components/contacts/EnhancedContactCard';
 import AdvancedContactFilter from '../components/contacts/AdvancedContactFilter';
 import ProfessionalContactModal from '../components/contacts/ProfessionalContactModal';
@@ -58,7 +58,7 @@ const ContactsEnhanced: React.FC = () => {
     enrichContact
   } = useContactStore();
 
-  const [showContactsModal, setShowContactsModal] = useState(false);
+  // REMOVE THIS LINE: const [showContactsModal, setShowContactsModal] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeTab, setActiveTab] = useState<'contacts' | 'communication' | 'automation' | 'calls' | 'meetings'>('contacts');
@@ -99,13 +99,13 @@ const ContactsEnhanced: React.FC = () => {
     }
 
     if (currentFilters.interestLevel.length > 0) {
-      filtered = filtered.filter(contact => 
+      filtered = filtered.filter(contact =>
         contact.interestLevel && currentFilters.interestLevel.includes(contact.interestLevel)
       );
     }
 
     if (currentFilters.industry.length > 0) {
-      filtered = filtered.filter(contact => 
+      filtered = filtered.filter(contact =>
         contact.industry && currentFilters.industry.includes(contact.industry)
       );
     }
@@ -137,7 +137,7 @@ const ContactsEnhanced: React.FC = () => {
 
     // Custom fields filter
     if (currentFilters.hasCustomFields) {
-      filtered = filtered.filter(contact => 
+      filtered = filtered.filter(contact =>
         contact.customFields && Object.keys(contact.customFields).length > 0
       );
     }
@@ -146,7 +146,7 @@ const ContactsEnhanced: React.FC = () => {
     if (currentFilters.lastContactDays) {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - currentFilters.lastContactDays);
-      filtered = filtered.filter(contact => 
+      filtered = filtered.filter(contact =>
         contact.lastContact && new Date(contact.lastContact) >= cutoffDate
       );
     }
@@ -178,10 +178,10 @@ const ContactsEnhanced: React.FC = () => {
   const handleAnalyzeAll = async () => {
     setIsAnalyzing(true);
     try {
-      const promises = selectedContacts.length > 0 
+      const promises = selectedContacts.length > 0
         ? selectedContacts.map(id => analyzeContact(id))
         : filteredContacts.slice(0, 10).map(contact => analyzeContact(contact.id));
-      
+
       await Promise.all(promises);
     } catch (error) {
       console.error('Failed to analyze contacts:', error);
@@ -190,20 +190,18 @@ const ContactsEnhanced: React.FC = () => {
     }
   };
 
-  const handleEnrichSelected = async () => {
+  const handleEnrichSelected = () => {
     if (selectedContacts.length === 0) return;
-    
-    try {
-      const promises = selectedContacts.map(id => enrichContact(id));
-      await Promise.all(promises);
-    } catch (error) {
-      console.error('Failed to enrich contacts:', error);
+
+    if (confirm(`Enrich ${selectedContacts.length} contacts?`)) {
+      selectedContacts.forEach(id => enrichContact(id));
+      clearSelection();
     }
   };
 
   const handleDeleteSelected = () => {
     if (selectedContacts.length === 0) return;
-    
+
     if (confirm(`Delete ${selectedContacts.length} contacts? This action cannot be undone.`)) {
       selectedContacts.forEach(id => deleteContact(id));
       clearSelection();
@@ -285,7 +283,7 @@ const ContactsEnhanced: React.FC = () => {
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2">
-            <button 
+            <button
               onClick={handleAnalyzeAll}
               disabled={isAnalyzing}
               className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors disabled:bg-purple-300"
@@ -293,8 +291,11 @@ const ContactsEnhanced: React.FC = () => {
               <Brain size={18} className="mr-1" />
               {isAnalyzing ? 'Analyzing...' : 'AI Analysis'}
             </button>
-            <button 
-              onClick={() => setShowContactsModal(true)}
+            <button
+              onClick={() => {
+                setSelectedContactForModal(null);
+                setContactModalMode('create');
+              }}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
             >
               <Plus size={18} className="mr-1" />
@@ -453,7 +454,7 @@ const ContactsEnhanced: React.FC = () => {
                 <span>Contacts</span>
               </div>
             </button>
-            
+
             <button
               onClick={() => setActiveTab('communication')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -467,7 +468,7 @@ const ContactsEnhanced: React.FC = () => {
                 <span>Communication Hub</span>
               </div>
             </button>
-            
+
             <button
               onClick={() => setActiveTab('automation')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -481,7 +482,7 @@ const ContactsEnhanced: React.FC = () => {
                 <span>Automation</span>
               </div>
             </button>
-            
+
             <button
               onClick={() => setActiveTab('calls')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -495,7 +496,7 @@ const ContactsEnhanced: React.FC = () => {
                 <span>Call Logging</span>
               </div>
             </button>
-            
+
             <button
               onClick={() => setActiveTab('meetings')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -522,7 +523,7 @@ const ContactsEnhanced: React.FC = () => {
               <Users className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || hasActiveFilters() 
+                {searchTerm || hasActiveFilters()
                   ? 'Try adjusting your search or filters'
                   : 'Get started by adding your first contact'
                 }
@@ -530,7 +531,10 @@ const ContactsEnhanced: React.FC = () => {
               {(!searchTerm && !hasActiveFilters()) && (
                 <div className="mt-6">
                   <button
-                    onClick={() => setShowContactsModal(true)}
+                    onClick={() => {
+                      setSelectedContactForModal(null);
+                      setContactModalMode('create');
+                    }}
                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="mr-2 h-5 w-5" />
@@ -551,19 +555,13 @@ const ContactsEnhanced: React.FC = () => {
                   contact={contact}
                   isSelected={selectedContacts.includes(contact.id)}
                   onSelect={toggleContactSelection}
-                  onEdit={(contact) => {
-                    // Handle edit - open modal with contact data
-                    console.log('Edit contact:', contact);
-                  }}
+                  onEdit={handleEditContact}
                   onDelete={(id) => {
                     if (confirm('Delete this contact? This action cannot be undone.')) {
                       deleteContact(id);
                     }
                   }}
-                  onView={(contact) => {
-                    // Handle view - could open a detailed modal or navigate
-                    console.log('View contact:', contact);
-                  }}
+                  onView={handleViewContact}
                 />
               ))}
             </div>
@@ -584,13 +582,13 @@ const ContactsEnhanced: React.FC = () => {
 
       {activeTab === 'meetings' && <MeetingScheduler />}
 
-      {/* Contacts Grid/List - Legacy (remove after tab content is working) */}
-      {false && filteredContacts.length === 0 ? (
+      {/* REMOVE THIS SECTION - IT'S A DUPLICATE OF THE CONTACTS GRID/LIST ABOVE */}
+      {/* {false && filteredContacts.length === 0 ? (
         <div className="text-center py-12">
           <Users className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
           <p className="mt-1 text-sm text-gray-500">
-            {searchTerm || hasActiveFilters() 
+            {searchTerm || hasActiveFilters()
               ? 'Try adjusting your search or filters'
               : 'Get started by adding your first contact'
             }
@@ -629,13 +627,13 @@ const ContactsEnhanced: React.FC = () => {
             />
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Modals */}
-      <ContactsModal
+      {/* REMOVE THIS MODAL: <ContactsModal
         isOpen={showContactsModal}
         onClose={() => setShowContactsModal(false)}
-      />
+      /> */}
 
       <AdvancedContactFilter
         isOpen={showAdvancedFilter}
@@ -657,3 +655,4 @@ const ContactsEnhanced: React.FC = () => {
 };
 
 export default ContactsEnhanced;
+
