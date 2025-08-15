@@ -10,8 +10,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDealStore } from '../store/dealStore';
-// 👉 If you kept the shim at src/store/contactStore.ts, change this import back to '../store/contactStore'
-import { useContactStore } from '../hooks/useContactStore';
+import { useContactStore } from '../store/contactStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
 
