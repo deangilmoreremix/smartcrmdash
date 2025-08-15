@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Mail, MapPin, Building } from 'lucide-react';
+import { MoreHorizontal, Mail, MapPin, Building, Star } from 'lucide-react'; // Added Star import
 import Avatar from './ui/Avatar';
 import CallButton from './CallButton';
 import { getInitials } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
 import { Contact } from '../types/contact';
+import { useContactStore } from '../store/contactStore'; // Added useContactStore import
 
 interface ContactCardProps {
   contact: Contact;
@@ -14,6 +15,7 @@ interface ContactCardProps {
 const ContactCard: React.FC<ContactCardProps> = ({ contact, onContactClick }) => {
   const { isDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { updateContact } = useContactStore(); // Destructure updateContact
 
   const handleContactClick = () => {
     if (onContactClick) {
@@ -32,6 +34,11 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onContactClick }) =>
     }
   };
 
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering onContactClick
+    updateContact(contact.id, { isFavorite: !contact.isFavorite });
+  };
+
   return (
     <div 
       onClick={handleContactClick}
@@ -39,56 +46,68 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onContactClick }) =>
     >
       <div className="flex items-start justify-between mb-4">
         <Avatar 
-          src={contact.avatarSrc || contact.avatar}
+          src={contact.avatarSrc || contact.avatar} // Use avatarSrc or avatar
           alt={contact.name}
           size="lg"
           fallback={getInitials(contact.name)}
           status="online"
         />
-        <button 
-          className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100 relative`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setMenuOpen(!menuOpen);
-          }}
-        >
-          <MoreHorizontal className="h-4 w-4" />
-          
-          {menuOpen && (
-            <div 
-              className={`absolute right-0 mt-1 w-40 ${
-                isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'
-              } border rounded-lg shadow-lg z-10 py-1`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button 
-                className={`w-full text-left px-3 py-2 text-sm ${
-                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
-                } flex items-center space-x-2`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log('Edit contact:', contact.id);
-                }}
+        <div className="flex items-center space-x-2"> {/* Wrapper for favorite and more buttons */}
+          <button
+            onClick={handleToggleFavorite}
+            className={`p-1 rounded-full transition-colors ${
+              contact.isFavorite 
+                ? 'text-yellow-500 hover:text-yellow-600' 
+                : 'text-gray-400 hover:text-yellow-500'
+            }`}
+          >
+            <Star size={16} fill={contact.isFavorite ? 'currentColor' : 'none'} />
+          </button>
+          <button 
+            className={`${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'} transition-colors opacity-0 group-hover:opacity-100 relative`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+            }}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+            
+            {menuOpen && (
+              <div 
+                className={`absolute right-0 mt-1 w-40 ${
+                  isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'
+                } border rounded-lg shadow-lg z-10 py-1`}
+                onClick={(e) => e.stopPropagation()}
               >
-                <MapPin size={14} className="text-gray-400" />
-                <span>Edit Contact</span>
-              </button>
-              
-              <button 
-                className={`w-full text-left px-3 py-2 text-sm ${
-                  isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
-                } flex items-center space-x-2`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(`mailto:${contact.email}`, '_blank');
-                }}
-              >
-                <Mail size={14} className="text-gray-400" />
-                <span>Send Email</span>
-              </button>
-            </div>
-          )}
-        </button>
+                <button 
+                  className={`w-full text-left px-3 py-2 text-sm ${
+                    isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                  } flex items-center space-x-2`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Edit contact:', contact.id);
+                  }}
+                >
+                  <MapPin size={14} className="text-gray-400" />
+                  <span>Edit Contact</span>
+                </button>
+                
+                <button 
+                  className={`w-full text-left px-3 py-2 text-sm ${
+                    isDark ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-700'
+                  } flex items-center space-x-2`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`mailto:${contact.email}`, '_blank');
+                  }}
+                >
+                  <Mail size={14} className="text-gray-400" />
+                  <span>Send Email</span>
+                </button>
+              </div>
+            )}
+          </button>
+        </div>
       </div>
       
       <div className="space-y-3">
@@ -142,3 +161,4 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onContactClick }) =>
 };
 
 export default ContactCard;
+
