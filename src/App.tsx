@@ -18,7 +18,6 @@ import Dashboard from './pages/Dashboard';
 import SystemOverview from './pages/SystemOverview';
 
 // Heavy pages - lazy load for better performance
-const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts')); // details handled by modal inside Contacts
@@ -94,7 +93,7 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-                          {/* Optional deep-link: route /contacts/:id to the same page so it can auto-open the modal */}
+                          {/* Deep-link: route /contacts/:id to the same page so it can auto-open the modal */}
                           <Route
                             path="/contacts/:id"
                             element={
