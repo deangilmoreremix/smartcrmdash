@@ -10,7 +10,11 @@ class GeminiAIService {
   private model = 'gemini-1.5-flash:generateContent';
 
   isApiKeyConfigured() {
-    return !!this.apiKey && this.apiKey.length > 10 && !this.apiKey.includes('your_') && !this.apiKey.startsWith('your_');
+    return !!this.apiKey && 
+           this.apiKey !== 'undefined' && 
+           this.apiKey.length > 10 && 
+           !this.apiKey.includes('your_') && 
+           !this.apiKey.startsWith('your_');
   }
   
   setApiKey(key: string) {
