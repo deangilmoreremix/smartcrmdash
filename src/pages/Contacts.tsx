@@ -218,8 +218,10 @@ const ContactsEnhanced: React.FC = () => {
     setContactModalMode('edit');
   };
 
+  // UPDATED: also reset mode so create-mode can close
   const handleCloseContactModal = () => {
     setSelectedContactForModal(null);
+    setContactModalMode('view'); // <-- important
   };
 
   const handleApplyFilters = (filters: FilterCriteria) => {
@@ -582,59 +584,7 @@ const ContactsEnhanced: React.FC = () => {
 
       {activeTab === 'meetings' && <MeetingScheduler />}
 
-      {/* REMOVE THIS SECTION - IT'S A DUPLICATE OF THE CONTACTS GRID/LIST ABOVE */}
-      {/* {false && filteredContacts.length === 0 ? (
-        <div className="text-center py-12">
-          <Users className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {searchTerm || hasActiveFilters()
-              ? 'Try adjusting your search or filters'
-              : 'Get started by adding your first contact'
-            }
-          </p>
-          {(!searchTerm && !hasActiveFilters()) && (
-            <div className="mt-6">
-              <button
-                onClick={() => setShowContactsModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Add Contact
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (false &&
-        <div className={
-          viewMode === 'grid'
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-            : 'space-y-4'
-        }>
-          {filteredContacts.map((contact) => (
-            <EnhancedContactCard
-              key={contact.id}
-              contact={contact}
-              isSelected={selectedContacts.includes(contact.id)}
-              onSelect={toggleContactSelection}
-              onEdit={handleEditContact}
-              onDelete={(id) => {
-                if (confirm('Delete this contact? This action cannot be undone.')) {
-                  deleteContact(id);
-                }
-              }}
-              onView={handleViewContact}
-            />
-          ))}
-        </div>
-      )} */}
-
       {/* Modals */}
-      {/* REMOVE THIS MODAL: <ContactsModal
-        isOpen={showContactsModal}
-        onClose={() => setShowContactsModal(false)}
-      /> */}
-
       <AdvancedContactFilter
         isOpen={showAdvancedFilter}
         onClose={() => setShowAdvancedFilter(false)}
@@ -644,8 +594,9 @@ const ContactsEnhanced: React.FC = () => {
         currentFilters={currentFilters}
       />
 
+      {/* UPDATED: open when creating OR when a contact is selected */}
       <ProfessionalContactModal
-        isOpen={!!selectedContactForModal}
+        isOpen={contactModalMode === 'create' || !!selectedContactForModal}
         onClose={handleCloseContactModal}
         contact={selectedContactForModal || undefined}
         mode={contactModalMode}
@@ -655,4 +606,3 @@ const ContactsEnhanced: React.FC = () => {
 };
 
 export default ContactsEnhanced;
-
