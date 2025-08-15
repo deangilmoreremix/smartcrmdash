@@ -80,13 +80,13 @@ function App() {
                             </ProtectedRoute>
                           } />
                           
-                          <Route path="/contacts" element={
+                          <Route path="/contacts" element={ /* <-- UPDATE THIS ROUTE */
                             <ProtectedRoute>
-                              <Contacts />
+                              <Contacts /> {/* <-- USE THE NEW Contacts.tsx */}
                             </ProtectedRoute>
                           } />
                           
-                          <Route path="/contacts/:id" element={
+                          <Route path="/contacts/:id" element={ /* <-- ADD THIS NEW ROUTE */
                             <ProtectedRoute>
                               <ContactDetail />
                             </ProtectedRoute>
@@ -111,7 +111,9 @@ function App() {
                             <ProtectedRoute>
                               <Analytics />
                             </ProtectedRoute>
-                          } />              {/* AI Integration */}
+                          } />
+
+                          {/* AI Integration */}
                           <Route path="/ai-integration" element={
                             <ProtectedRoute>
                               <AIIntegration />
