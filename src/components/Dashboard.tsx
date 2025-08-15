@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '../hooks/useContactStore';
 import { useGemini } from '../services/geminiService';
 import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
