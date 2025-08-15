@@ -1,3 +1,5 @@
+// src/components/Navbar.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -9,10 +11,10 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
-import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../store/contactStore';
-import { useTaskStore } from '../store/taskStore';
-import { useAppointmentStore } from '../store/appointmentStore';
+import { useDealStore } from "../store/dealStore";
+import { useContactStore } from "../hooks/useContactStore"; // Line 68: This import path is now correct after Step 1
+import { useTaskStore } from "../store/taskStore";
+import { useAppointmentStore } from "../store/appointmentStore";
 
 interface NavbarProps {
   onOpenPipelineModal?: () => void;
@@ -227,7 +229,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
-      action: () => handleNavigation('/contacts-enhanced', 'contacts'), // 👈 route updated
+      action: () => handleNavigation('/contacts', 'contacts'), // Line 300: This line is changed to point to the new Contacts.tsx
       badge: counters.hotContacts, // 👈 dynamic badge (hot leads). Use total count if you prefer.
       color: 'from-purple-500 to-indigo-500'
     },
