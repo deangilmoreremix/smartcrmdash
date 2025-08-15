@@ -8,11 +8,15 @@ import {
   Tag,
   Plus,
   Trash2,
-  Clock
+  Clock,
+  RefreshCw // Added for random avatar
 } from 'lucide-react';
 import { Contact } from '../../types/contact';
 import { useContactStore } from '../../store/contactStore';
 import { formatDistanceToNow } from 'date-fns';
+import Avatar from '../ui/Avatar'; // Added import
+import { getRandomAvatar, getInitials } from '../../utils/avatars'; // Added import
+import { Switch } from '../ui/switch'; // Added import
 
 interface ProfessionalContactModalProps {
   isOpen: boolean;
@@ -47,7 +51,9 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
     socialProfiles: {},
     customFields: {},
     location: '',
-    preferredContact: 'email'
+    preferredContact: 'email',
+    avatarSrc: '', // Initialize avatarSrc
+    isFavorite: false // Initialize isFavorite
   });
 
   const [newTag, setNewTag] = useState('');
@@ -62,7 +68,9 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
         ...contact,
         socialProfiles: contact.socialProfiles || {},
         customFields: contact.customFields || {},
-        tags: contact.tags || []
+        tags: contact.tags || [],
+        avatarSrc: contact.avatarSrc || contact.avatar || '', // Ensure avatarSrc is set
+        isFavorite: contact.isFavorite || false // Ensure isFavorite is set
       });
     } else if (mode === 'create') {
       setFormData({
@@ -83,7 +91,9 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
         socialProfiles: {},
         customFields: {},
         location: '',
-        preferredContact: 'email'
+        preferredContact: 'email',
+        avatarSrc: getRandomAvatar(), // Default to a random avatar for new contacts
+        isFavorite: false
       });
     }
   }, [contact, mode]);
@@ -111,7 +121,9 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
         socialProfiles: formData.socialProfiles || {},
         customFields: formData.customFields || {},
         location: formData.location || '',
-        preferredContact: formData.preferredContact || 'email'
+        preferredContact: formData.preferredContact || 'email',
+        avatarSrc: formData.avatarSrc || formData.avatar || '', // Include avatarSrc
+        isFavorite: formData.isFavorite || false // Include isFavorite
       };
 
       if (mode === 'create') {
@@ -259,6 +271,41 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Avatar Management */}
+                  <div className="col-span-full mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Avatar
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <Avatar
+                        src={formData.avatarSrc || formData.avatar}
+                        alt={formData.name || getInitials(formData.firstName || 'NN')}
+                        size="lg"
+                        fallback={getInitials(formData.firstName || 'NN')}
+                      />
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={formData.avatarSrc || formData.avatar || ''}
+                          onChange={(e) => setFormData(prev => ({ ...prev, avatarSrc: e.target.value, avatar: e.target.value }))}
+                          disabled={isReadOnly}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                          placeholder="Enter avatar URL"
+                        />
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => setFormData(prev => ({ ...prev, avatarSrc: getRandomAvatar(), avatar: getRandomAvatar() }))}
+                            className="mt-2 px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
+                          >
+                            <RefreshCw size={14} className="inline mr-1" />
+                            Random Avatar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* End Avatar Management */}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       First Name
@@ -440,6 +487,18 @@ const ProfessionalContactModal: React.FC<ProfessionalContactModalProps> = ({
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                     />
                   </div>
+                  {/* isFavorite Toggle */}
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-700">
+                      Mark as Favorite
+                    </label>
+                    <Switch
+                      checked={formData.isFavorite || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFavorite: checked }))}
+                      disabled={isReadOnly}
+                    />
+                  </div>
+                  {/* End isFavorite Toggle */}
                 </div>
               </div>
 
