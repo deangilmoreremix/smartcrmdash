@@ -30,7 +30,7 @@ const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
 
 import './components/styles/design-system.css';
 
-// Placeholder component for routes not yet implemented
+// Generic placeholder while some features are WIP
 const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
   <div className="min-h-screen bg-gray-50 p-8">
     <div className="max-w-4xl mx-auto">
@@ -42,11 +42,8 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
   </div>
 );
 
-// Protected Route component (placeholder for future auth)
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // TODO: Add authentication logic here when auth is implemented
-  return <>{children}</>;
-};
+// Stub auth wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 function App() {
   return (
@@ -65,17 +62,7 @@ function App() {
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-                          {/* System Overview - Main Landing Page */}
-                          <Route
-                            path="/system-overview"
-                            element={
-                              <ProtectedRoute>
-                                <SystemOverview />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Main Application Routes */}
+                          {/* -------- Core pages (main tabs) -------- */}
                           <Route
                             path="/dashboard"
                             element={
@@ -84,8 +71,6 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-
-                          {/* Contacts — details open as a modal inside this page */}
                           <Route
                             path="/contacts"
                             element={
@@ -94,7 +79,7 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-                          {/* Deep-link: route /contacts/:id to the same page; Contacts will open the modal based on :id */}
+                          {/* Deep link: open modal by :id inside Contacts */}
                           <Route
                             path="/contacts/:id"
                             element={
@@ -103,28 +88,6 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-
-                          {/* Tasks */}
-                          <Route
-                            path="/tasks"
-                            element={
-                              <ProtectedRoute>
-                                <TasksNew />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Communication */}
-                          <Route
-                            path="/communication"
-                            element={
-                              <ProtectedRoute>
-                                <Communication />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Analytics */}
                           <Route
                             path="/analytics"
                             element={
@@ -133,17 +96,6 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-
-                          {/* AI Integration */}
-                          <Route
-                            path="/ai-integration"
-                            element={
-                              <ProtectedRoute>
-                                <AIIntegration />
-                              </ProtectedRoute>
-                            }
-                          />
-
                           <Route
                             path="/ai-tools"
                             element={
@@ -152,19 +104,24 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-
                           <Route
-                            path="/sales-tools"
+                            path="/appointments"
                             element={
                               <ProtectedRoute>
-                                <PlaceholderPage
-                                  title="Sales Tools"
-                                  description="Sales tools collection coming soon"
-                                />
+                                <TasksNew /> {/* Calendar lives here per your mapping */}
                               </ProtectedRoute>
                             }
                           />
 
+                          {/* -------- Other top-level pages you have -------- */}
+                          <Route
+                            path="/system-overview"
+                            element={
+                              <ProtectedRoute>
+                                <SystemOverview />
+                              </ProtectedRoute>
+                            }
+                          />
                           <Route
                             path="/pipeline"
                             element={
@@ -173,17 +130,14 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-
                           <Route
-                            path="/settings"
+                            path="/ai-integration"
                             element={
                               <ProtectedRoute>
-                                <PlaceholderPage title="Settings" description="Settings page coming soon" />
+                                <AIIntegration />
                               </ProtectedRoute>
                             }
                           />
-
-                          {/* Mobile Responsiveness */}
                           <Route
                             path="/mobile"
                             element={
@@ -193,15 +147,95 @@ function App() {
                             }
                           />
 
-                          {/* Feature Pages */}
-                          <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
+                          {/* -------- Tasks group -------- */}
                           <Route
-                            path="/features/contacts"
-                            element={<PlaceholderPage title="Contact Management Features" />}
+                            path="/tasks"
+                            element={
+                              <ProtectedRoute>
+                                <TasksNew />
+                              </ProtectedRoute>
+                            }
                           />
+                          {/* keep legacy tasks reachable if you want */}
+                          <Route
+                            path="/tasks-legacy"
+                            element={
+                              <ProtectedRoute>
+                                <Tasks />
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          {/* -------- Communication group -------- */}
+                          <Route
+                            path="/communication"
+                            element={
+                              <ProtectedRoute>
+                                <Communication />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/email-composer"
+                            element={
+                              <ProtectedRoute>
+                                <Communication /> {/* opens composer within this page */}
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          {/* -------- Sales dropdown -------- */}
+                          <Route path="/sales-tools" element={<PlaceholderPage title="Sales Tools" />} />
+                          <Route path="/lead-automation" element={<PlaceholderPage title="Lead Automation" />} />
+                          <Route path="/circle-prospecting" element={<PlaceholderPage title="Circle Prospecting" />} />
+                          {/* Appointments already mapped to /appointments -> TasksNew */}
+                          <Route path="/phone-system" element={<PlaceholderPage title="Phone System" />} />
+                          <Route path="/invoicing" element={<PlaceholderPage title="Invoicing" />} />
+                          <Route path="/sales-analytics" element={<PlaceholderPage title="Sales Analytics" />} />
+                          {/* Deal Pipeline opens a modal from Navbar; route kept for safety */}
+                          <Route path="/quote-builder" element={<PlaceholderPage title="Quote Builder" />} />
+                          <Route path="/commission-tracker" element={<PlaceholderPage title="Commission Tracker" />} />
+                          <Route path="/follow-up-reminders" element={<PlaceholderPage title="Follow-up Reminders" />} />
+                          <Route path="/territory-management" element={<PlaceholderPage title="Territory Management" />} />
+
+                          {/* -------- Tasks dropdown -------- */}
+                          <Route path="/task-automation" element={<PlaceholderPage title="Task Automation" />} />
+                          <Route path="/project-tracker" element={<PlaceholderPage title="Project Tracker" />} />
+                          <Route path="/time-tracking" element={<PlaceholderPage title="Time Tracking" />} />
+                          <Route path="/workflow-builder" element={<PlaceholderPage title="Workflow Builder" />} />
+                          <Route path="/deadline-manager" element={<PlaceholderPage title="Deadline Manager" />} />
+
+                          {/* -------- Communication dropdown -------- */}
+                          <Route path="/video-email" element={<PlaceholderPage title="Video Email" />} />
+                          <Route path="/text-messages" element={<PlaceholderPage title="Text Messages" />} />
+                          <Route path="/campaigns" element={<PlaceholderPage title="Campaigns" />} />
+                          <Route path="/group-calls" element={<PlaceholderPage title="Group Calls" />} />
+                          <Route path="/call-recording" element={<PlaceholderPage title="Call Recording" />} />
+                          <Route path="/in-call-messaging" element={<PlaceholderPage title="In-Call Messaging" />} />
+                          <Route path="/call-analytics" element={<PlaceholderPage title="Call Analytics" />} />
+                          <Route path="/connection-quality" element={<PlaceholderPage title="Connection Quality Monitor" />} />
+
+                          {/* -------- Content dropdown -------- */}
+                          <Route path="/content-library" element={<PlaceholderPage title="Content Library" />} />
+                          <Route path="/voice-profiles" element={<PlaceholderPage title="Voice Profiles" />} />
+                          <Route path="/business-analysis" element={<PlaceholderPage title="Business Analysis" />} />
+                          <Route path="/image-generator" element={<PlaceholderPage title="Image Generator" />} />
+                          <Route path="/forms" element={<PlaceholderPage title="Forms" />} />
+                          <Route path="/ai-model-demo" element={<PlaceholderPage title="AI Model Demo" />} />
+
+                          {/* -------- AI Goals (main tab) -------- */}
+                          <Route path="/ai-goals" element={<PlaceholderPage title="AI Goals" />} />
+
+                          {/* -------- Apps dropdown -------- */}
+                          <Route path="/white-label" element={<PlaceholderPage title="White-Label Customization" />} />
+                          {/* External links (FunnelCraft, SmartCRM Closer, ContentAI) are handled by <a href> in Navbar */}
+
+                          {/* -------- Feature pages from earlier app -------- */}
+                          <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
+                          <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
 
-                          {/* Catch-all route */}
+                          {/* Catch-all */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                       </Suspense>
