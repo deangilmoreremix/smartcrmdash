@@ -39,10 +39,6 @@ interface TaskStore {
   // Computed properties
   getFilteredTasks: () => Task[];
   getTasksByStatus: (status: TaskStatus) => Task[];
-  getTaskMetrics: () => TaskMetrics;
-  getOverdueTasks: () => Task[];
-  getTasksDueToday: () => Task[];
-  getTasksDueThisWeek: () => Task[];
 }
 
 export const useTaskStore = create<TaskStore>()(
@@ -151,6 +147,125 @@ export const useTaskStore = create<TaskStore>()(
       
       getTasksByStatus: (status) => {
         return get().tasks.filter((task) => task.status === status);
+      },
+      
+      getTaskMetrics: () => {
+        const state = get();
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+        const startOfWeek = new Date(startOfDay.getTime() - startOfDay.getDay() * 24 * 60 * 60 * 1000);
+        const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        
+        const completedTasks = state.tasks.filter(task => task.status === 'completed').length;
+        const overdueTasks = state.tasks.filter(task => 
+          task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed'
+        ).length;
+        const tasksCompletedToday = state.tasks.filter(task =>
+          task.status === 'completed' && 
+          task.completedDate && 
+          new Date(task.completedDate) >= startOfDay && 
+          new Date(task.completedDate) < endOfDay
+        ).length;
+        const tasksCompletedThisWeek = state.tasks.filter(task =>
+          task.status === 'completed' && 
+          task.completedDate && 
+          new Date(task.completedDate) >= startOfWeek && 
+          new Date(task.completedDate) < endOfWeek
+        ).length;
+        const tasksCompletedThisMonth = state.tasks.filter(task =>
+          task.status === 'completed' && 
+          task.completedDate && 
+          new Date(task.completedDate) >= startOfMonth && 
+          new Date(task.completedDate) <= endOfMonth
+        ).length;
+        
+        // Calculate average completion time
+        const completedTasksWithDates = state.tasks.filter(task => 
+          task.status === 'completed' && task.createdAt && task.completedDate
+        );
+        const averageCompletionTime = completedTasksWithDates.length > 0 
+          ? completedTasksWithDates.reduce((sum, task) => {
+              const created = new Date(task.createdAt).getTime();
+              const completed = new Date(task.completedDate!).getTime();
+              return sum + (completed - created) / (1000 * 60 * 60 * 24); // days
+            }, 0) / completedTasksWithDates.length
+          : 0;
+        
+        const completionRate = state.tasks.length > 0 ? (completedTasks / state.tasks.length) * 100 : 0;
+        
+        // Count tasks by type
+        const tasksByType = state.tasks.reduce((acc, task) => {
+          acc[task.type] = (acc[task.type] || 0) + 1;
+          return acc;
+        }, {} as Record<Task['type'], number>);
+        
+        // Count tasks by priority
+        const tasksByPriority = state.tasks.reduce((acc, task) => {
+          acc[task.priority] = (acc[task.priority] || 0) + 1;
+          return acc;
+        }, {} as Record<Task['priority'], number>);
+        
+        // Count tasks by status
+        const tasksByStatus = state.tasks.reduce((acc, task) => {
+          acc[task.status] = (acc[task.status] || 0) + 1;
+          return acc;
+        }, {} as Record<Task['status'], number>);
+        
+        return {
+          totalTasks: state.tasks.length,
+          completedTasks,
+          pendingTasks: state.tasks.filter(task => task.status === 'pending').length,
+          overdueTasks,
+          tasksCompletedToday,
+          tasksCompletedThisWeek,
+          tasksCompletedThisMonth,
+          averageCompletionTime,
+          completionRate,
+          tasksByType,
+          tasksByPriority,
+          tasksByStatus,
+          tasksByUser: {},
+          productivityScore: Math.min(100, completionRate + (tasksCompletedToday * 5))
+        };
+      },
+      
+      getOverdueTasks: () => {
+        const now = new Date();
+        return get().tasks.filter(task => 
+          task.dueDate && 
+          new Date(task.dueDate) < now && 
+          task.status !== 'completed'
+        );
+      },
+      
+      getTasksDueToday: () => {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+        
+        return get().tasks.filter(task => 
+          task.dueDate && 
+          new Date(task.dueDate) >= startOfDay && 
+          new Date(task.dueDate) < endOfDay &&
+          task.status !== 'completed'
+        );
+      },
+      
+      getTasksDueThisWeek: () => {
+        const now = new Date();
+        const startOfWeek = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        return get().tasks.filter(task => 
+          task.dueDate && 
+          new Date(task.dueDate) >= startOfWeek && 
+          new Date(task.dueDate) < endOfWeek &&
+          task.status !== 'completed'
+        );
       }
     }),
     {
