@@ -39,6 +39,10 @@ interface TaskStore {
   // Computed properties
   getFilteredTasks: () => Task[];
   getTasksByStatus: (status: TaskStatus) => Task[];
+  getTaskMetrics: () => TaskMetrics;
+  getOverdueTasks: () => Task[];
+  getTasksDueToday: () => Task[];
+  getTasksDueThisWeek: () => Task[];
 }
 
 export const useTaskStore = create<TaskStore>()(
