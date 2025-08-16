@@ -12,7 +12,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDealStore } from "../store/dealStore";
-import { useContactStore } from "../hooks/useContactStore"; // Line 68: This import path is now correct after Step 1
+import { useContactStore } from "../hooks/useContactStore";
 import { useTaskStore } from "../store/taskStore";
 import { useAppointmentStore } from "../store/appointmentStore";
 
@@ -190,11 +190,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     setIsMobileMenuOpen(false);
   }, [navigate, openAITool, onOpenPipelineModal]);
 
-  // Active tab based on route (include /contacts-enhanced)
+  // Active tab based on route
   useEffect(() => {
     const path = location.pathname;
     if (path === '/dashboard') setActiveTab('dashboard');
-    else if (path === '/contacts' || path === '/contacts-enhanced') setActiveTab('contacts'); // 👈 enhanced route
+    else if (path === '/contacts' || path === '/contacts-enhanced') setActiveTab('contacts');
     else if (path === '/pipeline') setActiveTab('pipeline');
     else if (path === '/tasks') setActiveTab('tasks');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
@@ -202,18 +202,51 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else setActiveTab('');
   }, [location.pathname]);
 
-  // AI tools list (unchanged, truncated for brevity)
+  // AI tools list
   const aiTools = [
-    { name: 'Email Analysis', tool: 'email-analysis', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video, category: 'Core AI Tools' },
-    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Core AI Tools' },
-    { name: 'Call Script Generator', tool: 'call-script', icon: Phone, category: 'Core AI Tools' },
-    { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield, category: 'Core AI Tools' },
-    { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp, category: 'Core AI Tools' },
-    { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3, category: 'Core AI Tools' },
-    { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart, category: 'Core AI Tools' },
-    // ... (rest unchanged)
+    // Core AI Tools
+    { name: 'Email Analysis', tool: 'email-analysis', icon: Mail },
+    { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video },
+    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText },
+    { name: 'Call Script Generator', tool: 'call-script', icon: Phone },
+    { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail },
+    { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield },
+    { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp },
+    { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3 },
+    { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart },
+
+    // Communication
+    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
+    { name: 'Objection Handler', tool: 'objection-handler', icon: MessageSquare },
+    { name: 'Email Response', tool: 'email-response', icon: Mail },
+    { name: 'Voice Tone Optimizer', tool: 'voice-tone', icon: Volume2 },
+
+    // Customer & Content
+    { name: 'Customer Persona', tool: 'customer-persona', icon: User },
+    { name: 'Visual Content Generator', tool: 'visual-content', icon: Image },
+    { name: 'Meeting Agenda', tool: 'meeting-agenda', icon: Calendar },
+
+    // Advanced Features
+    { name: 'AI Assistant', tool: 'ai-assistant', icon: Bot },
+    { name: 'Vision Analyzer', tool: 'vision-analyzer', icon: Eye },
+    { name: 'Image Generator', tool: 'image-generator', icon: Camera },
+    { name: 'Semantic Search', tool: 'semantic-search', icon: Search },
+    { name: 'Function Assistant', tool: 'function-assistant', icon: Code },
+
+    // Real-time Features
+    { name: 'Streaming Chat', tool: 'streaming-chat', icon: MessageCircle },
+    { name: 'Form Validation', tool: 'form-validation', icon: CheckSquare },
+    { name: 'Live Deal Analysis', tool: 'live-deal-analysis', icon: Activity },
+    { name: 'Instant Response', tool: 'instant-response', icon: Zap },
+    { name: 'Real-time Email Composer', tool: 'realtime-email', icon: Mail },
+    { name: 'Voice Analysis Real-time', tool: 'voice-analysis', icon: Mic },
+
+    // Reasoning Generators
+    { name: 'Reasoning Email', tool: 'reasoning-email', icon: Brain },
+    { name: 'Reasoning Proposal', tool: 'reasoning-proposal', icon: FileText },
+    { name: 'Reasoning Script', tool: 'reasoning-script', icon: Phone },
+    { name: 'Reasoning Objection', tool: 'reasoning-objection', icon: AlertTriangle },
+    { name: 'Reasoning Social', tool: 'reasoning-social', icon: Users }
   ];
 
   const mainTabs = [
@@ -229,8 +262,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
-      action: () => handleNavigation('/contacts', 'contacts'), // Line 300: This line is changed to point to the new Contacts.tsx
-      badge: counters.hotContacts, // 👈 dynamic badge (hot leads). Use total count if you prefer.
+      action: () => handleNavigation('/contacts', 'contacts'),
+      badge: counters.hotContacts,
       color: 'from-purple-500 to-indigo-500'
     },
     {
@@ -278,15 +311,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       badge: 1,
       color: 'from-cyan-500 to-blue-500'
     }
-  ];
-
-  const dropdownMenus = [
-    { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: taskTools.length, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
-    { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-    { id: 'content', label: 'Content', icon: Edit3, badge: contentTools.length, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-    { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' },
-    { id: 'ai-categories', label: 'AI', icon: Brain, badge: 31, color: 'from-pink-500 to-rose-500', badgeColor: 'bg-pink-500' }
   ];
 
   const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
@@ -409,7 +433,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : menu.id === 'communication' ? communicationTools.length
                         : menu.id === 'content' ? contentTools.length
                         : menu.id === 'apps' ? connectedApps.length
-                        : 31,
+                        : aiTools.length,
                       menu.badgeColor
                     )}
                     {activeDropdown === menu.id && (
@@ -417,7 +441,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     )}
                   </button>
 
-                  {/* Example dropdown: Sales */}
+                  {/* Sales */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
                     <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-3">
@@ -489,19 +513,56 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     </div>
                   )}
 
-                  {/* AI Categories (collapsed example) */}
+                  {/* AI Categories — FULL LIST + scrollable + View All */}
                   {menu.id === 'ai-categories' && activeDropdown === 'ai-categories' && (
-                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div
+                      className={`absolute top-14 right-0 w-72 ${
+                        isDark ? 'bg-gray-900/95' : 'bg-white/95'
+                      } backdrop-blur-2xl border ${
+                        isDark ? 'border-white/10' : 'border-gray-200'
+                      } rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}
+                    >
                       <div className="p-3">
                         <div className="mb-3">
-                          <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
-                            AI Tool Categories
+                          <h3
+                            className={`text-sm font-semibold ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}
+                          >
+                            AI Tools
                           </h3>
                         </div>
-                        {/* Keep your category lists here if needed */}
+
+                        {/* Scrollable tools list */}
+                        <div className="max-h-80 overflow-y-auto -mx-1 px-1 space-y-1">
+                          {aiTools.map((tool, index) => (
+                            <button
+                              key={tool.tool ?? index}
+                              onClick={() => handleAIToolClick(tool.tool)}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
+                                isDark
+                                  ? 'hover:bg-white/5 text-gray-300 hover:text-white'
+                                  : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                              }`}
+                            >
+                              {tool.icon ? (
+                                <tool.icon size={16} className="shrink-0" />
+                              ) : (
+                                <Sparkles size={16} className="shrink-0" />
+                              )}
+                              <span className="text-sm font-medium">{tool.name}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* View All */}
                         <button
                           onClick={() => handleNavigation('/ai-tools', 'ai-tools')}
-                          className={`w-full mt-3 py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
+                          className={`w-full mt-3 py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${
+                            isDark
+                              ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white'
+                              : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'
+                          }`}
                         >
                           <span className="text-sm font-medium">View All AI Tools</span>
                         </button>
