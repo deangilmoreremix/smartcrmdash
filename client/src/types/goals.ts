@@ -14,12 +14,16 @@ export interface Goal {
   realWorldExample: string;
   successMetrics: string[];
   prerequisite: string[];
+  prerequisites?: string[]; // Alias for prerequisite for compatibility
   roi: string;
-  estimatedTime?: string;
-  revenueImpact?: string;
-  implementationNotes?: string[];
-  technicalRequirements?: string[];
-  aiModels?: string[];
+  // Additional properties for comprehensive design
+  estimatedTime?: string; // Alias for estimatedSetupTime
+  revenueImpact?: string; // Additional revenue impact field
+  expectedRoi?: string; // Alias for roi
+  difficulty?: 'Simple' | 'Intermediate' | 'Advanced'; // Alias for complexity
+  implementationNotes?: string[]; // Implementation guidance
+  technicalRequirements?: string[]; // Technical requirements
+  aiModels?: string[]; // AI models used
   recommendedFor?: ('contact' | 'deal' | 'company')[];
   toolMapping?: string;
 }

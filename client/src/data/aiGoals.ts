@@ -1,27 +1,6 @@
 import { Goal, GoalCategory } from '../types/goals';
 
-export interface AIGoal {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  icon: string;
-  complexity: 'Simple' | 'Intermediate' | 'Advanced';
-  estimatedTime: string;
-  recommendedFor: ('contact' | 'deal' | 'company')[];
-  toolMapping?: string;
-  priority: 'High' | 'Medium' | 'Low';
-  agentsRequired: string[];
-  toolsNeeded: string[];
-  estimatedSetupTime: string;
-  businessImpact: string;
-  realWorldExample: string;
-  successMetrics: string[];
-  prerequisite: string[];
-  roi: string;
-}
-
-export const AI_GOALS: AIGoal[] = [
+export const allGoals: Goal[] = [
   // Sales Goals (15 goals)
   {
     id: 'leadScoring',

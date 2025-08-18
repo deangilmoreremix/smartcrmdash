@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Goal, GoalCategory, AIGoalContext } from '../types/goals';
-import { AI_GOALS, goalCategories, AIGoal } from '../data/aiGoals';
+import { allGoals, goalCategories } from '../data/completeGoalsData';
 import InteractiveGoalCard from './InteractiveGoalCard';
 import { 
   Search, 
@@ -42,13 +42,8 @@ const InteractiveGoalExplorer: React.FC<InteractiveGoalExplorerProps> = ({
   const [executingGoals, setExecutingGoals] = useState<Set<string>>(new Set());
   const [completedGoals, setCompletedGoals] = useState<Set<string>>(new Set());
 
-  // Convert AI_GOALS to Goal format
-  const goals: Goal[] = useMemo(() => 
-    AI_GOALS.map((aiGoal: AIGoal) => ({
-      ...aiGoal,
-      name: aiGoal.title
-    })), []
-  );
+  // Use the complete goals data
+  const goals: Goal[] = useMemo(() => allGoals, []);
 
   // Filter goals based on search and filters
   const filteredGoals = useMemo(() => {
