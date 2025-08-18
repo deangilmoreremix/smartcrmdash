@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Phone, Mail, Send, Users, Search, Filter, Plus, MoreVertical, Check, Clock, AlertCircle, Paperclip } from 'lucide-react';
-import GlassCard from '@/components/ui/GlassCard';
-import ModernButton from '@/components/ui/ModernButton';
 
 interface Message {
   id: string;
@@ -249,7 +247,7 @@ const CommunicationHub: React.FC = () => {
   return (
     <div className="h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <GlassCard className="w-80 border-r border-gray-200 flex flex-col rounded-none">
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-900">Communication Hub</h1>
@@ -265,11 +263,10 @@ const CommunicationHub: React.FC = () => {
           ].map(tab => {
             const IconComponent = tab.icon;
             return (
-              <ModernButton
+              <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                variant={activeTab === tab.key ? "primary" : "ghost"}
-                className={`flex-1 flex items-center justify-center py-3 text-sm font-medium rounded-none ${
+                className={`flex-1 flex items-center justify-center py-3 text-sm font-medium ${
                   activeTab === tab.key
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-500 hover:text-gray-700'
@@ -277,7 +274,7 @@ const CommunicationHub: React.FC = () => {
               >
                 <IconComponent size={16} className="mr-1" />
                 {tab.label}
-              </ModernButton>
+              </button>
             );
           })}
         </div>
@@ -361,17 +358,17 @@ const CommunicationHub: React.FC = () => {
               <Users size={48} className="mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Broadcast Messages</h3>
               <p className="text-gray-500 mb-4">Send messages to multiple contacts at once</p>
-              <ModernButton variant="primary">
+              <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 <Plus size={16} className="mr-1" />
                 Create Broadcast
-              </ModernButton>
+              </button>
             </div>
           )}
         </div>
-      </GlassCard>
+      </div>
       
       {/* Main Chat Area */}
-      <GlassCard className="flex-1 flex flex-col rounded-none">
+      <div className="flex-1 flex flex-col">
         {selectedContact ? (
           <>
             {/* Chat Header */}
@@ -405,9 +402,9 @@ const CommunicationHub: React.FC = () => {
                     <option value="whatsapp">WhatsApp</option>
                     <option value="email">Email</option>
                   </select>
-                  <ModernButton variant="ghost" size="sm">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
                     <MoreVertical size={16} />
-                  </ModernButton>
+                  </button>
                 </div>
               </div>
             </div>

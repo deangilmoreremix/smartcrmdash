@@ -296,14 +296,13 @@ const CircleProspecting: React.FC = () => {
           <p className="text-gray-600 mt-1">Geographic prospecting to find local businesses</p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <ModernButton
+          <button
             onClick={() => setShowCreateForm(true)}
-            variant="primary"
-            className="inline-flex items-center"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
           >
             <Plus size={18} className="mr-1" />
             New Circle
-          </ModernButton>
+          </button>
         </div>
       </header>
 
@@ -317,7 +316,7 @@ const CircleProspecting: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Circles List */}
         <div className="lg:col-span-1">
-          <GlassCard>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold">Prospecting Circles</h2>
             </div>
@@ -357,7 +356,7 @@ const CircleProspecting: React.FC = () => {
                 ))
               )}
             </div>
-          </GlassCard>
+          </div>
         </div>
 
         {/* Circle Details and Businesses */}
@@ -365,15 +364,13 @@ const CircleProspecting: React.FC = () => {
           {selectedCircle ? (
             <div className="space-y-6">
               {/* Circle Info */}
-              <GlassCard className="p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold">{selectedCircle.name}</h2>
-                  <ModernButton
+                  <button
                     onClick={() => searchBusinesses(selectedCircle.id)}
                     disabled={isSearching}
-                    variant="primary"
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700"
+                    className="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors disabled:opacity-50"
                   >
                     {isSearching ? (
                       <>
@@ -386,7 +383,7 @@ const CircleProspecting: React.FC = () => {
                         Refresh Search
                       </>
                     )}
-                  </ModernButton>
+                  </button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -416,10 +413,10 @@ const CircleProspecting: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
 
               {/* Businesses List */}
-              <GlassCard>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="p-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
@@ -451,13 +448,13 @@ const CircleProspecting: React.FC = () => {
                           <Search size={48} className="mx-auto text-gray-300 mb-4" />
                           <h4 className="text-lg font-medium text-gray-900 mb-2">No businesses found</h4>
                           <p className="text-gray-500 mb-4">Try adjusting your search criteria or refresh the search</p>
-                          <ModernButton
+                          <button
                             onClick={() => searchBusinesses(selectedCircle.id)}
-                            variant="primary"
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                           >
                             <Search size={16} className="mr-1" />
                             Search Businesses
-                          </ModernButton>
+                          </button>
                         </>
                       )}
                     </div>
@@ -533,34 +530,28 @@ const CircleProspecting: React.FC = () => {
                           
                           <div className="ml-4 flex flex-col space-y-2">
                             {business.status === 'new' && (
-                              <ModernButton
+                              <button
                                 onClick={() => updateBusinessStatus(business.id, 'contacted')}
-                                variant="primary"
-                                size="sm"
-                                className="bg-yellow-600 hover:bg-yellow-700"
+                                className="px-3 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
                               >
                                 Mark Contacted
-                              </ModernButton>
+                              </button>
                             )}
                             {business.status === 'contacted' && (
-                              <ModernButton
+                              <button
                                 onClick={() => updateBusinessStatus(business.id, 'qualified')}
-                                variant="primary"
-                                size="sm"
-                                className="bg-purple-600 hover:bg-purple-700"
+                                className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
                               >
                                 Mark Qualified
-                              </ModernButton>
+                              </button>
                             )}
                             {business.status === 'qualified' && (
-                              <ModernButton
+                              <button
                                 onClick={() => updateBusinessStatus(business.id, 'converted')}
-                                variant="primary"
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700"
+                                className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
                               >
                                 Mark Converted
-                              </ModernButton>
+                              </button>
                             )}
                           </div>
                         </div>
@@ -568,31 +559,31 @@ const CircleProspecting: React.FC = () => {
                     ))
                   )}
                 </div>
-              </GlassCard>
+              </div>
             </div>
           ) : (
-            <GlassCard className="p-8 text-center">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
               <Target size={48} className="mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Circle Selected</h3>
               <p className="text-gray-500 mb-4">
                 Select a prospecting circle from the list or create a new one to get started
               </p>
-              <ModernButton
+              <button
                 onClick={() => setShowCreateForm(true)}
-                variant="primary"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 <Plus size={16} className="mr-1" />
                 Create Your First Circle
-              </ModernButton>
-            </GlassCard>
+              </button>
+            </div>
           )}
         </div>
       </div>
 
       {/* Create Circle Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
-          <GlassCard className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold">Create Prospecting Circle</h2>
               <button
@@ -711,23 +702,23 @@ const CircleProspecting: React.FC = () => {
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">
-                <ModernButton
+                <button
+                  type="button"
                   onClick={() => setShowCreateForm(false)}
-                  variant="outline"
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Cancel
-                </ModernButton>
-                <ModernButton
+                </button>
+                <button
                   type="submit"
                   disabled={isLoading}
-                  variant="primary"
-                  loading={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
                   {isLoading ? 'Creating...' : 'Create Circle'}
-                </ModernButton>
+                </button>
               </div>
             </form>
-          </GlassCard>
+          </div>
         </div>
       )}
     </div>
