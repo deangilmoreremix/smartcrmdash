@@ -5,6 +5,7 @@ This is a modern CRM (Customer Relationship Management) application built with R
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Design Implementation: Always use the exact design, styling, and structure from attached assets rather than creating custom interpretations. Follow the specific component layouts, color schemes, and UI patterns exactly as provided in the attached asset files.
 
 # Recent Changes (2025-01-18)
 
@@ -22,6 +23,7 @@ Preferred communication style: Simple, everyday language.
   - **CommunicationHub** - Unified SMS, WhatsApp & Email messaging system
 - **Technical Updates**: Fixed routing conflicts, resolved duplicate imports, updated App.tsx with proper protected routes
 - **User Confirmed**: Appointments system working with comprehensive calendar features, contact integration, and professional scheduling interface
+- **Design Consistency Requirement**: User requires exact implementation of design patterns from attached assets - no custom interpretations or modifications to styling/structure
 
 ## Remote Contacts Integration Success
 - Successfully embedded user's remote contacts module from Netlify
