@@ -124,43 +124,53 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
 
-  // ===== All AI tool entries (IDs MUST MATCH AITools.tsx switch cases) =====
-  const aiTools: AITool[] = [
-    { title: 'Smart Email Composer', id: 'email-composer-content', icon: Mail, category: 'Email' },
-    { title: 'AI Assistant Chat', id: 'ai-assistant-chat', icon: Brain, category: 'Assistant' },
-    { title: 'Live Deal Analysis', id: 'live-deal-analysis', icon: BarChart3, category: 'Sales' },
-    { title: 'Auto Form Completer', id: 'auto-form-completer', icon: Zap, category: 'Forms' },
-    { title: 'Call Script (Content)', id: 'call-script', icon: Phone, category: 'Sales' },
-    { title: 'Call Script Generator', id: 'call-script-generator', icon: Phone, category: 'Sales' },
-    { title: 'Competitor Analysis (Content)', id: 'competitor-analysis', icon: Shield, category: 'Research' },
-    { title: 'Competitor Analysis (Main)', id: 'competitor-analysis-main', icon: Shield, category: 'Research' },
-    { title: 'Customer Persona', id: 'customer-persona', icon: Users, category: 'Research' },
-    { title: 'Document Analyzer (Realtime)', id: 'document-analyzer-realtime', icon: FileText, category: 'Docs' },
-    { title: 'Email Analysis', id: 'email-analysis', icon: Mail, category: 'Email' },
-    { title: 'Function Assistant', id: 'function-assistant', icon: Code, category: 'Developer' },
-    { title: 'Image Generator (Content)', id: 'image-generator', icon: Image, category: 'Content' },
-    { title: 'Instant AI Response', id: 'instant-response', icon: Zap, category: 'Assistant' },
-    { title: 'Market Trends (Content)', id: 'market-trends', icon: TrendingUp, category: 'Research' },
-    { title: 'Meeting Agenda', id: 'meeting-agenda', icon: Calendar, category: 'Meetings' },
-    { title: 'Meeting Summary', id: 'meeting-summary', icon: Calendar, category: 'Meetings' },
-    { title: 'Objection Handler', id: 'objection-handler', icon: AlertTriangle, category: 'Sales' },
-    { title: 'Realtime Email Composer', id: 'realtime-email-composer', icon: Mail, category: 'Email' },
-    { title: 'Realtime Form Validation', id: 'form-validation', icon: CheckSquare, category: 'Forms' },
-    { title: 'Reasoning Email (Content)', id: 'reasoning-email', icon: Mail, category: 'Reasoning' },
-    { title: 'Reasoning Proposal', id: 'reasoning-proposal-generator', icon: FileText, category: 'Reasoning' },
-    { title: 'Reasoning Script', id: 'reasoning-script-generator', icon: Phone, category: 'Reasoning' },
-    { title: 'Reasoning Objection', id: 'reasoning-objection-handler', icon: AlertTriangle, category: 'Reasoning' },
-    { title: 'Reasoning Social', id: 'reasoning-social-content', icon: Megaphone, category: 'Reasoning' },
-    { title: 'Semantic Search (Realtime)', id: 'smart-search-realtime', icon: Search, category: 'Search' },
-    { title: 'Social Media Generator', id: 'social-media-generator', icon: Megaphone, category: 'Content' },
-    { title: 'Voice Analysis (Realtime)', id: 'voice-analysis-realtime', icon: Volume2, category: 'Audio' },
-    { title: 'Visual Content Generator', id: 'visual-content-generator', icon: Image, category: 'Content' },
-    { title: 'Churn Prediction', id: 'churn-prediction', icon: PieChart, category: 'Analytics' },
-    { title: 'Proposal Generator', id: 'proposal-generator', icon: FileText, category: 'Sales' },
-    { title: 'Sentiment Analysis', id: 'sentiment-analysis', icon: LineChart, category: 'Analytics' },
-    { title: 'AI Usage Stats Panel', id: 'ai-usage-stats-panel', icon: Eye, category: 'Analytics' },
-    { title: 'Market Trends (Analysis)', id: 'market-trends-analysis', icon: TrendingUp, category: 'Analytics' },
-  ];
+  // ===== All AI tool entries organized by categories =====
+  const aiToolCategories = {
+    'Core AI Tools': [
+      { title: 'Email Analysis', id: 'email-analysis', icon: Mail },
+      { title: 'Meeting Summarizer', id: 'meeting-summary', icon: Calendar },
+      { title: 'Proposal Generator', id: 'proposal-generator', icon: FileText },
+      { title: 'Call Script Generator', id: 'call-script-generator', icon: Phone },
+      { title: 'Subject Line Optimizer', id: 'subject-optimizer', icon: Mail },
+      { title: 'Competitor Analysis', id: 'competitor-analysis', icon: Shield },
+      { title: 'Market Trends', id: 'market-trends', icon: TrendingUp },
+      { title: 'Sales Insights', id: 'sales-insights', icon: BarChart3 },
+      { title: 'Sales Forecast', id: 'sales-forecast', icon: LineChart },
+    ],
+    'Communication': [
+      { title: 'Email Composer', id: 'email-composer-content', icon: Mail },
+      { title: 'Objection Handler', id: 'objection-handler', icon: AlertTriangle },
+      { title: 'Email Response', id: 'email-response', icon: Mail },
+      { title: 'Voice Tone Optimizer', id: 'voice-tone-optimizer', icon: Volume2 },
+    ],
+    'Customer & Content': [
+      { title: 'Customer Persona', id: 'customer-persona', icon: Users },
+      { title: 'Visual Content Generator', id: 'visual-content-generator', icon: Image },
+      { title: 'Meeting Agenda', id: 'meeting-agenda', icon: Calendar },
+    ],
+    'Advanced Features': [
+      { title: 'AI Assistant', id: 'ai-assistant-chat', icon: Brain },
+      { title: 'Vision Analyzer', id: 'vision-analyzer', icon: Eye },
+      { title: 'Image Generator', id: 'image-generator', icon: Image },
+      { title: 'Semantic Search', id: 'smart-search-realtime', icon: Search },
+      { title: 'Function Assistant', id: 'function-assistant', icon: Code },
+    ],
+    'Real-time Features': [
+      { title: 'Streaming Chat', id: 'ai-assistant-chat', icon: MessageSquare },
+      { title: 'Form Validation', id: 'form-validation', icon: CheckSquare },
+      { title: 'Live Deal Analysis', id: 'live-deal-analysis', icon: BarChart3 },
+      { title: 'Instant Response', id: 'instant-response', icon: Zap },
+      { title: 'Real-time Email Composer', id: 'realtime-email-composer', icon: Mail },
+      { title: 'Voice Analysis Real-time', id: 'voice-analysis-realtime', icon: Volume2 },
+    ],
+    'Reasoning Generators': [
+      { title: 'Reasoning Email', id: 'reasoning-email', icon: Mail },
+      { title: 'Reasoning Proposal', id: 'reasoning-proposal', icon: FileText },
+      { title: 'Reasoning Script', id: 'reasoning-script', icon: Phone },
+      { title: 'Reasoning Objection', id: 'reasoning-objection', icon: AlertTriangle },
+      { title: 'Reasoning Social', id: 'reasoning-social', icon: Megaphone },
+    ]
+  };
 
   // Click outside to close
   useEffect(() => {
@@ -259,7 +269,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       label: 'AI Tools',
       icon: Brain,
       action: () => handleNavigation('/ai-tools', 'ai-tools'),
-      badge: aiTools.length,
+      badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
     {
@@ -278,7 +288,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'content', label: 'Content', icon: Edit3, badge: contentTools.length, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' },
-    { id: 'ai-categories', label: 'AI', icon: Brain, badge: aiTools.length, color: 'from-pink-500 to-rose-500', badgeColor: 'bg-pink-500' }
+    { id: 'ai-categories', label: 'AI', icon: Brain, badge: Object.values(aiToolCategories).flat().length, color: 'from-pink-500 to-rose-500', badgeColor: 'bg-pink-500' }
   ];
 
   const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
@@ -397,7 +407,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : menu.id === 'communication' ? communicationTools.length
                         : menu.id === 'content' ? contentTools.length
                         : menu.id === 'apps' ? connectedApps.length
-                        : aiTools.length,
+                        : Object.values(aiToolCategories).flat().length,
                       menu.badgeColor
                     )}
                     {activeDropdown === menu.id && (
@@ -405,23 +415,29 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     )}
                   </button>
 
-                  {/* ===== AI dropdown content (scrollable list + View All button) ===== */}
+                  {/* ===== AI dropdown content (categorized sections + View All button) ===== */}
                   {menu.id === 'ai-categories' && activeDropdown === 'ai-categories' && (
                     <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="max-h-80 overflow-y-auto p-2">
-                        {aiTools.map((t) => (
-                          <button
-                            key={t.id}
-                            onClick={() => handleAIToolClick(t.id)}
-                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
-                          >
-                            {t.icon ? <t.icon size={16} className="opacity-80" /> : <Sparkles size={16} className="opacity-80" />}
-                            <div className="flex-1">
-                              <div className="text-sm font-medium">{t.title}</div>
-                              {t.category && <div className="text-[11px] opacity-70">{t.category}</div>}
+                      <div className="max-h-96 overflow-y-auto p-2">
+                        {Object.entries(aiToolCategories).map(([categoryName, tools]) => (
+                          <div key={categoryName} className="mb-4">
+                            <div className={`text-xs font-semibold uppercase tracking-wider px-3 py-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {categoryName}
                             </div>
-                            <ChevronDown size={14} className="opacity-30 rotate-270" />
-                          </button>
+                            {tools.map((tool) => (
+                              <button
+                                key={tool.id}
+                                onClick={() => handleAIToolClick(tool.id)}
+                                className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
+                              >
+                                {tool.icon ? <tool.icon size={14} className="opacity-80" /> : <Sparkles size={14} className="opacity-80" />}
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium">{tool.title}</div>
+                                </div>
+                                <ChevronDown size={12} className="opacity-30 rotate-270" />
+                              </button>
+                            ))}
+                          </div>
                         ))}
                       </div>
                       <div className="p-2 border-t border-gray-200/30">
