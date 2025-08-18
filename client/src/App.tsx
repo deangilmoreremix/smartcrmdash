@@ -24,6 +24,7 @@ const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts')); // details handled via modal inside
 const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // Enhanced with Module Federation
 const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // Button test
+const ContactsWorking = lazy(() => import('./pages/ContactsWorking')); // Working contacts with inline styles
 const Pipeline = lazy(() => import('./pages/Pipeline'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -137,7 +138,7 @@ function App() {
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <ContactsWithRemote />
+                                <ContactsWorking />
                               </ProtectedRoute>
                             }
                           />
