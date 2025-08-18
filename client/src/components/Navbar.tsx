@@ -179,11 +179,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
+    console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
     navigate(route);
     setActiveTab(tabName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleAIToolClick = useCallback((toolId: string) => {
     // Set the current tool & go to the hub page
@@ -319,7 +320,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 return (
                   <div key={tab.id} className="relative">
                     <button
-                      onClick={(e) => { e.stopPropagation(); tab.action(); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        console.log('Tab clicked:', tab.id, tab.label);
+                        tab.action(); 
+                      }}
                       className={`
                         relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                         transition-all duration-300 transform hover:scale-105
