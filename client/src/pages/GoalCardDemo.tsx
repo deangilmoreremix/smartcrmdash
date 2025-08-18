@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import InteractiveGoalCard from '@/components/ui/InteractiveGoalCard';
+import InteractiveGoalCard from '@/components/InteractiveGoalCard';
 import { Goal } from '@/types/goals';
 
 const GoalCardDemo: React.FC = () => {

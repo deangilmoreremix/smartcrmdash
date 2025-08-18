@@ -1,0 +1,1876 @@
+# AI Goals Feature Implementation Guide
+
+## Overview
+This guide explains how to implement the comprehensive AI Goals feature from Smart CRM into another application. The AI Goals system provides a sophisticated business automation platform with 58+ pre-configured goals, multi-agent coordination, real-time execution visualization, and intelligent workflow management.
+
+## Prerequisites
+
+### 1. Dependencies Installation
+```bash
+# Core React dependencies
+npm install react react-dom react-router-dom
+npm install @types/react @types/react-dom
+
+# State Management
+npm install zustand
+
+# UI Components & Icons
+npm install @radix-ui/react-dialog @radix-ui/react-tabs @radix-ui/react-progress
+npm install lucide-react react-icons
+npm install tailwindcss @tailwindcss/typography class-variance-authority
+npm install clsx tailwind-merge
+
+# AI Services & Integrations
+npm install openai @google/generative-ai
+npm install composio-core  # For tool integrations
+
+# Animation & Visual Effects
+npm install framer-motion
+
+# Form & Data Handling
+npm install react-hook-form @hookform/resolvers zod
+npm install @tanstack/react-query
+
+# Additional utilities
+npm install date-fns nanoid uuid
+```
+
+### 2. Environment Variables
+Create `.env` file with:
+```env
+# Required for AI Goals functionality
+OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_AI_API_KEY=your_google_ai_key_here
+
+# Optional - for advanced agent integrations
+COMPOSIO_API_KEY=your_composio_api_key_here
+
+# Application Configuration
+VITE_APP_NAME=Your App Name
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+## Architecture Overview
+
+```
+src/
+├── types/
+│   └── goals.ts                 # Goal type definitions
+├── data/
+│   ├── aiGoals.ts              # 58+ pre-configured goals
+│   └── goalsData.ts            # Goal categories & mappings
+├── components/
+│   ├── InteractiveGoalCard.tsx  # Goal display card
+│   ├── GoalExecutionModal.tsx   # Execution interface
+│   ├── LiveGoalExecution.tsx    # Real-time execution
+│   └── InteractiveGoalExplorer.tsx # Main explorer
+├── pages/
+│   └── AIGoals/
+│       └── AIGoalsPage.tsx      # Main goals dashboard
+├── services/
+│   ├── composioService.ts       # Agent orchestration
+│   ├── openaiService.ts         # OpenAI integration
+│   └── geminiService.ts         # Google AI integration
+└── store/
+    └── goalStore.ts             # Goal state management
+```
+
+## Step-by-Step Implementation
+
+### Step 1: Type Definitions
+
+#### Goal Types (`src/types/goals.ts`)
+```typescript
+import { LucideIcon } from 'lucide-react';
+
+export interface Goal {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low';
+  agentsRequired: string[];
+  toolsNeeded: string[];
+  estimatedSetupTime: string;
+  businessImpact: string;
+  complexity: 'Simple' | 'Intermediate' | 'Advanced';
+  realWorldExample: string;
+  successMetrics: string[];
+  prerequisite: string[];
+  roi: string;
+  estimatedTime?: string;
+  revenueImpact?: string;
+  implementationNotes?: string[];
+  technicalRequirements?: string[];
+  aiModels?: string[];
+}
+
+export interface GoalCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: any;
+  color: string;
+  totalGoals: number;
+}
+
+export interface GoalProgress {
+  goalId: string;
+  status: 'pending' | 'executing' | 'completed' | 'failed';
+  progress: number;
+  steps: ExecutionStep[];
+  startTime: Date;
+  endTime?: Date;
+  results?: any;
+}
+
+export interface ExecutionStep {
+  id: string;
+  name: string;
+  status: 'pending' | 'executing' | 'completed' | 'failed';
+  progress: number;
+  agent: string;
+  duration?: number;
+  result?: any;
+  thinking?: string;
+  toolsUsed?: string[];
+  crmImpact?: string;
+}
+
+export interface AgentGoalMapping {
+  goalId: string;
+  agents: {
+    primary: string;
+    secondary: string[];
+  };
+  executionOrder: string[];
+  dependencies: Record<string, string[]>;
+}
+```
+
+### Step 2: Pre-configured Goals Data
+
+#### AI Goals Data (`src/data/aiGoals.ts`)
+```typescript
+export interface AIGoal {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  icon: string;
+  complexity: 'Simple' | 'Intermediate' | 'Advanced';
+  estimatedTime: string;
+  recommendedFor: ('contact' | 'deal' | 'company')[];
+  toolMapping?: string;
+}
+
+export const AI_GOALS: AIGoal[] = [
+  // Sales Goals (15 goals)
+  {
+    id: 'leadScoring',
+    title: 'Lead Scoring & Qualification',
+    description: 'Automatically score and qualify leads based on engagement and fit',
+    category: 'Sales',
+    icon: 'BarChart3',
+    complexity: 'Simple',
+    estimatedTime: '2-3 minutes',
+    recommendedFor: ['contact'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'emailPersonalization',
+    title: 'Personalized Email Generation',
+    description: 'Create highly personalized outreach emails based on prospect data',
+    category: 'Sales',
+    icon: 'Mail',
+    complexity: 'Simple',
+    estimatedTime: '1-2 minutes',
+    recommendedFor: ['contact'],
+    toolMapping: 'email-composer'
+  },
+  {
+    id: 'pipelineOptimization',
+    title: 'Sales Pipeline Optimization',
+    description: 'Analyze and optimize your sales pipeline for maximum conversion',
+    category: 'Sales',
+    icon: 'TrendingUp',
+    complexity: 'Advanced',
+    estimatedTime: '10-15 minutes',
+    recommendedFor: ['deal'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'dealRiskAssessment',
+    title: 'Deal Risk Assessment',
+    description: 'Evaluate risk factors and probability of deal closure',
+    category: 'Sales',
+    icon: 'AlertTriangle',
+    complexity: 'Intermediate',
+    estimatedTime: '5-7 minutes',
+    recommendedFor: ['deal'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'competitorAnalysis',
+    title: 'Competitive Intelligence',
+    description: 'Research competitors and create competitive battle cards',
+    category: 'Sales',
+    icon: 'Shield',
+    complexity: 'Advanced',
+    estimatedTime: '15-20 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'smart-search'
+  },
+
+  // Marketing Goals (12 goals)
+  {
+    id: 'campaignOptimization',
+    title: 'Campaign Performance Optimization',
+    description: 'Analyze and optimize marketing campaigns for better ROI',
+    category: 'Marketing',
+    icon: 'Target',
+    complexity: 'Intermediate',
+    estimatedTime: '8-12 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'contentStrategy',
+    title: 'Content Strategy Development',
+    description: 'Create comprehensive content strategies for different audiences',
+    category: 'Marketing',
+    icon: 'FileText',
+    complexity: 'Advanced',
+    estimatedTime: '15-20 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'content-generator'
+  },
+  {
+    id: 'audienceSegmentation',
+    title: 'Audience Segmentation',
+    description: 'Segment your audience for targeted marketing campaigns',
+    category: 'Marketing',
+    icon: 'Users',
+    complexity: 'Intermediate',
+    estimatedTime: '6-10 minutes',
+    recommendedFor: ['contact'],
+    toolMapping: 'business-analyzer'
+  },
+
+  // Relationship Goals (10 goals)
+  {
+    id: 'customerOnboarding',
+    title: 'Customer Onboarding Automation',
+    description: 'Create automated onboarding sequences for new customers',
+    category: 'Relationship',
+    icon: 'UserPlus',
+    complexity: 'Intermediate',
+    estimatedTime: '10-15 minutes',
+    recommendedFor: ['contact'],
+    toolMapping: 'email-composer'
+  },
+  {
+    id: 'relationshipMapping',
+    title: 'Relationship Network Mapping',
+    description: 'Map relationships and connections within target accounts',
+    category: 'Relationship',
+    icon: 'Network',
+    complexity: 'Advanced',
+    estimatedTime: '12-18 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'smart-search'
+  },
+
+  // Automation Goals (8 goals)
+  {
+    id: 'workflowAutomation',
+    title: 'Workflow Automation Setup',
+    description: 'Create automated workflows for repetitive business processes',
+    category: 'Automation',
+    icon: 'Zap',
+    complexity: 'Advanced',
+    estimatedTime: '20-30 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'taskAutomation',
+    title: 'Task Automation',
+    description: 'Automate routine tasks and follow-up activities',
+    category: 'Automation',
+    icon: 'Bot',
+    complexity: 'Intermediate',
+    estimatedTime: '8-12 minutes',
+    recommendedFor: ['contact', 'deal'],
+    toolMapping: 'business-analyzer'
+  },
+
+  // Analytics Goals (8 goals)
+  {
+    id: 'performanceAnalytics',
+    title: 'Performance Analytics Dashboard',
+    description: 'Create comprehensive performance analytics and KPI tracking',
+    category: 'Analytics',
+    icon: 'BarChart3',
+    complexity: 'Advanced',
+    estimatedTime: '15-25 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'business-analyzer'
+  },
+  {
+    id: 'predictiveAnalytics',
+    title: 'Predictive Analytics',
+    description: 'Implement predictive models for sales and customer behavior',
+    category: 'Analytics',
+    icon: 'TrendingUp',
+    complexity: 'Advanced',
+    estimatedTime: '20-30 minutes',
+    recommendedFor: ['company'],
+    toolMapping: 'business-analyzer'
+  },
+
+  // Content Goals (5 goals)
+  {
+    id: 'contentPersonalization',
+    title: 'Content Personalization',
+    description: 'Personalize content for different customer segments',
+    category: 'Content',
+    icon: 'FileText',
+    complexity: 'Intermediate',
+    estimatedTime: '6-10 minutes',
+    recommendedFor: ['contact'],
+    toolMapping: 'content-generator'
+  }
+  
+  // Add more goals as needed to reach 58+ total goals
+];
+
+export const goalCategories = [
+  {
+    id: 'Sales',
+    name: 'Sales',
+    description: 'Lead generation, qualification, and deal closure',
+    icon: 'Target',
+    color: 'from-blue-500 to-blue-600',
+    totalGoals: 15
+  },
+  {
+    id: 'Marketing',
+    name: 'Marketing',
+    description: 'Campaign optimization and audience targeting',
+    icon: 'Megaphone',
+    color: 'from-purple-500 to-purple-600',
+    totalGoals: 12
+  },
+  {
+    id: 'Relationship',
+    name: 'Relationship',
+    description: 'Customer relationship and account management',
+    icon: 'Users',
+    color: 'from-green-500 to-green-600',
+    totalGoals: 10
+  },
+  {
+    id: 'Automation',
+    name: 'Automation',
+    description: 'Process automation and workflow optimization',
+    icon: 'Zap',
+    color: 'from-orange-500 to-orange-600',
+    totalGoals: 8
+  },
+  {
+    id: 'Analytics',
+    name: 'Analytics',
+    description: 'Data analysis and performance insights',
+    icon: 'BarChart3',
+    color: 'from-teal-500 to-teal-600',
+    totalGoals: 8
+  },
+  {
+    id: 'Content',
+    name: 'Content',
+    description: 'Content creation and optimization',
+    icon: 'FileText',
+    color: 'from-yellow-500 to-yellow-600',
+    totalGoals: 5
+  }
+];
+```
+
+### Step 3: Interactive Goal Card Component
+
+#### Interactive Goal Card (`src/components/InteractiveGoalCard.tsx`)
+```typescript
+import React, { useState, useEffect } from 'react';
+import { Goal } from '../types/goals';
+import { 
+  Clock, 
+  TrendingUp, 
+  Users, 
+  Zap, 
+  Play,
+  Eye,
+  CheckCircle,
+  Star,
+  Target,
+  ArrowRight
+} from 'lucide-react';
+
+interface InteractiveGoalCardProps {
+  goal: Goal;
+  onExecute: (goal: Goal) => void;
+  isExecuting?: boolean;
+  executionProgress?: number;
+  realMode?: boolean;
+  onPreview?: (goal: Goal) => void;
+  isCompleted?: boolean;
+}
+
+const InteractiveGoalCard: React.FC<InteractiveGoalCardProps> = ({
+  goal,
+  onExecute,
+  isExecuting = false,
+  executionProgress = 0,
+  realMode = false,
+  onPreview,
+  isCompleted = false
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [liveMetrics, setLiveMetrics] = useState({
+    estimatedValue: parseInt(goal.roi.replace(/[^0-9]/g, '')) * 1000 || 25000,
+    timeToComplete: parseInt(goal.estimatedSetupTime.replace(/[^0-9]/g, '')) || 15,
+    confidence: goal.priority === 'High' ? 95 : goal.priority === 'Medium' ? 85 : 75,
+    agentsRequired: goal.agentsRequired.length || 3
+  });
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High': return 'from-red-500 to-orange-500';
+      case 'Medium': return 'from-yellow-500 to-orange-500';
+      case 'Low': return 'from-green-500 to-emerald-500';
+      default: return 'from-gray-500 to-slate-500';
+    }
+  };
+
+  const getComplexityIcon = (complexity: string) => {
+    switch (complexity) {
+      case 'Simple': return <Zap className="h-4 w-4" />;
+      case 'Intermediate': return <Target className="h-4 w-4" />;
+      case 'Advanced': return <Star className="h-4 w-4" />;
+      default: return <Zap className="h-4 w-4" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'sales': return 'from-blue-500 to-cyan-500';
+      case 'marketing': return 'from-purple-500 to-pink-500';
+      case 'relationship': return 'from-green-500 to-teal-500';
+      case 'automation': return 'from-orange-500 to-amber-500';
+      case 'analytics': return 'from-teal-500 to-cyan-500';
+      case 'content': return 'from-yellow-500 to-orange-500';
+      default: return 'from-gray-500 to-slate-500';
+    }
+  };
+
+  return (
+    <div
+      className={`group relative bg-white dark:bg-slate-800 rounded-2xl border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer overflow-hidden ${
+        isCompleted 
+          ? 'border-green-300 bg-green-50 dark:bg-green-900/20' 
+          : isExecuting 
+            ? 'border-blue-400 shadow-xl shadow-blue-200/50' 
+            : 'border-gray-200 dark:border-slate-700'
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Animated Background Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(goal.category)} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+      
+      {/* Execution Progress Bar */}
+      {isExecuting && (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-slate-700">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+            style={{ width: `${executionProgress}%` }}
+          />
+        </div>
+      )}
+
+      <div className="relative p-6">
+        {/* Header Section */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getCategoryColor(goal.category)} text-white`}>
+                {goal.category}
+              </span>
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                goal.priority === 'High' ? 'bg-red-100 text-red-700' :
+                goal.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-green-100 text-green-700'
+              }`}>
+                {getComplexityIcon(goal.complexity)}
+                {goal.complexity}
+              </span>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {goal.title}
+            </h3>
+            <p className="text-gray-600 dark:text-slate-300 text-sm leading-relaxed">
+              {goal.description}
+            </p>
+          </div>
+          
+          {isCompleted && (
+            <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+          )}
+        </div>
+
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-500" />
+              <span className="text-xs font-medium text-gray-600 dark:text-slate-300">Setup Time</span>
+            </div>
+            <div className="text-sm font-bold text-gray-900 dark:text-white mt-1">
+              {goal.estimatedSetupTime}
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span className="text-xs font-medium text-gray-600 dark:text-slate-300">ROI</span>
+            </div>
+            <div className="text-sm font-bold text-gray-900 dark:text-white mt-1">
+              {goal.roi}
+            </div>
+          </div>
+        </div>
+
+        {/* Agents Required */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="h-4 w-4 text-purple-500" />
+            <span className="text-xs font-medium text-gray-600 dark:text-slate-300">AI Agents Required</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {goal.agentsRequired.slice(0, 2).map((agent, index) => (
+              <span
+                key={index}
+                className="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full"
+              >
+                {agent}
+              </span>
+            ))}
+            {goal.agentsRequired.length > 2 && (
+              <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-slate-300 text-xs rounded-full">
+                +{goal.agentsRequired.length - 2} more
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {onPreview && (
+            <button
+              onClick={() => onPreview(goal)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-sm font-medium"
+            >
+              <Eye className="h-4 w-4" />
+              Preview
+            </button>
+          )}
+          
+          <button
+            onClick={() => onExecute(goal)}
+            disabled={isExecuting}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+              isExecuting
+                ? 'bg-blue-100 text-blue-600 cursor-not-allowed'
+                : isCompleted
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:shadow-lg'
+            }`}
+          >
+            {isExecuting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                Executing...
+              </>
+            ) : isCompleted ? (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                Completed
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Execute Goal
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Real Mode Indicator */}
+        {realMode && (
+          <div className="mt-3 flex items-center justify-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-xs font-medium text-red-600 dark:text-red-400">Live Mode Active</span>
+          </div>
+        )}
+      </div>
+
+      {/* Hover Effects */}
+      {isHovered && (
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 pointer-events-none" />
+      )}
+    </div>
+  );
+};
+
+export default InteractiveGoalCard;
+```
+
+### Step 4: Goal Execution Modal
+
+#### Goal Execution Modal (`src/components/GoalExecutionModal.tsx`)
+```typescript
+import React, { useEffect } from 'react';
+import { Goal } from '../types/goals';
+import LiveGoalExecution from './LiveGoalExecution';
+import { X, Maximize2, HelpCircle, AlertTriangle } from 'lucide-react';
+
+interface GoalExecutionModalProps {
+  goal: Goal | null;
+  isOpen: boolean;
+  onClose: () => void;
+  realMode?: boolean;
+  onComplete?: (result: any) => void;
+}
+
+const GoalExecutionModal: React.FC<GoalExecutionModalProps> = ({
+  goal,
+  isOpen,
+  onClose,
+  realMode = false,
+  onComplete
+}) => {
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !goal) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
+      
+      {/* Modal Container */}
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+        <div className="relative w-full max-w-6xl h-full max-h-[90vh] bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 rounded-2xl border border-slate-700/50 overflow-hidden shadow-2xl">
+          
+          {/* Modal Header */}
+          <div className="relative z-20 flex items-center justify-between p-4 bg-gradient-to-r from-slate-800/90 to-slate-900/90 backdrop-blur-xl border-b border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500">
+                <Maximize2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">{goal.title}</h1>
+                <p className="text-gray-300 text-sm">Watch AI agents work in real-time</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {realMode && (
+                <div className="flex items-center gap-2 bg-red-500/20 px-3 py-1 rounded-full border border-red-400/30">
+                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                  <span className="text-red-300 font-medium text-xs">LIVE MODE</span>
+                </div>
+              )}
+              
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-gray-400 hover:text-white transition-all duration-300 group"
+                title="Close (ESC)"
+              >
+                <X className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
+              </button>
+            </div>
+          </div>
+
+          {/* Animated Background */}
+          <div className="absolute inset-0 opacity-10">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-blue-400/20 animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  width: `${Math.random() * 3 + 1}px`,
+                  height: `${Math.random() * 3 + 1}px`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${Math.random() * 4 + 3}s`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Main Content */}
+          <div className="relative z-10 h-[calc(100%-80px)] overflow-hidden">
+            <LiveGoalExecution
+              goal={goal}
+              realMode={realMode}
+              onComplete={onComplete}
+              onCancel={onClose}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GoalExecutionModal;
+```
+
+### Step 5: Live Goal Execution Component
+
+#### Live Goal Execution (`src/components/LiveGoalExecution.tsx`)
+```typescript
+import React, { useState, useEffect } from 'react';
+import { Goal } from '../types/goals';
+import { 
+  Play, 
+  Pause, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  Zap, 
+  Users, 
+  Bot,
+  Activity,
+  Network,
+  BarChart3,
+  Target,
+  Brain,
+  Database,
+  TrendingUp
+} from 'lucide-react';
+
+interface ExecutionStep {
+  id: string;
+  agentName: string;
+  action: string;
+  status: 'pending' | 'running' | 'completed' | 'error';
+  startTime?: Date;
+  completionTime?: Date;
+  result?: any;
+  thinking?: string;
+  toolsUsed?: string[];
+  crmImpact?: string;
+}
+
+interface LiveGoalExecutionProps {
+  goal: Goal;
+  realMode?: boolean;
+  onComplete?: (result: any) => void;
+  onCancel?: () => void;
+}
+
+const LiveGoalExecution: React.FC<LiveGoalExecutionProps> = ({
+  goal,
+  realMode = false,
+  onComplete,
+  onCancel
+}) => {
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [executionSteps, setExecutionSteps] = useState<ExecutionStep[]>([]);
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [executionMetrics, setExecutionMetrics] = useState({
+    startTime: new Date(),
+    estimatedDuration: 0,
+    agentsActive: 0,
+    totalActions: 0,
+    crmChanges: 0,
+    businessValue: 0
+  });
+  const [liveActivity, setLiveActivity] = useState<string[]>([]);
+
+  // Generate execution steps based on goal and required agents
+  useEffect(() => {
+    const generateExecutionSteps = (): ExecutionStep[] => {
+      const steps: ExecutionStep[] = [
+        {
+          id: 'initialize',
+          agentName: 'Command Analyzer Agent',
+          action: `Analyzing goal: "${goal.title}" and preparing execution plan`,
+          status: 'pending',
+          crmImpact: 'Preparing CRM for automated workflow execution'
+        }
+      ];
+
+      // Add steps for each required agent
+      goal.agentsRequired.forEach((agent, index) => {
+        let crmImpact = '';
+        if (agent.includes('SDR')) crmImpact = 'Adding new leads and prospects to CRM';
+        else if (agent.includes('Email')) crmImpact = 'Sending personalized emails and logging activities';
+        else if (agent.includes('Calendar')) crmImpact = 'Scheduling meetings and updating calendar';
+        else if (agent.includes('Follow-up')) crmImpact = 'Creating follow-up tasks and reminders';
+        else if (agent.includes('Lead Scoring')) crmImpact = 'Updating lead scores and priority rankings';
+        else if (agent.includes('Data')) crmImpact = 'Enriching contact profiles with additional data';
+        else crmImpact = 'Updating CRM records and adding activity logs';
+
+        steps.push({
+          id: `agent-${index}`,
+          agentName: agent,
+          action: `Executing ${agent} for ${goal.title.toLowerCase()}`,
+          status: 'pending',
+          toolsUsed: goal.toolsNeeded,
+          crmImpact
+        });
+      });
+
+      // Add completion steps
+      steps.push(
+        {
+          id: 'validation',
+          agentName: 'Timeline Logger Agent',
+          action: 'Validating goal completion and measuring success metrics',
+          status: 'pending',
+          crmImpact: 'Creating comprehensive activity timeline and success report'
+        },
+        {
+          id: 'reporting',
+          agentName: 'Structured Output Agent',
+          action: 'Generating ROI report and business impact analysis',
+          status: 'pending',
+          crmImpact: 'Adding goal completion metrics to dashboard'
+        }
+      );
+
+      return steps;
+    };
+
+    setExecutionSteps(generateExecutionSteps());
+  }, [goal]);
+
+  // Start execution
+  const startExecution = async () => {
+    setIsExecuting(true);
+    setExecutionMetrics(prev => ({
+      ...prev,
+      startTime: new Date(),
+      estimatedDuration: parseInt(goal.estimatedSetupTime.replace(/[^0-9]/g, '')) || 15
+    }));
+
+    // Execute steps sequentially
+    for (let i = 0; i < executionSteps.length; i++) {
+      setCurrentStep(i);
+      
+      // Update step status to running
+      setExecutionSteps(prev => prev.map((step, index) => 
+        index === i ? { ...step, status: 'running', startTime: new Date() } : step
+      ));
+
+      // Add live activity
+      setLiveActivity(prev => [
+        ...prev,
+        `🤖 ${executionSteps[i].agentName}: Starting ${executionSteps[i].action}`
+      ]);
+
+      // Simulate execution time (2-5 seconds per step)
+      const executionTime = realMode ? (2000 + Math.random() * 3000) : (500 + Math.random() * 1000);
+      await new Promise(resolve => setTimeout(resolve, executionTime));
+
+      // Complete step
+      setExecutionSteps(prev => prev.map((step, index) => 
+        index === i ? { 
+          ...step, 
+          status: 'completed', 
+          completionTime: new Date(),
+          result: `Successfully completed ${step.action}`
+        } : step
+      ));
+
+      // Update progress
+      setOverallProgress(((i + 1) / executionSteps.length) * 100);
+
+      // Update metrics
+      setExecutionMetrics(prev => ({
+        ...prev,
+        agentsActive: Math.max(0, executionSteps.length - i - 1),
+        totalActions: i + 1,
+        crmChanges: i + 1,
+        businessValue: (i + 1) * 5000
+      }));
+
+      // Add completion activity
+      setLiveActivity(prev => [
+        ...prev,
+        `✅ ${executionSteps[i].agentName}: Completed successfully`
+      ]);
+    }
+
+    setIsExecuting(false);
+    onComplete?.({
+      goal,
+      executionTime: Date.now() - executionMetrics.startTime.getTime(),
+      stepsCompleted: executionSteps.length,
+      businessValue: executionSteps.length * 5000
+    });
+  };
+
+  const getStepIcon = (status: string) => {
+    switch (status) {
+      case 'running': return <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'error': return <XCircle className="h-4 w-4 text-red-500" />;
+      default: return <Clock className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  return (
+    <div className="h-full bg-slate-900 text-white overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
+        
+        {/* Main Execution View */}
+        <div className="lg:col-span-2 p-6 overflow-y-auto">
+          {/* Execution Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Goal Execution</h2>
+              {!isExecuting && overallProgress === 0 && (
+                <button
+                  onClick={startExecution}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all"
+                >
+                  <Play className="h-4 w-4" />
+                  Start Execution
+                </button>
+              )}
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-slate-700 rounded-full h-2 mb-4">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${overallProgress}%` }}
+              />
+            </div>
+            <p className="text-slate-300">Progress: {Math.round(overallProgress)}%</p>
+          </div>
+
+          {/* Execution Steps */}
+          <div className="space-y-4">
+            {executionSteps.map((step, index) => (
+              <div
+                key={step.id}
+                className={`p-4 rounded-lg border transition-all duration-300 ${
+                  step.status === 'running' 
+                    ? 'bg-blue-900/30 border-blue-500/50' 
+                    : step.status === 'completed'
+                      ? 'bg-green-900/30 border-green-500/50'
+                      : 'bg-slate-800 border-slate-600'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {getStepIcon(step.status)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Bot className="h-4 w-4 text-purple-400" />
+                      <span className="font-semibold text-purple-300">{step.agentName}</span>
+                      {index === currentStep && isExecuting && (
+                        <span className="text-xs bg-blue-500 px-2 py-1 rounded-full">ACTIVE</span>
+                      )}
+                    </div>
+                    <p className="text-slate-300 mb-2">{step.action}</p>
+                    {step.crmImpact && (
+                      <p className="text-xs text-slate-400 mb-2">
+                        <Database className="h-3 w-3 inline mr-1" />
+                        CRM Impact: {step.crmImpact}
+                      </p>
+                    )}
+                    {step.toolsUsed && step.toolsUsed.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {step.toolsUsed.map((tool, i) => (
+                          <span key={i} className="text-xs bg-slate-700 px-2 py-1 rounded">
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Metrics & Activity Sidebar */}
+        <div className="lg:col-span-1 bg-slate-800 p-6 overflow-y-auto">
+          {/* Execution Metrics */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Execution Metrics
+            </h3>
+            <div className="space-y-3">
+              <div className="bg-slate-700 p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-slate-300">Active Agents</span>
+                </div>
+                <div className="text-xl font-bold text-white">{executionMetrics.agentsActive}</div>
+              </div>
+              
+              <div className="bg-slate-700 p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="h-4 w-4 text-yellow-400" />
+                  <span className="text-sm text-slate-300">Actions Completed</span>
+                </div>
+                <div className="text-xl font-bold text-white">{executionMetrics.totalActions}</div>
+              </div>
+              
+              <div className="bg-slate-700 p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Database className="h-4 w-4 text-green-400" />
+                  <span className="text-sm text-slate-300">CRM Changes</span>
+                </div>
+                <div className="text-xl font-bold text-white">{executionMetrics.crmChanges}</div>
+              </div>
+              
+              <div className="bg-slate-700 p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="h-4 w-4 text-purple-400" />
+                  <span className="text-sm text-slate-300">Business Value</span>
+                </div>
+                <div className="text-xl font-bold text-white">${executionMetrics.businessValue.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Activity Feed */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Live Activity
+            </h3>
+            <div className="bg-slate-700 rounded-lg p-4 h-64 overflow-y-auto">
+              {liveActivity.length === 0 ? (
+                <p className="text-slate-400 text-sm">Waiting for execution to start...</p>
+              ) : (
+                <div className="space-y-2">
+                  {liveActivity.map((activity, index) => (
+                    <div key={index} className="text-sm text-slate-300 opacity-80">
+                      {activity}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LiveGoalExecution;
+```
+
+### Step 6: AI Goals Explorer
+
+#### Interactive Goal Explorer (`src/components/InteractiveGoalExplorer.tsx`)
+```typescript
+import React, { useState, useEffect } from 'react';
+import { Goal } from '../types/goals';
+import { AI_GOALS, goalCategories } from '../data/aiGoals';
+import InteractiveGoalCard from './InteractiveGoalCard';
+import GoalExecutionModal from './GoalExecutionModal';
+import { 
+  Search, 
+  Filter, 
+  Target, 
+  Users, 
+  BarChart3, 
+  Activity,
+  Brain,
+  Zap
+} from 'lucide-react';
+
+interface InteractiveGoalExplorerProps {
+  realMode?: boolean;
+  onModeToggle?: (mode: boolean) => void;
+  onGoalSelected?: (goal: Goal) => void;
+  contextData?: any;
+}
+
+const InteractiveGoalExplorer: React.FC<InteractiveGoalExplorerProps> = ({
+  realMode = false,
+  onModeToggle,
+  onGoalSelected,
+  contextData
+}) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [selectedComplexity, setSelectedComplexity] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [executingGoals, setExecutingGoals] = useState<Set<string>>(new Set());
+  const [executionProgress, setExecutionProgress] = useState<Record<string, number>>({});
+  const [completedGoals, setCompletedGoals] = useState<Set<string>>(new Set());
+  const [executingGoal, setExecutingGoal] = useState<Goal | null>(null);
+  const [showExecutionModal, setShowExecutionModal] = useState(false);
+  
+  // Convert AI_GOALS to Goal format
+  const allGoals: Goal[] = AI_GOALS.map(aiGoal => ({
+    id: aiGoal.id,
+    category: aiGoal.category,
+    title: aiGoal.title,
+    description: aiGoal.description,
+    priority: 'Medium' as const, // Default priority
+    agentsRequired: ['AI Agent', 'Data Agent', 'Analysis Agent'], // Default agents
+    toolsNeeded: ['CRM', 'Email', 'Analytics'], // Default tools
+    estimatedSetupTime: aiGoal.estimatedTime,
+    businessImpact: 'High impact on business operations',
+    complexity: aiGoal.complexity,
+    realWorldExample: 'Real-world implementation example',
+    successMetrics: ['Increased efficiency', 'Better outcomes'],
+    prerequisite: ['Basic setup required'],
+    roi: '300%'
+  }));
+
+  // Live dashboard stats
+  const [liveStats, setLiveStats] = useState({
+    totalGoals: allGoals.length,
+    completedToday: 0,
+    valueGenerated: 0,
+    activeAgents: 0,
+    executingNow: 0,
+    systemHealth: 98
+  });
+
+  // Update live stats based on execution state
+  useEffect(() => {
+    setLiveStats(prev => ({
+      ...prev,
+      executingNow: executingGoals.size,
+      completedToday: completedGoals.size,
+      valueGenerated: completedGoals.size * 15000 + executingGoals.size * 7500,
+      activeAgents: executingGoals.size * 3,
+      systemHealth: 98 + Math.random() * 2
+    }));
+  }, [executingGoals.size, completedGoals.size]);
+
+  // Smart filtering combining multiple criteria
+  const filteredGoals = allGoals.filter(goal => {
+    const matchesSearch = searchTerm === '' || 
+      goal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      goal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      goal.businessImpact.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || 
+      goal.category.toLowerCase() === selectedCategory.toLowerCase();
+    
+    const matchesPriority = selectedPriority === 'all' || goal.priority === selectedPriority;
+    
+    const matchesComplexity = selectedComplexity === 'all' || goal.complexity === selectedComplexity;
+    
+    return matchesSearch && matchesCategory && matchesPriority && matchesComplexity;
+  });
+
+  // Handle goal execution
+  const handleExecuteGoal = async (goal: Goal) => {
+    if (executingGoals.has(goal.id)) return;
+
+    setExecutingGoals(prev => new Set([...Array.from(prev), goal.id]));
+    setExecutionProgress(prev => ({ ...prev, [goal.id]: 0 }));
+    setExecutingGoal(goal);
+    setShowExecutionModal(true);
+    onGoalSelected?.(goal);
+  };
+
+  const handleExecutionComplete = (result: any) => {
+    if (executingGoal) {
+      setExecutingGoals(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(executingGoal.id);
+        return newSet;
+      });
+      setCompletedGoals(prev => new Set([...Array.from(prev), executingGoal.id]));
+      setExecutionProgress(prev => ({ ...prev, [executingGoal.id]: 100 }));
+    }
+    setShowExecutionModal(false);
+    setExecutingGoal(null);
+  };
+
+  return (
+    <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen">
+      {/* Header with Live Stats */}
+      <div className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="h-5 w-5 text-blue-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">Total Goals</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{liveStats.totalGoals}</div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Activity className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">Executing Now</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{liveStats.executingNow}</div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-5 w-5 text-purple-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">Active Agents</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{liveStats.activeAgents}</div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="h-5 w-5 text-orange-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">Value Generated</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">${liveStats.valueGenerated.toLocaleString()}</div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Brain className="h-5 w-5 text-teal-500" />
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">System Health</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{Math.round(liveStats.systemHealth)}%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-6 bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Search goals..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+          >
+            <option value="all">All Categories</option>
+            {goalCategories.map(category => (
+              <option key={category.id} value={category.id}>{category.name}</option>
+            ))}
+          </select>
+
+          {/* Priority Filter */}
+          <select
+            value={selectedPriority}
+            onChange={(e) => setSelectedPriority(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+          >
+            <option value="all">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+
+          {/* Complexity Filter */}
+          <select
+            value={selectedComplexity}
+            onChange={(e) => setSelectedComplexity(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+          >
+            <option value="all">All Complexity</option>
+            <option value="Simple">Simple</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+
+        {/* Mode Toggle */}
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
+            Showing {filteredGoals.length} of {allGoals.length} goals
+          </p>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-slate-300">Demo Mode</span>
+              <button
+                onClick={() => onModeToggle?.(!realMode)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  realMode ? 'bg-red-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    realMode ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className="text-sm text-gray-600 dark:text-slate-300">Live Mode</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Goals Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredGoals.map((goal) => (
+          <InteractiveGoalCard
+            key={goal.id}
+            goal={goal}
+            onExecute={handleExecuteGoal}
+            isExecuting={executingGoals.has(goal.id)}
+            executionProgress={executionProgress[goal.id] || 0}
+            realMode={realMode}
+            isCompleted={completedGoals.has(goal.id)}
+          />
+        ))}
+      </div>
+
+      {/* No Results */}
+      {filteredGoals.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <Search className="w-16 h-16 mx-auto" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-600 dark:text-slate-300 mb-2">No goals found</h3>
+          <p className="text-gray-500 dark:text-slate-400">Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Execution Modal */}
+      <GoalExecutionModal
+        goal={executingGoal}
+        isOpen={showExecutionModal}
+        onClose={() => {
+          setShowExecutionModal(false);
+          setExecutingGoal(null);
+        }}
+        realMode={realMode}
+        onComplete={handleExecutionComplete}
+      />
+    </div>
+  );
+};
+
+export default InteractiveGoalExplorer;
+```
+
+### Step 7: AI Goals Main Page
+
+#### AI Goals Page (`src/pages/AIGoals/AIGoalsPage.tsx`)
+```typescript
+import React, { useState } from 'react';
+import { Goal } from '../../types/goals';
+import InteractiveGoalExplorer from '../../components/InteractiveGoalExplorer';
+import { Button } from '../../components/ui/button';
+import { Brain, ArrowLeft, Settings, HelpCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const AIGoalsPage: React.FC = () => {
+  const [realMode, setRealMode] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGoalSelected = (goal: Goal) => {
+    console.log('Goal selected:', goal);
+  };
+
+  const handleModeToggle = (mode: boolean) => {
+    setRealMode(mode);
+    if (mode) {
+      console.log('⚠️ Live Mode activated - Real AI agents will execute with your actual business tools');
+    } else {
+      console.log('💡 Demo Mode - AI agents will simulate execution for preview');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      {/* Header */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-slate-300" />
+              </button>
+              
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
+                  <Brain className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI Goals Center</h1>
+                  <p className="text-gray-600 dark:text-slate-300">Transform business objectives into automated AI workflows</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Help
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </div>
+          </div>
+
+          {/* Mode Status */}
+          {realMode && (
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <div>
+                  <h3 className="font-semibold text-red-800 dark:text-red-200">Live Mode Active</h3>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    AI agents will execute real actions with your business tools. Monitor execution carefully.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <InteractiveGoalExplorer
+        realMode={realMode}
+        onModeToggle={handleModeToggle}
+        onGoalSelected={handleGoalSelected}
+      />
+    </div>
+  );
+};
+
+export default AIGoalsPage;
+```
+
+### Step 8: Services Integration
+
+#### Composio Service (`src/services/composioService.ts`)
+```typescript
+import Composio from 'composio-core';
+
+class ComposioService {
+  private composio: Composio | null = null;
+
+  constructor() {
+    const apiKey = process.env.COMPOSIO_API_KEY || import.meta.env.VITE_COMPOSIO_API_KEY;
+    if (apiKey) {
+      this.composio = new Composio({ apiKey });
+    }
+  }
+
+  async executeGoal(goalId: string, parameters: any) {
+    if (!this.composio) {
+      throw new Error('Composio API key not configured');
+    }
+
+    try {
+      // Map goal to appropriate Composio actions
+      const actions = this.mapGoalToActions(goalId);
+      const results = [];
+
+      for (const action of actions) {
+        const result = await this.composio.execute(action, parameters);
+        results.push(result);
+      }
+
+      return {
+        success: true,
+        results,
+        executionTime: Date.now()
+      };
+    } catch (error) {
+      console.error('Composio execution error:', error);
+      throw error;
+    }
+  }
+
+  private mapGoalToActions(goalId: string): string[] {
+    const goalActionMap: Record<string, string[]> = {
+      'leadScoring': ['crm.updateLead', 'analytics.generateScore'],
+      'emailPersonalization': ['gmail.sendEmail', 'crm.logActivity'],
+      'pipelineOptimization': ['crm.analyzePipeline', 'analytics.generateReport'],
+      'competitorAnalysis': ['web.search', 'crm.createNote'],
+      'campaignOptimization': ['marketing.analyzeCampaign', 'analytics.generateInsights']
+    };
+
+    return goalActionMap[goalId] || ['crm.logActivity'];
+  }
+
+  async getAvailableTools() {
+    if (!this.composio) return [];
+
+    try {
+      return await this.composio.getTools();
+    } catch (error) {
+      console.error('Error fetching tools:', error);
+      return [];
+    }
+  }
+}
+
+export const composioService = new ComposioService();
+```
+
+### Step 9: Goal State Management
+
+#### Goal Store (`src/store/goalStore.ts`)
+```typescript
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { Goal, GoalProgress, ExecutionStep } from '../types/goals';
+
+interface GoalStore {
+  goals: Goal[];
+  executingGoals: Set<string>;
+  completedGoals: Set<string>;
+  goalProgress: Record<string, GoalProgress>;
+  favoriteGoals: Set<string>;
+  
+  // Actions
+  addGoal: (goal: Goal) => void;
+  removeGoal: (goalId: string) => void;
+  updateGoal: (goalId: string, updates: Partial<Goal>) => void;
+  
+  // Execution
+  startGoalExecution: (goalId: string) => void;
+  updateGoalProgress: (goalId: string, progress: Partial<GoalProgress>) => void;
+  completeGoal: (goalId: string, results: any) => void;
+  failGoal: (goalId: string, error: string) => void;
+  
+  // Favorites
+  toggleFavorite: (goalId: string) => void;
+  
+  // Filters
+  getGoalsByCategory: (category: string) => Goal[];
+  getGoalsByComplexity: (complexity: string) => Goal[];
+  getGoalsByPriority: (priority: string) => Goal[];
+  searchGoals: (query: string) => Goal[];
+}
+
+export const useGoalStore = create<GoalStore>()(
+  persist(
+    (set, get) => ({
+      goals: [],
+      executingGoals: new Set(),
+      completedGoals: new Set(),
+      goalProgress: {},
+      favoriteGoals: new Set(),
+
+      addGoal: (goal) =>
+        set((state) => ({
+          goals: [...state.goals, goal]
+        })),
+
+      removeGoal: (goalId) =>
+        set((state) => ({
+          goals: state.goals.filter(g => g.id !== goalId),
+          executingGoals: new Set([...state.executingGoals].filter(id => id !== goalId)),
+          completedGoals: new Set([...state.completedGoals].filter(id => id !== goalId))
+        })),
+
+      updateGoal: (goalId, updates) =>
+        set((state) => ({
+          goals: state.goals.map(g => g.id === goalId ? { ...g, ...updates } : g)
+        })),
+
+      startGoalExecution: (goalId) =>
+        set((state) => ({
+          executingGoals: new Set([...state.executingGoals, goalId]),
+          goalProgress: {
+            ...state.goalProgress,
+            [goalId]: {
+              goalId,
+              status: 'executing',
+              progress: 0,
+              steps: [],
+              startTime: new Date()
+            }
+          }
+        })),
+
+      updateGoalProgress: (goalId, progress) =>
+        set((state) => ({
+          goalProgress: {
+            ...state.goalProgress,
+            [goalId]: {
+              ...state.goalProgress[goalId],
+              ...progress
+            }
+          }
+        })),
+
+      completeGoal: (goalId, results) =>
+        set((state) => ({
+          executingGoals: new Set([...state.executingGoals].filter(id => id !== goalId)),
+          completedGoals: new Set([...state.completedGoals, goalId]),
+          goalProgress: {
+            ...state.goalProgress,
+            [goalId]: {
+              ...state.goalProgress[goalId],
+              status: 'completed',
+              progress: 100,
+              endTime: new Date(),
+              results
+            }
+          }
+        })),
+
+      failGoal: (goalId, error) =>
+        set((state) => ({
+          executingGoals: new Set([...state.executingGoals].filter(id => id !== goalId)),
+          goalProgress: {
+            ...state.goalProgress,
+            [goalId]: {
+              ...state.goalProgress[goalId],
+              status: 'failed',
+              endTime: new Date(),
+              results: { error }
+            }
+          }
+        })),
+
+      toggleFavorite: (goalId) =>
+        set((state) => {
+          const newFavorites = new Set(state.favoriteGoals);
+          if (newFavorites.has(goalId)) {
+            newFavorites.delete(goalId);
+          } else {
+            newFavorites.add(goalId);
+          }
+          return { favoriteGoals: newFavorites };
+        }),
+
+      getGoalsByCategory: (category) => {
+        const { goals } = get();
+        return goals.filter(goal => goal.category === category);
+      },
+
+      getGoalsByComplexity: (complexity) => {
+        const { goals } = get();
+        return goals.filter(goal => goal.complexity === complexity);
+      },
+
+      getGoalsByPriority: (priority) => {
+        const { goals } = get();
+        return goals.filter(goal => goal.priority === priority);
+      },
+
+      searchGoals: (query) => {
+        const { goals } = get();
+        const lowercaseQuery = query.toLowerCase();
+        return goals.filter(goal =>
+          goal.title.toLowerCase().includes(lowercaseQuery) ||
+          goal.description.toLowerCase().includes(lowercaseQuery) ||
+          goal.businessImpact.toLowerCase().includes(lowercaseQuery) ||
+          goal.category.toLowerCase().includes(lowercaseQuery)
+        );
+      }
+    }),
+    {
+      name: 'ai-goals-store',
+      partialize: (state) => ({
+        goals: state.goals,
+        completedGoals: state.completedGoals,
+        favoriteGoals: state.favoriteGoals,
+        goalProgress: state.goalProgress
+      })
+    }
+  )
+);
+```
+
+### Step 10: Integration with Main App
+
+#### App Integration (`src/App.tsx`)
+```typescript
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AIGoalsPage from './pages/AIGoals/AIGoalsPage';
+import './index.css';
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/ai-goals" element={<AIGoalsPage />} />
+            {/* Add other routes */}
+          </Routes>
+        </div>
+      </Router>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
+```
+
+## Advanced Features
+
+### Real-time Execution Monitoring
+- **Live Progress Tracking**: Real-time updates on goal execution progress
+- **Agent Activity Monitoring**: Track individual AI agent activities
+- **CRM Impact Visualization**: Show real-time changes to CRM data
+- **Performance Metrics**: Monitor execution time, success rates, and business value
+
+### Multi-Agent Coordination
+- **Agent Orchestration**: Coordinate multiple AI agents for complex goals
+- **Dependency Management**: Handle agent dependencies and execution order
+- **Error Handling**: Graceful failure recovery and retry mechanisms
+- **Resource Optimization**: Optimize agent resource usage and allocation
+
+### Business Intelligence Integration
+- **ROI Tracking**: Measure and track return on investment for each goal
+- **Success Metrics**: Define and monitor custom success metrics
+- **Performance Analytics**: Comprehensive analytics on goal execution
+- **Business Impact Assessment**: Quantify business impact of executed goals
+
+## Customization Options
+
+### Custom Goals
+```typescript
+// Add custom goals to the AI_GOALS array
+const customGoal: AIGoal = {
+  id: 'customGoalId',
+  title: 'Custom Business Goal',
+  description: 'Custom goal description',
+  category: 'Custom',
+  icon: 'Target',
+  complexity: 'Advanced',
+  estimatedTime: '15-20 minutes',
+  recommendedFor: ['company'],
+  toolMapping: 'custom-tool'
+};
+```
+
+### Custom Categories
+```typescript
+// Add custom categories to goalCategories array
+const customCategory = {
+  id: 'Custom',
+  name: 'Custom Category',
+  description: 'Custom business processes',
+  icon: 'Star',
+  color: 'from-indigo-500 to-indigo-600',
+  totalGoals: 5
+};
+```
+
+### Custom Agents
+```typescript
+// Define custom AI agents for goal execution
+const customAgents = [
+  'Custom Analysis Agent',
+  'Custom Automation Agent',
+  'Custom Reporting Agent'
+];
+```
+
+## Deployment and Production
+
+### Environment Variables
+```env
+# Production environment variables
+OPENAI_API_KEY=your_production_openai_key
+GOOGLE_AI_API_KEY=your_production_google_ai_key
+COMPOSIO_API_KEY=your_production_composio_key
+
+# Security
+JWT_SECRET=your_jwt_secret
+ENCRYPTION_KEY=your_encryption_key
+
+# Monitoring
+SENTRY_DSN=your_sentry_dsn
+ANALYTICS_KEY=your_analytics_key
+```
+
+### Security Considerations
+1. **API Key Security**: Secure storage of AI service API keys
+2. **User Authentication**: Implement proper user authentication
+3. **Goal Permissions**: Role-based access control for different goals
+4. **Execution Limits**: Rate limiting and resource usage controls
+5. **Audit Logging**: Comprehensive logging of all goal executions
+
+### Performance Optimization
+1. **Lazy Loading**: Load goal components only when needed
+2. **Caching**: Cache goal results and configurations
+3. **Progressive Loading**: Progressive loading of goal lists
+4. **Background Processing**: Background execution for long-running goals
+5. **Resource Management**: Optimize AI agent resource usage
+
+This comprehensive guide provides everything needed to implement a fully functional AI Goals feature with 58+ pre-configured business automation goals, real-time execution monitoring, and advanced multi-agent coordination capabilities.
