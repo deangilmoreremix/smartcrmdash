@@ -12,21 +12,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // OpenAI API status check
-  app.get('/api/openai/status', (req, res) => {
+  // OpenAI API status check with model availability
+  app.get('/api/openai/status', async (req, res) => {
     const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;
-    res.json({
-      configured: hasApiKey,
-      model: 'gpt-5', // GPT-5 with unified reasoning system (released August 7, 2025)
-      status: hasApiKey ? 'ready' : 'needs_configuration',
-      capabilities: [
-        '94.6% AIME mathematical accuracy',
-        '74.9% SWE-bench coding accuracy', 
-        '84.2% MMMU multimodal performance',
-        'Unified reasoning system',
-        'Advanced verbosity and reasoning_effort controls'
-      ]
-    });
+    
+    if (!hasApiKey) {
+      return res.json({
+        configured: false,
+        model: 'none',
+        status: 'needs_configuration',
+        error: 'No API key configured'
+      });
+    }
+
+    // Test API key with actual call
+    if (!openai) {
+      return res.json({
+        configured: false,
+        model: 'none',
+        status: 'openai_not_initialized',
+        error: 'OpenAI client not properly initialized'
+      });
+    }
+
+    try {
+      const testResponse = await openai.chat.completions.create({
+        model: "gpt-4o", // Test with reliable model first
+        messages: [{ role: "user", content: "Test" }],
+        max_tokens: 5
+      });
+
+      // Try GPT-5 to see if available
+      let gpt5Available = false;
+      try {
+        await openai.chat.completions.create({
+          model: "gpt-5",
+          messages: [{ role: "user", content: "Test" }],
+          max_tokens: 5
+        });
+        gpt5Available = true;
+      } catch (gpt5Error: any) {
+        console.log('GPT-5 not available:', gpt5Error?.message || 'Unknown error');
+      }
+
+      res.json({
+        configured: true,
+        model: gpt5Available ? 'gpt-5' : 'gpt-4o',
+        status: 'ready',
+        gpt5Available,
+        capabilities: gpt5Available ? [
+          '94.6% AIME mathematical accuracy',
+          '74.9% SWE-bench coding accuracy', 
+          '84.2% MMMU multimodal performance',
+          'Unified reasoning system',
+          'Advanced verbosity and reasoning_effort controls'
+        ] : [
+          'GPT-4 Omni model available',
+          'Advanced reasoning and analysis',
+          'Multimodal capabilities',
+          'JSON output formatting'
+        ]
+      });
+    } catch (error: any) {
+      res.json({
+        configured: false,
+        model: 'none',
+        status: 'api_key_invalid',
+        error: error?.message || 'Unknown API error',
+        suggestion: 'Please check your OpenAI API key at platform.openai.com/account/api-keys'
+      });
+    }
   });
 
   // Advanced AI Smart Greeting Generation (using GPT-4o)
@@ -86,21 +141,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { historicalData, currentMetrics } = req.body;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-5", // GPT-5 with 94.6% AIME mathematical accuracy
-        messages: [{
-          role: "system",
-          content: "You are an expert business analyst with GPT-5's advanced mathematical reasoning capabilities (94.6% AIME accuracy). Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
-        }, {
-          role: "user",
-          content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations.`
-        }],
-        response_format: { type: "json_object" },
-        verbosity: "high", // Detailed analysis
-        reasoning_effort: "high", // Deep mathematical analysis
-        temperature: 0.3,
-        max_tokens: 800
-      });
+      let response;
+      try {
+        response = await openai.chat.completions.create({
+          model: "gpt-5", // GPT-5 with 94.6% AIME mathematical accuracy
+          messages: [{
+            role: "system",
+            content: "You are an expert business analyst with advanced mathematical reasoning capabilities. Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
+          }, {
+            role: "user",
+            content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
+          }],
+          response_format: { type: "json_object" },
+          temperature: 0.3,
+          max_tokens: 800
+        });
+      } catch (gpt5Error) {
+        console.log('GPT-5 not available, using gpt-4o for KPI analysis');
+        response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{
+            role: "system",
+            content: "You are an expert business analyst with advanced mathematical reasoning capabilities. Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
+          }, {
+            role: "user",
+            content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
+          }],
+          response_format: { type: "json_object" },
+          temperature: 0.3,
+          max_tokens: 800
+        });
+      }
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json(result);
@@ -133,21 +204,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { dealData, contactHistory, marketContext } = req.body;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-5", // GPT-5 with expert-level deal analysis
-        messages: [{
-          role: "system",
-          content: "You are an expert sales strategist with GPT-5's deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
-        }, {
-          role: "user",
-          content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence.`
-        }],
-        response_format: { type: "json_object" },
-        verbosity: "medium",
-        reasoning_effort: "high", // Complex multi-step analysis
-        temperature: 0.2,
-        max_tokens: 600
-      });
+      let response;
+      try {
+        response = await openai.chat.completions.create({
+          model: "gpt-5", // GPT-5 with expert-level deal analysis
+          messages: [{
+            role: "system",
+            content: "You are an expert sales strategist with deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
+          }, {
+            role: "user",
+            content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence in JSON format.`
+          }],
+          response_format: { type: "json_object" },
+          temperature: 0.2,
+          max_tokens: 600
+        });
+      } catch (gpt5Error) {
+        console.log('GPT-5 not available, using gpt-4o for deal analysis');
+        response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{
+            role: "system",
+            content: "You are an expert sales strategist with deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
+          }, {
+            role: "user",
+            content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence in JSON format.`
+          }],
+          response_format: { type: "json_object" },
+          temperature: 0.2,
+          max_tokens: 600
+        });
+      }
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json(result);
