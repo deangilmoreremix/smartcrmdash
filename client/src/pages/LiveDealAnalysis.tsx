@@ -19,7 +19,7 @@ import {
   Users,
   Target,
   ArrowUpRight,
-  Pulse
+  Circle
 } from 'lucide-react';
 
 const LiveDealAnalysis: React.FC = () => {
@@ -29,7 +29,7 @@ const LiveDealAnalysis: React.FC = () => {
 
   // Calculate live deal metrics
   const dealsArray = Object.values(deals);
-  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(d.stage));
+  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(String(d.stage)));
   const hotDeals = activeDeals.filter(d => d.probability > 70);
   const warmDeals = activeDeals.filter(d => d.probability >= 40 && d.probability <= 70);
   const coldDeals = activeDeals.filter(d => d.probability < 40);
@@ -66,7 +66,7 @@ const LiveDealAnalysis: React.FC = () => {
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 shadow-lg">
-                <Pulse className="h-6 w-6 text-white" />
+                <Circle className="h-6 w-6 text-white" />
               </div>
               <div className="flex items-center text-red-400">
                 <Activity className="h-4 w-4 mr-1" />
@@ -144,7 +144,7 @@ const LiveDealAnalysis: React.FC = () => {
               Deal Temperature Analysis
             </h2>
             <ModernButton variant="glass" size="sm">
-              <Pulse className="h-4 w-4 mr-2" />
+              <Circle className="h-4 w-4 mr-2" />
               Real-time
             </ModernButton>
           </div>
@@ -195,7 +195,7 @@ const LiveDealAnalysis: React.FC = () => {
         <GlassCard className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} flex items-center`}>
-              <Pulse className="h-5 w-5 mr-2 text-green-500" />
+              <Circle className="h-5 w-5 mr-2 text-green-500" />
               Live Deal Activity Feed
             </h2>
             <ModernButton variant="outline" size="sm">
@@ -219,9 +219,8 @@ const LiveDealAnalysis: React.FC = () => {
                     deal.probability >= 40 ? 'bg-yellow-500' : 'bg-blue-500'
                   }`} />
                   <Avatar
-                    name={deal.contactName || 'Unknown'}
                     size="sm"
-                    fallback={getInitials(deal.contactName || 'UN')}
+                    fallback={getInitials((deal as any).contactName || 'UN')}
                   />
                   <div>
                     <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
