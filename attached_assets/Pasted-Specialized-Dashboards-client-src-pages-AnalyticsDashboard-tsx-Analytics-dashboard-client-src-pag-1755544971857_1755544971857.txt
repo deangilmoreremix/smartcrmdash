@@ -1,0 +1,39 @@
+Specialized Dashboards:
+client/src/pages/AnalyticsDashboard.tsx - Analytics dashboard
+client/src/pages/SuperAdminDashboard.tsx - Super admin dashboard
+client/src/components/AdvancedFeaturesDashboard.tsx - Advanced features dashboard
+client/src/components/AIAutomationDashboard.tsx - AI automation dashboard
+client/src/components/EmailDashboard.tsx - Email dashboard
+client/src/components/mobile/MobileResponsiveDashboard.tsx - Mobile dashboard
+client/src/components/analytics/SalesPerformanceDashboard.tsx - Sales performance dashboard
+Dashboard Section Components
+Main Sections (Modular System):
+client/src/components/sections/ExecutiveOverviewSection.tsx - Executive overview
+client/src/components/sections/AISmartFeaturesHub.tsx - AI features hub
+client/src/components/sections/SalesPipelineDealAnalytics.tsx - Pipeline & deals
+client/src/components/sections/CustomerLeadManagement.tsx - Contacts & leads
+client/src/components/sections/ActivitiesCommunications.tsx - Activities
+client/src/components/sections/IntegrationsSystem.tsx - Integrations
+Traditional Dashboard Components:
+client/src/components/dashboard/MetricsCards.tsx - KPI metric cards
+client/src/components/dashboard/DashboardHeader.tsx - Dashboard header
+client/src/components/dashboard/AIInsightsPanel.tsx - AI insights
+client/src/components/dashboard/QuickActions.tsx - Quick action buttons
+client/src/components/dashboard/KPICards.tsx - Key performance indicators
+client/src/components/dashboard/ChartsSection.tsx - Charts and visualizations
+client/src/components/dashboard/InteractionHistory.tsx - Interaction history
+client/src/components/dashboard/TasksAndFunnel.tsx - Tasks and funnel
+client/src/components/dashboard/CustomerProfile.tsx - Customer profiles
+client/src/components/dashboard/RecentActivity.tsx - Recent activity feed
+client/src/components/dashboard/ConnectedApps.tsx - Connected applications
+client/src/components/dashboard/NewLeadsSection.tsx - New leads section
+Layout & Control Components
+client/src/components/DashboardLayoutControls.tsx - Layout customization
+client/src/components/DraggableSection.tsx - Draggable sections
+Analytics & Data Components
+client/src/pages/Analytics.tsx - Main analytics page
+client/src/components/DealAnalytics.tsx - Deal analytics
+client/src/components/DealAnalytics copy.tsx - Deal analytics backup
+client/src/components/RevenueForecasting.tsx - Revenue forecasting
+client/src/components/SalesVelocityChart.tsx - Sales velocity charts
+client/src/components/PipelineStats.tsx - Pipeline statistics
