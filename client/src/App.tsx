@@ -35,6 +35,7 @@ const LeadAutomation = lazy(() => import('./pages/LeadAutomation'));
 const CircleProspecting = lazy(() => import('./pages/CircleProspecting'));
 const VideoEmail = lazy(() => import('./pages/VideoEmail'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
+const AIGoalsPage = lazy(() => import('./pages/AIGoalsPage'));
 
 import './components/styles/design-system.css';
 
@@ -369,16 +370,17 @@ function App() {
                           />
                           <Route
                             path="/ai-goals"
-                            element={<PlaceholderPage title="AI Goals" />}
+                            element={
+                              <ProtectedRoute>
+                                <AIGoalsPage />
+                              </ProtectedRoute>
+                            }
                           />
 
                           {/* Feature showcase routes (optional) */}
                           <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
-
-                          {/* Missing routes from navbar - adding placeholders */}
-                          <Route path="/ai-goals" element={<PlaceholderPage title="AI Goals" description="Set and track your AI-powered sales goals" />} />
                           
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />

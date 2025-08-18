@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 // AIGoalContext is now imported from types
 
-export function AIGoalsPage() {
+const AIGoalsPage: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [showExecutionModal, setShowExecutionModal] = useState(false);
   const [realMode, setRealMode] = useState(false);
@@ -173,7 +173,6 @@ export function AIGoalsPage() {
             />
           </div>
         </div>
-        </div>
       </div>
 
       {/* Goal Execution Modal */}
@@ -188,4 +187,6 @@ export function AIGoalsPage() {
       )}
     </div>
   );
-}
+};
+
+export default AIGoalsPage;
