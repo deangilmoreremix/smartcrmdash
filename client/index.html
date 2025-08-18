@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script>
+      // Fix for "global is not defined" error
+      if (typeof global === 'undefined') {
+        window.global = globalThis;
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
