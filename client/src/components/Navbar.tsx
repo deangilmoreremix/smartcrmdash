@@ -81,18 +81,16 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const salesTools = [
-    { name: 'Sales Tools', tool: 'sales-tools', icon: DollarSign },
-    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
-    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: Target },
-    { name: 'Appointments', tool: 'appointments', icon: Calendar },
-    { name: 'Phone System', tool: 'phone-system', icon: Phone },
-    { name: 'Invoicing', tool: 'invoicing', icon: Receipt },
-    { name: 'Sales Analytics', tool: 'sales-analytics', icon: TrendingUp },
-    { name: 'Deal Pipeline', tool: 'deal-pipeline', icon: Briefcase },
-    { name: 'Quote Builder', tool: 'quote-builder', icon: FileText },
-    { name: 'Commission Tracker', tool: 'commission-tracker', icon: PieChart },
-    { name: 'Follow-up Reminders', tool: 'follow-up-reminders', icon: Bell },
-    { name: 'Territory Management', tool: 'territory-management', icon: Globe }
+    { name: "Pipeline Intelligence", tool: 'deal-pipeline', icon: BarChart3 },
+    { name: "Deal Risk Monitor", tool: 'deal-risk', icon: Shield },
+    { name: "Smart Conversion Insights", tool: 'conversion-insights', icon: Zap },
+    { name: "Pipeline Health Dashboard", tool: 'pipeline-health', icon: Activity },
+    { name: "Sales Cycle Analytics", tool: 'sales-cycle', icon: Clock },
+    { name: "Win Rate Intelligence", tool: 'win-rate-analysis', icon: TrendingUp },
+    { name: "AI Sales Forecast", tool: 'ai-sales-forecast', icon: LineChart },
+    { name: "Live Deal Analysis", tool: 'live-deal-analysis', icon: Briefcase },
+    { name: "Competitor Insights", tool: 'competitor-insights', icon: Target },
+    { name: "Revenue Intelligence", tool: 'revenue-intelligence', icon: DollarSign },
   ];
 
   const communicationTools = [
@@ -359,7 +357,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
-                    
+
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
                       <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
