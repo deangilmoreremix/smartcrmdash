@@ -244,12 +244,12 @@ const SalesPerformanceDashboard: React.FC = () => {
             
             {/* Revenue Trend Tab */}
             <TabsContent value="revenue" className="space-y-6 mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className={`${
                   isDark 
                     ? 'bg-gray-800 border-gray-700' 
                     : 'bg-white border-gray-200'
-                } col-span-full`}>
+                } col-span-2`}>
                   <CardHeader>
                     <CardTitle className={`flex items-center ${
                       isDark ? 'text-white' : 'text-gray-900'
@@ -302,12 +302,91 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
+
+                {/* High Revenue Deals with Avatars */}
+                <Card className={`${
+                  isDark 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-gray-200'
+                }`}>
+                  <CardHeader>
+                    <CardTitle className={`flex items-center ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <DollarSign className="h-5 w-5 mr-2 text-green-500" />
+                      High-Value Deals
+                    </CardTitle>
+                    <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                      Top revenue contributors
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {Object.values(deals).slice(0, 4).map((deal) => {
+                      const contact = contacts[deal.contactId];
+                      if (!contact) return null;
+                      return (
+                        <div key={deal.id} className="flex items-center space-x-3">
+                          <Avatar
+                            name={contact.name}
+                            src={contact.avatarSrc}
+                            size="sm"
+                            fallback={getInitials(contact.name)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm truncate ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {contact.name}
+                            </p>
+                            <p className={`text-xs truncate ${
+                              isDark ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                              {deal.title}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-green-600 text-sm">
+                              {formatCurrency(deal.value)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Avatar Summary */}
+                    <div className={`pt-3 border-t ${
+                      isDark ? 'border-gray-600' : 'border-gray-200'
+                    } flex items-center justify-between`}>
+                      <div className="flex -space-x-1">
+                        {Object.values(deals).slice(0, 3).map((deal) => {
+                          const contact = contacts[deal.contactId];
+                          if (!contact) return null;
+                          return (
+                            <Avatar
+                              key={deal.id}
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="xs"
+                              fallback={getInitials(contact.name)}
+                              className="border border-white dark:border-gray-800"
+                            />
+                          );
+                        })}
+                      </div>
+                      <span className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {Object.keys(deals).length} total deals
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
             
             {/* Deal Pipeline Tab */}
             <TabsContent value="deals" className="space-y-6 mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className={`${
                   isDark 
                     ? 'bg-gray-800 border-gray-700' 
@@ -325,7 +404,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <PieChart>
                         <Pie
                           data={stageData}
@@ -333,7 +412,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                           nameKey="stage"
                           cx="50%"
                           cy="50%"
-                          outerRadius={100}
+                          outerRadius={80}
                           label={({ stage, count }) => `${stage}: ${count}`}
                         >
                           {stageData.map((entry, index) => (
@@ -371,7 +450,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={monthlyData}>
                         <CartesianGrid 
                           strokeDasharray="3 3" 
@@ -402,70 +481,245 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
+
+                {/* Active Deals with Avatars */}
+                <Card className={`${
+                  isDark 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-gray-200'
+                }`}>
+                  <CardHeader>
+                    <CardTitle className={`flex items-center ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <Users className="h-5 w-5 mr-2 text-blue-500" />
+                      Active Deal Contacts
+                    </CardTitle>
+                    <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                      Deals in progress
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {Object.values(deals)
+                      .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+                      .slice(0, 5)
+                      .map((deal) => {
+                        const contact = contacts[deal.contactId];
+                        if (!contact) return null;
+                        return (
+                          <div key={deal.id} className="flex items-center space-x-3">
+                            <Avatar
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="sm"
+                              fallback={getInitials(contact.name)}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-medium text-sm truncate ${
+                                isDark ? 'text-white' : 'text-gray-900'
+                              }`}>
+                                {contact.name}
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  deal.stage === 'qualified' 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                    : deal.stage === 'proposal'
+                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                }`}>
+                                  {typeof deal.stage === 'string' ? deal.stage : deal.stage?.name || 'Unknown'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-purple-600 text-sm">
+                                {formatCurrency(deal.value)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    
+                    {/* Pipeline Summary */}
+                    <div className={`pt-3 border-t ${
+                      isDark ? 'border-gray-600' : 'border-gray-200'
+                    } flex items-center justify-between`}>
+                      <div className="flex -space-x-1">
+                        {Object.values(deals)
+                          .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+                          .slice(0, 4)
+                          .map((deal) => {
+                            const contact = contacts[deal.contactId];
+                            if (!contact) return null;
+                            return (
+                              <Avatar
+                                key={deal.id}
+                                name={contact.name}
+                                src={contact.avatarSrc}
+                                size="xs"
+                                fallback={getInitials(contact.name)}
+                                className="border border-white dark:border-gray-800"
+                              />
+                            );
+                          })}
+                      </div>
+                      <span className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Active pipeline
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
             
             {/* Contact Growth Tab */}
             <TabsContent value="contacts" className="space-y-6 mt-8">
-              <Card className={`${
-                isDark 
-                  ? 'bg-gray-800 border-gray-700' 
-                  : 'bg-white border-gray-200'
-              } col-span-full`}>
-                <CardHeader>
-                  <CardTitle className={`flex items-center ${
-                    isDark ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    <Users className="h-5 w-5 mr-2 text-orange-500" />
-                    Contact Growth Trend
-                  </CardTitle>
-                  <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                    Contact acquisition over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={350}>
-                    <LineChart data={monthlyData}>
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        stroke={isDark ? '#374151' : '#e5e7eb'} 
-                      />
-                      <XAxis 
-                        dataKey="month" 
-                        axisLine={false} 
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }}
-                      />
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: isDark ? '#1f2937' : 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          color: isDark ? '#f3f4f6' : '#111827'
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="contacts" 
-                        stroke="#F59E0B" 
-                        strokeWidth={3}
-                        dot={{ fill: '#F59E0B', r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className={`${
+                  isDark 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-gray-200'
+                } col-span-2`}>
+                  <CardHeader>
+                    <CardTitle className={`flex items-center ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <Users className="h-5 w-5 mr-2 text-orange-500" />
+                      Contact Growth Trend
+                    </CardTitle>
+                    <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                      Contact acquisition over time
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <LineChart data={monthlyData}>
+                        <CartesianGrid 
+                          strokeDasharray="3 3" 
+                          stroke={isDark ? '#374151' : '#e5e7eb'} 
+                        />
+                        <XAxis 
+                          dataKey="month" 
+                          axisLine={false} 
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }}
+                        />
+                        <YAxis 
+                          axisLine={false} 
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: isDark ? '#9ca3af' : '#6b7280' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: isDark ? '#1f2937' : 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            color: isDark ? '#f3f4f6' : '#111827'
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="contacts" 
+                          stroke="#F59E0B" 
+                          strokeWidth={3}
+                          dot={{ fill: '#F59E0B', r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Contacts with Avatars */}
+                <Card className={`${
+                  isDark 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-gray-200'
+                }`}>
+                  <CardHeader>
+                    <CardTitle className={`flex items-center ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <Activity className="h-5 w-5 mr-2 text-orange-500" />
+                      Recent Contacts
+                    </CardTitle>
+                    <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                      Latest additions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {Object.values(contacts).slice(0, 5).map((contact) => (
+                      <div key={contact.id} className="flex items-center space-x-3">
+                        <Avatar
+                          name={contact.name}
+                          src={contact.avatarSrc}
+                          size="sm"
+                          fallback={getInitials(contact.name)}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-medium text-sm truncate ${
+                            isDark ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {contact.name}
+                          </p>
+                          <p className={`text-xs truncate ${
+                            isDark ? 'text-gray-400' : 'text-gray-500'
+                          }`}>
+                            {contact.company}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            contact.tags?.some(t => t.toLowerCase().includes('enterprise'))
+                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                              : contact.tags?.some(t => t.toLowerCase().includes('mid-market'))
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                          }`}>
+                            {contact.tags?.some(t => t.toLowerCase().includes('enterprise'))
+                              ? 'Enterprise'
+                              : contact.tags?.some(t => t.toLowerCase().includes('mid-market'))
+                              ? 'Mid-Market'
+                              : 'Standard'
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Contact Growth Summary */}
+                    <div className={`pt-3 border-t ${
+                      isDark ? 'border-gray-600' : 'border-gray-200'
+                    } flex items-center justify-between`}>
+                      <div className="flex -space-x-1">
+                        {Object.values(contacts).slice(0, 4).map((contact) => (
+                          <Avatar
+                            key={contact.id}
+                            name={contact.name}
+                            src={contact.avatarSrc}
+                            size="xs"
+                            fallback={getInitials(contact.name)}
+                            className="border border-white dark:border-gray-800"
+                          />
+                        ))}
+                      </div>
+                      <span className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        +{Object.keys(contacts).length} contacts
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
             
             {/* Performance Tab */}
             <TabsContent value="performance" className="space-y-6 mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Summary cards with same styling as dashboard */}
                 <Card className={`${
                   isDark 
@@ -480,17 +734,37 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-3xl font-bold ${
-                      isDark ? 'text-green-100' : 'text-green-900'
-                    }`}>
-                      {formatCurrency(monthlyData.reduce((sum, month) => sum + month.revenue, 0))}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={`text-2xl font-bold ${
+                          isDark ? 'text-green-100' : 'text-green-900'
+                        }`}>
+                          {formatCurrency(monthlyData.reduce((sum, month) => sum + month.revenue, 0))}
+                        </div>
+                        <p className={`text-xs mt-1 flex items-center ${
+                          isDark ? 'text-green-300' : 'text-green-600'
+                        }`}>
+                          <TrendingUp className="inline h-3 w-3 mr-1" />
+                          6-month total
+                        </p>
+                      </div>
+                      <div className="flex -space-x-1">
+                        {Object.values(deals).slice(0, 3).map((deal) => {
+                          const contact = contacts[deal.contactId];
+                          if (!contact) return null;
+                          return (
+                            <Avatar
+                              key={deal.id}
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="xs"
+                              fallback={getInitials(contact.name)}
+                              className="border border-white dark:border-green-800"
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                    <p className={`text-xs mt-2 flex items-center ${
-                      isDark ? 'text-green-300' : 'text-green-600'
-                    }`}>
-                      <TrendingUp className="inline h-3 w-3 mr-1" />
-                      6-month total
-                    </p>
                   </CardContent>
                 </Card>
                 
@@ -507,47 +781,138 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-3xl font-bold ${
-                      isDark ? 'text-blue-100' : 'text-blue-900'
-                    }`}>
-                      {stageData.reduce((sum, stage) => sum + stage.count, 0)}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={`text-2xl font-bold ${
+                          isDark ? 'text-blue-100' : 'text-blue-900'
+                        }`}>
+                          {stageData.reduce((sum, stage) => sum + stage.count, 0)}
+                        </div>
+                        <p className={`text-xs mt-1 flex items-center ${
+                          isDark ? 'text-blue-300' : 'text-blue-600'
+                        }`}>
+                          <Target className="inline h-3 w-3 mr-1" />
+                          All stages
+                        </p>
+                      </div>
+                      <div className="flex -space-x-1">
+                        {Object.values(deals).filter(d => d.stage !== 'closed-won' && d.stage !== 'closed-lost').slice(0, 3).map((deal) => {
+                          const contact = contacts[deal.contactId];
+                          if (!contact) return null;
+                          return (
+                            <Avatar
+                              key={deal.id}
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="xs"
+                              fallback={getInitials(contact.name)}
+                              className="border border-white dark:border-blue-800"
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                    <p className={`text-xs mt-2 flex items-center ${
-                      isDark ? 'text-blue-300' : 'text-blue-600'
-                    }`}>
-                      <Target className="inline h-3 w-3 mr-1" />
-                      All stages
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className={`${
-                  isDark 
-                    ? 'bg-gradient-to-br from-purple-900/20 to-violet-900/20 border-purple-800' 
-                    : 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200'
-                }`}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className={`text-sm font-medium ${
-                      isDark ? 'text-purple-200' : 'text-purple-800'
-                    }`}>
-                      Growth Rate
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-3xl font-bold ${
-                      isDark ? 'text-purple-100' : 'text-purple-900'
-                    }`}>
-                      +12.5%
-                    </div>
-                    <p className={`text-xs mt-2 flex items-center ${
-                      isDark ? 'text-purple-300' : 'text-purple-600'
-                    }`}>
-                      <TrendingUp className="inline h-3 w-3 mr-1" />
-                      Monthly average
-                    </p>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Top Performers with Avatars */}
+              <Card className={`${
+                isDark 
+                  ? 'bg-gray-800 border-gray-700' 
+                  : 'bg-white border-gray-200'
+              }`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    <Star className="h-5 w-5 mr-2 text-yellow-500" />
+                    Performance Leaders
+                  </CardTitle>
+                  <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                    Top contacts by deal value and engagement
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.values(contacts).slice(0, 6).map((contact, index) => {
+                      const contactDeals = Object.values(deals).filter(deal => deal.contactId === contact.id);
+                      const totalValue = contactDeals.reduce((sum, deal) => sum + deal.value, 0);
+                      return (
+                        <div key={contact.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+                          <div className="relative">
+                            <Avatar
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="md"
+                              fallback={getInitials(contact.name)}
+                            />
+                            {index < 3 && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">{index + 1}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium truncate ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {contact.name}
+                            </p>
+                            <p className={`text-sm truncate ${
+                              isDark ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
+                              {contact.company}
+                            </p>
+                            <p className="font-semibold text-green-600 text-sm">
+                              {totalValue > 0 ? formatCurrency(totalValue) : 
+                                contact.tags?.some(t => t.toLowerCase().includes('enterprise')) 
+                                  ? '$50,000' 
+                                  : '$25,000'
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Performance Summary */}
+                  <div className={`mt-6 pt-4 border-t ${
+                    isDark ? 'border-gray-600' : 'border-gray-200'
+                  } flex items-center justify-between`}>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex -space-x-2">
+                        {Object.values(contacts).slice(0, 8).map((contact) => (
+                          <Avatar
+                            key={contact.id}
+                            name={contact.name}
+                            src={contact.avatarSrc}
+                            size="xs"
+                            fallback={getInitials(contact.name)}
+                            className="border border-white dark:border-gray-800"
+                          />
+                        ))}
+                      </div>
+                      <span className={`text-sm ${
+                        isDark ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
+                        Top performers across all metrics
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-purple-600 text-lg">
+                        +12.5%
+                      </p>
+                      <p className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Growth Rate
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
