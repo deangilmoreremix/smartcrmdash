@@ -197,33 +197,7 @@ const PipelinePage: React.FC = () => {
     };
   }, [addDeal, updateDeal, deleteDeal, deals, contacts]);
 
-  // Handle iframe load and initialize CRM connection
-  const handleIframeLoad = () => {
-    if (iframeRef.current && bridgeRef.current) {
-      bridgeRef.current.setIframe(iframeRef.current);
-      
-      // Try to inject bridge code into remote module
-      setTimeout(() => {
-        bridgeRef.current?.injectBridgeCode();
-      }, 1000);
-      
-      // Wait for remote app to initialize, then send CRM data
-      setTimeout(() => {
-        const crmDeals = Object.values(deals).map(convertToCRMDeal);
-        const pipelineData: CRMPipelineData = {
-          deals: crmDeals,
-          stages: ['prospect', 'qualified', 'proposal', 'negotiation', 'closed-won', 'closed-lost'],
-          totalValue: crmDeals.reduce((sum, deal) => sum + deal.value, 0),
-          activeDeals: crmDeals.filter(deal => !deal.stage.includes('closed')).length
-        };
-        
-        bridgeRef.current?.initializeCRM(pipelineData, {
-          name: 'CRM Pipeline System',
-          version: '1.0'
-        });
-      }, 2000);
-    }
-  };
+  
 
   return (
     <div className={`min-h-screen ${

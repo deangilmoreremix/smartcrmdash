@@ -48,7 +48,6 @@
     handleCRMMessage(event) {
       // Security: Only accept messages from your CRM domain
       const allowedOrigins = [
-        'https://9f38fddb-d049-4cd4-9f57-c41b6a878a9d-00-2xv27ubfspt46.riker.replit.dev',
         'http://localhost:5000',
         'http://127.0.0.1:5000',
         'https://localhost:5000'
