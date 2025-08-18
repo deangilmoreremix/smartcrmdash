@@ -1,7 +1,7 @@
-import { supabase } from '../../services/supabaseClient';
-import { sendGmailEmail } from '../../services/composioService'; // You'll create this file below
+// import { supabase } from '../../services/supabaseClient'; // Not available
+// import { sendGmailEmail } from '../../services/composioService'; // Not available
 import React, { useState } from 'react';
-import * as edgeFunctionService from '../../services/edgeFunctionService';
+// import * as edgeFunctionService from '../../services/edgeFunctionService'; // Not available
 import { useOpenAI } from '../../services/openaiLegacyService';
 import AIToolContent from '../shared/AIToolContent';
 import { Mail, User, Building, RefreshCw, Copy, FileText, Send } from 'lucide-react';
@@ -15,19 +15,8 @@ const logEmailToLead = async ({
   summary: string;
   content: string;
 }) => {
-  const { error } = await supabase.from('lead_communications').insert([
-    {
-      lead_id: leadId,
-      type: 'email',
-      summary,
-      content,
-    },
-  ]);
-
-  if (error) {
-    console.error('Error logging email:', error);
-    throw error;
-  }
+  // TODO: Implement lead communication logging when database is available
+  console.log('Email logged for lead:', { leadId, summary, content });
 };
 
 const EmailComposerContent: React.FC = () => {
@@ -68,13 +57,21 @@ const EmailComposerContent: React.FC = () => {
         company: formData.recipientCompany
       };
       
-      const emailDraft = await openai.generateEmailDraft(
-        formData.recipientName,
-        formData.emailPurpose,
-        formData.additionalContext
-      );
+      const prompt = `Generate a professional email draft with the following details:
+        Recipient: ${formData.recipientName} ${formData.recipientPosition ? `(${formData.recipientPosition})` : ''}
+        Company: ${formData.recipientCompany}
+        Purpose: ${formData.emailPurpose}
+        Additional Context: ${formData.additionalContext}
+        
+        Please create a complete email with subject line, greeting, body, and professional closing.`;
       
-      setResult(emailDraft);
+      const emailDraft = await openai.generateEmailTemplate({
+        name: formData.recipientName,
+        position: formData.recipientPosition,
+        company: formData.recipientCompany
+      }, formData.emailPurpose);
+      
+      setResult(`Subject: ${emailDraft.subject}\n\n${emailDraft.body}`);
       setCopied(false);
     } catch (err) {
       console.error('Error generating email:', err);

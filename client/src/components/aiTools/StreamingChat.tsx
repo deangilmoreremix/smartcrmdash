@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useOpenAIStream } from '../../services/openaiStreamingService';
+import { useOpenAI } from '../../services/openaiLegacyService';
 import { Send, User, Bot, RefreshCw, Clock, Copy, Check, X, Zap, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

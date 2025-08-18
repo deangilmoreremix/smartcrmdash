@@ -1,0 +1,1024 @@
+# AI Tools Feature Implementation Guide
+
+## Overview
+This guide explains how to implement the comprehensive AI Tools feature from Smart CRM into another application. The AI Tools feature provides 35+ specialized AI-powered components for business automation, content generation, and analysis.
+
+## Prerequisites
+
+### 1. Dependencies Installation
+```bash
+# Core React dependencies
+npm install react react-dom react-router-dom
+npm install @types/react @types/react-dom
+
+# State Management
+npm install zustand
+
+# UI Components
+npm install @radix-ui/react-dialog @radix-ui/react-select @radix-ui/react-tabs
+npm install lucide-react react-icons
+npm install tailwindcss @tailwindcss/typography
+npm install class-variance-authority clsx tailwind-merge
+
+# AI Services
+npm install openai @google/generative-ai
+
+# Form Handling
+npm install react-hook-form @hookform/resolvers zod
+
+# HTTP Client
+npm install @tanstack/react-query
+
+# Animation & Effects
+npm install framer-motion
+
+# Additional utilities
+npm install date-fns nanoid
+```
+
+### 2. Environment Variables
+Create `.env` file with:
+```env
+# Required for AI functionality
+OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_AI_API_KEY=your_google_ai_key_here
+
+# Optional - for advanced features
+VITE_APP_NAME=Your App Name
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+## Architecture Overview
+
+```
+src/
+├── components/
+│   ├── aiTools/                 # 35+ AI tool components
+│   ├── shared/                  # Shared UI components
+│   └── ui/                      # Base UI components
+├── services/                    # AI service integrations
+├── store/                       # State management
+├── types/                       # TypeScript definitions
+└── pages/                       # AI Tools pages
+```
+
+## Step-by-Step Implementation
+
+### Step 1: Core Services Setup
+
+#### A. OpenAI Service (`src/services/openaiService.ts`)
+```typescript
+import OpenAI from 'openai';
+
+export const useOpenAI = () => {
+  const getClient = () => {
+    const apiKey = process.env.OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('OpenAI API key is not set');
+    }
+    
+    return new OpenAI({ 
+      apiKey,
+      dangerouslyAllowBrowser: true // Note: In production, proxy through backend
+    });
+  };
+  
+  const generateContent = async (prompt: string, model = "gpt-4o") => {
+    const client = getClient();
+    
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI assistant helping with professional business tasks."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+    
+    return response.choices[0].message.content || 'Unable to generate content';
+  };
+
+  return { generateContent, getClient };
+};
+```
+
+#### B. Gemini Service (`src/services/geminiService.ts`)
+```typescript
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export const useGemini = () => {
+  const getClient = () => {
+    const apiKey = process.env.GOOGLE_AI_API_KEY || import.meta.env.VITE_GOOGLE_AI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('Google AI API key is not set');
+    }
+    
+    return new GoogleGenerativeAI(apiKey);
+  };
+
+  const generateContent = async (prompt: string, model = "gemini-1.5-flash") => {
+    const genAI = getClient();
+    const modelInstance = genAI.getGenerativeModel({ model });
+    
+    const result = await modelInstance.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  };
+
+  return { generateContent, getClient };
+};
+```
+
+### Step 2: State Management
+
+#### API Store (`src/store/apiStore.ts`)
+```typescript
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface ApiStore {
+  apiKeys: {
+    openai: string;
+    google: string;
+  };
+  setApiKey: (service: 'openai' | 'google', key: string) => void;
+}
+
+export const useApiStore = create<ApiStore>()(
+  persist(
+    (set) => ({
+      apiKeys: {
+        openai: '',
+        google: ''
+      },
+      setApiKey: (service, key) =>
+        set((state) => ({
+          apiKeys: {
+            ...state.apiKeys,
+            [service]: key
+          }
+        })),
+    }),
+    {
+      name: 'ai-tools-api-keys',
+    }
+  )
+);
+```
+
+### Step 3: Shared Components
+
+#### A. AI Tool Content Wrapper (`src/components/shared/AIToolContent.tsx`)
+```typescript
+import React, { ReactNode, useState } from 'react';
+import { Copy, Download, RefreshCw } from 'lucide-react';
+
+interface AIToolContentProps {
+  isLoading: boolean;
+  error: string | null;
+  result: string | null;
+  loadingMessage?: string;
+  resultTitle?: string;
+  children?: ReactNode;
+}
+
+const AIToolContent: React.FC<AIToolContentProps> = ({
+  isLoading,
+  error,
+  result,
+  loadingMessage = "Processing your request...",
+  resultTitle = "AI-Generated Results",
+  children
+}) => {
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopyToClipboard = () => {
+    if (result) {
+      navigator.clipboard.writeText(result);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  return (
+    <div className="max-h-[65vh] overflow-y-auto pr-1">
+      {children}
+      
+      {isLoading && (
+        <div className="my-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100 shadow-sm animate-pulse">
+          <div className="flex items-center">
+            <RefreshCw size={24} className="text-blue-500 animate-spin mr-4" />
+            <div>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                AI Processing
+              </h3>
+              <p className="text-blue-700">{loadingMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="my-6 bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-red-800 mb-2">Error</h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {result && !isLoading && (
+        <div className="my-6 bg-green-50 border border-green-200 rounded-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-green-800">{resultTitle}</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCopyToClipboard}
+                className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+              >
+                <Copy size={16} />
+                {copySuccess ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          </div>
+          <div className="text-green-700 whitespace-pre-wrap">{result}</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AIToolContent;
+```
+
+#### B. AI Tool Modal (`src/components/shared/AIToolModal.tsx`)
+```typescript
+import React from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+
+interface AIToolModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+const AIToolModal: React.FC<AIToolModalProps> = ({ isOpen, onClose, title, children }) => {
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl z-50 w-[90vw] max-w-4xl max-h-[90vh] overflow-hidden">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <Dialog.Title className="text-xl font-semibold text-gray-900">
+              {title}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={24} />
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            {children}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
+export default AIToolModal;
+```
+
+### Step 4: Core AI Tool Components
+
+#### A. Email Composer (`src/components/aiTools/EmailComposerContent.tsx`)
+```typescript
+import React, { useState } from 'react';
+import { useOpenAI } from '../../services/openaiService';
+import AIToolContent from '../shared/AIToolContent';
+import { Mail, Send, User, Target } from 'lucide-react';
+
+const EmailComposerContent: React.FC = () => {
+  const openai = useOpenAI();
+  const [formData, setFormData] = useState({
+    recipient: '',
+    purpose: '',
+    tone: 'professional',
+    context: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.recipient || !formData.purpose) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const prompt = `Draft a professional email with the following details:
+        - Recipient: ${formData.recipient}
+        - Purpose: ${formData.purpose}
+        - Tone: ${formData.tone}
+        - Additional Context: ${formData.context}
+        
+        Create a well-structured email with subject line, greeting, body, and professional closing.`;
+
+      const emailDraft = await openai.generateContent(prompt);
+      setResult(emailDraft);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <AIToolContent
+      isLoading={isLoading}
+      error={error}
+      result={result}
+      loadingMessage="Crafting your professional email..."
+      resultTitle="Generated Email"
+    >
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-blue-100 rounded-lg">
+            <Mail className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">AI Email Composer</h2>
+            <p className="text-gray-600">Generate professional emails with AI assistance</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <User className="inline w-4 h-4 mr-2" />
+              Recipient Name
+            </label>
+            <input
+              type="text"
+              name="recipient"
+              value={formData.recipient}
+              onChange={handleInputChange}
+              placeholder="Enter recipient's name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Target className="inline w-4 h-4 mr-2" />
+              Email Purpose
+            </label>
+            <input
+              type="text"
+              name="purpose"
+              value={formData.purpose}
+              onChange={handleInputChange}
+              placeholder="e.g., Follow up on meeting, Product introduction, Partnership proposal"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tone
+            </label>
+            <select
+              name="tone"
+              value={formData.tone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="professional">Professional</option>
+              <option value="friendly">Friendly</option>
+              <option value="formal">Formal</option>
+              <option value="casual">Casual</option>
+              <option value="persuasive">Persuasive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Context (Optional)
+            </label>
+            <textarea
+              name="context"
+              value={formData.context}
+              onChange={handleInputChange}
+              placeholder="Any additional context or specific points to include..."
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading || !formData.recipient || !formData.purpose}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Send className="w-4 h-4" />
+            {isLoading ? 'Generating...' : 'Generate Email'}
+          </button>
+        </form>
+      </div>
+    </AIToolContent>
+  );
+};
+
+export default EmailComposerContent;
+```
+
+#### B. Content Generator (`src/components/aiTools/ContentGeneratorContent.tsx`)
+```typescript
+import React, { useState } from 'react';
+import { useOpenAI } from '../../services/openaiService';
+import AIToolContent from '../shared/AIToolContent';
+import { FileText, Sparkles, Target } from 'lucide-react';
+
+const ContentGeneratorContent: React.FC = () => {
+  const openai = useOpenAI();
+  const [formData, setFormData] = useState({
+    contentType: 'blog-post',
+    topic: '',
+    audience: '',
+    tone: 'professional',
+    length: 'medium'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.topic || !formData.audience) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const lengthGuide = {
+        short: '300-500 words',
+        medium: '800-1200 words',
+        long: '1500-2000 words'
+      };
+
+      const prompt = `Create a ${formData.contentType} with the following specifications:
+        - Topic: ${formData.topic}
+        - Target Audience: ${formData.audience}
+        - Tone: ${formData.tone}
+        - Length: ${lengthGuide[formData.length as keyof typeof lengthGuide]}
+        
+        Please create engaging, well-structured content that speaks directly to the target audience.
+        Include relevant headings, subheadings, and actionable insights where appropriate.`;
+
+      const content = await openai.generateContent(prompt);
+      setResult(content);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate content');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <AIToolContent
+      isLoading={isLoading}
+      error={error}
+      result={result}
+      loadingMessage="Creating your content..."
+      resultTitle="Generated Content"
+    >
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-purple-100 rounded-lg">
+            <FileText className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">AI Content Generator</h2>
+            <p className="text-gray-600">Create professional content for any purpose</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Content Type
+            </label>
+            <select
+              name="contentType"
+              value={formData.contentType}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="blog-post">Blog Post</option>
+              <option value="article">Article</option>
+              <option value="social-media">Social Media Post</option>
+              <option value="newsletter">Newsletter</option>
+              <option value="product-description">Product Description</option>
+              <option value="press-release">Press Release</option>
+              <option value="case-study">Case Study</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Sparkles className="inline w-4 h-4 mr-2" />
+              Topic/Subject
+            </label>
+            <input
+              type="text"
+              name="topic"
+              value={formData.topic}
+              onChange={handleInputChange}
+              placeholder="Enter the main topic or subject"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Target className="inline w-4 h-4 mr-2" />
+              Target Audience
+            </label>
+            <input
+              type="text"
+              name="audience"
+              value={formData.audience}
+              onChange={handleInputChange}
+              placeholder="e.g., Small business owners, Tech professionals, Students"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tone
+              </label>
+              <select
+                name="tone"
+                value={formData.tone}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="professional">Professional</option>
+                <option value="conversational">Conversational</option>
+                <option value="authoritative">Authoritative</option>
+                <option value="friendly">Friendly</option>
+                <option value="educational">Educational</option>
+                <option value="persuasive">Persuasive</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Length
+              </label>
+              <select
+                name="length"
+                value={formData.length}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="short">Short (300-500 words)</option>
+                <option value="medium">Medium (800-1200 words)</option>
+                <option value="long">Long (1500-2000 words)</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading || !formData.topic || !formData.audience}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            {isLoading ? 'Generating...' : 'Generate Content'}
+          </button>
+        </form>
+      </div>
+    </AIToolContent>
+  );
+};
+
+export default ContentGeneratorContent;
+```
+
+### Step 5: AI Tools Provider
+
+#### AI Tools Provider (`src/components/AIToolsProvider.tsx`)
+```typescript
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import AIToolModal from './shared/AIToolModal';
+import { 
+  Mail, 
+  FileText, 
+  Brain, 
+  MessageSquare,
+  Target,
+  TrendingUp,
+  Users,
+  Phone
+} from 'lucide-react';
+
+// Import AI Tool Components
+import EmailComposerContent from './aiTools/EmailComposerContent';
+import ContentGeneratorContent from './aiTools/ContentGeneratorContent';
+// Add more imports as you create them
+
+interface AITool {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  component: React.ComponentType;
+  category: string;
+}
+
+interface AIToolsContextType {
+  tools: AITool[];
+  openTool: (toolId: string) => void;
+  closeTool: () => void;
+  currentTool: AITool | null;
+  isModalOpen: boolean;
+}
+
+const AIToolsContext = createContext<AIToolsContextType | undefined>(undefined);
+
+export const useAITools = () => {
+  const context = useContext(AIToolsContext);
+  if (!context) {
+    throw new Error('useAITools must be used within an AIToolsProvider');
+  }
+  return context;
+};
+
+export const AIToolsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [currentTool, setCurrentTool] = useState<AITool | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const tools: AITool[] = [
+    {
+      id: 'email-composer',
+      name: 'Email Composer',
+      description: 'Generate professional emails with AI assistance',
+      icon: Mail,
+      component: EmailComposerContent,
+      category: 'Communication'
+    },
+    {
+      id: 'content-generator',
+      name: 'Content Generator',
+      description: 'Create blog posts, articles, and marketing content',
+      icon: FileText,
+      component: ContentGeneratorContent,
+      category: 'Content'
+    },
+    // Add more tools as you implement them
+  ];
+
+  const openTool = (toolId: string) => {
+    const tool = tools.find(t => t.id === toolId);
+    if (tool) {
+      setCurrentTool(tool);
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeTool = () => {
+    setIsModalOpen(false);
+    setCurrentTool(null);
+  };
+
+  return (
+    <AIToolsContext.Provider value={{ tools, openTool, closeTool, currentTool, isModalOpen }}>
+      {children}
+      
+      {currentTool && (
+        <AIToolModal
+          isOpen={isModalOpen}
+          onClose={closeTool}
+          title={currentTool.name}
+        >
+          <currentTool.component />
+        </AIToolModal>
+      )}
+    </AIToolsContext.Provider>
+  );
+};
+```
+
+### Step 6: AI Tools Dashboard
+
+#### AI Tools Page (`src/pages/AITools.tsx`)
+```typescript
+import React from 'react';
+import { useAITools } from '../components/AIToolsProvider';
+import { Search, Filter } from 'lucide-react';
+
+const AITools: React.FC = () => {
+  const { tools, openTool } = useAITools();
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState('All');
+
+  const categories = ['All', ...Array.from(new Set(tools.map(tool => tool.category)))];
+
+  const filteredTools = tools.filter(tool => {
+    const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tool.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">AI Tools Dashboard</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Powerful AI-driven tools to enhance your productivity and automate your workflows
+          </p>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search AI tools..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Tools Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredTools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <div
+                key={tool.id}
+                onClick={() => openTool(tool.id)}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200 cursor-pointer group"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <Icon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-900 transition-colors">
+                      {tool.name}
+                    </h3>
+                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      {tool.category}
+                    </span>
+                  </div>
+                </div>
+                
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {tool.description}
+                </p>
+                
+                <div className="mt-4 flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700 transition-colors">
+                  Launch Tool
+                  <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* No Results */}
+        {filteredTools.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Search className="w-16 h-16 mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">No tools found</h3>
+            <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AITools;
+```
+
+### Step 7: Backend API Routes (Optional)
+
+If you want to proxy AI requests through your backend for security:
+
+#### Backend Routes (`server/routes.js` or similar)
+```javascript
+const express = require('express');
+const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const router = express.Router();
+
+// OpenAI proxy endpoint
+router.post('/api/ai/openai', async (req, res) => {
+  try {
+    const { prompt, model = 'gpt-4o' } = req.body;
+    
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const response = await openai.chat.completions.create({
+      model,
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful AI assistant."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+
+    res.json({ 
+      result: response.choices[0].message.content,
+      success: true 
+    });
+  } catch (error) {
+    console.error('OpenAI API Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate content',
+      success: false 
+    });
+  }
+});
+
+// Google AI proxy endpoint
+router.post('/api/ai/gemini', async (req, res) => {
+  try {
+    const { prompt, model = 'gemini-1.5-flash' } = req.body;
+    
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+    const modelInstance = genAI.getGenerativeModel({ model });
+    
+    const result = await modelInstance.generateContent(prompt);
+    const response = await result.response;
+    
+    res.json({ 
+      result: response.text(),
+      success: true 
+    });
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate content',
+      success: false 
+    });
+  }
+});
+
+module.exports = router;
+```
+
+### Step 8: App Integration
+
+#### Main App Component (`src/App.tsx`)
+```typescript
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AIToolsProvider } from './components/AIToolsProvider';
+import AITools from './pages/AITools';
+import './index.css';
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AIToolsProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/ai-tools" element={<AITools />} />
+              {/* Add other routes */}
+            </Routes>
+          </div>
+        </Router>
+      </AIToolsProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
+```
+
+## Additional AI Tools to Implement
+
+Based on the Smart CRM implementation, here are the additional AI tools you can add:
+
+### Communication Tools
+- **Email Analysis** - Analyze email effectiveness and sentiment
+- **Meeting Summary** - Generate meeting summaries from transcripts
+- **Call Scripts** - Generate sales call scripts
+- **Subject Line Optimizer** - Create high-converting email subject lines
+- **Email Response Generator** - Smart email replies
+
+### Business Intelligence
+- **Competitor Analysis** - Analyze competitor strategies
+- **Market Trend Analysis** - Track market trends and insights
+- **Sales Insights** - Generate sales performance insights
+- **Sales Forecasting** - Predict sales performance
+- **Customer Persona Generator** - Create detailed customer personas
+
+### Content & Creative
+- **Social Media Content** - Generate social media posts
+- **Visual Content Generator** - Create visual content descriptions
+- **Voice Tone Optimizer** - Optimize communication tone
+- **Meeting Agenda Generator** - Create structured meeting agendas
+
+### Advanced Features
+- **Document Analyzer** - Real-time document analysis
+- **Voice Analysis** - Analyze voice recordings
+- **Smart Search** - Semantic search capabilities
+- **Form Auto-completer** - AI-powered form completion
+- **Real-time Validation** - Intelligent form validation
+
+## Security Considerations
+
+1. **API Key Management**: Store API keys securely in environment variables
+2. **Backend Proxy**: Consider proxying AI requests through your backend
+3. **Rate Limiting**: Implement rate limiting for AI API calls
+4. **Input Validation**: Validate all user inputs before sending to AI services
+5. **Error Handling**: Implement comprehensive error handling
+6. **User Authentication**: Secure AI tools behind authentication
+
+## Performance Optimization
+
+1. **Lazy Loading**: Load AI tool components only when needed
+2. **Caching**: Cache AI responses for repeated queries
+3. **Streaming**: Implement streaming responses for better UX
+4. **Loading States**: Provide clear loading indicators
+5. **Error Boundaries**: Implement React error boundaries
+
+## Deployment Notes
+
+1. **Environment Variables**: Ensure all required environment variables are set
+2. **Build Process**: Configure build process to include all assets
+3. **CDN**: Consider using CDN for static assets
+4. **Monitoring**: Implement logging and monitoring for AI API usage
+5. **Fallbacks**: Provide fallback options when AI services are unavailable
+
+This comprehensive guide provides everything needed to implement a fully functional AI Tools feature in any React application. Start with the core components and gradually add more specialized tools based on your specific use case.
