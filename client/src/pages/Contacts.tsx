@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useContactStore } from '../hooks/useContactStore';
 // REMOVE THIS LINE: import { ContactsModal } from '../components/modals/ContactsModal';
-import EnhancedContactCard from '../components/contacts/EnhancedContactCard';
+import { AIEnhancedContactCard } from '../components/contacts/AIEnhancedContactCard';
 import AdvancedContactFilter from '../components/contacts/AdvancedContactFilter';
 import ProfessionalContactModal from '../components/contacts/ProfessionalContactModal';
 import EmailComposer from '../components/communications/EmailComposer';
@@ -579,7 +579,7 @@ const ContactsEnhanced: React.FC = () => {
                     : 'space-y-4'
                 }>
                   {filteredContacts.map((contact) => (
-                    <EnhancedContactCard
+                    <AIEnhancedContactCard
                       key={contact.id}
                       contact={contact}
                       isSelected={selectedContacts.includes(contact.id)}

@@ -1,6 +1,6 @@
 // AI Contact Enrichment Service - OpenAI & Gemini Integration
 import { httpClient } from './http-client.service';
-// Stub imports for now
+import { logger } from './logger.service';
 
 export interface ContactEnrichmentData {
   firstName?: string;
