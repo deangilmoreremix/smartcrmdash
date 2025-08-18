@@ -46,9 +46,19 @@ import RealTimeEmailComposer from '../components/aiTools/RealTimeEmailComposer';
 import VoiceAnalysisRealtime from '../components/aiTools/VoiceAnalysisRealtime';
 import SmartSearchRealtime from '../components/aiTools/SmartSearchRealtime';
 import AutoFormCompleter from '../components/aiTools/AutoFormCompleter';
+import CallScriptContent from '../components/aiTools/CallScriptContent';
+import EmailResponseContent from '../components/aiTools/EmailResponseContent';
+import MeetingAgendaContent from '../components/aiTools/MeetingAgendaContent';
+import CustomerPersonaContent from '../components/aiTools/CustomerPersonaContent';
+import ImageGeneratorContent from '../components/aiTools/ImageGeneratorContent';
+import FunctionAssistantContent from '../components/aiTools/FunctionAssistantContent';
+import ObjectionHandlerContent from '../components/aiTools/ObjectionHandlerContent';
+import ProposalGenerator from '../components/aiTools/ProposalGenerator';
+import MeetingSummaryContent from '../components/aiTools/MeetingSummaryContent';
+import SocialMediaGenerator from '../components/aiTools/SocialMediaGenerator';
 
 const AITools: React.FC = () => {
-  const { openTool } = useAITools();
+  const { openTool, currentTool, closeTool } = useAITools();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showDemo, setShowDemo] = useState(false);
@@ -326,6 +336,92 @@ const AITools: React.FC = () => {
     setActiveDemoTool(demoId);
     setShowDemo(true);
   };
+
+  // Function to render individual AI tool components based on currentTool
+  const renderAITool = (toolId: string) => {
+    switch (toolId) {
+      case 'email-composer-content':
+      case 'email-composer':
+        return <EmailResponseContent />;
+      case 'ai-assistant-chat':
+        return <StreamingChat />;
+      case 'live-deal-analysis':
+        return <LiveDealAnalysis />;
+      case 'auto-form-completer':
+        return <AutoFormCompleter />;
+      case 'call-script':
+      case 'call-script-generator':
+        return <CallScriptContent />;
+      case 'document-analyzer-realtime':
+        return <DocumentAnalyzerRealtime />;
+      case 'email-analysis':
+        return <EmailResponseContent />;
+      case 'function-assistant':
+        return <FunctionAssistantContent />;
+      case 'image-generator':
+        return <ImageGeneratorContent />;
+      case 'instant-response':
+        return <InstantAIResponseGenerator />;
+      case 'meeting-agenda':
+        return <MeetingAgendaContent />;
+      case 'customer-persona':
+        return <CustomerPersonaContent />;
+      case 'objection-handler':
+        return <ObjectionHandlerContent />;
+      case 'realtime-email-composer':
+        return <RealTimeEmailComposer />;
+      case 'form-validation':
+        return <RealTimeFormValidation />;
+      case 'proposal-generator':
+        return <ProposalGenerator />;
+      case 'meeting-summary':
+        return <MeetingSummaryContent />;
+      case 'social-media-generator':
+        return <SocialMediaGenerator />;
+      case 'smart-search-realtime':
+        return <SmartSearchRealtime />;
+      case 'voice-analysis-realtime':
+        return <VoiceAnalysisRealtime />;
+      default:
+        return (
+          <div className="text-center py-16">
+            <Brain className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-xl font-medium text-gray-700 mb-2">AI Tool Not Found</h3>
+            <p className="text-gray-500">The requested AI tool could not be loaded.</p>
+            <button 
+              onClick={closeTool}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Back to Tools
+            </button>
+          </div>
+        );
+    }
+  };
+
+  // If a specific AI tool is selected, render it instead of the tools grid
+  if (currentTool) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-6">
+          <button
+            onClick={closeTool}
+            className="flex items-center text-blue-600 hover:text-blue-700 transition-colors mb-4"
+          >
+            <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
+            Back to AI Tools
+          </button>
+          <div className="border-b border-gray-200 pb-4">
+            <h1 className="text-3xl font-bold text-gray-900">AI Tool</h1>
+            <p className="text-gray-600 mt-1">Working with your selected AI assistant</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {renderAITool(currentTool)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
