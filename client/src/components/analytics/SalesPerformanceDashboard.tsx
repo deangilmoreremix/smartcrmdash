@@ -112,16 +112,17 @@ const SalesPerformanceDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Performance insights from {analytics.totalContacts} contacts and {analytics.totalDeals} deals
-          </p>
-        </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
+    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales Analytics</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Performance insights from {analytics.totalContacts} contacts and {analytics.totalDeals} deals
+            </p>
+          </div>
+          <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-40">
             <SelectValue />
           </SelectTrigger>
@@ -131,12 +132,12 @@ const SalesPerformanceDashboard: React.FC = () => {
             <SelectItem value="90">Last 90 days</SelectItem>
             <SelectItem value="365">Last year</SelectItem>
           </SelectContent>
-        </Select>
-      </div>
+          </Select>
+        </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        {/* Key Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -191,19 +192,19 @@ const SalesPerformanceDashboard: React.FC = () => {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
 
-      {/* Main Dashboard Tabs */}
-      <Tabs value="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-        </TabsList>
+        {/* Main Dashboard Tabs */}
+        <Tabs value="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Trend */}
             <Card className="col-span-1 lg:col-span-2">
               <CardHeader>
@@ -442,7 +443,8 @@ const SalesPerformanceDashboard: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </main>
   );
 };
 

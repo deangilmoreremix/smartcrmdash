@@ -2,11 +2,7 @@ import React from 'react';
 import SalesPerformanceDashboard from '@/components/analytics/SalesPerformanceDashboard';
 
 const AnalyticsDashboard: React.FC = () => {
-  return (
-    <div className="h-full">
-      <SalesPerformanceDashboard />
-    </div>
-  );
+  return <SalesPerformanceDashboard />;
 };
 
 export default AnalyticsDashboard;
