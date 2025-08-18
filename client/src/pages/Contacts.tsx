@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Contact } from '../types';
+import { Contact } from '../types/contact';
 import { 
   Plus, 
   Search, 
@@ -24,7 +24,7 @@ import { useDropzone } from 'react-dropzone';
 import { read, utils } from 'xlsx';
 import Fuse from 'fuse.js';
 import Select from 'react-select';
-import AIEnhancedContactCard from '../components/contacts/AIEnhancedContactCard';
+import EnhancedContactCard from '../components/contacts/EnhancedContactCard';
 import { 
   createColumnHelper, 
   flexRender, 
