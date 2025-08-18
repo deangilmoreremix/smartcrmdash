@@ -82,7 +82,7 @@ import ImageGeneratorContent from './aiTools/ImageGeneratorContent';
 // import ReasoningObjectionHandler from './aiTools/ReasoningObjectionHandler';
 // import ReasoningSocialContent from './aiTools/ReasoningSocialContent';
 
-type AIToolType = 
+export type AIToolType = 
   | 'email-analysis' 
   | 'meeting-summary'
   | 'proposal-generator'
@@ -139,6 +139,140 @@ const AIToolsContext = createContext<AIToolsContextProps>({
 });
 
 export const useAITools = () => useContext(AIToolsContext);
+
+// Export getToolInfo function for external use
+export const getToolInfo = (tool: AIToolType | null) => {
+  if (!tool) {
+    return {
+      title: '',
+      icon: <Brain size={24} />,
+      component: null
+    };
+  }
+
+  switch (tool) {
+    case 'email-analysis':
+      return {
+        title: 'Email Analysis',
+        icon: <Mail size={24} />,
+        component: <EmailAnalysisContent />
+      };
+    case 'meeting-summary':
+      return {
+        title: 'Meeting Summary Generator',
+        icon: <Calendar size={24} />,
+        component: <MeetingSummaryContent />
+      };
+    case 'call-script':
+      return {
+        title: 'Call Script Generator',
+        icon: <Phone size={24} />,
+        component: <CallScriptContent />
+      };
+    case 'competitor-analysis':
+      return {
+        title: 'Competitor Analysis',
+        icon: <Eye size={24} />,
+        component: <CompetitorAnalysisContent />
+      };
+    case 'market-trends':
+      return {
+        title: 'Market Trend Analysis',
+        icon: <TrendingUp size={24} />,
+        component: <MarketTrendContent />
+      };
+    case 'email-composer':
+      return {
+        title: 'Email Composer',
+        icon: <Mail size={24} />,
+        component: <EmailComposerContent />
+      };
+    case 'objection-handler':
+      return {
+        title: 'Objection Handler',
+        icon: <Shield size={24} />,
+        component: <ObjectionHandlerContent />
+      };
+    case 'customer-persona':
+      return {
+        title: 'Customer Persona Generator',
+        icon: <User size={24} />,
+        component: <CustomerPersonaContent />
+      };
+    case 'meeting-agenda':
+      return {
+        title: 'Meeting Agenda Generator',
+        icon: <Calendar size={24} />,
+        component: <MeetingAgendaContent />
+      };
+    case 'image-generator':
+      return {
+        title: 'Image Generator',
+        icon: <Image size={24} />,
+        component: <ImageGeneratorContent />
+      };
+    case 'streaming-chat':
+      return {
+        title: 'AI Streaming Chat',
+        icon: <MessageSquare size={24} />,
+        component: <StreamingChat />
+      };
+    case 'form-validation':
+      return {
+        title: 'Real-Time Form Validation',
+        icon: <CheckCheck size={24} />,
+        component: <RealTimeFormValidation />
+      };
+    case 'live-deal-analysis':
+      return {
+        title: 'Live Deal Analysis',
+        icon: <BarChart3 size={24} />,
+        component: <LiveDealAnalysis />
+      };
+    case 'instant-response':
+      return {
+        title: 'Instant AI Response Generator',
+        icon: <Zap size={24} />,
+        component: <InstantAIResponseGenerator />
+      };
+    case 'document-analyzer-realtime':
+      return {
+        title: 'Document Analyzer Real-time',
+        icon: <FileSearch size={24} />,
+        component: <DocumentAnalyzerRealtime />
+      };
+    case 'realtime-email-composer':
+      return {
+        title: 'Real-Time Email Composer',
+        icon: <Mail size={24} />,
+        component: <RealTimeEmailComposer />
+      };
+    case 'voice-analysis-realtime':
+      return {
+        title: 'Voice Analysis Real-time',
+        icon: <Mic size={24} />,
+        component: <VoiceAnalysisRealtime />
+      };
+    case 'smart-search-realtime':
+      return {
+        title: 'Smart Search Real-time',
+        icon: <Search size={24} />,
+        component: <SmartSearchRealtime />
+      };
+    case 'auto-form-completer':
+      return {
+        title: 'Auto Form Completer',
+        icon: <FileText size={24} />,
+        component: <AutoFormCompleter />
+      };
+    default:
+      return {
+        title: 'AI Tool',
+        icon: <Brain size={24} />,
+        component: null
+      };
+  }
+};
 
 interface AIToolsProviderProps {
   children: ReactNode;
