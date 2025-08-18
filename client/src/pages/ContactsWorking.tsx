@@ -235,39 +235,60 @@ const ContactsWorking: React.FC = () => {
         
         {error && (
           <div style={{ padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #ef4444', borderRadius: '4px', marginBottom: '16px' }}>
-            <div style={{ color: '#dc2626', fontWeight: '500', marginBottom: '8px' }}>❌ Module Federation Setup Required</div>
-            <div style={{ color: '#7f1d1d', fontSize: '14px', marginBottom: '12px' }}>{error}</div>
+            <div style={{ color: '#dc2626', fontWeight: '500', marginBottom: '8px' }}>❌ Module Federation Container Missing</div>
+            <div style={{ color: '#7f1d1d', fontSize: '14px', marginBottom: '12px' }}>
+              Script loads successfully but no 'ContactsApp' container found. Your Bolt app needs proper Module Federation setup.
+            </div>
             
-            <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #f59e0b', borderRadius: '4px', fontSize: '12px' }}>
-              <div style={{ fontWeight: '500', marginBottom: '4px', color: '#92400e' }}>Troubleshooting:</div>
-              <div style={{ color: '#92400e', lineHeight: '1.4' }}>
-                1. Check browser console for specific error details<br/>
-                2. Verify vite.config.js has correct "name: 'ContactsApp'"<br/>
-                3. Ensure ContactsApp-wrapper.tsx exports default component<br/>
-                4. Try rebuilding and redeploying your Bolt app<br/>
-                5. Check network tab for failed resource loads
+            <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #f59e0b', borderRadius: '4px', fontSize: '12px', marginBottom: '12px' }}>
+              <div style={{ fontWeight: '500', marginBottom: '8px', color: '#92400e' }}>Required Fix:</div>
+              <div style={{ color: '#92400e', lineHeight: '1.5' }}>
+                1. Install: <code>npm install @originjs/vite-plugin-federation</code><br/>
+                2. Replace your vite.config.js with the one in docs/BOLT_SETUP_CHECKLIST.md<br/>
+                3. Create src/ContactsApp.tsx with the test component<br/>
+                4. Run <code>npm run build</code> and redeploy<br/>
+                5. Verify window.ContactsApp exists in browser console
               </div>
             </div>
             
-            <button
-              onClick={() => {
-                setError(null);
-                loadRemoteContacts(remoteUrl);
-              }}
-              style={{
-                marginTop: '8px',
-                padding: '4px 12px',
-                fontSize: '12px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                pointerEvents: 'auto'
-              }}
-            >
-              Retry Connection
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => {
+                  setError(null);
+                  loadRemoteContacts(remoteUrl);
+                }}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  pointerEvents: 'auto'
+                }}
+              >
+                Retry Connection
+              </button>
+              
+              <button
+                onClick={() => {
+                  window.open(`${remoteUrl}/assets/remoteEntry.js`, '_blank');
+                }}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '12px',
+                  backgroundColor: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  pointerEvents: 'auto'
+                }}
+              >
+                Check remoteEntry.js
+              </button>
+            </div>
           </div>
         )}
         
