@@ -268,7 +268,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Brain,
-      action: () => handleNavigation('/ai-tools', 'ai-tools'),
+      action: () => toggleDropdown('ai-tools'),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
@@ -287,8 +287,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: taskTools.length, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'content', label: 'Content', icon: Edit3, badge: contentTools.length, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-    { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' },
-    { id: 'ai-categories', label: 'AI', icon: Brain, badge: Object.values(aiToolCategories).flat().length, color: 'from-pink-500 to-rose-500', badgeColor: 'bg-pink-500' }
+    { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
   const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
@@ -359,6 +358,42 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
+                    
+                    {/* AI Tools Dropdown */}
+                    {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
+                      <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                        <div className="max-h-96 overflow-y-auto p-2">
+                          {Object.entries(aiToolCategories).map(([categoryName, tools]) => (
+                            <div key={categoryName} className="mb-4">
+                              <div className={`text-xs font-semibold uppercase tracking-wider px-3 py-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {categoryName}
+                              </div>
+                              {tools.map((tool) => (
+                                <button
+                                  key={tool.id}
+                                  onClick={() => handleAIToolClick(tool.id)}
+                                  className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
+                                >
+                                  {tool.icon ? <tool.icon size={14} className="opacity-80" /> : <Sparkles size={14} className="opacity-80" />}
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium">{tool.title}</div>
+                                  </div>
+                                  <ChevronDown size={12} className="opacity-30 rotate-270" />
+                                </button>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-2 border-t border-gray-200/30">
+                          <button
+                            onClick={() => handleNavigation('/ai-tools', 'ai-tools')}
+                            className={`w-full py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
+                          >
+                            View All AI Tools
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -369,8 +404,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 { id: 'tasks', items: taskTools, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
                 { id: 'communication', items: communicationTools, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
                 { id: 'content', items: contentTools, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-                { id: 'apps', items: connectedApps, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' },
-                { id: 'ai-categories', items: [], color: 'from-pink-500 to-rose-500', badgeColor: 'bg-pink-500' }
+                { id: 'apps', items: connectedApps, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
               ].map(menu => (
                 <div key={menu.id} className="relative">
                   <button
@@ -391,14 +425,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     {menu.id === 'communication' && <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'content' && <Edit3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'apps' && <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'ai-categories' && <Brain size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+
                     <span className="text-xs font-medium">
                       {menu.id === 'sales' ? 'Sales'
                         : menu.id === 'tasks' ? 'Tasks'
                         : menu.id === 'communication' ? 'Comm'
                         : menu.id === 'content' ? 'Content'
-                        : menu.id === 'apps' ? 'Apps'
-                        : 'AI'}
+                        : 'Apps'}
                     </span>
                     <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                     {renderBadge(
@@ -406,8 +439,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : menu.id === 'tasks' ? taskTools.length
                         : menu.id === 'communication' ? communicationTools.length
                         : menu.id === 'content' ? contentTools.length
-                        : menu.id === 'apps' ? connectedApps.length
-                        : Object.values(aiToolCategories).flat().length,
+                        : connectedApps.length,
                       menu.badgeColor
                     )}
                     {activeDropdown === menu.id && (
@@ -415,41 +447,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     )}
                   </button>
 
-                  {/* ===== AI dropdown content (categorized sections + View All button) ===== */}
-                  {menu.id === 'ai-categories' && activeDropdown === 'ai-categories' && (
-                    <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="max-h-96 overflow-y-auto p-2">
-                        {Object.entries(aiToolCategories).map(([categoryName, tools]) => (
-                          <div key={categoryName} className="mb-4">
-                            <div className={`text-xs font-semibold uppercase tracking-wider px-3 py-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {categoryName}
-                            </div>
-                            {tools.map((tool) => (
-                              <button
-                                key={tool.id}
-                                onClick={() => handleAIToolClick(tool.id)}
-                                className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
-                              >
-                                {tool.icon ? <tool.icon size={14} className="opacity-80" /> : <Sparkles size={14} className="opacity-80" />}
-                                <div className="flex-1">
-                                  <div className="text-sm font-medium">{tool.title}</div>
-                                </div>
-                                <ChevronDown size={12} className="opacity-30 rotate-270" />
-                              </button>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="p-2 border-t border-gray-200/30">
-                        <button
-                          onClick={() => handleNavigation('/ai-tools', 'ai-tools')}
-                          className={`w-full py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
-                        >
-                          View All AI Tools
-                        </button>
-                      </div>
-                    </div>
-                  )}
+
 
                   {/* Other dropdown panels (sales/tasks/communication/content/apps) — keep your existing code */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
