@@ -55,9 +55,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     const pendingTasks = Object.values(tasks).filter(task => !task.completed).length;
 
     const todayAppointments = Object.values(appointments).filter(apt => {
-      if (!apt.startTime) return false;
+      if (!apt.date || !apt.time) return false;
       const today = new Date();
-      const aptDate = new Date(apt.startTime);
+      const aptDate = new Date(`${apt.date}T${apt.time}`);
       return aptDate.toDateString() === today.toDateString() && apt.status === 'scheduled';
     }).length;
 

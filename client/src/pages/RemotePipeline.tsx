@@ -77,7 +77,24 @@ const RemotePipeline: React.FC = () => {
     if (iframe && bridgeRef.current) {
       const handleLoad = () => {
         console.log('📺 Remote pipeline iframe loaded');
+        
+        // Check if content actually loaded (not a 404 page)
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc && iframeDoc.title === 'Page not found') {
+            console.error('❌ Remote app not found - 404 error');
+            setError('The remote React app is not available at this URL. Please check if the app is properly deployed.');
+            setIsLoading(false);
+            setIsConnected(false);
+            return;
+          }
+        } catch (e) {
+          // Cross-origin restrictions prevent document access - this is normal
+          console.log('📝 Cross-origin iframe loaded (expected)');
+        }
+        
         setError(null);
+        setIsLoading(false);
         
         if (bridgeRef.current) {
           bridgeRef.current.setIframe(iframe);
@@ -92,7 +109,7 @@ const RemotePipeline: React.FC = () => {
 
       const handleError = () => {
         console.error('❌ Failed to load remote pipeline');
-        setError('Failed to load remote pipeline application');
+        setError('Network error: Could not connect to the remote pipeline application. Check your internet connection.');
         setIsLoading(false);
         setIsConnected(false);
       };
@@ -116,7 +133,7 @@ const RemotePipeline: React.FC = () => {
   };
 
   const handleOpenInNewTab = () => {
-    window.open(REMOTE_URL, '_blank');
+    window.open('https://cheery-syrniki-b5b6ca.netlify.app', '_blank');
   };
 
   return (
@@ -201,8 +218,8 @@ const RemotePipeline: React.FC = () => {
           src={REMOTE_URL}
           className="w-full h-full border-0"
           title="Remote Pipeline System"
-          allow="clipboard-read; clipboard-write"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-navigation"
+          allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
           loading="lazy"
         />
       </div>
@@ -214,9 +231,15 @@ const RemotePipeline: React.FC = () => {
           {isConnected && (
             <span className="text-green-600">● Bridge Active</span>
           )}
+          {error && (
+            <span className="text-red-600">● Connection Failed</span>
+          )}
         </div>
-        <div>
-          CRM Integration v1.0
+        <div className="flex items-center space-x-2">
+          <span>CRM Integration v1.0</span>
+          {!isLoading && !error && !isConnected && (
+            <span className="text-yellow-600">● Checking...</span>
+          )}
         </div>
       </div>
     </div>
