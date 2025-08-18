@@ -3,6 +3,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import DashboardHeader from '../dashboard/DashboardHeader';
 import KPICards from '../dashboard/KPICards';
 import MetricsCards from '../dashboard/MetricsCards';
+import Avatar from '../ui/Avatar';
+import { getInitials } from '../../utils/avatars';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -10,7 +12,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell, Area, AreaChart 
 } from 'recharts';
 import { 
-  TrendingUp, BarChart3, Target, Users, DollarSign, Activity
+  TrendingUp, BarChart3, Target, Users, DollarSign, Activity, Star, Building2
 } from 'lucide-react';
 import { useContactStore } from '@/hooks/useContactStore';
 import { useDealStore } from '../../store/dealStore';
@@ -75,6 +77,133 @@ const SalesPerformanceDashboard: React.FC = () => {
         <div className="mb-8">
           <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Performance Overview</h2>
           <MetricsCards />
+        </div>
+
+        {/* Top Contacts Section with Avatars - Same as Dashboard */}
+        <div className="mb-8">
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Top Performing Contacts</h2>
+          <Card className={`${
+            isDark 
+              ? 'bg-gray-800 border-gray-700' 
+              : 'bg-white border-gray-200'
+          } mb-8`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>
+                <Star className="h-5 w-5 mr-2 text-yellow-500" />
+                High-Value Business Relationships
+              </CardTitle>
+              <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                Your most valuable contacts and their estimated deal values
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.values(contacts).slice(0, 6).map((contact) => (
+                  <div 
+                    key={contact.id} 
+                    className={`flex items-center space-x-3 p-4 rounded-lg ${
+                      isDark 
+                        ? 'bg-gray-700 hover:bg-gray-600' 
+                        : 'bg-gray-50 hover:bg-gray-100'
+                    } transition-colors cursor-pointer`}
+                  >
+                    <Avatar
+                      name={contact.name}
+                      src={contact.avatarSrc}
+                      size="md"
+                      className="flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium truncate ${
+                        isDark ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {contact.name}
+                      </p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Building2 className="h-3 w-3 text-gray-400" />
+                        <p className={`text-sm truncate ${
+                          isDark ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {contact.company}
+                        </p>
+                      </div>
+                      <p className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      } mt-1`}>
+                        {contact.position}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600 text-sm">
+                        {contact.tags?.some(t => t.toLowerCase().includes('enterprise')) 
+                          ? '$50,000' 
+                          : contact.tags?.some(t => t.toLowerCase().includes('mid-market'))
+                            ? '$25,000'
+                            : '$10,000'
+                        }
+                      </p>
+                      <p className={`text-xs ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Est. Value
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Contact Avatars Summary Row */}
+              <div className={`mt-6 pt-4 border-t ${
+                isDark ? 'border-gray-600' : 'border-gray-200'
+              } flex items-center justify-between`}>
+                <div className="flex items-center space-x-3">
+                  <div className="flex -space-x-2">
+                    {Object.values(contacts).slice(0, 5).map((contact, index) => (
+                      <Avatar
+                        key={contact.id}
+                        name={contact.name}
+                        src={contact.avatarSrc}
+                        size="sm"
+                        className="border-2 border-white dark:border-gray-800 shadow-sm"
+                      />
+                    ))}
+                    {Object.keys(contacts).length > 5 && (
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium border-2 ${
+                        isDark 
+                          ? 'bg-gray-600 text-gray-200 border-gray-800' 
+                          : 'bg-gray-200 text-gray-600 border-white'
+                      }`}>
+                        +{Object.keys(contacts).length - 5}
+                      </div>
+                    )}
+                  </div>
+                  <span className={`text-sm ${
+                    isDark ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {Object.keys(contacts).length} active contacts
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-green-600 text-lg">
+                    {formatCurrency(
+                      Object.values(contacts).reduce((total, contact) => {
+                        if (contact.tags?.some(t => t.toLowerCase().includes('enterprise'))) return total + 50000;
+                        if (contact.tags?.some(t => t.toLowerCase().includes('mid-market'))) return total + 25000;
+                        return total + 10000;
+                      }, 0)
+                    )}
+                  </p>
+                  <p className={`text-xs ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    Total Portfolio Value
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Analytics Charts Section with same styling as dashboard */}
