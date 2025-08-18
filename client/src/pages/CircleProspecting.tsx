@@ -1,20 +1,8 @@
 import React, { useState } from 'react';
 import { useGemini } from '../services/geminiService';
 import { Target, Search, Download, User, Home, MapPin, CreditCard, Database, Brain } from 'lucide-react';
-import { MapContainer, TileLayer, Circle, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { icon } from 'leaflet';
 
 // Fix for default marker icon in Leaflet
-const defaultIcon = icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
 interface ProspectData {
   id: string;
   name: string;
@@ -37,7 +25,7 @@ const CircleProspecting: React.FC = () => {
   const [radius, setRadius] = useState<number>(1000); // Radius in meters
   const [searchAddress, setSearchAddress] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   
@@ -147,11 +135,11 @@ const CircleProspecting: React.FC = () => {
     return true;
   });
   
-  const getMarkerColor = (score?: number) => {
+  const getScoreColor = (score?: number) => {
     if (!score) return 'gray';
     if (score >= 80) return 'green';
     if (score >= 70) return 'blue';
-    if (score >= 60) return 'orange';
+    if (score >= 60) return 'yellow';
     return 'red';
   };
   
@@ -214,60 +202,6 @@ const CircleProspecting: React.FC = () => {
                   onChange={handleRadiusChange}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Data Points to Include:</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <input
-                      id="homeowner"
-                      type="checkbox"
-                      checked={true}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="homeowner" className="ml-2 block text-sm text-gray-700">
-                      Homeowner Status
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="contact"
-                      type="checkbox"
-                      checked={true}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="contact" className="ml-2 block text-sm text-gray-700">
-                      Contact Information
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="mortgage"
-                      type="checkbox"
-                      checked={true}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="mortgage" className="ml-2 block text-sm text-gray-700">
-                      Mortgage Data
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="income"
-                      type="checkbox"
-                      checked={true}
-                      readOnly
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="income" className="ml-2 block text-sm text-gray-700">
-                      Income Range
-                    </label>
-                  </div>
-                </div>
               </div>
               
               <div className="pt-4">
@@ -335,132 +269,78 @@ const CircleProspecting: React.FC = () => {
               </div>
             </div>
             
-            {viewMode === 'map' && (
-              <div className="h-[600px] w-full">
-                <MapContainer 
-                  center={center} 
-                  zoom={14} 
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  
-                  {/* Draw the radius circle */}
-                  <Circle center={center} radius={radius} pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 0.1 }} />
-                  
-                  {/* Place markers for each prospect */}
-                  {prospectsInRadius.map(prospect => (
-                    <Marker 
-                      key={prospect.id} 
-                      position={[prospect.lat, prospect.lng]} 
-                      icon={defaultIcon}
-                    >
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-bold">{prospect.name}</p>
-                          <p>{prospect.address}</p>
-                          <p className="mt-1">Home Value: ${prospect.homeValue?.toLocaleString()}</p>
-                          <p>Last Refinance: {prospect.lastRefinance}</p>
-                          <p className="mt-2">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              getMarkerColor(prospect.score) === 'green' ? 'bg-green-100 text-green-800' :
-                              getMarkerColor(prospect.score) === 'blue' ? 'bg-blue-100 text-blue-800' :
-                              getMarkerColor(prospect.score) === 'orange' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              Lead Score: {prospect.score}
-                            </span>
-                          </p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
-            )}
-            
             {viewMode === 'list' && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Address
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Home Value
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Mortgage
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Score
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {prospectsInRadius.map(prospect => (
-                      <tr key={prospect.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
-                              <User className="h-5 w-5 text-gray-500" />
+              <div className="p-4">
+                <div className="space-y-4">
+                  {prospectsInRadius.map((prospect) => (
+                    <div key={prospect.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center mb-2">
+                            <User size={18} className="text-gray-500 mr-2" />
+                            <h3 className="text-lg font-medium text-gray-900">{prospect.name}</h3>
+                            {prospect.score && (
+                              <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                getScoreColor(prospect.score) === 'green' ? 'bg-green-100 text-green-800' :
+                                getScoreColor(prospect.score) === 'blue' ? 'bg-blue-100 text-blue-800' :
+                                getScoreColor(prospect.score) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                Score: {prospect.score}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <MapPin size={14} className="mr-1" />
+                              {prospect.address}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{prospect.name}</div>
-                              <div className="text-sm text-gray-500">{prospect.email}</div>
+                            <div className="flex items-center">
+                              <CreditCard size={14} className="mr-1" />
+                              Home Value: ${prospect.homeValue?.toLocaleString()}
+                            </div>
+                            <div>
+                              Phone: {prospect.phone}
+                            </div>
+                            <div>
+                              Income: {prospect.income}
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{prospect.address}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">${prospect.homeValue?.toLocaleString()}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">${prospect.mortgageAmount?.toLocaleString()}</div>
-                          <div className="text-xs text-gray-500">Last refi: {prospect.lastRefinance}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            getMarkerColor(prospect.score) === 'green' ? 'bg-green-100 text-green-800' :
-                            getMarkerColor(prospect.score) === 'blue' ? 'bg-blue-100 text-blue-800' :
-                            getMarkerColor(prospect.score) === 'orange' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {prospect.score}/100
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900 mr-2">Add to Campaign</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          
+                          {prospect.occupation && (
+                            <div className="mt-2 text-sm text-gray-500">
+                              Occupation: {prospect.occupation}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="ml-4 flex space-x-2">
+                          <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Contact
+                          </button>
+                          <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
-          
-          <div className="flex justify-between">
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-              <Target size={16} className="mr-1" />
-              Add to Campaign
-            </button>
             
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <Download size={16} className="mr-1" />
-              Export Data
-            </button>
+            {viewMode === 'map' && (
+              <div className="p-4">
+                <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin size={48} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Interactive map view would be displayed here</p>
+                    <p className="text-sm text-gray-400 mt-1">Showing {prospectsInRadius.length} prospects in selected area</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -31,6 +31,10 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
 const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
 const SalesTools = lazy(() => import('./pages/SalesTools'));
+const LeadAutomation = lazy(() => import('./pages/LeadAutomation'));
+const CircleProspecting = lazy(() => import('./pages/CircleProspecting'));
+const VideoEmail = lazy(() => import('./pages/VideoEmail'));
+const TextMessages = lazy(() => import('./pages/TextMessages'));
 
 import './components/styles/design-system.css';
 
@@ -201,11 +205,19 @@ function App() {
                           />
                           <Route
                             path="/lead-automation"
-                            element={<PlaceholderPage title="Lead Automation" />}
+                            element={
+                              <ProtectedRoute>
+                                <LeadAutomation />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/circle-prospecting"
-                            element={<PlaceholderPage title="Circle Prospecting" />}
+                            element={
+                              <ProtectedRoute>
+                                <CircleProspecting />
+                              </ProtectedRoute>
+                            }
                           />
                           {/* Appointments already routed to /appointments above */}
                           <Route
@@ -262,11 +274,19 @@ function App() {
                           {/* ===== Dropdown: Communication ===== */}
                           <Route
                             path="/video-email"
-                            element={<PlaceholderPage title="Video Email" />}
+                            element={
+                              <ProtectedRoute>
+                                <VideoEmail />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/text-messages"
-                            element={<PlaceholderPage title="Text Messages" />}
+                            element={
+                              <ProtectedRoute>
+                                <TextMessages />
+                              </ProtectedRoute>
+                            }
                           />
                           {/* Email Composer goes to Communication page you already have */}
                           <Route
