@@ -13,13 +13,11 @@ import {
   Phone, Mail, Calendar, Award, Activity 
 } from 'lucide-react';
 import { useContactStore } from '@/hooks/useContactStore';
-import { contactStore } from '@/store/contactStore';
-import { dealStore } from '@/store/dealStore';
 
 const SalesPerformanceDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30');
   const { contacts } = useContactStore();
-  const deals = dealStore.getState().deals;
+  const deals = {}; // Mock deals data structure
 
   // Calculate analytics from real data
   const analytics = useMemo(() => {
