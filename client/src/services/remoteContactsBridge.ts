@@ -113,6 +113,19 @@ export class RemoteContactsBridge {
     this.sendMessage('LOCAL_CONTACT_DELETED', { id: contactId });
   }
 
+  // Navigation helpers that can be called from CRM
+  sendNavigationCapabilities() {
+    this.sendMessage('NAVIGATION_AVAILABLE', {
+      routes: [
+        { path: '/', name: 'Dashboard' },
+        { path: '/contacts', name: 'Contacts' },
+        { path: '/deals', name: 'Deals' },
+        { path: '/tasks', name: 'Tasks' },
+        { path: '/calendar', name: 'Calendar' }
+      ]
+    });
+  }
+
   getConnectionStatus() {
     return this.isConnected;
   }

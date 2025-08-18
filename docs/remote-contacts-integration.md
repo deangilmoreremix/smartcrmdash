@@ -176,6 +176,7 @@ const contact = {
 - `LOCAL_CONTACT_CREATED` - A contact was created in CRM
 - `LOCAL_CONTACT_UPDATED` - A contact was updated in CRM
 - `LOCAL_CONTACT_DELETED` - A contact was deleted in CRM
+- `NAVIGATION_AVAILABLE` - Available CRM routes for navigation
 
 ### From Remote Module to CRM
 - `REMOTE_READY` - Remote module is loaded and ready
@@ -184,6 +185,9 @@ const contact = {
 - `CONTACT_DELETED` - A contact was deleted in remote module
 - `REQUEST_CONTACTS` - Request current CRM contact data
 - `SYNC_REQUEST` - Request full synchronization
+- `NAVIGATE` - Navigate to a specific CRM route
+- `NAVIGATE_BACK` - Navigate back in browser history
+- `NAVIGATE_TO_DASHBOARD` - Navigate to CRM dashboard
 
 ## Testing the Integration
 

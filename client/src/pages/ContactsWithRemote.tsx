@@ -61,6 +61,28 @@ const ContactsWithRemote: React.FC = () => {
       fetchContacts();
     });
 
+    bridge.onMessage('NAVIGATE', (data) => {
+      console.log('🧭 Remote requesting navigation to:', data.route);
+      if (data.route && typeof data.route === 'string') {
+        // Use window.location for navigation
+        if (data.route.startsWith('/')) {
+          window.location.pathname = data.route;
+        } else {
+          window.location.hash = '#/' + data.route;
+        }
+      }
+    });
+
+    bridge.onMessage('NAVIGATE_BACK', () => {
+      console.log('⬅️ Remote requesting navigation back');
+      window.history.back();
+    });
+
+    bridge.onMessage('NAVIGATE_TO_DASHBOARD', () => {
+      console.log('🏠 Remote requesting navigation to dashboard');
+      window.location.pathname = '/';
+    });
+
     return () => {
       bridge.disconnect();
     };
@@ -82,8 +104,11 @@ const ContactsWithRemote: React.FC = () => {
         bridgeRef.current?.initializeCRM(crmContacts, {
           name: 'CRM System',
           version: '1.0.0',
-          features: ['contacts', 'deals', 'tasks', 'ai-tools']
+          features: ['contacts', 'deals', 'tasks', 'ai-tools', 'navigation']
         });
+        
+        // Send navigation capabilities
+        bridgeRef.current?.sendNavigationCapabilities();
       }, 2000);
     }
   };
@@ -211,6 +236,19 @@ const ContactsWithRemote: React.FC = () => {
             this.sendToCRM('REQUEST_CONTACTS', {});
           }
 
+          // Navigation methods for remote module to use
+          navigateTo(route) {
+            this.sendToCRM('NAVIGATE', { route });
+          }
+
+          navigateBack() {
+            this.sendToCRM('NAVIGATE_BACK', {});
+          }
+
+          navigateToDashboard() {
+            this.sendToCRM('NAVIGATE_TO_DASHBOARD', {});
+          }
+
           sendToCRM(type, data) {
             if (window.parent) {
               window.parent.postMessage({ type, data }, this.parentOrigin);
@@ -226,6 +264,11 @@ const ContactsWithRemote: React.FC = () => {
         window.notifyContactCreated = (contact) => window.crmBridge?.notifyContactCreated(contact);
         window.notifyContactUpdated = (contact) => window.crmBridge?.notifyContactUpdated(contact);
         window.notifyContactDeleted = (contactId) => window.crmBridge?.notifyContactDeleted(contactId);
+        
+        // Navigation helper functions
+        window.navigateTo = (route) => window.crmBridge?.navigateTo(route);
+        window.navigateBack = () => window.crmBridge?.navigateBack();
+        window.navigateToDashboard = () => window.crmBridge?.navigateToDashboard();
         
         console.log('✅ CRM Bridge injected successfully');
       `;
