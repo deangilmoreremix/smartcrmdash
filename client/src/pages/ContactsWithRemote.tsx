@@ -41,14 +41,10 @@ const ContactsWithRemote: React.FC = () => {
     fetchContacts();
   };
 
-  const handleSettingsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Settings button clicked, current showSettings:', showSettings);
-    setShowSettings(prev => {
-      console.log('Setting showSettings from', prev, 'to', !prev);
-      return !prev;
-    });
+  const handleSettingsClick = () => {
+    console.log('Settings button clicked! Current showSettings:', showSettings);
+    setShowSettings(!showSettings);
+    console.log('After click, showSettings should be:', !showSettings);
   };
 
   return (
@@ -66,20 +62,29 @@ const ContactsWithRemote: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <div 
+            {/* Test button to verify clicks work */}
+            <button 
+              onClick={() => {console.log('TEST BUTTON CLICKED!'); setShowSettings(true);}}
+              className="px-3 py-2 bg-green-500 text-white rounded text-sm"
+            >
+              Test Open
+            </button>
+            
+            <button 
               onClick={handleSettingsClick}
+              onMouseDown={(e) => console.log('Mouse down on settings button')}
+              onMouseUp={(e) => console.log('Mouse up on settings button')}
               className={`p-3 rounded-md transition-colors cursor-pointer border-2 ${
                 showSettings 
                   ? 'bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-300' 
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 border-gray-300'
               }`}
               title="Remote Settings - Click to configure Module Federation"
-              role="button"
-              tabIndex={0}
+              type="button"
               style={{ minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <Settings className="h-6 w-6" />
-            </div>
+            </button>
             
             {remoteUrl && (
               <a
@@ -107,6 +112,13 @@ const ContactsWithRemote: React.FC = () => {
             
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
               <strong>Test:</strong> Settings panel is working! Current state: showSettings = {String(showSettings)}
+              <br />
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs"
+              >
+                Close Panel (Test Button)
+              </button>
             </div>
             
             <div className="space-y-3">
