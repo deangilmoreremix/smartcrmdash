@@ -71,6 +71,11 @@ const ContactsWithRemote: React.FC = () => {
     if (iframeRef.current && bridgeRef.current) {
       bridgeRef.current.setIframe(iframeRef.current);
       
+      // Try to inject bridge code into remote module
+      setTimeout(() => {
+        injectBridgeCode();
+      }, 1000);
+      
       // Wait for remote app to initialize, then send CRM data
       setTimeout(() => {
         const crmContacts = Object.values(contacts).map(convertToCRMContact);
@@ -79,8 +84,186 @@ const ContactsWithRemote: React.FC = () => {
           version: '1.0.0',
           features: ['contacts', 'deals', 'tasks', 'ai-tools']
         });
-      }, 1500);
+      }, 2000);
     }
+  };
+
+  // Inject bridge code into the remote iframe
+  const injectBridgeCode = () => {
+    if (!iframeRef.current) return;
+
+    try {
+      const iframe = iframeRef.current;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      
+      if (!iframeDoc) {
+        console.warn('⚠️ Cannot access iframe document - cross-origin restrictions');
+        return;
+      }
+
+      // Create script element with bridge code
+      const script = iframeDoc.createElement('script');
+      script.textContent = `
+        console.log('🚀 Injecting CRM Bridge into remote module');
+        
+        // CRM Integration Bridge for Remote Contacts Module
+        class CRMBridge {
+          constructor() {
+            this.parentOrigin = '${window.location.origin}';
+            this.isConnected = false;
+            this.setupMessageListener();
+            this.notifyReady();
+          }
+
+          setupMessageListener() {
+            window.addEventListener('message', (event) => {
+              if (event.origin !== this.parentOrigin) {
+                return;
+              }
+
+              const { type, data } = event.data;
+              console.log('📨 Remote module received:', type, data);
+
+              switch (type) {
+                case 'CRM_INIT':
+                  this.handleCRMInit(data);
+                  break;
+                case 'CONTACTS_SYNC':
+                  this.handleContactsSync(data.contacts);
+                  break;
+                case 'LOCAL_CONTACT_CREATED':
+                  this.handleLocalContactCreated(data);
+                  break;
+                case 'LOCAL_CONTACT_UPDATED':
+                  this.handleLocalContactUpdated(data);
+                  break;
+                case 'LOCAL_CONTACT_DELETED':
+                  this.handleLocalContactDeleted(data);
+                  break;
+              }
+            });
+          }
+
+          notifyReady() {
+            this.sendToCRM('REMOTE_READY', { 
+              moduleInfo: {
+                name: 'Remote Contacts',
+                version: '1.0.0',
+                capabilities: ['create', 'read', 'update', 'delete']
+              }
+            });
+          }
+
+          handleCRMInit(data) {
+            console.log('🚀 CRM initialized with', data.contacts?.length || 0, 'contacts');
+            this.isConnected = true;
+            
+            // Try to integrate with existing contact management
+            if (data.contacts && window.loadContactsFromCRM) {
+              window.loadContactsFromCRM(data.contacts);
+            } else {
+              console.log('💾 CRM contacts available:', data.contacts);
+            }
+          }
+
+          handleContactsSync(contacts) {
+            console.log('🔄 Syncing', contacts.length, 'contacts from CRM');
+            if (window.loadContactsFromCRM) {
+              window.loadContactsFromCRM(contacts);
+            }
+          }
+
+          handleLocalContactCreated(contact) {
+            console.log('➕ Local contact created:', contact);
+            if (window.addContactFromCRM) {
+              window.addContactFromCRM(contact);
+            }
+          }
+
+          handleLocalContactUpdated(contact) {
+            console.log('✏️ Local contact updated:', contact);
+            if (window.updateContactFromCRM) {
+              window.updateContactFromCRM(contact);
+            }
+          }
+
+          handleLocalContactDeleted(data) {
+            console.log('🗑️ Local contact deleted:', data.id);
+            if (window.deleteContactFromCRM) {
+              window.deleteContactFromCRM(data.id);
+            }
+          }
+
+          // Methods that the remote module can call
+          notifyContactCreated(contact) {
+            this.sendToCRM('CONTACT_CREATED', contact);
+          }
+
+          notifyContactUpdated(contact) {
+            this.sendToCRM('CONTACT_UPDATED', contact);
+          }
+
+          notifyContactDeleted(contactId) {
+            this.sendToCRM('CONTACT_DELETED', { id: contactId });
+          }
+
+          requestCRMContacts() {
+            this.sendToCRM('REQUEST_CONTACTS', {});
+          }
+
+          sendToCRM(type, data) {
+            if (window.parent) {
+              window.parent.postMessage({ type, data }, this.parentOrigin);
+              console.log('📤 Sent to CRM:', type, data);
+            }
+          }
+        }
+
+        // Initialize the bridge and make it globally available
+        window.crmBridge = new CRMBridge();
+        
+        // Helper functions for the remote module to use
+        window.notifyContactCreated = (contact) => window.crmBridge?.notifyContactCreated(contact);
+        window.notifyContactUpdated = (contact) => window.crmBridge?.notifyContactUpdated(contact);
+        window.notifyContactDeleted = (contactId) => window.crmBridge?.notifyContactDeleted(contactId);
+        
+        console.log('✅ CRM Bridge injected successfully');
+      `;
+
+      // Append script to iframe document
+      iframeDoc.head.appendChild(script);
+      console.log('💉 Bridge code injected into remote module');
+
+    } catch (error) {
+      console.warn('⚠️ Failed to inject bridge code:', (error as Error).message);
+      console.log('📝 This is expected with cross-origin iframes. Attempting postMessage approach...');
+      
+      // Try postMessage approach as fallback
+      setTimeout(() => {
+        attemptPostMessageBridge();
+      }, 500);
+    }
+  };
+
+  // Attempt to setup bridge via postMessage
+  const attemptPostMessageBridge = () => {
+    if (!iframeRef.current?.contentWindow) return;
+    
+    console.log('📡 Attempting bridge setup via postMessage');
+    
+    // Send multiple setup attempts with different approaches
+    const messages = [
+      { type: 'CRM_BRIDGE_SETUP', origin: window.location.origin },
+      { type: 'PARENT_READY', data: { crmOrigin: window.location.origin } },
+      { type: 'INIT_COMMUNICATION', data: { ready: true } }
+    ];
+    
+    messages.forEach((message, index) => {
+      setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage(message, 'https://taupe-sprinkles-83c9ee.netlify.app');
+        console.log(`📤 Sent setup message ${index + 1}:`, message.type);
+      }, index * 200);
+    });
   };
 
   // Notify remote when local contacts change
