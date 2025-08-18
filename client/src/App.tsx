@@ -45,6 +45,8 @@ const ContentLibrary = lazy(() => import('./pages/ContentLibrary'));
 const FormsAndSurveys = lazy(() => import('./pages/FormsAndSurveys'));
 const VoiceProfiles = lazy(() => import('./pages/VoiceProfiles'));
 const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
+const Appointments = lazy(() => import('./pages/Appointments'));
+const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 
 import './components/styles/design-system.css';
 
@@ -190,7 +192,7 @@ function App() {
                             path="/appointments"
                             element={
                               <ProtectedRoute>
-                                <TasksNew />
+                                <Appointments />
                               </ProtectedRoute>
                             }
                           />
