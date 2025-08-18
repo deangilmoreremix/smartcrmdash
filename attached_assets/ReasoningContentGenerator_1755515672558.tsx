@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useOpenAI } from '../../services/openaiLegacyService';
+import { useGemini } from '../../services/geminiService';
 import AIToolContent from '../shared/AIToolContent';
 import { 
   Brain, 
@@ -11,11 +11,7 @@ import {
   Users, 
   MessageSquare,
   Sparkles,
-  Zap,
-  Mail,
-  Phone,
-  Shield,
-  Hash
+  Zap
 } from 'lucide-react';
 
 interface ReasoningContentGeneratorProps {
@@ -25,7 +21,7 @@ interface ReasoningContentGeneratorProps {
 const ReasoningContentGenerator: React.FC<ReasoningContentGeneratorProps> = ({ 
   contentType = 'email' 
 }) => {
-  const openai = useOpenAI();
+  const gemini = useGemini();
   
   const [formData, setFormData] = useState({
     audience: '',
@@ -87,7 +83,9 @@ const ReasoningContentGenerator: React.FC<ReasoningContentGeneratorProps> = ({
         Format your response as a strategic analysis that would help a sales or marketing professional understand the reasoning behind the content creation approach.
       `;
       
-      const reasoningText = await openai.generateReasoning(reasoningPrompt);
+      const reasoningResult = await gemini.getGenerativeModel({ model: 'gemini-pro' }).generateContent(reasoningPrompt);
+      const reasoningResponse = await reasoningResult.response;
+      const reasoningText = reasoningResponse.text();
       setReasoningInsights(reasoningText);
       
       // Now generate the actual content using the reasoning insights
@@ -111,7 +109,9 @@ const ReasoningContentGenerator: React.FC<ReasoningContentGeneratorProps> = ({
         ${getContentSpecificInstructions()}
       `;
       
-      const contentText = await openai.generateScript(contentPrompt);
+      const contentResult = await gemini.getGenerativeModel({ model: 'gemini-pro' }).generateContent(contentPrompt);
+      const contentResponse = await contentResult.response;
+      const contentText = contentResponse.text();
       
       setResult(contentText);
       setCopied(false);
@@ -324,45 +324,107 @@ const ReasoningContentGenerator: React.FC<ReasoningContentGeneratorProps> = ({
           <div className="flex justify-between items-center mb-2">
             <button 
               onClick={() => setReasoningVisible(!reasoningVisible)}
-              className="flex items-center text-purple-600 hover:text-purple-700"
+              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center"
             >
-              <Brain className="h-4 w-4 mr-2" />
+              <Brain size={16} className="mr-1" />
               {reasoningVisible ? 'Hide AI Reasoning' : 'Show AI Reasoning'}
             </button>
-            <button
-              onClick={handleCopy}
-              className="flex items-center px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-            >
-              {copied ? <Check className="h-4 w-4 mr-1 text-green-600" /> : <Copy className="h-4 w-4 mr-1" />}
-              {copied ? 'Copied!' : 'Copy Result'}
-            </button>
+            
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleCopy}
+                className={`inline-flex items-center px-3 py-1.5 rounded text-sm transition-colors ${
+                  copied 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {copied ? (
+                  <>
+                    <Check size={16} className="mr-1" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} className="mr-1" />
+                    Copy to Clipboard
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           
           {reasoningVisible && reasoningInsights && (
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-4">
-              <h4 className="font-medium text-purple-800 mb-2 flex items-center">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Strategic Reasoning
-              </h4>
-              <div className="text-sm text-purple-700 whitespace-pre-wrap">
+            <div className="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-100">
+              <div className="flex items-center mb-2">
+                <Sparkles size={16} className="text-purple-600 mr-2" />
+                <h4 className="font-medium text-purple-800">AI Reasoning Insights</h4>
+              </div>
+              <div className="text-sm text-gray-700 whitespace-pre-line">
                 {reasoningInsights}
               </div>
             </div>
           )}
-          
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-800 mb-3 flex items-center">
-              {getContentIcon()}
-              <span className="ml-2">Generated {getContentTitle()}</span>
-            </h4>
-            <div className="text-sm text-gray-700 whitespace-pre-wrap">
-              {result}
-            </div>
-          </div>
         </div>
       )}
     </div>
   );
 };
+
+// Additional components for the icons
+const Mail = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <rect width="20" height="16" x="2" y="4" rx="2"/>
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+  </svg>
+);
+
+const Shield = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+);
+
+const Hash = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <line x1="4" x2="20" y1="9" y2="9"/>
+    <line x1="4" x2="20" y1="15" y2="15"/>
+    <line x1="10" x2="8" y1="3" y2="21"/>
+    <line x1="16" x2="14" y1="3" y2="21"/>
+  </svg>
+);
 
 export default ReasoningContentGenerator;
