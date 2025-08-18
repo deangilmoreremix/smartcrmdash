@@ -2,14 +2,13 @@
 import React, { useState } from 'react';
 import { Settings, ExternalLink, Monitor } from 'lucide-react';
 import RemoteContactsLoader from '../components/RemoteContactsLoader';
-import RemoteContactsIntegration from '../components/contacts/RemoteContactsIntegration';
+import AutoLoadingRemoteContacts from '../components/contacts/AutoLoadingRemoteContacts';
 import ContactsEnhanced from './Contacts'; // Your existing contacts component
 import { useContactStore } from '../hooks/useContactStore';
 
 const ContactsWithRemote: React.FC = () => {
-  const [remoteUrl, setRemoteUrl] = useState<string | null>('https://taupe-sprinkles-83c9ee.netlify.app/');
-  const [useRemote, setUseRemote] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
   
   console.log('ContactsWithRemote rendered, showSettings:', showSettings);
   
@@ -65,7 +64,7 @@ const ContactsWithRemote: React.FC = () => {
               Contacts
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {useRemote && remoteUrl ? 'Using remote contacts app' : 'Using local contacts'}
+              {manualMode ? 'Manual configuration mode' : 'Smart auto-loading contacts'}
             </p>
           </div>
           
@@ -101,46 +100,41 @@ const ContactsWithRemote: React.FC = () => {
           </div>
         </div>
 
-        {/* Remote Settings Panel */}
+        {/* Advanced Settings Panel */}
         {showSettings && (
           <div className="mt-4 p-6 bg-blue-50 dark:bg-gray-700 rounded-lg border-2 border-blue-200">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              🔧 Module Federation Configuration
+              ⚡ Smart Contact Loading
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Connect your deployed Bolt contacts app to replace the local contacts interface.
+              Auto-loading system tries multiple remote sources and falls back to local contacts seamlessly.
             </p>
             
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm">
-              <strong>Success!</strong> Settings panel is working! Current state: showSettings = {String(showSettings)}
+              <strong>✨ No Configuration Needed!</strong> The system automatically detects and loads the best available contact module.
             </div>
             
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Remote App URL
-                </label>
-                <input
-                  type="url"
-                  value={remoteUrl || ''}
-                  onChange={(e) => setRemoteUrl(e.target.value || null)}
-                  placeholder="https://your-bolt-contacts-app.vercel.app"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                />
-              </div>
-              
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  id="useRemote"
-                  checked={useRemote}
-                  onChange={(e) => setUseRemote(e.target.checked)}
-                  disabled={!remoteUrl}
+                  id="manualMode"
+                  checked={manualMode}
+                  onChange={(e) => setManualMode(e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <label htmlFor="useRemote" className="text-xs text-gray-700 dark:text-gray-300">
-                  Use remote contacts app (requires URL above)
+                <label htmlFor="manualMode" className="text-xs text-gray-700 dark:text-gray-300">
+                  Enable manual configuration mode (for developers)
                 </label>
+              </div>
+              
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                <p><strong>Auto-loading sources:</strong></p>
+                <ul className="list-disc list-inside ml-2 mt-1">
+                  <li>taupe-sprinkles-83c9ee.netlify.app</li>
+                  <li>contacts-app.vercel.app</li>
+                  <li>your-backup-contacts.netlify.app</li>
+                </ul>
               </div>
               
               <div className="flex space-x-2 pt-2">
@@ -150,18 +144,6 @@ const ContactsWithRemote: React.FC = () => {
                 >
                   Close
                 </button>
-                <button
-                  onClick={() => {
-                    if (remoteUrl) {
-                      setUseRemote(true);
-                      console.log('Enabling remote contacts with URL:', remoteUrl);
-                    }
-                  }}
-                  disabled={!remoteUrl}
-                  className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                >
-                  Apply
-                </button>
               </div>
             </div>
           </div>
@@ -170,13 +152,13 @@ const ContactsWithRemote: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1">
-        {useRemote && remoteUrl ? (
-          <RemoteContactsIntegration
-            remoteUrl={remoteUrl}
+        {manualMode ? (
+          <ContactsEnhanced />
+        ) : (
+          <AutoLoadingRemoteContacts
+            fallbackComponent={ContactsEnhanced}
             onContactSync={fetchContacts}
           />
-        ) : (
-          <ContactsEnhanced />
         )}
       </div>
     </div>
