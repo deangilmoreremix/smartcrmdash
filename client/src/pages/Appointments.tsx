@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { GlassCard } from '../components/ui/GlassCard';
-import { ModernButton } from '../components/ui/ModernButton';
 import { 
   Clock, 
   User, 
@@ -366,7 +364,7 @@ const Appointments: React.FC = () => {
           <p className="text-gray-600 mt-1">Schedule and manage your meetings with contacts</p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <ModernButton 
+          <button 
             onClick={() => {
               setIsEditing(false);
               setFormData({
@@ -383,18 +381,17 @@ const Appointments: React.FC = () => {
               });
               setShowAppointmentForm(true);
             }}
-            variant="primary"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
           >
             <Plus size={18} className="mr-1" />
             New Appointment
-          </ModernButton>
+          </button>
         </div>
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <GlassCard className="mb-6">
+          <div className="bg-white rounded-lg shadow-sm mb-6">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold">Calendar</h2>
             </div>
@@ -413,9 +410,9 @@ const Appointments: React.FC = () => {
                 />
               </div>
             </div>
-          </GlassCard>
+          </div>
           
-          <GlassCard>
+          <div className="bg-white rounded-lg shadow-sm">
             <div className="p-4 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Upcoming Appointments</h2>
@@ -479,43 +476,39 @@ const Appointments: React.FC = () => {
               )}
               
               <div className="mt-2 text-center">
-                <ModernButton variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                <button className="text-sm text-blue-600 hover:text-blue-800">
                   View All Appointments
-                </ModernButton>
+                </button>
               </div>
             </div>
-          </GlassCard>
+          </div>
         </div>
         
         <div className="lg:col-span-2">
-          <GlassCard>
+          <div className="bg-white rounded-lg shadow-sm">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <ModernButton 
+                <button 
                   onClick={() => {
                     const prevDay = new Date(selectedDate);
                     prevDay.setDate(prevDay.getDate() - 1);
                     handleDateChange(prevDay);
                   }}
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 rounded-full"
+                  className="p-1 rounded-full hover:bg-gray-100"
                 >
                   <ChevronLeft size={18} />
-                </ModernButton>
+                </button>
                 <h2 className="text-lg font-semibold">{formatDateHeader(selectedDate)}</h2>
-                <ModernButton 
+                <button 
                   onClick={() => {
                     const nextDay = new Date(selectedDate);
                     nextDay.setDate(nextDay.getDate() + 1);
                     handleDateChange(nextDay);
                   }}
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 rounded-full"
+                  className="p-1 rounded-full hover:bg-gray-100"
                 >
                   <ChevronRight size={18} />
-                </ModernButton>
+                </button>
               </div>
               <div className="flex items-center">
                 <div className="relative mr-2">
@@ -540,9 +533,9 @@ const Appointments: React.FC = () => {
                     <option value="in-person">In Person</option>
                   </select>
                 </div>
-                <ModernButton variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                <button className="text-blue-600 text-sm hover:text-blue-800">
                   Share Calendar
-                </ModernButton>
+                </button>
               </div>
             </div>
             
@@ -590,45 +583,30 @@ const Appointments: React.FC = () => {
                             
                             <div className="flex space-x-2">
                               {appointment.type === 'video' && (
-                                <ModernButton 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="p-1 text-purple-600 hover:text-purple-800" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    selectAppointment(appointment.id);
-                                  }}
-                                >
+                                <button className="p-1 text-purple-600 hover:text-purple-800" onClick={(e) => {
+                                  e.stopPropagation();
+                                  selectAppointment(appointment.id);
+                                }}>
                                   <Video size={14} />
-                                </ModernButton>
+                                </button>
                               )}
                               {appointment.type === 'phone' && (
-                                <ModernButton 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="p-1 text-blue-600 hover:text-blue-800" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (appointment.contactPhone) {
-                                      window.open(`tel:${appointment.contactPhone}`);
-                                    }
-                                  }}
-                                >
+                                <button className="p-1 text-blue-600 hover:text-blue-800" onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (appointment.contactPhone) {
+                                    window.open(`tel:${appointment.contactPhone}`);
+                                  }
+                                }}>
                                   <Phone size={14} />
-                                </ModernButton>
+                                </button>
                               )}
                               {appointment.contactEmail && (
-                                <ModernButton 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="p-1 text-red-600 hover:text-red-800" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(`mailto:${appointment.contactEmail}`);
-                                  }}
-                                >
+                                <button className="p-1 text-red-600 hover:text-red-800" onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(`mailto:${appointment.contactEmail}`);
+                                }}>
                                   <Mail size={14} />
-                                </ModernButton>
+                                </button>
                               )}
                             </div>
                           </div>
@@ -797,21 +775,20 @@ const Appointments: React.FC = () => {
                     </div>
                     
                     <div className="mt-4 flex justify-end space-x-2">
-                      <ModernButton 
+                      <button 
                         type="button"
                         onClick={() => {
                           setShowAppointmentForm(false);
                           selectTimeSlot(null);
                         }}
-                        variant="outline"
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                       >
                         Cancel
-                      </ModernButton>
-                      <ModernButton 
+                      </button>
+                      <button 
                         type="submit"
                         disabled={isSubmitting}
-                        variant="primary"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                       >
                         {isSubmitting ? (
                           <>
@@ -823,17 +800,17 @@ const Appointments: React.FC = () => {
                             {isEditing ? 'Update' : 'Schedule'} Appointment
                           </>
                         )}
-                      </ModernButton>
+                      </button>
                     </div>
                   </form>
                 </div>
               )}
             </div>
-          </GlassCard>
+          </div>
           
           {/* Appointments for selected date */}
           {appointmentsForSelectedDate.length > 0 && (
-            <GlassCard className="mt-6 p-6">
+            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-lg font-semibold mb-4">Appointments for {selectedDate.toLocaleDateString()}</h2>
               <div className="divide-y">
                 {appointmentsForSelectedDate.map(appointment => (
@@ -875,21 +852,18 @@ const Appointments: React.FC = () => {
                         <div className="mt-3 flex flex-wrap gap-2">
                           {appointment.status === 'scheduled' && (
                             <>
-                              <ModernButton 
+                              <button 
                                 onClick={() => handleEditAppointment(appointment)}
-                                variant="outline"
-                                size="sm"
+                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"
                               >
                                 Reschedule
-                              </ModernButton>
-                              <ModernButton 
+                              </button>
+                              <button 
                                 onClick={() => handleAppointmentStatusChange(appointment.id, 'canceled')}
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
+                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50 text-red-600"
                               >
                                 Cancel
-                              </ModernButton>
+                              </button>
                             </>
                           )}
                           {appointment.type === 'video' && (
