@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAITools } from '../components/AIToolsProvider';
+import React, { useState } from 'react';
+import { useAITools, AIToolType } from '../components/AIToolsProvider';
 import { 
   Brain, 
   Mail, 
@@ -7,62 +7,22 @@ import {
   FileText, 
   Phone, 
   Target, 
-  FileSearch, 
   TrendingUp, 
   BarChart3,
   PieChart, 
-  ChevronRight,
-  CheckCheck,
-  ArrowRight,
-  Play,
-  User,
-  Clock,
-  Star,
-  ExternalLink,
-  BarChart,
   Users,
-  Briefcase,
   Eye,
   Image,
-  Mic,
   Search,
-  Zap,
-  MessagesSquare,
-  CheckCircle,
-  Sparkles,
-  Shield,
-  Volume2,
-  Reply,
   Calendar,
-  X
+  Lightbulb,
+  Bot
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import StreamingChat from '../components/aiTools/StreamingChat';
-import RealTimeFormValidation from '../components/aiTools/RealTimeFormValidation';
-import LiveDealAnalysis from '../components/aiTools/LiveDealAnalysis';
-import InstantAIResponseGenerator from '../components/aiTools/InstantAIResponseGenerator';
-import DocumentAnalyzerRealtime from '../components/aiTools/DocumentAnalyzerRealtime';
-import RealTimeEmailComposer from '../components/aiTools/RealTimeEmailComposer';
-import VoiceAnalysisRealtime from '../components/aiTools/VoiceAnalysisRealtime';
-import SmartSearchRealtime from '../components/aiTools/SmartSearchRealtime';
-import AutoFormCompleter from '../components/aiTools/AutoFormCompleter';
-import CallScriptContent from '../components/aiTools/CallScriptContent';
-import EmailResponseContent from '../components/aiTools/EmailResponseContent';
-import MeetingAgendaContent from '../components/aiTools/MeetingAgendaContent';
-import CustomerPersonaContent from '../components/aiTools/CustomerPersonaContent';
-import ImageGeneratorContent from '../components/aiTools/ImageGeneratorContent';
-import FunctionAssistantContent from '../components/aiTools/FunctionAssistantContent';
-import ObjectionHandlerContent from '../components/aiTools/ObjectionHandlerContent';
-import ProposalGenerator from '../components/aiTools/ProposalGenerator';
-import MeetingSummaryContent from '../components/aiTools/MeetingSummaryContent';
-import SocialMediaGenerator from '../components/aiTools/SocialMediaGenerator';
 
 const AITools: React.FC = () => {
-  const { openTool, currentTool, closeTool } = useAITools();
+  const { openTool } = useAITools();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [showDemo, setShowDemo] = useState(false);
-  const [activeDemoTool, setActiveDemoTool] = useState<string | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Tools' },
