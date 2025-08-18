@@ -15,6 +15,7 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [iframeSrc, setIframeSrc] = useState('');
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'failed'>('checking');
   
   const {
     contacts,
@@ -28,6 +29,40 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
     // Clean up the URL and set iframe source
     const cleanUrl = remoteUrl.endsWith('/') ? remoteUrl.slice(0, -1) : remoteUrl;
     setIframeSrc(cleanUrl);
+    
+    // Reset loading state when URL changes
+    setIsIframeLoaded(false);
+    setConnectionStatus('checking');
+    
+    // Test if URL is accessible
+    const testConnection = async () => {
+      try {
+        console.log('Testing connection to:', cleanUrl);
+        const response = await fetch(cleanUrl, { 
+          method: 'HEAD', 
+          mode: 'no-cors',
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
+        console.log('Connection test completed');
+        setConnectionStatus('connected');
+      } catch (error) {
+        console.warn('Connection test failed:', error);
+        setConnectionStatus('failed');
+        // Still try to load iframe even if HEAD request fails
+      }
+    };
+    
+    testConnection();
+    
+    // Set a maximum timeout for loading
+    const loadTimeout = setTimeout(() => {
+      if (!isIframeLoaded) {
+        console.warn('Remote contacts app took too long to load');
+        setIsIframeLoaded(true); // Force show iframe
+      }
+    }, 30000); // 30 second timeout
+    
+    return () => clearTimeout(loadTimeout);
   }, [remoteUrl]);
 
   // Handle messages from the embedded contacts app
@@ -121,6 +156,13 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
 
   const handleIframeLoad = () => {
     console.log('Iframe loaded, waiting for app ready signal...');
+    // Set a timeout to show error if app doesn't respond
+    setTimeout(() => {
+      if (!isIframeLoaded) {
+        console.warn('Remote app did not send ready signal within 15 seconds');
+        setIsIframeLoaded(true); // Show iframe anyway
+      }
+    }, 15000);
   };
 
   return (
@@ -176,6 +218,7 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
               onClick={() => {
                 const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
                 if (iframe) {
+                  setIsIframeLoaded(false);
                   iframe.src = iframe.src; // Reload iframe
                 }
               }}
@@ -184,6 +227,15 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
               <RefreshCw className="h-3 w-3" />
               <span>Reload</span>
             </button>
+            
+            {!isIframeLoaded && (
+              <button
+                onClick={() => setIsIframeLoaded(true)}
+                className="flex items-center space-x-1 px-3 py-1 bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-800 transition-colors text-sm"
+              >
+                <span>Force Load</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -195,12 +247,19 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
             <div className="text-center p-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Loading Remote Contacts</p>
-              <p className="text-gray-600 dark:text-gray-400 mb-1">Connecting to remote application...</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-1">
+                {connectionStatus === 'checking' && 'Testing connection...'}
+                {connectionStatus === 'connected' && 'Loading remote application...'}
+                {connectionStatus === 'failed' && 'Connection test failed, trying anyway...'}
+              </p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
                 {remoteUrl}
               </p>
               <div className="mt-4 text-xs text-gray-400">
-                This may take a few moments on first load
+                {connectionStatus === 'failed' ? 
+                  'The remote app might be slow or temporarily unavailable' :
+                  'This may take a few moments on first load'
+                }
               </div>
             </div>
           </div>
@@ -211,6 +270,10 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
           src={iframeSrc}
           className={`w-full h-full border-0 ${isIframeLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleIframeLoad}
+          onError={() => {
+            console.error('Failed to load remote contacts iframe');
+            setIsIframeLoaded(true); // Show iframe even if there's an error
+          }}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation"
           allow="camera; microphone; geolocation"
           title="Remote Contacts Application"
