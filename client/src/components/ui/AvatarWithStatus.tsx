@@ -33,11 +33,12 @@ export const AvatarWithStatus: React.FC<AvatarWithStatusProps> = ({
   showStatus = false
 }) => {
   const initials = name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+    ? name.split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '??';
 
   const sizeClass = sizeClasses[size];
 
