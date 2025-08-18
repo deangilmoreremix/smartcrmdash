@@ -70,6 +70,7 @@
     "react-avatar": "^5.0.4",
     "react-beautiful-dnd": "^13.1.1",
     "react-big-calendar": "^1.19.4",
+    "react-calendar": "^6.0.0",
     "react-csv": "^2.2.2",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
