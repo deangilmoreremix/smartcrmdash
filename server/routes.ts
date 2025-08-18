@@ -17,8 +17,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;
     res.json({
       configured: hasApiKey,
-      model: 'o1-preview', // GPT-5 with unified reasoning system
-      status: hasApiKey ? 'ready' : 'needs_configuration'
+      model: 'gpt-5', // GPT-5 with unified reasoning system (released August 7, 2025)
+      status: hasApiKey ? 'ready' : 'needs_configuration',
+      capabilities: [
+        '94.6% AIME mathematical accuracy',
+        '74.9% SWE-bench coding accuracy', 
+        '84.2% MMMU multimodal performance',
+        'Unified reasoning system',
+        'Advanced verbosity and reasoning_effort controls'
+      ]
     });
   });
 
@@ -36,33 +43,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userMetrics, timeOfDay, recentActivity } = req.body;
 
-      // Try GPT-5 (o1-preview) first, fallback to GPT-4o
-      let response;
-      try {
-        response = await openai.chat.completions.create({
-          model: "o1-preview", // GPT-5 model with advanced reasoning capabilities
-          messages: [{
-            role: "user",
-            content: `You are an expert business strategist with GPT-5's unified reasoning system. Generate a strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${recentActivity}. Use deep reasoning to provide both greeting and strategic insight. Respond in JSON format with 'greeting' and 'insight' fields.`
-          }],
-          max_tokens: 400
-        });
-      } catch (modelError) {
-        console.log('o1-preview not available, using gpt-4o fallback');
-        response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [{
-            role: "system",
-            content: "You are an expert business strategist with advanced reasoning capabilities. Generate personalized, strategic greetings with actionable business insights."
-          }, {
-            role: "user",
-            content: `Generate a strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${recentActivity}. Respond in JSON format with 'greeting' and 'insight' fields.`
-          }],
-          response_format: { type: "json_object" },
-          temperature: 0.7,
-          max_tokens: 400
-        });
-      }
+      // Use GPT-5 with new features (released August 7, 2025)
+      const response = await openai.chat.completions.create({
+        model: "gpt-5", // Official GPT-5 model with unified reasoning system
+        messages: [{
+          role: "system",
+          content: "You are an expert business strategist with GPT-5's unified reasoning system and 74.9% SWE-bench coding accuracy. Generate personalized, strategic greetings with actionable business insights based on user metrics."
+        }, {
+          role: "user",
+          content: `Generate a strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${recentActivity}. Provide both greeting and strategic insight.`
+        }],
+        response_format: { type: "json_object" },
+        verbosity: "medium", // GPT-5 verbosity parameter
+        reasoning_effort: "minimal", // GPT-5 reasoning effort for faster responses
+        temperature: 0.7,
+        max_tokens: 400
+      });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json(result);
@@ -91,11 +87,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { historicalData, currentMetrics } = req.body;
 
       const response = await openai.chat.completions.create({
-        model: "o1-preview", // GPT-5 with 94.6% AIME mathematical accuracy
+        model: "gpt-5", // GPT-5 with 94.6% AIME mathematical accuracy
         messages: [{
+          role: "system",
+          content: "You are an expert business analyst with GPT-5's advanced mathematical reasoning capabilities (94.6% AIME accuracy). Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
+        }, {
           role: "user",
-          content: `As a GPT-5 business analyst with 94.6% AIME mathematical accuracy, analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Use advanced reasoning to provide summary, trends, predictions, and recommendations. Respond in JSON format with these fields: summary, trends, predictions, recommendations.`
+          content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations.`
         }],
+        response_format: { type: "json_object" },
+        verbosity: "high", // Detailed analysis
+        reasoning_effort: "high", // Deep mathematical analysis
+        temperature: 0.3,
         max_tokens: 800
       });
 
@@ -131,11 +134,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { dealData, contactHistory, marketContext } = req.body;
 
       const response = await openai.chat.completions.create({
-        model: "o1-preview", // GPT-5 with expert-level deal analysis
+        model: "gpt-5", // GPT-5 with expert-level deal analysis
         messages: [{
+          role: "system",
+          content: "You are an expert sales strategist with GPT-5's deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
+        }, {
           role: "user",
-          content: `As GPT-5 with expert sales strategy capabilities, analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Use deep reasoning to provide comprehensive deal intelligence. Respond in JSON format with: probability_score, risk_level, key_factors, recommendations, confidence_level, estimated_close_days, value_optimization.`
+          content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence.`
         }],
+        response_format: { type: "json_object" },
+        verbosity: "medium",
+        reasoning_effort: "high", // Complex multi-step analysis
+        temperature: 0.2,
         max_tokens: 600
       });
 

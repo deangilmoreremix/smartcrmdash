@@ -46,8 +46,8 @@ export class GPT5Service {
   }
 
   /**
-   * GPT-5 Expert-Level KPI Analysis
-   * Server-side processing for secure API key handling
+   * GPT-5 Expert-Level KPI Analysis  
+   * 94.6% AIME mathematical accuracy with high reasoning effort
    */
   async analyzeKPITrends(historicalData: any, currentMetrics: any, chartImages: string[] = [], videoData: string[] = []) {
     try {
@@ -73,7 +73,7 @@ export class GPT5Service {
 
   /**
    * GPT-5 Expert-Level Deal Intelligence Analysis
-   * Server-side processing for comprehensive deal analysis
+   * Advanced reasoning with 74.9% SWE-bench coding accuracy
    */
   async analyzeDealIntelligence(dealData: any, contactHistory: any, marketContext: any) {
     try {
