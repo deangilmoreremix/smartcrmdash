@@ -61,6 +61,11 @@ import LiveDealAnalysis from './pages/LiveDealAnalysis';
 import CompetitorInsights from './pages/CompetitorInsights';
 import RevenueIntelligence from './pages/RevenueIntelligence';
 
+// Communication pages added
+import ActivityAnalytics from './pages/ActivityAnalytics';
+import ResponseIntelligence from './pages/ResponseIntelligence';
+import ChannelSyncHub from './pages/ChannelSyncHub';
+
 import './styles/design-system.css';
 
 
@@ -409,6 +414,32 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
+                          {/* New Communication Routes */}
+                          <Route
+                            path="/activity-analytics"
+                            element={
+                              <ProtectedRoute>
+                                <ActivityAnalytics />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/response-intelligence"
+                            element={
+                              <ProtectedRoute>
+                                <ResponseIntelligence />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/channel-sync-hub"
+                            element={
+                              <ProtectedRoute>
+                                <ChannelSyncHub />
+                              </ProtectedRoute>
+                            }
+                          />
+
                           <Route
                             path="/campaigns"
                             element={<PlaceholderPage title="Campaigns" />}
