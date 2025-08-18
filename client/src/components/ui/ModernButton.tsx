@@ -1,47 +1,65 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { Loader2 } from 'lucide-react';
 
-interface ModernButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+interface ModernButtonProps {
   children: React.ReactNode;
+  variant?: 'primary' | 'glass' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
 }
 
-const variants = {
-  primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
-  secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-900',
-  outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 shadow-sm',
-  ghost: 'hover:bg-gray-100 text-gray-700',
-  danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm'
-};
-
-const sizes = {
-  xs: 'px-2 py-1 text-xs',
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base'
-};
-
 export const ModernButton: React.FC<ModernButtonProps> = ({
+  children,
   variant = 'primary',
   size = 'md',
-  className,
-  children,
-  disabled,
-  ...props
+  loading = false,
+  disabled = false,
+  onClick,
+  className = ''
 }) => {
+  const getVariantClass = () => {
+    switch (variant) {
+      case 'glass':
+        return 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30';
+      case 'outline':
+        return 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50';
+      case 'ghost':
+        return 'bg-transparent text-gray-700 hover:bg-gray-100';
+      case 'primary':
+      default:
+        return 'bg-blue-600 text-white hover:bg-blue-700';
+    }
+  };
+
+  const getSizeClass = () => {
+    switch (size) {
+      case 'sm':
+        return 'px-3 py-1.5 text-sm';
+      case 'lg':
+        return 'px-6 py-3 text-lg';
+      case 'md':
+      default:
+        return 'px-4 py-2 text-base';
+    }
+  };
+
   return (
     <button
-      className={cn(
-        'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-        variants[variant],
-        sizes[size],
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
-      )}
-      disabled={disabled}
-      {...props}
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`
+        ${getVariantClass()}
+        ${getSizeClass()}
+        rounded-lg font-medium transition-all duration-200
+        disabled:opacity-50 disabled:cursor-not-allowed
+        flex items-center justify-center gap-2
+        ${className}
+      `}
     >
+      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
       {children}
     </button>
   );

@@ -48,6 +48,8 @@ const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 
+import './styles/design-system.css';
+
 
 
 // Reusable placeholder

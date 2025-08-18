@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, User, Clock, BarChart2, RefreshCw, Send, MessageSquare, Mic, MicOff, Volume2, VolumeX, PhoneOff, Play, Pause, MousePointer } from 'lucide-react';
+import { GlassCard } from '../components/ui/GlassCard';
+import { ModernButton } from '../components/ui/ModernButton';
 
 interface CallLog {
   id: string;
@@ -209,7 +211,7 @@ const PhoneSystem: React.FC = () => {
       {activeTab === 'dialer' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Dialer */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <GlassCard className="p-6">
             <h2 className="text-xl font-semibold mb-4">Dialer</h2>
             
             <div className="mb-6">
@@ -238,26 +240,28 @@ const PhoneSystem: React.FC = () => {
             
             {/* Action Buttons */}
             <div className="flex justify-center space-x-4 mb-4">
-              <button
+              <ModernButton
                 onClick={handleBackspace}
-                className="p-3 bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors"
+                variant="outline"
                 disabled={isCallInProgress}
+                className="p-3 rounded-full"
               >
                 <RefreshCw size={20} />
-              </button>
+              </ModernButton>
               
-              <button
+              <ModernButton
                 onClick={startCall}
                 disabled={dialerNumber.length === 0 || isCallInProgress}
-                className="p-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors disabled:opacity-50"
+                variant="primary"
+                className="p-4 bg-green-500 hover:bg-green-600 rounded-full"
               >
                 <Phone size={24} />
-              </button>
+              </ModernButton>
             </div>
-          </div>
+          </GlassCard>
 
           {/* Call Controls */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <GlassCard className="p-6">
             <h2 className="text-xl font-semibold mb-4">
               {isCallInProgress ? 'Active Call' : 'Call Controls'}
             </h2>
@@ -275,31 +279,30 @@ const PhoneSystem: React.FC = () => {
                 </div>
                 
                 <div className="flex justify-center space-x-4 mb-6">
-                  <button
+                  <ModernButton
                     onClick={toggleMute}
-                    className={`p-3 rounded-full transition-colors ${
-                      isMuted ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    variant={isMuted ? 'primary' : 'outline'}
+                    className={`p-3 rounded-full ${isMuted ? 'bg-red-500 hover:bg-red-600' : ''}`}
                   >
                     {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
-                  </button>
+                  </ModernButton>
                   
-                  <button
+                  <ModernButton
                     onClick={toggleSpeaker}
-                    className={`p-3 rounded-full transition-colors ${
-                      isSpeakerOn ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    variant={isSpeakerOn ? 'primary' : 'outline'}
+                    className={`p-3 rounded-full ${isSpeakerOn ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
                   >
                     {isSpeakerOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
-                  </button>
+                  </ModernButton>
                 </div>
                 
-                <button
+                <ModernButton
                   onClick={endCall}
-                  className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                  variant="primary"
+                  className="p-4 bg-red-500 hover:bg-red-600 rounded-full"
                 >
                   <PhoneOff size={24} />
-                </button>
+                </ModernButton>
               </div>
             ) : (
               <div className="text-center text-gray-500">
@@ -308,12 +311,12 @@ const PhoneSystem: React.FC = () => {
                 <p className="text-sm">Use the dialer to start a call</p>
               </div>
             )}
-          </div>
+          </GlassCard>
         </div>
       )}
 
       {activeTab === 'logs' && (
-        <div className="bg-white rounded-lg shadow">
+        <GlassCard>
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold">Call History</h2>
           </div>
@@ -353,9 +356,11 @@ const PhoneSystem: React.FC = () => {
                     </div>
                   )}
                   {log.recordingUrl && (
-                    <button
+                    <ModernButton
                       onClick={() => playRecording(log.recordingUrl!)}
-                      className="mt-2 text-blue-600 hover:text-blue-700 text-sm flex items-center"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 text-blue-600 hover:text-blue-700"
                     >
                       {recordingPlayback === log.recordingUrl && isPlayingRecording ? (
                         <Pause size={14} className="mr-1" />
@@ -363,17 +368,17 @@ const PhoneSystem: React.FC = () => {
                         <Play size={14} className="mr-1" />
                       )}
                       Recording
-                    </button>
+                    </ModernButton>
                   )}
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </GlassCard>
       )}
 
       {activeTab === 'voicemail' && (
-        <div className="bg-white rounded-lg shadow">
+        <GlassCard>
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold">Voicemails ({voicemails.length})</h2>
           </div>
@@ -398,9 +403,11 @@ const PhoneSystem: React.FC = () => {
                     <div className="text-sm text-gray-800 mb-3">{voicemail.notes}</div>
                   )}
                   {voicemail.recordingUrl && (
-                    <button
+                    <ModernButton
                       onClick={() => playRecording(voicemail.recordingUrl!)}
-                      className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                      variant="outline"
+                      size="sm"
+                      className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                     >
                       {recordingPlayback === voicemail.recordingUrl && isPlayingRecording ? (
                         <Pause size={14} className="mr-1" />
@@ -408,17 +415,17 @@ const PhoneSystem: React.FC = () => {
                         <Play size={14} className="mr-1" />
                       )}
                       Play Voicemail
-                    </button>
+                    </ModernButton>
                   )}
                 </div>
               ))
             )}
           </div>
-        </div>
+        </GlassCard>
       )}
 
       {activeTab === 'settings' && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <GlassCard className="p-6">
           <h2 className="text-xl font-semibold mb-6">Phone Settings</h2>
           
           <div className="space-y-6">
@@ -457,7 +464,7 @@ const PhoneSystem: React.FC = () => {
               <input type="range" min="0" max="100" defaultValue="80" className="w-full max-w-xs" />
             </div>
           </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   );
