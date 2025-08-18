@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Mail, Brain, Lightbulb, Target, Send, Copy, RefreshCw, Zap, CheckCircle } from 'lucide-react';
-import { openaiService } from '../../services/openaiService';
+import { openAIService } from '../../services/openAIService';
 
 const ReasoningEmailGenerator: React.FC = () => {
   const { isDark } = useTheme();
@@ -27,7 +27,7 @@ Please provide:
 
 Format the response as JSON with these keys: email, reasoning, improvements, analytics`;
 
-      const response = await openaiService.generateCompletion(prompt, {
+      const response = await openAIService.generateCompletion(prompt, {
         model: 'gpt-4',
         temperature: 0.7,
         maxTokens: 1000
