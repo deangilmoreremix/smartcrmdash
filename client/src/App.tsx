@@ -301,7 +301,7 @@ function App() {
                             path="/communication"
                             element={
                               <ProtectedRoute>
-                                <Communication />
+                                <CommunicationHub />
                               </ProtectedRoute>
                             }
                           />
