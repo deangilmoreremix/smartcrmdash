@@ -22,7 +22,7 @@ interface NavbarProps {
 type AITool = {
   title: string;
   id: string;       // must match AITools.tsx switch cases
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  icon?: any;  // Simplified for compatibility with lucide-react icons
   category?: string;
 };
 
@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   // Counters
   const counters = React.useMemo(() => {
     const activeDeals = Object.values(deals).filter(
-      deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+      deal => String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
     ).length;
 
     const hotContacts = Object.values(contacts).filter(contact =>
@@ -199,9 +199,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     if (path === '/dashboard') setActiveTab('dashboard');
     else if (path === '/contacts') setActiveTab('contacts');
     else if (path === '/pipeline') setActiveTab('pipeline');
-    else if (path === '/tasks') setActiveTab('tasks');
+    else if (path === '/tasks' || path === '/appointments') setActiveTab('appointments');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
-    else if (path === '/appointments') setActiveTab('appointments');
+    else if (path === '/analytics') setActiveTab('analytics');
+    else if (path === '/ai-goals') setActiveTab('ai-goals');
     else setActiveTab('');
   }, [location.pathname]);
 
@@ -233,7 +234,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
         setActiveDropdown(null);
         setIsMobileMenuOpen(false);
       },
-      badge: Object.values(deals).filter(d => d.stage !== 'closed-won' && d.stage !== 'closed-lost').length,
+      badge: Object.values(deals).filter(d => String(d.stage) !== 'closed-won' && String(d.stage) !== 'closed-lost').length,
       color: 'from-green-500 to-emerald-500'
     },
     {

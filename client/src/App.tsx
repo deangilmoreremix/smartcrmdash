@@ -352,6 +352,9 @@ function App() {
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
 
+                          {/* Missing routes from navbar - adding placeholders */}
+                          <Route path="/ai-goals" element={<PlaceholderPage title="AI Goals" description="Set and track your AI-powered sales goals" />} />
+                          
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
