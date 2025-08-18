@@ -11,16 +11,38 @@
       this.deals = [];
       this.stages = [];
       this.isInitialized = false;
+      this.connectionAttempts = 0;
+      this.maxConnectionAttempts = 5;
       
       // Listen for messages from parent CRM
       window.addEventListener('message', this.handleCRMMessage.bind(this));
       
       console.log('🔗 Pipeline Bridge initialized in remote app');
       
-      // Notify parent CRM that we're ready
-      setTimeout(() => {
-        this.sendToCRM('REMOTE_READY', { timestamp: Date.now() });
-      }, 500);
+      // Notify parent CRM that we're ready with retry logic
+      this.notifyParentReady();
+    }
+
+    notifyParentReady() {
+      if (this.connectionAttempts >= this.maxConnectionAttempts) {
+        console.warn('⚠️ Max connection attempts reached');
+        return;
+      }
+
+      this.connectionAttempts++;
+      console.log(`🔄 Connection attempt ${this.connectionAttempts}/${this.maxConnectionAttempts}`);
+      
+      this.sendToCRM('REMOTE_READY', { 
+        timestamp: Date.now(),
+        attempt: this.connectionAttempts
+      });
+
+      // Retry if not connected within 2 seconds
+      if (!this.isInitialized && this.connectionAttempts < this.maxConnectionAttempts) {
+        setTimeout(() => {
+          this.notifyParentReady();
+        }, 2000);
+      }
     }
 
     handleCRMMessage(event) {
@@ -28,16 +50,21 @@
       const allowedOrigins = [
         'https://9f38fddb-d049-4cd4-9f57-c41b6a878a9d-00-2xv27ubfspt46.riker.replit.dev',
         'http://localhost:5000',
-        'http://127.0.0.1:5000'
+        'http://127.0.0.1:5000',
+        'https://localhost:5000'
       ];
       
-      if (!allowedOrigins.includes(event.origin)) {
+      // Allow any replit.dev domain for development
+      const isReplitDomain = event.origin && event.origin.includes('.replit.dev');
+      
+      if (!allowedOrigins.includes(event.origin) && !isReplitDomain) {
+        console.warn('❌ Message from unauthorized origin:', event.origin);
         return;
       }
 
       try {
         const message = event.data;
-        if (!message || message.source !== 'CRM') {
+        if (!message || (message.source && message.source !== 'CRM')) {
           return;
         }
 

@@ -41,7 +41,7 @@ export class RemotePipelineBridge {
   private initialize() {
     // Listen for messages from remote pipeline
     window.addEventListener('message', this.handleMessage.bind(this));
-    
+
     console.log('🔗 Pipeline Bridge initialized');
   }
 
@@ -53,7 +53,7 @@ export class RemotePipelineBridge {
 
     try {
       const message: PipelineMessage = event.data;
-      
+
       if (!message || typeof message !== 'object' || message.source !== 'REMOTE_PIPELINE') {
         return;
       }
@@ -173,7 +173,7 @@ export class RemotePipelineBridge {
             timestamp: Date.now()
           }, '*');
         },
-        
+
         ready: () => {
           window.parent.postMessage({
             type: 'REMOTE_READY',
@@ -181,7 +181,7 @@ export class RemotePipelineBridge {
             timestamp: Date.now()
           }, '*');
         },
-        
+
         onDealUpdate: (deal) => {
           window.parent.postMessage({
             type: 'DEAL_UPDATED',
@@ -190,7 +190,7 @@ export class RemotePipelineBridge {
             timestamp: Date.now()
           }, '*');
         },
-        
+
         onDealCreate: (deal) => {
           window.parent.postMessage({
             type: 'DEAL_CREATED',
@@ -199,7 +199,7 @@ export class RemotePipelineBridge {
             timestamp: Date.now()
           }, '*');
         },
-        
+
         onDealDelete: (dealId) => {
           window.parent.postMessage({
             type: 'DEAL_DELETED',
@@ -208,7 +208,7 @@ export class RemotePipelineBridge {
             timestamp: Date.now()
           }, '*');
         },
-        
+
         onStageChange: (dealId, oldStage, newStage) => {
           window.parent.postMessage({
             type: 'DEAL_STAGE_CHANGED',
@@ -218,7 +218,7 @@ export class RemotePipelineBridge {
           }, '*');
         }
       };
-      
+
       // Notify CRM that bridge is ready
       setTimeout(() => {
         if (window.crmBridge) {
