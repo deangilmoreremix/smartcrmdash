@@ -31,9 +31,14 @@ const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
 const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
-const SalesTools = lazy(() => import('./pages/SalesTools'));
-const LeadAutomation = lazy(() => import('./pages/LeadAutomation'));
-const CircleProspecting = lazy(() => import('./pages/CircleProspecting'));
+import SalesTools from './pages/SalesTools';
+import PipelineIntelligence from './pages/PipelineIntelligence';
+import DealRiskMonitor from './pages/DealRiskMonitor';
+import SmartConversionInsights from './pages/SmartConversionInsights';
+import SalesCycleAnalytics from './pages/SalesCycleAnalytics';
+import PipelineHealthDashboard from './pages/PipelineHealthDashboard';
+import LeadAutomation from './pages/LeadAutomation';
+import CircleProspecting from './pages/CircleProspecting';
 const VideoEmail = lazy(() => import('./pages/VideoEmail'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
 const AIGoalsPage = lazy(() => import('./pages/AIGoalsPage'));
@@ -160,7 +165,7 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-                          
+
                           {/* Contacts page - Using Remote Module Federation */}
                           <Route
                             path="/contacts"
@@ -223,6 +228,46 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <SalesTools />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/pipeline-intelligence"
+                            element={
+                              <ProtectedRoute>
+                                <PipelineIntelligence />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/deal-risk-monitor"
+                            element={
+                              <ProtectedRoute>
+                                <DealRiskMonitor />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/smart-conversion-insights"
+                            element={
+                              <ProtectedRoute>
+                                <SmartConversionInsights />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/sales-cycle-analytics"
+                            element={
+                              <ProtectedRoute>
+                                <SalesCycleAnalytics />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/pipeline-health-dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <PipelineHealthDashboard />
                               </ProtectedRoute>
                             }
                           />
@@ -407,7 +452,7 @@ function App() {
                           <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
-                          
+
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
