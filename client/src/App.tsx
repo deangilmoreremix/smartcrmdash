@@ -22,6 +22,7 @@ const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts')); // details handled via modal inside
+const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // Enhanced with Module Federation
 const Pipeline = lazy(() => import('./pages/Pipeline'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -120,18 +121,27 @@ function App() {
                             }
                           />
 
-                          {/* Contacts — details open as a modal inside this page */}
+                          {/* Contacts with Module Federation support */}
                           <Route
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <Contacts />
+                                <ContactsWithRemote />
                               </ProtectedRoute>
                             }
                           />
                           {/* Deep-link: /contacts/:id opens same page and the page handles auto-opening modal */}
                           <Route
                             path="/contacts/:id"
+                            element={
+                              <ProtectedRoute>
+                                <ContactsWithRemote />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Legacy contacts route for fallback */}
+                          <Route
+                            path="/contacts-legacy"
                             element={
                               <ProtectedRoute>
                                 <Contacts />
