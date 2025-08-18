@@ -18,8 +18,35 @@ const ContactsWorking: React.FC = () => {
     try {
       console.log('Loading remote contacts from:', url);
       
-      // Try to load the remote module
-      const module = await loadRemoteComponent(url, 'ContactsApp', './ContactsApp');
+      // Try different possible container names and module paths
+      const attempts = [
+        { scope: 'ContactsApp', module: './ContactsApp' },
+        { scope: 'contactsApp', module: './ContactsApp' },
+        { scope: 'ContactsApp', module: './App' },
+        { scope: 'remoteApp', module: './ContactsApp' },
+        { scope: 'ContactsApp', module: './src/ContactsApp' }
+      ];
+      
+      let module = null;
+      let lastError = null;
+      
+      for (const attempt of attempts) {
+        try {
+          console.log(`Trying container: ${attempt.scope}, module: ${attempt.module}`);
+          module = await loadRemoteComponent(url, attempt.scope, attempt.module);
+          if (module) {
+            console.log(`Success with container: ${attempt.scope}, module: ${attempt.module}`);
+            break;
+          }
+        } catch (err) {
+          console.log(`Failed attempt: ${attempt.scope}/${attempt.module}`, err);
+          lastError = err;
+        }
+      }
+      
+      if (!module) {
+        throw lastError || new Error('All Module Federation attempts failed');
+      }
       
       if (module && (module.default || module)) {
         setRemoteContacts(() => module.default || module);
@@ -212,12 +239,13 @@ const ContactsWorking: React.FC = () => {
             <div style={{ color: '#7f1d1d', fontSize: '14px', marginBottom: '12px' }}>{error}</div>
             
             <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #f59e0b', borderRadius: '4px', fontSize: '12px' }}>
-              <div style={{ fontWeight: '500', marginBottom: '4px', color: '#92400e' }}>Setup Instructions:</div>
+              <div style={{ fontWeight: '500', marginBottom: '4px', color: '#92400e' }}>Troubleshooting:</div>
               <div style={{ color: '#92400e', lineHeight: '1.4' }}>
-                1. In your Bolt app, add the files from the docs/ folder<br/>
-                2. Make sure vite.config.js includes Module Federation plugin<br/>
-                3. Redeploy your Bolt app<br/>
-                4. Click Apply again to retry connection
+                1. Check browser console for specific error details<br/>
+                2. Verify vite.config.js has correct "name: 'ContactsApp'"<br/>
+                3. Ensure ContactsApp-wrapper.tsx exports default component<br/>
+                4. Try rebuilding and redeploying your Bolt app<br/>
+                5. Check network tab for failed resource loads
               </div>
             </div>
             

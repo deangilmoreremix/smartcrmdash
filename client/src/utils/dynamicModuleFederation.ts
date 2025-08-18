@@ -93,13 +93,25 @@ class DynamicModuleFederation {
     let retries = 0;
     const maxRetries = 50; // 5 seconds max wait
     
+    console.log(`Looking for Module Federation container: ${scope}`);
+    console.log('Available window properties:', Object.keys(window).filter(key => key.includes('App') || key.includes('Contact')));
+    
     while (!window[scope] && retries < maxRetries) {
       await new Promise(resolve => setTimeout(resolve, 100));
       retries++;
+      
+      if (retries % 10 === 0) {
+        console.log(`Still waiting for container "${scope}", retry ${retries}/${maxRetries}`);
+      }
     }
 
     if (!window[scope]) {
-      throw new Error(`Remote container "${scope}" not found`);
+      const availableContainers = Object.keys(window).filter(key => 
+        typeof window[key] === 'object' && 
+        window[key] !== null && 
+        typeof (window[key] as any).get === 'function'
+      );
+      throw new Error(`Remote container "${scope}" not found. Available containers: ${availableContainers.join(', ') || 'none'}`);
     }
 
     const container = window[scope] as ModuleContainer;
