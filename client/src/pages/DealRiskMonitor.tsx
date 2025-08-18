@@ -1,101 +1,279 @@
 
 import React from 'react';
-import { Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTheme } from '../contexts/ThemeContext';
+import { useDealStore } from '../store/dealStore';
+import { useContactStore } from '../hooks/useContactStore';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import Avatar from '../components/ui/Avatar';
+import { 
+  Shield, 
+  AlertTriangle, 
+  Clock, 
+  TrendingDown,
+  DollarSign,
+  Users,
+  Target,
+  Activity,
+  CheckCircle,
+  XCircle
+} from 'lucide-react';
 
 const DealRiskMonitor: React.FC = () => {
-  const riskDeals = [
-    { id: 1, name: 'Enterprise Software License', risk: 'High', value: '$75,000', reason: 'No activity in 14 days' },
-    { id: 2, name: 'Marketing Platform', risk: 'Medium', value: '$45,000', reason: 'Budget concerns raised' },
-    { id: 3, name: 'CRM Integration', risk: 'Low', value: '$25,000', reason: 'On track for closure' },
-  ];
+  const { isDark } = useTheme();
+  const { deals } = useDealStore();
+  const { contacts } = useContactStore();
 
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'High': return 'text-red-600 bg-red-50';
-      case 'Medium': return 'text-yellow-600 bg-yellow-50';
-      case 'Low': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
+  // Calculate risk metrics
+  const dealsArray = Object.values(deals);
+  const highRiskDeals = dealsArray.filter(deal => {
+    const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+    return daysSinceUpdate > 7 || deal.probability < 30;
+  });
+  
+  const mediumRiskDeals = dealsArray.filter(deal => {
+    const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+    return (daysSinceUpdate >= 3 && daysSinceUpdate <= 7) || (deal.probability >= 30 && deal.probability <= 60);
+  });
+
+  const lowRiskDeals = dealsArray.filter(deal => {
+    const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+    return daysSinceUpdate < 3 && deal.probability > 60;
+  });
+
+  const atRiskValue = highRiskDeals.reduce((sum, deal) => sum + deal.value, 0);
+
+  // Format currency
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   };
 
-  const getRiskIcon = (risk: string) => {
-    switch (risk) {
-      case 'High': return <XCircle className="h-5 w-5 text-red-600" />;
-      case 'Medium': return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'Low': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      default: return <Shield className="h-5 w-5 text-gray-600" />;
-    }
+  // Get initials for avatar
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  // Get risk level
+  const getRiskLevel = (deal: any) => {
+    const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceUpdate > 7 || deal.probability < 30) return 'high';
+    if ((daysSinceUpdate >= 3 && daysSinceUpdate <= 7) || (deal.probability >= 30 && deal.probability <= 60)) return 'medium';
+    return 'low';
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Deal Risk Monitor</h1>
-        <div className="text-sm text-gray-500">AI-powered risk assessment</div>
-      </div>
+    <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Deal Risk Monitor
+            </h1>
+            <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Identify and manage at-risk deals to prevent revenue loss
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+              <Shield className="h-3 w-3 mr-1" />
+              Risk Analysis
+            </Badge>
+          </div>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Risk Deals</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+        {/* Risk Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                High Risk Deals
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {highRiskDeals.length}
+              </div>
+              <p className="text-xs text-red-600 flex items-center mt-1">
+                <TrendingDown className="h-3 w-3 mr-1" />
+                Immediate attention needed
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                At Risk Value
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(atRiskValue)}
+              </div>
+              <p className="text-xs text-orange-600 flex items-center mt-1">
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                Revenue at risk
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                Medium Risk
+              </CardTitle>
+              <Clock className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {mediumRiskDeals.length}
+              </div>
+              <p className="text-xs text-yellow-600 flex items-center mt-1">
+                <Clock className="h-3 w-3 mr-1" />
+                Monitor closely
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                Low Risk
+              </CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {lowRiskDeals.length}
+              </div>
+              <p className="text-xs text-green-600 flex items-center mt-1">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                On track
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* High Risk Deals */}
+        <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
+              High Risk Deals - Immediate Action Required
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">8</div>
-            <p className="text-xs text-muted-foreground">Requires immediate attention</p>
+          <CardContent className="space-y-4">
+            {highRiskDeals.length === 0 ? (
+              <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                <p>No high-risk deals found. Great job!</p>
+              </div>
+            ) : (
+              highRiskDeals.map((deal) => {
+                const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+                return (
+                  <div key={deal.id} className={`flex items-center space-x-3 p-4 rounded-lg border ${
+                    isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'
+                  }`}>
+                    <Avatar
+                      name={deal.contactName || 'Unknown'}
+                      size="md"
+                      fallback={getInitials(deal.contactName || 'UN')}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium text-sm truncate ${
+                        isDark ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {deal.title}
+                      </p>
+                      <p className={`text-sm truncate ${
+                        isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {deal.contactName} • {formatCurrency(deal.value)}
+                      </p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                          {deal.probability}% probability
+                        </Badge>
+                        <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                          {daysSinceUpdate} days inactive
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <XCircle className="h-5 w-5 text-red-500 mb-1" />
+                      <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        High Risk
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Medium Risk Deals</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+        {/* All Deals Risk Analysis */}
+        <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <Activity className="h-5 w-5 mr-2 text-blue-500" />
+              Complete Risk Analysis
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">15</div>
-            <p className="text-xs text-muted-foreground">Monitor closely</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Risk Deals</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">124</div>
-            <p className="text-xs text-muted-foreground">On track</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Risk Assessment Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {riskDeals.map((deal) => (
-              <div key={deal.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  {getRiskIcon(deal.risk)}
-                  <div>
-                    <h3 className="font-medium">{deal.name}</h3>
-                    <p className="text-sm text-gray-500">{deal.reason}</p>
+          <CardContent className="space-y-4">
+            {dealsArray.map((deal) => {
+              const riskLevel = getRiskLevel(deal);
+              const daysSinceUpdate = Math.floor((Date.now() - new Date(deal.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+              
+              return (
+                <div key={deal.id} className="flex items-center space-x-3">
+                  <Avatar
+                    name={deal.contactName || 'Unknown'}
+                    size="sm"
+                    fallback={getInitials(deal.contactName || 'UN')}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-medium text-sm truncate ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {deal.title}
+                    </p>
+                    <p className={`text-sm truncate ${
+                      isDark ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      {deal.contactName} • {formatCurrency(deal.value)}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs ${
+                        riskLevel === 'high' ? 'bg-red-50 text-red-700 border-red-200' :
+                        riskLevel === 'medium' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                        'bg-green-50 text-green-700 border-green-200'
+                      }`}
+                    >
+                      {riskLevel} risk
+                    </Badge>
+                    <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {deal.probability}%
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="font-semibold">{deal.value}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(deal.risk)}`}>
-                    {deal.risk} Risk
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
