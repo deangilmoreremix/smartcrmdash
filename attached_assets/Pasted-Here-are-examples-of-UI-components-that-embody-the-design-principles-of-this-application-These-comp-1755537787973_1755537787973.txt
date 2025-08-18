@@ -1,0 +1,98 @@
+Here are examples of UI components that embody the design principles of this application. These components leverage Tailwind CSS and the custom CSS variables defined in src/index.css and src/styles/design-system.css to create a consistent look and feel.
+
+src/components/ui/GlassCard.tsx
+This component provides the "glassmorphism" effect seen throughout the application, along with hover states and consistent padding.
+
+
+import React from 'react';
+
+interface GlassCardProps {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  hover?: boolean;
+}
+
+export const GlassCard: React.FC<GlassCardProps> = ({ 
+  children, 
+  className = '', 
+  onClick,
+  hover = true 
+}) => {
+  return (
+    <div
+      className={`
+        glass-card rounded-xl
+        ${hover ? 'hover:shadow-xl transition-all duration-300 hover:scale-[1.02]' : ''}
+        ${onClick ? 'cursor-pointer' : ''}
+        
+src/components/ui/ModernButton.tsx
+This component defines the standard button styles, including variants, sizes, and a loading state, all adhering to the design system.
+
+
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+
+interface ModernButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'glass' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
+}
+
+export const ModernButton: React.FC<ModernButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  disabled = false,
+  onClick,
+  className = ''
+}) => {
+  const getVariantClass = () => {
+    switch (variant) {
+      case 'glass':
+        return 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30';
+      case 'outline':
+        return 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50';
+      case 'ghost':
+        return 'bg-transparent text-gray-700 hover:bg-gray-100';
+      case 'primary':
+      default:
+        return 'bg-blue-600 text-white hover:bg-blue-700';
+    }
+  };
+
+  const getSizeClass = () => {
+    switch (size) {
+      case 'sm':
+        return 'px-3 py-1.5 text-sm';
+      case 'lg':
+        return 'px-6 py-3 text-lg';
+      case 'md':
+      default:
+        return 'px-4 py-2 text-base';
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`
+        ${getVariantClass()}
+        ${getSizeClass()}
+        rounded-lg font-medium transition-all duration-200
+        disabled:opacity-50 disabled:cursor-not-allowed
+        flex items-center justify-center gap-2
+        ${className}
+      `}
+    >
+      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+      {children}
+    </button>
+  );
+};
