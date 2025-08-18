@@ -278,10 +278,6 @@ const PipelineIntelligence: React.FC = () => {
 };
 
 export default PipelineIntelligence;
-import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-import { Brain, BarChart3, TrendingUp, Target, Zap, Users, DollarSign, Clock, Activity, ArrowUpRight } from 'lucide-react';
-import { useDealStore } from '../store/dealStore';
 
 const PipelineIntelligence: React.FC = () => {
   const { isDark } = useTheme();
