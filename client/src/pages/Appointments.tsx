@@ -366,7 +366,7 @@ const Appointments: React.FC = () => {
           <p className="text-gray-600 mt-1">Schedule and manage your meetings with contacts</p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <button 
+          <ModernButton 
             onClick={() => {
               setIsEditing(false);
               setFormData({
@@ -383,17 +383,18 @@ const Appointments: React.FC = () => {
               });
               setShowAppointmentForm(true);
             }}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+            variant="primary"
+            className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus size={18} className="mr-1" />
             New Appointment
-          </button>
+          </ModernButton>
         </div>
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm mb-6">
+          <GlassCard className="mb-6">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold">Calendar</h2>
             </div>
@@ -412,9 +413,9 @@ const Appointments: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
+          </GlassCard>
           
-          <div className="bg-white rounded-lg shadow-sm">
+          <GlassCard>
             <div className="p-4 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Upcoming Appointments</h2>
@@ -478,39 +479,43 @@ const Appointments: React.FC = () => {
               )}
               
               <div className="mt-2 text-center">
-                <button className="text-sm text-blue-600 hover:text-blue-800">
+                <ModernButton variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
                   View All Appointments
-                </button>
+                </ModernButton>
               </div>
             </div>
-          </div>
+          </GlassCard>
         </div>
         
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm">
+          <GlassCard>
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <button 
+                <ModernButton 
                   onClick={() => {
                     const prevDay = new Date(selectedDate);
                     prevDay.setDate(prevDay.getDate() - 1);
                     handleDateChange(prevDay);
                   }}
-                  className="p-1 rounded-full hover:bg-gray-100"
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 rounded-full"
                 >
                   <ChevronLeft size={18} />
-                </button>
+                </ModernButton>
                 <h2 className="text-lg font-semibold">{formatDateHeader(selectedDate)}</h2>
-                <button 
+                <ModernButton 
                   onClick={() => {
                     const nextDay = new Date(selectedDate);
                     nextDay.setDate(nextDay.getDate() + 1);
                     handleDateChange(nextDay);
                   }}
-                  className="p-1 rounded-full hover:bg-gray-100"
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 rounded-full"
                 >
                   <ChevronRight size={18} />
-                </button>
+                </ModernButton>
               </div>
               <div className="flex items-center">
                 <div className="relative mr-2">
@@ -535,9 +540,9 @@ const Appointments: React.FC = () => {
                     <option value="in-person">In Person</option>
                   </select>
                 </div>
-                <button className="text-blue-600 text-sm hover:text-blue-800">
+                <ModernButton variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
                   Share Calendar
-                </button>
+                </ModernButton>
               </div>
             </div>
             
@@ -585,30 +590,45 @@ const Appointments: React.FC = () => {
                             
                             <div className="flex space-x-2">
                               {appointment.type === 'video' && (
-                                <button className="p-1 text-purple-600 hover:text-purple-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  selectAppointment(appointment.id);
-                                }}>
+                                <ModernButton 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="p-1 text-purple-600 hover:text-purple-800" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    selectAppointment(appointment.id);
+                                  }}
+                                >
                                   <Video size={14} />
-                                </button>
+                                </ModernButton>
                               )}
                               {appointment.type === 'phone' && (
-                                <button className="p-1 text-blue-600 hover:text-blue-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (appointment.contactPhone) {
-                                    window.open(`tel:${appointment.contactPhone}`);
-                                  }
-                                }}>
+                                <ModernButton 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="p-1 text-blue-600 hover:text-blue-800" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (appointment.contactPhone) {
+                                      window.open(`tel:${appointment.contactPhone}`);
+                                    }
+                                  }}
+                                >
                                   <Phone size={14} />
-                                </button>
+                                </ModernButton>
                               )}
                               {appointment.contactEmail && (
-                                <button className="p-1 text-red-600 hover:text-red-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(`mailto:${appointment.contactEmail}`);
-                                }}>
+                                <ModernButton 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="p-1 text-red-600 hover:text-red-800" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(`mailto:${appointment.contactEmail}`);
+                                  }}
+                                >
                                   <Mail size={14} />
-                                </button>
+                                </ModernButton>
                               )}
                             </div>
                           </div>
@@ -777,20 +797,21 @@ const Appointments: React.FC = () => {
                     </div>
                     
                     <div className="mt-4 flex justify-end space-x-2">
-                      <button 
+                      <ModernButton 
                         type="button"
                         onClick={() => {
                           setShowAppointmentForm(false);
                           selectTimeSlot(null);
                         }}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        variant="outline"
                       >
                         Cancel
-                      </button>
-                      <button 
+                      </ModernButton>
+                      <ModernButton 
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        variant="primary"
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
                         {isSubmitting ? (
                           <>
@@ -802,17 +823,17 @@ const Appointments: React.FC = () => {
                             {isEditing ? 'Update' : 'Schedule'} Appointment
                           </>
                         )}
-                      </button>
+                      </ModernButton>
                     </div>
                   </form>
                 </div>
               )}
             </div>
-          </div>
+          </GlassCard>
           
           {/* Appointments for selected date */}
           {appointmentsForSelectedDate.length > 0 && (
-            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+            <GlassCard className="mt-6 p-6">
               <h2 className="text-lg font-semibold mb-4">Appointments for {selectedDate.toLocaleDateString()}</h2>
               <div className="divide-y">
                 {appointmentsForSelectedDate.map(appointment => (
@@ -854,18 +875,21 @@ const Appointments: React.FC = () => {
                         <div className="mt-3 flex flex-wrap gap-2">
                           {appointment.status === 'scheduled' && (
                             <>
-                              <button 
+                              <ModernButton 
                                 onClick={() => handleEditAppointment(appointment)}
-                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"
+                                variant="outline"
+                                size="sm"
                               >
                                 Reschedule
-                              </button>
-                              <button 
+                              </ModernButton>
+                              <ModernButton 
                                 onClick={() => handleAppointmentStatusChange(appointment.id, 'canceled')}
-                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50 text-red-600"
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700"
                               >
                                 Cancel
-                              </button>
+                              </ModernButton>
                             </>
                           )}
                           {appointment.type === 'video' && (
