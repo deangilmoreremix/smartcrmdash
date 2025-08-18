@@ -2,13 +2,22 @@ import OpenAI from 'openai';
 
 // GPT-5 Enhanced Service for AI Dashboard Components
 export class GPT5Service {
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
+  private isConfigured = false;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-      dangerouslyAllowBrowser: true
-    });
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (apiKey && apiKey !== 'your_openai_api_key' && apiKey.length > 10) {
+      this.openai = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      this.isConfigured = true;
+    }
+  }
+
+  private checkApiKey(): boolean {
+    return this.isConfigured && this.openai !== null;
   }
 
   /**
@@ -16,8 +25,15 @@ export class GPT5Service {
    * Leverages GPT-5's unified reasoning system for strategic insights
    */
   async generateSmartGreeting(userMetrics: any, timeOfDay: string, recentActivity: any) {
+    if (!this.checkApiKey()) {
+      return {
+        greeting: `Good ${timeOfDay}! You have ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue.toLocaleString()} in your pipeline.`,
+        insight: 'Configure OpenAI API key to enable GPT-5 enhanced insights.'
+      };
+    }
+
     try {
-      const response = await this.openai.chat.completions.create({
+      const response = await this.openai!.chat.completions.create({
         model: "gpt-5", // Using GPT-5's most advanced capabilities
         messages: [{
           role: "system",
@@ -50,6 +66,13 @@ export class GPT5Service {
    * 94.6% AIME accuracy for mathematical forecasting
    */
   async analyzeKPITrends(historicalData: any, currentMetrics: any, chartImages: string[] = [], videoData: string[] = []) {
+    if (!this.checkApiKey()) {
+      return {
+        summary: 'Your KPI trends show steady performance. Configure OpenAI API key for detailed GPT-5 analysis.',
+        recommendations: ['Set up API credentials', 'Enable advanced analytics']
+      };
+    }
+
     try {
       const messages: any[] = [{
         role: "system", 

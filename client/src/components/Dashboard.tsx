@@ -32,6 +32,12 @@ import NewLeadsSection from './dashboard/NewLeadsSection';
 import KPICards from './dashboard/KPICards';
 import QuickActions from './dashboard/QuickActions';
 
+// GPT-5 Enhanced Components
+import GPT5AnalyticsPanel from './dashboard/GPT5AnalyticsPanel';
+import GPT5DealIntelligence from './dashboard/GPT5DealIntelligence';
+import GPT5SmartKPICards from './dashboard/GPT5SmartKPICards';
+import GPT5EnhancedDashboard from './dashboard/GPT5EnhancedDashboard';
+
 // Video call components
 import PersistentVideoCallButton from './PersistentVideoCallButton';
 import VideoCallPreviewWidget from './VideoCallPreviewWidget';
@@ -119,11 +125,26 @@ const Dashboard: React.FC = React.memo(() => {
       case 'kpi-cards-section':
         return <KPICards />;
 
+      case 'gpt5-smart-kpi-section':
+        return <GPT5SmartKPICards />;
+
       case 'quick-actions-section':
         return <QuickActions />;
         
       case 'ai-insights-section':
         return <AIInsightsPanel />;
+
+      case 'gpt5-analytics-section':
+        return <GPT5AnalyticsPanel />;
+
+      case 'gpt5-deal-intelligence-section':
+        return <GPT5DealIntelligence />;
+
+      case 'gpt5-enhanced-dashboard':
+        return <GPT5EnhancedDashboard />;
+
+      case 'gpt5-feature-status':
+        return React.createElement(React.lazy(() => import('./dashboard/GPT5FeatureStatus')));
 
       case 'interaction-history-section':
         return <InteractionHistory />;

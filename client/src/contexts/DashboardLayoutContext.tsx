@@ -31,9 +31,13 @@ export const useDashboardLayout = () => {
   return context;
 };
 
-// Updated defaultSectionOrder with new sections
+// Updated defaultSectionOrder with GPT-5 enhanced sections
 const defaultSectionOrder = [
+  'gpt5-enhanced-dashboard',
+  'gpt5-smart-kpi-section',
   'executive-overview-section',
+  'gpt5-analytics-section',
+  'gpt5-deal-intelligence-section',
   'ai-smart-features-hub',
   'sales-pipeline-deal-analytics',
   'customer-lead-management', 
@@ -41,8 +45,42 @@ const defaultSectionOrder = [
   'integrations-system'
 ];
 
-// Updated sectionConfigs with new sections
+// Updated sectionConfigs with GPT-5 enhanced sections
 const sectionConfigs: Record<string, SectionConfig> = {
+  // GPT-5 Enhanced Sections
+  'gpt5-enhanced-dashboard': {
+    id: 'gpt5-enhanced-dashboard',
+    title: 'GPT-5 Enhanced Dashboard',
+    description: 'Complete GPT-5 powered business intelligence suite',
+    icon: 'Brain',
+    component: null,
+    color: 'from-indigo-600 to-purple-600'
+  },
+  'gpt5-smart-kpi-section': {
+    id: 'gpt5-smart-kpi-section',
+    title: 'GPT-5 Smart KPI Analysis',
+    description: 'Expert-level performance metrics with AI insights',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-blue-600 to-indigo-600'
+  },
+  'gpt5-analytics-section': {
+    id: 'gpt5-analytics-section',
+    title: 'GPT-5 Advanced Analytics',
+    description: 'Multimodal business intelligence and forecasting',
+    icon: 'TrendingUp',
+    component: null,
+    color: 'from-purple-600 to-pink-600'
+  },
+  'gpt5-deal-intelligence-section': {
+    id: 'gpt5-deal-intelligence-section',
+    title: 'GPT-5 Deal Intelligence',
+    description: 'Expert deal analysis and win probability scoring',
+    icon: 'Target',
+    component: null,
+    color: 'from-green-600 to-teal-600'
+  },
+  
   // New main sections
   'executive-overview-section': {
     id: 'executive-overview-section',
