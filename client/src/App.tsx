@@ -137,7 +137,7 @@ function App() {
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <SimpleContactsTest />
+                                <ContactsWithRemote />
                               </ProtectedRoute>
                             }
                           />

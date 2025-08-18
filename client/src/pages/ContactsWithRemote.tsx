@@ -10,6 +10,8 @@ const ContactsWithRemote: React.FC = () => {
   const [useRemote, setUseRemote] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
+  console.log('ContactsWithRemote rendered, showSettings:', showSettings);
+  
   const contacts = useContactStore((state) => state.contacts);
   const fetchContacts = useContactStore((state) => state.fetchContacts);
   
@@ -40,8 +42,16 @@ const ContactsWithRemote: React.FC = () => {
   };
 
   const handleSettingsToggle = () => {
-    console.log('Settings button clicked!');
-    setShowSettings(!showSettings);
+    console.log('Settings button clicked! Current showSettings:', showSettings);
+    const newValue = !showSettings;
+    console.log('Setting showSettings to:', newValue);
+    setShowSettings(newValue);
+    console.log('After setState call, showSettings should become:', newValue);
+  };
+
+  const handleSimpleTest = () => {
+    console.log('Simple test button clicked!');
+    alert('Button click works!');
   };
 
   return (
@@ -60,6 +70,13 @@ const ContactsWithRemote: React.FC = () => {
           
           <div className="flex items-center space-x-2">
             {/* Simple test button */}
+            <button 
+              onClick={handleSimpleTest}
+              className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Test
+            </button>
+            
             <button 
               onClick={handleSettingsToggle}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
