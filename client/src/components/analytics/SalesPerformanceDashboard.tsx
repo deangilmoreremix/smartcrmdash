@@ -130,7 +130,8 @@ const SalesPerformanceDashboard: React.FC = () => {
     };
   };
 
-  const { monthlyData, stageData } = generateChartData();
+  const analyticsData = generateAnalyticsData();
+  const { monthlyData, stageData, metrics, topDeals, recentContacts, activeDeals } = analyticsData;
 
   const formatCurrency = (value: number) => 
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
@@ -397,7 +398,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {Object.values(deals).slice(0, 4).map((deal) => {
+                    {topDeals.slice(0, 4).map((deal) => {
                       const contact = contacts[deal.contactId];
                       if (!contact) return null;
                       return (
@@ -462,6 +463,38 @@ const SalesPerformanceDashboard: React.FC = () => {
             
             {/* Deal Pipeline Tab */}
             <TabsContent value="deals" className="space-y-6 mt-8">
+              {/* Embedded Pipeline Component */}
+              <Card className={`${
+                isDark 
+                  ? 'bg-gray-800 border-gray-700' 
+                  : 'bg-white border-gray-200'
+              } mb-6`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    <Target className="h-5 w-5 mr-2 text-green-500" />
+                    Interactive Deal Pipeline
+                  </CardTitle>
+                  <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                    Your comprehensive pipeline management system
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="w-full h-[800px] rounded-lg overflow-hidden">
+                    <iframe 
+                      src="https://cheery-syrniki-b5b6ca.netlify.app"
+                      className="w-full h-full border-0"
+                      title="Pipeline Management System"
+                      allowFullScreen
+                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                      loading="lazy"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Pipeline Analytics Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className={`${
                   isDark 
@@ -576,69 +609,63 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {Object.values(deals)
-                      .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
-                      .slice(0, 5)
-                      .map((deal) => {
-                        const contact = contacts[deal.contactId];
-                        if (!contact) return null;
-                        return (
-                          <div key={deal.id} className="flex items-center space-x-3">
-                            <Avatar
-                              name={contact.name}
-                              src={contact.avatarSrc}
-                              size="sm"
-                              fallback={getInitials(contact.name)}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-medium text-sm truncate ${
-                                isDark ? 'text-white' : 'text-gray-900'
+                    {activeDeals.slice(0, 5).map((deal) => {
+                      const contact = contacts[deal.contactId];
+                      if (!contact) return null;
+                      return (
+                        <div key={deal.id} className="flex items-center space-x-3">
+                          <Avatar
+                            name={contact.name}
+                            src={contact.avatarSrc}
+                            size="sm"
+                            fallback={getInitials(contact.name)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm truncate ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {contact.name}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                deal.stage === 'qualified' 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                  : deal.stage === 'proposal'
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
                               }`}>
-                                {contact.name}
-                              </p>
-                              <div className="flex items-center space-x-2">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                  deal.stage === 'qualified' 
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                    : deal.stage === 'proposal'
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                }`}>
-                                  {typeof deal.stage === 'string' ? deal.stage : deal.stage?.name || 'Unknown'}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-purple-600 text-sm">
-                                {formatCurrency(deal.value)}
-                              </p>
+                                {typeof deal.stage === 'string' ? deal.stage : deal.stage?.name || 'Unknown'}
+                              </span>
                             </div>
                           </div>
-                        );
-                      })}
+                          <div className="text-right">
+                            <p className="font-semibold text-purple-600 text-sm">
+                              {formatCurrency(deal.value)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                     
                     {/* Pipeline Summary */}
                     <div className={`pt-3 border-t ${
                       isDark ? 'border-gray-600' : 'border-gray-200'
                     } flex items-center justify-between`}>
                       <div className="flex -space-x-1">
-                        {Object.values(deals)
-                          .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
-                          .slice(0, 4)
-                          .map((deal) => {
-                            const contact = contacts[deal.contactId];
-                            if (!contact) return null;
-                            return (
-                              <Avatar
-                                key={deal.id}
-                                name={contact.name}
-                                src={contact.avatarSrc}
-                                size="xs"
-                                fallback={getInitials(contact.name)}
-                                className="border border-white dark:border-gray-800"
-                              />
-                            );
-                          })}
+                        {activeDeals.slice(0, 4).map((deal) => {
+                          const contact = contacts[deal.contactId];
+                          if (!contact) return null;
+                          return (
+                            <Avatar
+                              key={deal.id}
+                              name={contact.name}
+                              src={contact.avatarSrc}
+                              size="xs"
+                              fallback={getInitials(contact.name)}
+                              className="border border-white dark:border-gray-800"
+                            />
+                          );
+                        })}
                       </div>
                       <span className={`text-xs ${
                         isDark ? 'text-gray-400' : 'text-gray-500'
@@ -727,7 +754,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {Object.values(contacts).slice(0, 5).map((contact) => (
+                    {recentContacts.slice(0, 5).map((contact) => (
                       <div key={contact.id} className="flex items-center space-x-3">
                         <Avatar
                           name={contact.name}
@@ -771,7 +798,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                       isDark ? 'border-gray-600' : 'border-gray-200'
                     } flex items-center justify-between`}>
                       <div className="flex -space-x-1">
-                        {Object.values(contacts).slice(0, 4).map((contact) => (
+                        {recentContacts.slice(0, 4).map((contact) => (
                           <Avatar
                             key={contact.id}
                             name={contact.name}
@@ -785,7 +812,7 @@ const SalesPerformanceDashboard: React.FC = () => {
                       <span className={`text-xs ${
                         isDark ? 'text-gray-400' : 'text-gray-500'
                       }`}>
-                        +{Object.keys(contacts).length} contacts
+                        +{metrics.totalContacts} contacts
                       </span>
                     </div>
                   </CardContent>
