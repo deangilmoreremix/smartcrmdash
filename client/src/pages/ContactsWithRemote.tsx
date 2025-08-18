@@ -107,14 +107,24 @@ const ContactsWithRemote: React.FC = () => {
               ⚡ Smart Contact Loading
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Auto-loading system tries multiple remote sources and falls back to local contacts seamlessly.
+              The system automatically tests multiple remote contact sources and seamlessly falls back to local contacts when needed.
             </p>
             
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm">
-              <strong>✨ No Configuration Needed!</strong> The system automatically detects and loads the best available contact module.
+              <strong>✨ Intelligent Auto-Discovery!</strong> No setup required - the system finds and loads the best available contact application.
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-gray-600 p-3 rounded border">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">How It Works:</h4>
+                <ol className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                  <li>1. Tests connection to remote contact apps</li>
+                  <li>2. Loads the first available remote source</li>
+                  <li>3. Falls back to local contacts if all remote sources fail</li>
+                  <li>4. Provides retry options if connections fail</li>
+                </ol>
+              </div>
+              
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -124,17 +134,18 @@ const ContactsWithRemote: React.FC = () => {
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="manualMode" className="text-xs text-gray-700 dark:text-gray-300">
-                  Enable manual configuration mode (for developers)
+                  Force local contacts mode (skip remote loading)
                 </label>
               </div>
               
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                <p><strong>Auto-loading sources:</strong></p>
-                <ul className="list-disc list-inside ml-2 mt-1">
-                  <li>taupe-sprinkles-83c9ee.netlify.app</li>
-                  <li>contacts-app.vercel.app</li>
-                  <li>your-backup-contacts.netlify.app</li>
+                <p><strong>Remote Contact Sources (tested in order):</strong></p>
+                <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                  <li>https://taupe-sprinkles-83c9ee.netlify.app</li>
+                  <li>https://contacts-app.vercel.app</li>
+                  <li>https://your-backup-contacts.netlify.app</li>
                 </ul>
+                <p className="mt-2 text-gray-400">💡 If remote apps are unavailable, local contacts load automatically.</p>
               </div>
               
               <div className="flex space-x-2 pt-2">
@@ -142,7 +153,13 @@ const ContactsWithRemote: React.FC = () => {
                   onClick={() => setShowSettings(false)}
                   className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
                 >
-                  Close
+                  Close Settings
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Reload Page
                 </button>
               </div>
             </div>
