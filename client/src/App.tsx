@@ -38,6 +38,14 @@ const VideoEmail = lazy(() => import('./pages/VideoEmail'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
 const AIGoalsPage = lazy(() => import('./pages/AIGoalsPage'));
 
+// New comprehensive implementations
+const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
+const Invoicing = lazy(() => import('./pages/Invoicing'));
+const ContentLibrary = lazy(() => import('./pages/ContentLibrary'));
+const FormsAndSurveys = lazy(() => import('./pages/FormsAndSurveys'));
+const VoiceProfiles = lazy(() => import('./pages/VoiceProfiles'));
+const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
+
 import './components/styles/design-system.css';
 
 // Reusable placeholder
@@ -224,31 +232,19 @@ function App() {
                           {/* Appointments already routed to /appointments above */}
                           <Route
                             path="/phone-system"
-                            element={<PlaceholderPage title="Phone System" />}
+                            element={
+                              <ProtectedRoute>
+                                <PhoneSystem />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/invoicing"
-                            element={<PlaceholderPage title="Invoicing" />}
-                          />
-                          <Route
-                            path="/sales-analytics"
-                            element={<PlaceholderPage title="Sales Analytics" />}
-                          />
-                          <Route
-                            path="/quote-builder"
-                            element={<PlaceholderPage title="Quote Builder" />}
-                          />
-                          <Route
-                            path="/commission-tracker"
-                            element={<PlaceholderPage title="Commission Tracker" />}
-                          />
-                          <Route
-                            path="/follow-up-reminders"
-                            element={<PlaceholderPage title="Follow-up Reminders" />}
-                          />
-                          <Route
-                            path="/territory-management"
-                            element={<PlaceholderPage title="Territory Management" />}
+                            element={
+                              <ProtectedRoute>
+                                <Invoicing />
+                              </ProtectedRoute>
+                            }
                           />
 
                           {/* ===== Dropdown: Tasks ===== */}
@@ -335,15 +331,27 @@ function App() {
                           {/* ===== Dropdown: Content ===== */}
                           <Route
                             path="/content-library"
-                            element={<PlaceholderPage title="Content Library" />}
+                            element={
+                              <ProtectedRoute>
+                                <ContentLibrary />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/voice-profiles"
-                            element={<PlaceholderPage title="Voice Profiles" />}
+                            element={
+                              <ProtectedRoute>
+                                <VoiceProfiles />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/business-analysis"
-                            element={<PlaceholderPage title="Business Analysis" />}
+                            element={
+                              <ProtectedRoute>
+                                <BusinessAnalysis />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/image-generator"
@@ -351,7 +359,11 @@ function App() {
                           />
                           <Route
                             path="/forms"
-                            element={<PlaceholderPage title="Forms" />}
+                            element={
+                              <ProtectedRoute>
+                                <FormsAndSurveys />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/ai-model-demo"

@@ -1,279 +1,464 @@
-import React, { useState, useEffect } from 'react';
-import { Phone, PhoneCall, PhoneIncoming, PhoneOutgoing, Clock, User, Search, Plus, Mic, MicOff, Volume2, VolumeX, RotateCcw } from 'lucide-react';
-import { useContactStore } from '../hooks/useContactStore';
+import React, { useState } from 'react';
+import { Phone, User, Clock, BarChart2, RefreshCw, Send, MessageSquare, Mic, MicOff, Volume2, VolumeX, PhoneOff, Play, Pause, MousePointer } from 'lucide-react';
 
-interface Call {
+interface CallLog {
   id: string;
-  contactId: string;
-  contactName: string;
-  company: string;
-  phoneNumber: string;
-  type: 'incoming' | 'outgoing' | 'missed';
-  duration: string;
-  timestamp: Date;
-  status: 'completed' | 'missed' | 'ongoing';
-}
-
-interface CallSession {
-  contactId: string;
   contactName: string;
   phoneNumber: string;
+  direction: 'inbound' | 'outbound';
   startTime: Date;
-  isActive: boolean;
-  isMuted: boolean;
-  isSpeakerOn: boolean;
+  duration: number; // in seconds
+  status: 'completed' | 'missed' | 'voicemail';
+  notes?: string;
+  recordingUrl?: string;
 }
 
 const PhoneSystem: React.FC = () => {
-  const { contacts } = useContactStore();
-  const [activeCall, setActiveCall] = useState<CallSession | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [callHistory, setCallHistory] = useState<Call[]>([
+  const [activeTab, setActiveTab] = useState<'dialer' | 'logs' | 'voicemail' | 'settings'>('dialer');
+  const [dialerNumber, setDialerNumber] = useState('');
+  const [isCallInProgress, setIsCallInProgress] = useState(false);
+  const [callStatus, setCallStatus] = useState<string | null>(null);
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isOnHold, setIsOnHold] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
+  const [recordingPlayback, setRecordingPlayback] = useState<string | null>(null);
+  const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  
+  // Call logs data
+  const [callLogs] = useState<CallLog[]>([
     {
       id: '1',
-      contactId: '1',
-      contactName: 'Jane Doe',
-      company: 'Microsoft',
-      phoneNumber: '+1 (555) 123-4567',
-      type: 'outgoing',
-      duration: '12:45',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      status: 'completed'
+      contactName: 'John Doe',
+      phoneNumber: '(555) 123-4567',
+      direction: 'outbound',
+      startTime: new Date(Date.now() - 86400000), // yesterday
+      duration: 325, // 5:25
+      status: 'completed',
+      notes: 'Discussed proposal details. Follow up next week.',
+      recordingUrl: 'https://example.com/recording1.mp3'
     },
     {
-      id: '2', 
-      contactId: '2',
-      contactName: 'Darlene Robertson',
-      company: 'Ford Motor Company',
-      phoneNumber: '+1 (555) 234-5678',
-      type: 'incoming',
-      duration: '8:23',
-      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-      status: 'completed'
+      id: '2',
+      contactName: 'Sarah Williams',
+      phoneNumber: '(555) 987-6543',
+      direction: 'inbound',
+      startTime: new Date(Date.now() - 172800000), // 2 days ago
+      duration: 0,
+      status: 'missed',
+      notes: 'Left a voicemail about scheduling a demo'
     },
     {
       id: '3',
-      contactId: '3', 
-      contactName: 'Wade Warren',
-      company: 'Zenith Corp',
-      phoneNumber: '+1 (555) 345-6789',
-      type: 'missed',
-      duration: '0:00',
-      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-      status: 'missed'
+      contactName: 'Robert Johnson',
+      phoneNumber: '(555) 456-7890',
+      direction: 'outbound',
+      startTime: new Date(Date.now() - 259200000), // 3 days ago
+      duration: 183, // 3:03
+      status: 'completed',
+      recordingUrl: 'https://example.com/recording2.mp3'
+    },
+    {
+      id: '4',
+      contactName: 'Jane Smith',
+      phoneNumber: '(555) 321-7654',
+      direction: 'inbound',
+      startTime: new Date(Date.now() - 345600000), // 4 days ago
+      duration: 0,
+      status: 'voicemail',
+      notes: 'Asked about pricing options',
+      recordingUrl: 'https://example.com/voicemail1.mp3'
     }
   ]);
-
-  const [callDuration, setCallDuration] = useState('00:00');
-
-  // Call timer for active calls
-  useEffect(() => {
-    if (activeCall && activeCall.isActive) {
-      const interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - activeCall.startTime.getTime()) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        setCallDuration(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+  
+  // Voicemail data
+  const voicemails = callLogs.filter(log => log.status === 'voicemail');
+  
+  // Handle dialer input
+  const handleDialerInput = (value: string) => {
+    if (dialerNumber.length < 14) { // Limit to standard phone number length
+      setDialerNumber(dialerNumber + value);
+    }
+  };
+  
+  const handleBackspace = () => {
+    if (dialerNumber.length > 0) {
+      setDialerNumber(dialerNumber.slice(0, -1));
+    }
+  };
+  
+  const formatPhoneNumber = (number: string) => {
+    if (number.length <= 3) {
+      return number;
+    } else if (number.length <= 7) {
+      return `(${number.slice(0, 3)}) ${number.slice(3)}`;
+    } else {
+      return `(${number.slice(0, 3)}) ${number.slice(3, 6)}-${number.slice(6)}`;
+    }
+  };
+  
+  const startCall = () => {
+    if (dialerNumber.trim().length === 0) return;
+    
+    // Use the system dialer to initiate the call
+    window.location.href = `tel:${dialerNumber.replace(/\D/g, '')}`;
+    
+    // In a real implementation, we might also log the call attempt
+    // For the demo, we'll also show the in-app calling UI
+    setIsCallInProgress(true);
+    setCallStatus('Calling...');
+    
+    // Simulate call connecting
+    setTimeout(() => {
+      setCallStatus('Connected');
+      setCallDuration(0);
+      
+      // Start timer
+      const timerId = setInterval(() => {
+        setCallDuration(prev => prev + 1);
       }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [activeCall]);
-
-  const filteredContacts = Object.values(contacts).filter(contact =>
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.company?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const startCall = (contactId: string, contactName: string, phoneNumber: string) => {
-    const newCall: CallSession = {
-      contactId,
-      contactName,
-      phoneNumber,
-      startTime: new Date(),
-      isActive: true,
-      isMuted: false,
-      isSpeakerOn: false
-    };
-    setActiveCall(newCall);
+      
+      setCallTimer(timerId);
+    }, 2000);
   };
-
+  
   const endCall = () => {
-    if (activeCall) {
-      // Add to call history
-      const callRecord: Call = {
-        id: Date.now().toString(),
-        contactId: activeCall.contactId,
-        contactName: activeCall.contactName,
-        company: contacts[activeCall.contactId]?.company || '',
-        phoneNumber: activeCall.phoneNumber,
-        type: 'outgoing',
-        duration: callDuration,
-        timestamp: activeCall.startTime,
-        status: 'completed'
-      };
-      setCallHistory(prev => [callRecord, ...prev]);
+    if (callTimer) {
+      clearInterval(callTimer);
+      setCallTimer(null);
     }
-    setActiveCall(null);
-    setCallDuration('00:00');
+    
+    setIsCallInProgress(false);
+    setCallStatus(null);
+    setCallDuration(0);
+    setIsMuted(false);
+    setIsOnHold(false);
+    setIsSpeakerOn(false);
   };
-
+  
   const toggleMute = () => {
-    if (activeCall) {
-      setActiveCall(prev => prev ? { ...prev, isMuted: !prev.isMuted } : null);
-    }
+    setIsMuted(!isMuted);
   };
-
+  
+  const toggleHold = () => {
+    setIsOnHold(!isOnHold);
+  };
+  
   const toggleSpeaker = () => {
-    if (activeCall) {
-      setActiveCall(prev => prev ? { ...prev, isSpeakerOn: !prev.isSpeakerOn } : null);
+    setIsSpeakerOn(!isSpeakerOn);
+  };
+  
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  const formatCallDuration = (duration: number) => {
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  const playRecording = (url: string) => {
+    if (recordingPlayback === url && isPlayingRecording) {
+      setIsPlayingRecording(false);
+      setRecordingPlayback(null);
+    } else {
+      setRecordingPlayback(url);
+      setIsPlayingRecording(true);
+      
+      // Simulate playback (in real app, would use audio player)
+      setTimeout(() => {
+        setIsPlayingRecording(false);
+        setRecordingPlayback(null);
+      }, 3000);
     }
-  };
-
-  const getCallIcon = (type: string, status: string) => {
-    if (status === 'missed') return PhoneIncoming;
-    if (type === 'incoming') return PhoneIncoming;
-    return PhoneOutgoing;
-  };
-
-  const getCallColor = (type: string, status: string) => {
-    if (status === 'missed') return 'text-red-500';
-    if (type === 'incoming') return 'text-green-500';
-    return 'text-blue-500';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Phone System</h1>
-            <p className="text-gray-600 dark:text-gray-400">Make calls and manage your communication</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Status: </span>
-              <span className="text-green-600 font-semibold">Connected</span>
-            </div>
-          </div>
-        </div>
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Phone System</h1>
+        <p className="text-gray-600">Make and receive calls directly from your CRM</p>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Active Call Section */}
-          {activeCall && (
-            <div className="lg:col-span-3 mb-6">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
-                <div className="text-center">
-                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="w-12 h-12" />
-                  </div>
-                  <h3 className="text-xl font-semibold">{activeCall.contactName}</h3>
-                  <p className="text-blue-100 mb-2">{contacts[activeCall.contactId]?.company}</p>
-                  <p className="text-blue-200 mb-4">{activeCall.phoneNumber}</p>
-                  <p className="text-2xl font-mono mb-6">{callDuration}</p>
-                  
-                  <div className="flex justify-center space-x-4">
-                    <button
-                      onClick={toggleMute}
-                      className={`p-3 rounded-full ${activeCall.isMuted ? 'bg-red-500' : 'bg-white/20'} hover:bg-white/30 transition-colors`}
-                    >
-                      {activeCall.isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-                    </button>
-                    <button
-                      onClick={toggleSpeaker}
-                      className={`p-3 rounded-full ${activeCall.isSpeakerOn ? 'bg-green-500' : 'bg-white/20'} hover:bg-white/30 transition-colors`}
-                    >
-                      {activeCall.isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
-                    </button>
-                    <button
-                      onClick={endCall}
-                      className="p-3 bg-red-500 hover:bg-red-600 rounded-full transition-colors"
-                    >
-                      <Phone className="w-6 h-6 rotate-135" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Contact Search & Call */}
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Contacts</h2>
-              
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search contacts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {filteredContacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {contact.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{contact.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{contact.company}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{contact.phone}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => startCall(contact.id, contact.name, contact.phone || '')}
-                      disabled={!!activeCall}
-                      className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Phone className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Call History */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Calls</h2>
-              
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {callHistory.map((call) => {
-                  const IconComponent = getCallIcon(call.type, call.status);
-                  const iconColor = getCallColor(call.type, call.status);
-                  
-                  return (
-                    <div key={call.id} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <IconComponent className={`w-5 h-5 ${iconColor}`} />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-white">{call.contactName}</h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{call.phoneNumber}</p>
-                        <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
-                          <span>{call.timestamp.toLocaleDateString()} {call.timestamp.toLocaleTimeString()}</span>
-                          <span>{call.duration}</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => startCall(call.contactId, call.contactName, call.phoneNumber)}
-                        disabled={!!activeCall}
-                        className="p-1 text-gray-400 hover:text-green-500 disabled:cursor-not-allowed"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+      {/* Tab Navigation */}
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {['dialer', 'logs', 'voicemail', 'settings'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as any)}
+                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                  activeTab === tab
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
+
+      {/* Tab Content */}
+      {activeTab === 'dialer' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Dialer */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Dialer</h2>
+            
+            <div className="mb-6">
+              <input
+                type="text"
+                value={formatPhoneNumber(dialerNumber)}
+                readOnly
+                className="w-full text-2xl text-center p-4 border-2 border-gray-300 rounded-lg bg-gray-50"
+                placeholder="Enter phone number"
+              />
+            </div>
+            
+            {/* Keypad */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((digit) => (
+                <button
+                  key={digit}
+                  onClick={() => handleDialerInput(digit)}
+                  className="aspect-square bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold transition-colors"
+                  disabled={isCallInProgress}
+                >
+                  {digit}
+                </button>
+              ))}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-center space-x-4 mb-4">
+              <button
+                onClick={handleBackspace}
+                className="p-3 bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors"
+                disabled={isCallInProgress}
+              >
+                <RefreshCw size={20} />
+              </button>
+              
+              <button
+                onClick={startCall}
+                disabled={dialerNumber.length === 0 || isCallInProgress}
+                className="p-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors disabled:opacity-50"
+              >
+                <Phone size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* Call Controls */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              {isCallInProgress ? 'Active Call' : 'Call Controls'}
+            </h2>
+            
+            {isCallInProgress ? (
+              <div className="text-center">
+                <div className="mb-4">
+                  <div className="text-lg font-semibold">{callStatus}</div>
+                  <div className="text-gray-600">{formatPhoneNumber(dialerNumber)}</div>
+                  {callStatus === 'Connected' && (
+                    <div className="text-2xl font-bold text-green-600 mt-2">
+                      {formatDuration(callDuration)}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex justify-center space-x-4 mb-6">
+                  <button
+                    onClick={toggleMute}
+                    className={`p-3 rounded-full transition-colors ${
+                      isMuted ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
+                  </button>
+                  
+                  <button
+                    onClick={toggleSpeaker}
+                    className={`p-3 rounded-full transition-colors ${
+                      isSpeakerOn ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {isSpeakerOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                  </button>
+                </div>
+                
+                <button
+                  onClick={endCall}
+                  className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                >
+                  <PhoneOff size={24} />
+                </button>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500">
+                <Phone size={48} className="mx-auto mb-4 text-gray-300" />
+                <p>No active call</p>
+                <p className="text-sm">Use the dialer to start a call</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'logs' && (
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold">Call History</h2>
+          </div>
+          
+          <div className="divide-y divide-gray-200">
+            {callLogs.map((log) => (
+              <div key={log.id} className="p-6 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className={`p-2 rounded-full ${
+                    log.direction === 'inbound' ? 'bg-green-100' : 'bg-blue-100'
+                  }`}>
+                    <Phone size={16} className={
+                      log.direction === 'inbound' ? 'text-green-600' : 'text-blue-600'
+                    } />
+                  </div>
+                  
+                  <div>
+                    <div className="font-medium">{log.contactName}</div>
+                    <div className="text-sm text-gray-600">{log.phoneNumber}</div>
+                    <div className="text-xs text-gray-500">
+                      {log.startTime.toLocaleDateString()} {log.startTime.toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                    log.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    log.status === 'missed' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {log.status}
+                  </div>
+                  {log.duration > 0 && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      {formatCallDuration(log.duration)}
+                    </div>
+                  )}
+                  {log.recordingUrl && (
+                    <button
+                      onClick={() => playRecording(log.recordingUrl!)}
+                      className="mt-2 text-blue-600 hover:text-blue-700 text-sm flex items-center"
+                    >
+                      {recordingPlayback === log.recordingUrl && isPlayingRecording ? (
+                        <Pause size={14} className="mr-1" />
+                      ) : (
+                        <Play size={14} className="mr-1" />
+                      )}
+                      Recording
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'voicemail' && (
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold">Voicemails ({voicemails.length})</h2>
+          </div>
+          
+          <div className="divide-y divide-gray-200">
+            {voicemails.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <MessageSquare size={48} className="mx-auto mb-4 text-gray-300" />
+                <p>No voicemails</p>
+              </div>
+            ) : (
+              voicemails.map((voicemail) => (
+                <div key={voicemail.id} className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-medium">{voicemail.contactName}</div>
+                    <div className="text-sm text-gray-600">
+                      {voicemail.startTime.toLocaleDateString()} {voicemail.startTime.toLocaleTimeString()}
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">{voicemail.phoneNumber}</div>
+                  {voicemail.notes && (
+                    <div className="text-sm text-gray-800 mb-3">{voicemail.notes}</div>
+                  )}
+                  {voicemail.recordingUrl && (
+                    <button
+                      onClick={() => playRecording(voicemail.recordingUrl!)}
+                      className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                    >
+                      {recordingPlayback === voicemail.recordingUrl && isPlayingRecording ? (
+                        <Pause size={14} className="mr-1" />
+                      ) : (
+                        <Play size={14} className="mr-1" />
+                      )}
+                      Play Voicemail
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-6">Phone Settings</h2>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Default Country Code
+              </label>
+              <select className="block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="+1">+1 (United States)</option>
+                <option value="+44">+44 (United Kingdom)</option>
+                <option value="+49">+49 (Germany)</option>
+                <option value="+33">+33 (France)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Call Recording
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                  <span className="ml-2 text-sm">Enable call recording</span>
+                </label>
+                <label className="flex items-center">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                  <span className="ml-2 text-sm">Auto-record all calls</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ringtone Volume
+              </label>
+              <input type="range" min="0" max="100" defaultValue="80" className="w-full max-w-xs" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

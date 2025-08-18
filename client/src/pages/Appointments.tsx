@@ -1,382 +1,331 @@
 import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { 
-  Clock, 
-  User, 
-  Check, 
-  Video, 
-  Phone, 
-  MapPin, 
-  Plus, 
-  Calendar as CalendarIcon, 
-  AlertOctagon, 
-  ChevronRight, 
-  ChevronLeft, 
-  Mail, 
-  X,
-  RefreshCw,
-  Search,
-  AlertCircle,
-  Copy,
-  Link
-} from 'lucide-react';
-import { useAppointmentStore, Appointment, AppointmentType, AppointmentStatus } from '../store/appointmentStore';
-import Select from 'react-select';
+import { Calendar, Clock, User, Plus, Edit, Trash2, CheckCircle, X, Phone, Video, MessageSquare, ArrowLeft, ArrowRight, Filter } from 'lucide-react';
+
+interface Appointment {
+  id: string;
+  title: string;
+  description?: string;
+  start_time: Date;
+  end_time: Date;
+  contact_name: string;
+  contact_email?: string;
+  contact_phone?: string;
+  appointment_type: 'meeting' | 'call' | 'demo' | 'consultation';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
+  location?: string;
+  meeting_link?: string;
+  notes?: string;
+  reminder_sent?: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+const appointmentTypes = [
+  { value: 'meeting', label: 'Meeting', icon: User },
+  { value: 'call', label: 'Phone Call', icon: Phone },
+  { value: 'demo', label: 'Demo', icon: Video },
+  { value: 'consultation', label: 'Consultation', icon: MessageSquare },
+];
+
+const appointmentStatuses = [
+  { value: 'scheduled', label: 'Scheduled', color: 'bg-blue-100 text-blue-800' },
+  { value: 'confirmed', label: 'Confirmed', color: 'bg-green-100 text-green-800' },
+  { value: 'completed', label: 'Completed', color: 'bg-gray-100 text-gray-800' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
+];
 
 const Appointments: React.FC = () => {
-  const { 
-    appointments, 
-    fetchAppointments, 
-    createAppointment, 
-    updateAppointment,
-    deleteAppointment,
-    selectAppointment,
-    selectedAppointment,
-    selectedSlot,
-    selectTimeSlot,
-    isTimeSlotAvailable,
-    getAppointmentsForDate
-  } = useAppointmentStore();
-  
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
-  const [appointmentDetail, setAppointmentDetail] = useState<Appointment | null>(null);
-  const [showAppointmentDetail, setShowAppointmentDetail] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [appointmentTypes, setAppointmentTypes] = useState<string[]>([]);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  // Form data for creating/editing appointments
-  const [formData, setFormData] = useState<Partial<Appointment>>({
+  // Form state
+  const [formData, setFormData] = useState({
     title: '',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-    date: new Date(),
-    duration: 30,
-    type: 'video',
+    description: '',
+    start_time: '',
+    end_time: '',
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    appointment_type: 'meeting' as const,
+    status: 'scheduled' as const,
     location: '',
+    meeting_link: '',
     notes: '',
-    status: 'scheduled'
   });
   
+  // Mock data initialization
   useEffect(() => {
-    fetchAppointments();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const mockAppointments: Appointment[] = [
+      {
+        id: '1',
+        title: 'Product Demo with Acme Corp',
+        description: 'Showcase our new features to potential enterprise client',
+        start_time: new Date(today.getTime() + 10 * 60 * 60 * 1000), // 10 AM today
+        end_time: new Date(today.getTime() + 11 * 60 * 60 * 1000), // 11 AM today
+        contact_name: 'John Smith',
+        contact_email: 'john@acmecorp.com',
+        contact_phone: '+1-555-0123',
+        appointment_type: 'demo',
+        status: 'confirmed',
+        meeting_link: 'https://zoom.us/j/123456789',
+        notes: 'Focus on enterprise features and scalability',
+        reminder_sent: true,
+        created_at: new Date(Date.now() - 86400000),
+        updated_at: new Date(Date.now() - 86400000),
+      },
+      {
+        id: '2',
+        title: 'Sales Consultation',
+        description: 'Initial consultation with potential client',
+        start_time: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000), // 2 PM tomorrow
+        end_time: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 15 * 60 * 60 * 1000), // 3 PM tomorrow
+        contact_name: 'Sarah Johnson',
+        contact_email: 'sarah@techstart.com',
+        contact_phone: '+1-555-0456',
+        appointment_type: 'consultation',
+        status: 'scheduled',
+        location: 'Conference Room A',
+        notes: 'Interested in our premium package',
+        reminder_sent: false,
+        created_at: new Date(Date.now() - 172800000),
+        updated_at: new Date(Date.now() - 172800000),
+      },
+      {
+        id: '3',
+        title: 'Follow-up Call',
+        description: 'Check-in with existing client about implementation',
+        start_time: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000), // 9 AM day after tomorrow
+        end_time: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000 + 9.5 * 60 * 60 * 1000), // 9:30 AM day after tomorrow
+        contact_name: 'Michael Chen',
+        contact_email: 'michael@innovate.io',
+        contact_phone: '+1-555-0789',
+        appointment_type: 'call',
+        status: 'scheduled',
+        notes: 'Check progress on integration project',
+        reminder_sent: false,
+        created_at: new Date(Date.now() - 259200000),
+        updated_at: new Date(Date.now() - 259200000),
+      },
+    ];
+    
+    setAppointments(mockAppointments);
   }, []);
   
+  // Reset form when editing appointment changes
   useEffect(() => {
-    // Set initial selected date to today
-    if (selectedSlot) {
+    if (editingAppointment) {
       setFormData({
-        ...formData,
-        date: selectedSlot,
-        endDate: new Date(selectedSlot.getTime() + 30 * 60000)
+        title: editingAppointment.title,
+        description: editingAppointment.description || '',
+        start_time: formatDateTimeForInput(editingAppointment.start_time),
+        end_time: formatDateTimeForInput(editingAppointment.end_time),
+        contact_name: editingAppointment.contact_name,
+        contact_email: editingAppointment.contact_email || '',
+        contact_phone: editingAppointment.contact_phone || '',
+        appointment_type: editingAppointment.appointment_type,
+        status: editingAppointment.status,
+        location: editingAppointment.location || '',
+        meeting_link: editingAppointment.meeting_link || '',
+        notes: editingAppointment.notes || '',
       });
-      setShowAppointmentForm(true);
+    } else {
+      resetForm();
     }
-  }, [selectedSlot]);
+  }, [editingAppointment]);
   
-  useEffect(() => {
-    if (selectedAppointment) {
-      setAppointmentDetail(appointments[selectedAppointment]);
-      setShowAppointmentDetail(true);
+  const formatDateTimeForInput = (date: Date) => {
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+  
+  const resetForm = () => {
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+    
+    setFormData({
+      title: '',
+      description: '',
+      start_time: formatDateTimeForInput(startTime),
+      end_time: formatDateTimeForInput(endTime),
+      contact_name: '',
+      contact_email: '',
+      contact_phone: '',
+      appointment_type: 'meeting',
+      status: 'scheduled',
+      location: '',
+      meeting_link: '',
+      notes: '',
+    });
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const appointmentData = {
+        ...formData,
+        start_time: new Date(formData.start_time),
+        end_time: new Date(formData.end_time),
+      };
+      
+      if (editingAppointment) {
+        // Update existing appointment
+        const updatedAppointment = {
+          ...editingAppointment,
+          ...appointmentData,
+          updated_at: new Date(),
+        };
+        setAppointments(appointments.map(apt => 
+          apt.id === editingAppointment.id ? updatedAppointment : apt
+        ));
+      } else {
+        // Create new appointment
+        const newAppointment: Appointment = {
+          id: Date.now().toString(),
+          ...appointmentData,
+          reminder_sent: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+        setAppointments([...appointments, newAppointment]);
+      }
+      
+      setShowAppointmentForm(false);
+      setEditingAppointment(null);
+      resetForm();
+    } catch (err) {
+      setError('Failed to save appointment');
+    } finally {
+      setIsLoading(false);
     }
-  }, [selectedAppointment, appointments]);
+  };
   
-  // Calculate appointments for the selected date
-  const appointmentsForSelectedDate = getAppointmentsForDate(selectedDate);
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setShowAppointmentForm(true);
+  };
   
-  // Available time slots for the day
-  const timeSlots = [
-    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', 
-    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-    '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
-    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM'
-  ];
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this appointment?')) return;
+    
+    setIsLoading(true);
+    try {
+      setAppointments(appointments.filter(apt => apt.id !== id));
+    } catch (err) {
+      setError('Failed to delete appointment');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
-  // Get contacts for dropdown (for demo we're using mock data)
-  const contacts = [
-    { value: '1', label: 'John Doe', email: 'john.doe@example.com', phone: '(555) 123-4567' },
-    { value: '2', label: 'Jane Smith', email: 'jane.smith@example.com', phone: '(555) 987-6543' },
-    { value: '3', label: 'Robert Johnson', email: 'robert@example.com', phone: '(555) 456-7890' },
-    { value: '4', label: 'Sarah Williams', email: 'sarah@example.com', phone: '(555) 567-8901' },
-  ];
+  const handleStatusUpdate = async (id: string, newStatus: Appointment['status']) => {
+    setIsLoading(true);
+    try {
+      const updatedAppointments = appointments.map(apt =>
+        apt.id === id ? { ...apt, status: newStatus, updated_at: new Date() } : apt
+      );
+      setAppointments(updatedAppointments);
+    } catch (err) {
+      setError('Failed to update appointment status');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
-  // Functions to format appointments and dates
+  // Filter appointments
+  const filteredAppointments = appointments.filter(apt => {
+    if (filterStatus !== 'all' && apt.status !== filterStatus) return false;
+    if (filterType !== 'all' && apt.appointment_type !== filterType) return false;
+    return true;
+  });
+  
+  // Calendar helpers
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+  
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+  
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      return newDate;
+    });
+  };
+  
+  const getAppointmentsForDate = (date: Date) => {
+    return filteredAppointments.filter(apt => {
+      const aptDate = new Date(apt.start_time);
+      return aptDate.toDateString() === date.toDateString();
+    });
+  };
+  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} min`;
-    } else {
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      return remainingMinutes > 0 ? `${hours} hr ${remainingMinutes} min` : `${hours} hr`;
-    }
+  const getStatusColor = (status: string) => {
+    return appointmentStatuses.find(s => s.value === status)?.color || 'bg-gray-100 text-gray-800';
   };
   
-  const isSameDay = (date1: Date, date2: Date) => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
+  const getTypeIcon = (type: string) => {
+    const typeConfig = appointmentTypes.find(t => t.value === type);
+    return typeConfig ? typeConfig.icon : User;
   };
-  
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-    selectTimeSlot(null);
-    setShowAppointmentForm(false);
-  };
-  
-  const handleTimeSlotClick = (timeSlot: string) => {
-    if (!isTimeSlotTaken(timeSlot)) {
-      const [hourStr, minuteStr, period] = timeSlot.match(/(\d+):(\d+)\s+([AP]M)/)?.slice(1) || [];
-      const isPM = period === 'PM';
-      let hour = parseInt(hourStr);
-      const minute = parseInt(minuteStr);
-      
-      if (isPM && hour !== 12) hour += 12;
-      if (!isPM && hour === 12) hour = 0;
-      
-      const slotTime = new Date(selectedDate);
-      slotTime.setHours(hour, minute, 0, 0);
-      
-      // Select the time slot
-      selectTimeSlot(slotTime);
-    }
-  };
-  
-  // Check if a time slot is taken
-  const isTimeSlotTaken = (timeSlot: string) => {
-    const [hourStr, minuteStr] = timeSlot.split(':');
-    const isPM = timeSlot.includes('PM');
-    let hour = parseInt(hourStr);
-    const minute = parseInt(minuteStr);
-    
-    if (isPM && hour !== 12) hour += 12;
-    if (!isPM && hour === 12) hour = 0;
-    
-    const slotTime = new Date(selectedDate);
-    slotTime.setHours(hour, minute, 0, 0);
-    
-    return !isTimeSlotAvailable(slotTime, 30); // Assume 30 min duration for checking
-  };
-  
-  // Function to get appointment at a specific time slot
-  const getAppointmentAtTimeSlot = (timeSlot: string) => {
-    const [hourStr, minuteStr] = timeSlot.split(':');
-    const isPM = timeSlot.includes('PM');
-    let hour = parseInt(hourStr);
-    const minute = parseInt(minuteStr);
-    
-    if (isPM && hour !== 12) hour += 12;
-    if (!isPM && hour === 12) hour = 0;
-    
-    const slotTime = new Date(selectedDate);
-    slotTime.setHours(hour, minute, 0, 0);
-    
-    return Object.values(appointments).find(appointment => {
-      const appointmentStartTime = appointment.date;
-      const appointmentEndTime = appointment.endDate;
-      
-      return (
-        isSameDay(appointmentStartTime, selectedDate) &&
-        slotTime >= appointmentStartTime &&
-        slotTime < appointmentEndTime
-      );
-    });
-  };
-  
-  const formatDateHeader = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    };
-    return date.toLocaleDateString(undefined, options);
-  };
-  
-  const renderAppointmentTypeIcon = (type: AppointmentType) => {
-    switch (type) {
-      case 'in-person':
-        return <MapPin size={18} className="text-green-500" />;
-      case 'video':
-        return <Video size={18} className="text-purple-500" />;
-      case 'phone':
-        return <Phone size={18} className="text-blue-500" />;
-      default:
-        return null;
-    }
-  };
-  
-  const getStatusBadgeClass = (status: AppointmentStatus) => {
-    switch(status) {
-      case 'scheduled':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'canceled':
-        return 'bg-red-100 text-red-800';
-      case 'no-show':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-  
-  const handleSubmitAppointment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      // Calculate end date based on start time and duration
-      const endDate = new Date(formData.date || new Date());
-      endDate.setMinutes(endDate.getMinutes() + (formData.duration || 30));
-      
-      const appointmentData = {
-        ...formData,
-        endDate
-      };
-      
-      if (isEditing && appointmentDetail) {
-        // Update existing appointment
-        await updateAppointment(appointmentDetail.id, appointmentData);
-      } else {
-        // Create new appointment
-        await createAppointment(appointmentData);
-      }
-      
-      // Reset form and close
-      setFormData({
-        title: '',
-        contactName: '',
-        contactEmail: '',
-        contactPhone: '',
-        date: new Date(),
-        duration: 30,
-        type: 'video',
-        location: '',
-        notes: '',
-        status: 'scheduled'
-      });
-      setShowAppointmentForm(false);
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving appointment:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  const handleEditAppointment = (appt: Appointment) => {
-    setFormData({
-      title: appt.title,
-      contactId: appt.contactId,
-      contactName: appt.contactName,
-      contactEmail: appt.contactEmail,
-      contactPhone: appt.contactPhone,
-      date: appt.date,
-      duration: appt.duration,
-      type: appt.type,
-      location: appt.location,
-      notes: appt.notes,
-      status: appt.status
-    });
-    
-    setShowAppointmentDetail(false);
-    setIsEditing(true);
-    setShowAppointmentForm(true);
-  };
-  
-  const handleDeleteAppointment = async (id: string) => {
-    if (confirm('Are you sure you want to delete this appointment?')) {
-      try {
-        await deleteAppointment(id);
-        setShowAppointmentDetail(false);
-      } catch (error) {
-        console.error('Error deleting appointment:', error);
-      }
-    }
-  };
-  
-  const handleContactSelect = (option: any) => {
-    if (option) {
-      const contact = contacts.find(c => c.value === option.value);
-      setFormData({
-        ...formData,
-        contactId: option.value,
-        contactName: contact?.label || '',
-        contactEmail: contact?.email || '',
-        contactPhone: contact?.phone || ''
-      });
-    } else {
-      setFormData({
-        ...formData,
-        contactId: undefined,
-        contactName: '',
-        contactEmail: '',
-        contactPhone: ''
-      });
-    }
-  };
-  
-  const handleAppointmentStatusChange = async (id: string, status: AppointmentStatus) => {
-    try {
-      await updateAppointment(id, { status });
-      
-      if (appointmentDetail && appointmentDetail.id === id) {
-        setAppointmentDetail({
-          ...appointmentDetail,
-          status
-        });
-      }
-    } catch (error) {
-      console.error('Error updating appointment status:', error);
-    }
-  };
-  
-  const handleCopyMeetingLink = () => {
-    // In a real app, this would be a real meeting URL
-    const meetingUrl = 'https://meeting.example.com/join/abc123';
-    
-    navigator.clipboard.writeText(meetingUrl)
-      .then(() => {
-        alert('Meeting link copied to clipboard');
-      })
-      .catch(err => {
-        console.error('Failed to copy meeting link:', err);
-      });
-  };
-  
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Header */}
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <p className="text-gray-600 mt-1">Schedule and manage your meetings with contacts</p>
+          <p className="text-gray-600 mt-1">Manage your meetings and appointments</p>
         </div>
-        <div className="mt-4 sm:mt-0">
-          <button 
+        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+          {/* View Mode Toggle */}
+          <div className="inline-flex rounded-md shadow-sm">
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
+                viewMode === 'calendar'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <Calendar size={16} className="inline mr-1" />
+              Calendar
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
+                viewMode === 'list'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              List
+            </button>
+          </div>
+          
+          <button
             onClick={() => {
-              setIsEditing(false);
-              setFormData({
-                title: '',
-                contactName: '',
-                contactEmail: '',
-                contactPhone: '',
-                date: new Date(),
-                duration: 30,
-                type: 'video',
-                location: '',
-                notes: '',
-                status: 'scheduled'
-              });
+              setEditingAppointment(null);
               setShowAppointmentForm(true);
             }}
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
@@ -386,665 +335,470 @@ const Appointments: React.FC = () => {
           </button>
         </div>
       </header>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm mb-6">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold">Calendar</h2>
-            </div>
-            <div className="p-4">
-              <div className="calendar-container">
-                <Calendar 
-                  onChange={handleDateChange} 
-                  value={selectedDate}
-                  className="react-calendar" 
-                  tileClassName={({ date }) => {
-                    const hasAppointment = Object.values(appointments).some(appointment => 
-                      isSameDay(appointment.date, date)
-                    );
-                    return hasAppointment ? 'has-appointment' : null;
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Upcoming Appointments</h2>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search appointments..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="pl-8 pr-4 py-1 text-sm border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <Search size={14} className="absolute left-2 top-2 text-gray-400" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4">
-              {Object.values(appointments)
-                .filter(appointment => 
-                  appointment.date >= new Date() && 
-                  appointment.status === 'scheduled' && 
-                  (searchText === '' || 
-                    appointment.contactName.toLowerCase().includes(searchText.toLowerCase()) || 
-                    appointment.title.toLowerCase().includes(searchText.toLowerCase())
-                  )
-                )
-                .sort((a, b) => a.date.getTime() - b.date.getTime())
-                .slice(0, 5)
-                .map(appointment => (
-                  <div key={appointment.id} className="border rounded-lg p-3 mb-3 hover:bg-gray-50 cursor-pointer" onClick={() => selectAppointment(appointment.id)}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center">
-                          {renderAppointmentTypeIcon(appointment.type)}
-                          <h3 className="font-medium ml-1 text-sm">{appointment.title}</h3>
-                        </div>
-                        <p className="text-xs text-gray-500">{appointment.contactName}</p>
-                      </div>
-                      <div className="text-right text-xs">
-                        <p className="font-medium">
-                          {appointment.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        </p>
-                        <p className="text-gray-500">{formatTime(appointment.date)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              
-              {Object.values(appointments).filter(appointment => 
-                appointment.date >= new Date() && 
-                appointment.status === 'scheduled' &&
-                (searchText === '' || 
-                  appointment.contactName.toLowerCase().includes(searchText.toLowerCase()) || 
-                  appointment.title.toLowerCase().includes(searchText.toLowerCase())
-                )
-              ).length === 0 && (
-                <div className="text-center p-4">
-                  <CalendarIcon size={32} className="mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">No upcoming appointments</p>
-                </div>
-              )}
-              
-              <div className="mt-2 text-center">
-                <button className="text-sm text-blue-600 hover:text-blue-800">
-                  View All Appointments
-                </button>
-              </div>
-            </div>
-          </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          {error}
         </div>
-        
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => {
-                    const prevDay = new Date(selectedDate);
-                    prevDay.setDate(prevDay.getDate() - 1);
-                    handleDateChange(prevDay);
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-100"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <h2 className="text-lg font-semibold">{formatDateHeader(selectedDate)}</h2>
-                <button 
-                  onClick={() => {
-                    const nextDay = new Date(selectedDate);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    handleDateChange(nextDay);
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-100"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-              <div className="flex items-center">
-                <div className="relative mr-2">
-                  <select
-                    className="border border-gray-300 rounded-md pl-3 pr-8 py-1 text-sm"
-                    onChange={(e) => {
-                      const types = [...appointmentTypes];
-                      const value = e.target.value;
-                      
-                      if (types.includes(value)) {
-                        setAppointmentTypes(types.filter(t => t !== value));
-                      } else {
-                        types.push(value);
-                        setAppointmentTypes(types);
-                      }
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Filter Type</option>
-                    <option value="video">Video</option>
-                    <option value="phone">Phone</option>
-                    <option value="in-person">In Person</option>
-                  </select>
-                </div>
-                <button className="text-blue-600 text-sm hover:text-blue-800">
-                  Share Calendar
-                </button>
-              </div>
+      )}
+
+      {/* Filters */}
+      <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter size={16} className="text-gray-400" />
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="all">All Statuses</option>
+                {appointmentStatuses.map(status => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
             </div>
             
-            <div className="p-4">
-              {/* Time slots */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {timeSlots.map(timeSlot => {
-                  const isTaken = isTimeSlotTaken(timeSlot);
-                  const appointment = getAppointmentAtTimeSlot(timeSlot);
-                  
-                  return (
-                    <div 
-                      key={timeSlot}
-                      onClick={() => !isTaken && handleTimeSlotClick(timeSlot)}
-                      className={`border rounded-lg p-3 ${
-                        isTaken ? 'bg-blue-50 border-blue-200' : 
-                        selectedSlot && timeSlot === formatTime(selectedSlot) ? 'bg-green-50 border-green-200' : 
-                        'hover:bg-gray-50 cursor-pointer'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center">
-                          <Clock size={16} className="text-gray-400 mr-2" />
-                          <span className="font-medium">{timeSlot}</span>
-                        </div>
-                        {isTaken && (
-                          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
-                            Booked
-                          </span>
-                        )}
-                      </div>
-                      
-                      {isTaken && appointment && (
-                        <div className="mt-2">
-                          <div className="flex items-center">
-                            {renderAppointmentTypeIcon(appointment.type)}
-                            <p className="text-sm font-medium ml-1">{appointment.title}</p>
-                          </div>
-                          <div className="flex items-center mt-1">
-                            <User size={14} className="text-gray-400 mr-1" />
-                            <p className="text-xs text-gray-500">{appointment.contactName}</p>
-                          </div>
-                          <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-                            <span>{formatDuration(appointment.duration)}</span>
-                            
-                            <div className="flex space-x-2">
-                              {appointment.type === 'video' && (
-                                <button className="p-1 text-purple-600 hover:text-purple-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  selectAppointment(appointment.id);
-                                }}>
-                                  <Video size={14} />
-                                </button>
-                              )}
-                              {appointment.type === 'phone' && (
-                                <button className="p-1 text-blue-600 hover:text-blue-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (appointment.contactPhone) {
-                                    window.open(`tel:${appointment.contactPhone}`);
-                                  }
-                                }}>
-                                  <Phone size={14} />
-                                </button>
-                              )}
-                              {appointment.contactEmail && (
-                                <button className="p-1 text-red-600 hover:text-red-800" onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(`mailto:${appointment.contactEmail}`);
-                                }}>
-                                  <Mail size={14} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {!isTaken && (
-                        <div className="mt-2 text-center text-sm text-gray-500">
-                          Available
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* New Appointment Form */}
-              {showAppointmentForm && (
-                <div className="mt-6 border-t pt-6">
-                  <h3 className="text-lg font-medium mb-4">{isEditing ? 'Edit Appointment' : 'Schedule New Appointment'}</h3>
-                  <form onSubmit={handleSubmitAppointment}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Title
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.title || ''}
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                          placeholder="Enter appointment title"
-                          className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contact
-                        </label>
-                        <Select
-                          options={contacts}
-                          value={formData.contactId ? { 
-                            value: formData.contactId, 
-                            label: formData.contactName 
-                          } : null}
-                          onChange={handleContactSelect}
-                          placeholder="Select or enter contact name"
-                          isClearable
-                          className="basic-single"
-                          classNamePrefix="select"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Date & Time
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={formData.date ? 
-                            new Date(formData.date.getTime() - (formData.date.getTimezoneOffset() * 60000))
-                              .toISOString()
-                              .slice(0, 16) 
-                            : ''
-                          }
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              const newDate = new Date(e.target.value);
-                              setFormData({ ...formData, date: newDate });
-                            }
-                          }}
-                          className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Duration
-                        </label>
-                        <select
-                          value={formData.duration || 30}
-                          onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                          className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value={15}>15 minutes</option>
-                          <option value={30}>30 minutes</option>
-                          <option value={45}>45 minutes</option>
-                          <option value={60}>1 hour</option>
-                          <option value={90}>1.5 hours</option>
-                          <option value={120}>2 hours</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Appointment Type
-                        </label>
-                        <div className="flex space-x-2">
-                          <label className={`flex-1 flex items-center justify-center p-2 border rounded-md hover:bg-blue-50 cursor-pointer ${
-                            formData.type === 'in-person' ? 'bg-blue-50 border-blue-300' : ''
-                          }`}>
-                            <input 
-                              type="radio" 
-                              name="type" 
-                              value="in-person" 
-                              checked={formData.type === 'in-person'} 
-                              onChange={() => setFormData({ ...formData, type: 'in-person' })}
-                              className="hidden" 
-                            />
-                            <MapPin size={16} className="mr-1 text-green-500" />
-                            <span className="text-sm">In Person</span>
-                          </label>
-                          <label className={`flex-1 flex items-center justify-center p-2 border rounded-md hover:bg-blue-50 cursor-pointer ${
-                            formData.type === 'video' ? 'bg-blue-50 border-blue-300' : ''
-                          }`}>
-                            <input 
-                              type="radio" 
-                              name="type" 
-                              value="video" 
-                              checked={formData.type === 'video'} 
-                              onChange={() => setFormData({ ...formData, type: 'video' })}
-                              className="hidden" 
-                            />
-                            <Video size={16} className="mr-1 text-purple-500" />
-                            <span className="text-sm">Video</span>
-                          </label>
-                          <label className={`flex-1 flex items-center justify-center p-2 border rounded-md hover:bg-blue-50 cursor-pointer ${
-                            formData.type === 'phone' ? 'bg-blue-50 border-blue-300' : ''
-                          }`}>
-                            <input 
-                              type="radio" 
-                              name="type" 
-                              value="phone" 
-                              checked={formData.type === 'phone'} 
-                              onChange={() => setFormData({ ...formData, type: 'phone' })}
-                              className="hidden" 
-                            />
-                            <Phone size={16} className="mr-1 text-blue-500" />
-                            <span className="text-sm">Phone</span>
-                          </label>
-                        </div>
-                      </div>
-                      
-                      {formData.type === 'in-person' && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Location
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.location || ''}
-                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                            placeholder="Enter meeting location"
-                            className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      )}
-                      
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Notes
-                        </label>
-                        <textarea
-                          value={formData.notes || ''}
-                          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                          className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
-                          rows={3}
-                          placeholder="Add any notes or preparation details"
-                        ></textarea>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-end space-x-2">
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setShowAppointmentForm(false);
-                          selectTimeSlot(null);
-                        }}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <RefreshCw size={16} className="animate-spin mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            {isEditing ? 'Update' : 'Schedule'} Appointment
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-            </div>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-3 py-2 border rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+            >
+              <option value="all">All Types</option>
+              {appointmentTypes.map(type => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
           </div>
           
-          {/* Appointments for selected date */}
-          {appointmentsForSelectedDate.length > 0 && (
-            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-semibold mb-4">Appointments for {selectedDate.toLocaleDateString()}</h2>
-              <div className="divide-y">
-                {appointmentsForSelectedDate.map(appointment => (
-                  <div key={appointment.id} className="py-4 first:pt-0 last:pb-0">
-                    <div className="flex">
-                      <div className="w-16 text-center mr-4">
-                        <div className="text-sm font-medium">{formatTime(appointment.date)}</div>
-                        <div className="text-xs text-gray-500">{formatDuration(appointment.duration)}</div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <div>
-                            <div className="flex items-center">
-                              {renderAppointmentTypeIcon(appointment.type)}
-                              <h3 className="font-medium ml-1">{appointment.title}</h3>
-                            </div>
-                            <p className="text-sm text-gray-500">{appointment.contactName}</p>
-                          </div>
-                          <div>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusBadgeClass(appointment.status)}`}>
-                              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {appointment.location && (
-                          <div className="flex items-center mt-1 text-xs text-gray-500">
-                            <MapPin size={12} className="mr-1" />
-                            {appointment.location}
-                          </div>
-                        )}
-                        
-                        {appointment.notes && (
-                          <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                            {appointment.notes}
-                          </div>
-                        )}
-                        
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {appointment.status === 'scheduled' && (
-                            <>
-                              <button 
-                                onClick={() => handleEditAppointment(appointment)}
-                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"
-                              >
-                                Reschedule
-                              </button>
-                              <button 
-                                onClick={() => handleAppointmentStatusChange(appointment.id, 'canceled')}
-                                className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50 text-red-600"
-                              >
-                                Cancel
-                              </button>
-                            </>
-                          )}
-                          {appointment.type === 'video' && (
-                            <button className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center">
-                              <Video size={12} className="mr-1" />
-                              Join Meeting
-                            </button>
-                          )}
-                          {appointment.type === 'phone' && appointment.contactPhone && (
-                            <button 
-                              onClick={() => window.open(`tel:${appointment.contactPhone}`)}
-                              className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center"
-                            >
-                              <Phone size={12} className="mr-1" />
-                              Call
-                            </button>
-                          )}
-                          {appointment.status === 'scheduled' && (
-                            <button 
-                              onClick={() => handleAppointmentStatusChange(appointment.id, 'completed')}
-                              className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 flex items-center"
-                            >
-                              <Check size={12} className="mr-1" />
-                              Mark Completed
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {viewMode === 'calendar' && (
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => navigateMonth('prev')}
+                className="p-2 text-gray-400 hover:text-gray-600"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <h2 className="text-lg font-semibold text-gray-900 min-w-[160px] text-center">
+                {currentDate.toLocaleDateString([], { month: 'long', year: 'numeric' })}
+              </h2>
+              <button
+                onClick={() => navigateMonth('next')}
+                className="p-2 text-gray-400 hover:text-gray-600"
+              >
+                <ArrowRight size={20} />
+              </button>
             </div>
           )}
         </div>
       </div>
-      
-      {/* Appointment Detail Modal */}
-      {showAppointmentDetail && appointmentDetail && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Appointment Details</h3>
-              <button onClick={() => setShowAppointmentDetail(false)} className="text-gray-400 hover:text-gray-500">
-                <X size={20} />
+
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          {/* Calendar Header */}
+          <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="px-4 py-3 text-sm font-medium text-gray-500 text-center">
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          {/* Calendar Body */}
+          <div className="grid grid-cols-7 bg-white">
+            {Array.from({ length: getFirstDayOfMonth(currentDate) }).map((_, index) => (
+              <div key={`empty-${index}`} className="h-24 border-r border-b border-gray-100"></div>
+            ))}
+            
+            {Array.from({ length: getDaysInMonth(currentDate) }).map((_, dayIndex) => {
+              const day = dayIndex + 1;
+              const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+              const dayAppointments = getAppointmentsForDate(date);
+              const isToday = date.toDateString() === new Date().toDateString();
+              
+              return (
+                <div
+                  key={day}
+                  className={`h-24 border-r border-b border-gray-100 p-1 cursor-pointer hover:bg-gray-50 ${
+                    isToday ? 'bg-blue-50' : ''
+                  }`}
+                  onClick={() => setSelectedDate(date)}
+                >
+                  <div className={`text-sm font-medium mb-1 ${
+                    isToday ? 'text-blue-600' : 'text-gray-900'
+                  }`}>
+                    {day}
+                  </div>
+                  <div className="space-y-1">
+                    {dayAppointments.slice(0, 2).map((apt) => {
+                      const IconComponent = getTypeIcon(apt.appointment_type);
+                      return (
+                        <div
+                          key={apt.id}
+                          className={`text-xs p-1 rounded truncate ${getStatusColor(apt.status)}`}
+                          title={`${apt.title} - ${formatTime(apt.start_time)}`}
+                        >
+                          <IconComponent size={10} className="inline mr-1" />
+                          {formatTime(apt.start_time)}
+                        </div>
+                      );
+                    })}
+                    {dayAppointments.length > 2 && (
+                      <div className="text-xs text-gray-500 p-1">
+                        +{dayAppointments.length - 2} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* List View */}
+      {viewMode === 'list' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          {filteredAppointments.length === 0 ? (
+            <div className="p-8 text-center">
+              <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
+              <p className="text-gray-500 mb-4">
+                {filterStatus !== 'all' || filterType !== 'all' 
+                  ? 'No appointments match your current filters' 
+                  : 'Schedule your first appointment to get started'
+                }
+              </p>
+              <button
+                onClick={() => setShowAppointmentForm(true)}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <Plus size={18} className="mr-1" />
+                New Appointment
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {filteredAppointments
+                .sort((a, b) => a.start_time.getTime() - b.start_time.getTime())
+                .map((appointment) => {
+                  const IconComponent = getTypeIcon(appointment.appointment_type);
+                  return (
+                    <div key={appointment.id} className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4 flex-1">
+                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                            <IconComponent size={20} />
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="font-medium text-gray-900">{appointment.title}</h3>
+                              <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
+                                {appointmentStatuses.find(s => s.value === appointment.status)?.label}
+                              </span>
+                            </div>
+                            
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex items-center space-x-4">
+                                <span className="flex items-center">
+                                  <Clock size={14} className="mr-1" />
+                                  {appointment.start_time.toLocaleDateString()} at {formatTime(appointment.start_time)} - {formatTime(appointment.end_time)}
+                                </span>
+                                <span className="flex items-center">
+                                  <User size={14} className="mr-1" />
+                                  {appointment.contact_name}
+                                </span>
+                              </div>
+                              
+                              {appointment.description && (
+                                <p className="text-gray-500">{appointment.description}</p>
+                              )}
+                              
+                              {(appointment.location || appointment.meeting_link) && (
+                                <div className="flex items-center space-x-4 text-xs">
+                                  {appointment.location && (
+                                    <span>📍 {appointment.location}</span>
+                                  )}
+                                  {appointment.meeting_link && (
+                                    <a 
+                                      href={appointment.meeting_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-700"
+                                    >
+                                      🔗 Meeting Link
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 ml-4">
+                          {appointment.status === 'scheduled' && (
+                            <button
+                              onClick={() => handleStatusUpdate(appointment.id, 'confirmed')}
+                              className="text-green-600 hover:text-green-700"
+                              title="Confirm appointment"
+                            >
+                              <CheckCircle size={16} />
+                            </button>
+                          )}
+                          
+                          <button
+                            onClick={() => handleEdit(appointment)}
+                            className="text-gray-400 hover:text-blue-600"
+                            title="Edit appointment"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          
+                          <button
+                            onClick={() => handleDelete(appointment.id)}
+                            className="text-gray-400 hover:text-red-600"
+                            title="Delete appointment"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Appointment Form Modal */}
+      {showAppointmentForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold">
+                {editingAppointment ? 'Edit Appointment' : 'New Appointment'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowAppointmentForm(false);
+                  setEditingAppointment(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={24} />
               </button>
             </div>
             
-            <div className="px-6 py-4">
-              <div className="flex justify-between items-start mb-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter appointment title"
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter appointment description"
+                  />
+                </div>
+                
                 <div>
-                  <div className="flex items-center">
-                    {renderAppointmentTypeIcon(appointmentDetail.type)}
-                    <h4 className="text-xl font-semibold ml-2">{appointmentDetail.title}</h4>
-                  </div>
-                  <span className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full ${getStatusBadgeClass(appointmentDetail.status)}`}>
-                    {appointmentDetail.status.charAt(0).toUpperCase() + appointmentDetail.status.slice(1)}
-                  </span>
+                  <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="start_time"
+                    value={formData.start_time}
+                    onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
                 </div>
-                <div className="text-right">
-                  <p className="font-medium">{appointmentDetail.date.toLocaleDateString()}</p>
-                  <p className="text-gray-500">{formatTime(appointmentDetail.date)} - {formatTime(appointmentDetail.endDate)}</p>
-                  <p className="text-xs text-gray-500 mt-1">({formatDuration(appointmentDetail.duration)})</p>
+                
+                <div>
+                  <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Time *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="end_time"
+                    value={formData.end_time}
+                    onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  />
                 </div>
-              </div>
-              
-              <div className="mb-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-2">Contact Information</h5>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center mb-1">
-                    <User size={16} className="text-gray-400 mr-2" />
-                    <span className="font-medium">{appointmentDetail.contactName}</span>
-                  </div>
-                  {appointmentDetail.contactEmail && (
-                    <div className="flex items-center text-sm text-gray-500 mb-1">
-                      <Mail size={14} className="text-gray-400 mr-2" />
-                      <a href={`mailto:${appointmentDetail.contactEmail}`} className="hover:text-blue-600">
-                        {appointmentDetail.contactEmail}
-                      </a>
-                    </div>
-                  )}
-                  {appointmentDetail.contactPhone && (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Phone size={14} className="text-gray-400 mr-2" />
-                      <a href={`tel:${appointmentDetail.contactPhone}`} className="hover:text-blue-600">
-                        {appointmentDetail.contactPhone}
-                      </a>
-                    </div>
-                  )}
+                
+                <div>
+                  <label htmlFor="contact_name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="contact_name"
+                    value={formData.contact_name}
+                    onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter contact name"
+                  />
                 </div>
-              </div>
-              
-              {appointmentDetail.type === 'in-person' && appointmentDetail.location && (
-                <div className="mb-4">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Location</h5>
-                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
-                    <MapPin size={16} className="text-gray-400 mr-2" />
-                    <span className="text-gray-700">{appointmentDetail.location}</span>
-                  </div>
+                
+                <div>
+                  <label htmlFor="contact_email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Email
+                  </label>
+                  <input
+                    type="email"
+                    id="contact_email"
+                    value={formData.contact_email}
+                    onChange={(e) => setFormData({...formData, contact_email: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter contact email"
+                  />
                 </div>
-              )}
-              
-              {appointmentDetail.type === 'video' && (
-                <div className="mb-4">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Meeting Link</h5>
-                  <div className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Video size={16} className="text-gray-400 mr-2" />
-                      <span className="text-gray-700 text-sm">https://meeting.example.com/join/abc123</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <button 
-                        onClick={handleCopyMeetingLink}
-                        className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                        title="Copy meeting link"
-                      >
-                        <Copy size={14} />
-                      </button>
-                      <button 
-                        className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-                        title="Open meeting link"
-                      >
-                        <Link size={14} />
-                      </button>
-                    </div>
-                  </div>
+                
+                <div>
+                  <label htmlFor="contact_phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="contact_phone"
+                    value={formData.contact_phone}
+                    onChange={(e) => setFormData({...formData, contact_phone: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter contact phone"
+                  />
                 </div>
-              )}
-              
-              {appointmentDetail.notes && (
-                <div className="mb-4">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Notes</h5>
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-700">
-                    {appointmentDetail.notes}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="px-6 py-3 bg-gray-50 flex justify-between">
-              <div className="space-x-2">
-                <button
-                  onClick={() => handleAppointmentStatusChange(appointmentDetail.id, 
-                    appointmentDetail.status === 'scheduled' ? 'completed' : 'scheduled')}
-                  className={`px-3 py-1.5 text-sm border rounded-md ${
-                    appointmentDetail.status === 'scheduled' 
-                      ? 'bg-green-600 hover:bg-green-700 text-white border-transparent'
-                      : 'border-green-300 text-green-700 hover:bg-green-50'
-                  }`}
-                >
-                  {appointmentDetail.status === 'scheduled' ? 'Mark Completed' : 'Mark Scheduled'}
-                </button>
-                {appointmentDetail.status === 'scheduled' && (
-                  <button
-                    onClick={() => handleAppointmentStatusChange(appointmentDetail.id, 'canceled')}
-                    className="px-3 py-1.5 text-sm border border-red-300 text-red-700 hover:bg-red-50 rounded-md"
+                
+                <div>
+                  <label htmlFor="appointment_type" className="block text-sm font-medium text-gray-700 mb-1">
+                    Type
+                  </label>
+                  <select
+                    id="appointment_type"
+                    value={formData.appointment_type}
+                    onChange={(e) => setFormData({...formData, appointment_type: e.target.value as any})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
-                    Cancel Appointment
-                  </button>
-                )}
+                    {appointmentTypes.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    id="status"
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value as any})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  >
+                    {appointmentStatuses.map(status => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter location"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="meeting_link" className="block text-sm font-medium text-gray-700 mb-1">
+                    Meeting Link
+                  </label>
+                  <input
+                    type="url"
+                    id="meeting_link"
+                    value={formData.meeting_link}
+                    onChange={(e) => setFormData({...formData, meeting_link: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter meeting link"
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter additional notes"
+                  />
+                </div>
               </div>
-              <div className="space-x-2">
+              
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
-                  onClick={() => handleEditAppointment(appointmentDetail)}
-                  className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                  type="button"
+                  onClick={() => {
+                    setShowAppointmentForm(false);
+                    setEditingAppointment(null);
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  Edit
+                  Cancel
                 </button>
                 <button
-                  onClick={() => handleDeleteAppointment(appointmentDetail.id)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md"
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Delete
+                  {isLoading ? 'Saving...' : (editingAppointment ? 'Update Appointment' : 'Create Appointment')}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
