@@ -1,13 +1,14 @@
 // Enhanced Contacts Page with Remote Component Integration
 import React, { useState } from 'react';
-import { Settings, ExternalLink } from 'lucide-react';
+import { Settings, ExternalLink, Monitor } from 'lucide-react';
 import RemoteContactsLoader from '../components/RemoteContactsLoader';
+import RemoteContactsIntegration from '../components/contacts/RemoteContactsIntegration';
 import ContactsEnhanced from './Contacts'; // Your existing contacts component
 import { useContactStore } from '../hooks/useContactStore';
 
 const ContactsWithRemote: React.FC = () => {
-  const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
-  const [useRemote, setUseRemote] = useState(false);
+  const [remoteUrl, setRemoteUrl] = useState<string | null>('https://taupe-sprinkles-83c9ee.netlify.app/');
+  const [useRemote, setUseRemote] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   
   console.log('ContactsWithRemote rendered, showSettings:', showSettings);
@@ -179,15 +180,14 @@ const ContactsWithRemote: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Contacts Content Area</h2>
-          <p className="text-gray-600">
-            {useRemote && remoteUrl 
-              ? `Remote contacts from: ${remoteUrl}` 
-              : 'Local contacts will be displayed here'
-            }
-          </p>
-        </div>
+        {useRemote && remoteUrl ? (
+          <RemoteContactsIntegration
+            remoteUrl={remoteUrl}
+            onContactSync={fetchContacts}
+          />
+        ) : (
+          <ContactsEnhanced />
+        )}
       </div>
     </div>
   );

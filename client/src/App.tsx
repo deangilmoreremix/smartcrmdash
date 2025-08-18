@@ -139,12 +139,12 @@ function App() {
                             }
                           />
                           
-                          {/* Contacts page */}
+                          {/* Contacts page - Using Remote Module Federation */}
                           <Route
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <Contacts />
+                                <ContactsWithRemote />
                               </ProtectedRoute>
                             }
                           />

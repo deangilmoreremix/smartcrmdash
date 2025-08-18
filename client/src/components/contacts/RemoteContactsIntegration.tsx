@@ -1,0 +1,215 @@
+import React, { useState, useEffect } from 'react';
+import { Settings, ExternalLink, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { useContactStore } from '../../hooks/useContactStore';
+import { Contact } from '../../types/contact';
+
+interface RemoteContactsIntegrationProps {
+  remoteUrl: string;
+  onContactSync?: () => void;
+}
+
+const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
+  remoteUrl,
+  onContactSync
+}) => {
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+  const [iframeSrc, setIframeSrc] = useState('');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  
+  const {
+    contacts,
+    addContact,
+    updateContact,
+    deleteContact,
+    fetchContacts
+  } = useContactStore();
+
+  useEffect(() => {
+    // Clean up the URL and set iframe source
+    const cleanUrl = remoteUrl.endsWith('/') ? remoteUrl.slice(0, -1) : remoteUrl;
+    setIframeSrc(cleanUrl);
+  }, [remoteUrl]);
+
+  // Handle messages from the embedded contacts app
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Security: only accept messages from your trusted domain
+      if (!event.origin.includes('netlify.app') && !event.origin.includes('localhost')) {
+        return;
+      }
+
+      const { type, data } = event.data;
+
+      switch (type) {
+        case 'CONTACT_SELECTED':
+          console.log('Contact selected in remote app:', data);
+          break;
+          
+        case 'CONTACT_CREATED':
+          console.log('Contact created in remote app:', data);
+          if (data && data.contact) {
+            addContact(data.contact);
+            setSyncStatus('success');
+            setTimeout(() => setSyncStatus('idle'), 3000);
+          }
+          onContactSync?.();
+          break;
+          
+        case 'CONTACT_UPDATED':
+          console.log('Contact updated in remote app:', data);
+          if (data && data.contact && data.contact.id) {
+            updateContact(data.contact.id, data.contact);
+            setSyncStatus('success');
+            setTimeout(() => setSyncStatus('idle'), 3000);
+          }
+          onContactSync?.();
+          break;
+          
+        case 'CONTACT_DELETED':
+          console.log('Contact deleted in remote app:', data);
+          if (data && data.contactId) {
+            deleteContact(data.contactId);
+            setSyncStatus('success');
+            setTimeout(() => setSyncStatus('idle'), 3000);
+          }
+          onContactSync?.();
+          break;
+          
+        case 'REQUEST_CONTACTS':
+          // Send current contacts to the remote app
+          const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+              type: 'CONTACTS_DATA',
+              data: { contacts: Object.values(contacts) }
+            }, '*');
+          }
+          break;
+          
+        case 'APP_READY':
+          console.log('Remote contacts app is ready');
+          setIsIframeLoaded(true);
+          // Send initial data
+          const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+              type: 'INIT_DATA',
+              data: { 
+                contacts: Object.values(contacts),
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+              }
+            }, '*');
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [contacts, addContact, updateContact, deleteContact, onContactSync]);
+
+  const handleSyncContacts = () => {
+    setSyncStatus('syncing');
+    fetchContacts().then(() => {
+      setSyncStatus('success');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }).catch(() => {
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    });
+  };
+
+  const handleIframeLoad = () => {
+    console.log('Iframe loaded, waiting for app ready signal...');
+  };
+
+  return (
+    <div className="h-full w-full">
+      {/* Status Bar */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-700/50 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                isIframeLoaded ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'
+              }`}></div>
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Remote Contacts {isIframeLoaded ? 'Connected' : 'Loading...'}
+              </span>
+            </div>
+            
+            {syncStatus !== 'idle' && (
+              <div className="flex items-center space-x-2">
+                {syncStatus === 'syncing' && (
+                  <>
+                    <RefreshCw className="h-4 w-4 text-blue-600 animate-spin" />
+                    <span className="text-sm text-blue-700 dark:text-blue-300">Syncing...</span>
+                  </>
+                )}
+                {syncStatus === 'success' && (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 dark:text-green-300">Synced</span>
+                  </>
+                )}
+                {syncStatus === 'error' && (
+                  <>
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-sm text-red-700 dark:text-red-300">Sync failed</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleSyncContacts}
+              disabled={syncStatus === 'syncing'}
+              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3 w-3 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+              <span>Sync</span>
+            </button>
+            
+            <a
+              href={remoteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+            >
+              <ExternalLink className="h-3 w-3" />
+              <span>Open</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Remote App Container */}
+      <div className="relative w-full" style={{ height: 'calc(100vh - 120px)' }}>
+        {!isIframeLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Loading contacts app...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                Connecting to {remoteUrl}
+              </p>
+            </div>
+          </div>
+        )}
+        
+        <iframe
+          id="remote-contacts-iframe"
+          src={iframeSrc}
+          className={`w-full h-full border-0 ${isIframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={handleIframeLoad}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          title="Remote Contacts Application"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default RemoteContactsIntegration;
