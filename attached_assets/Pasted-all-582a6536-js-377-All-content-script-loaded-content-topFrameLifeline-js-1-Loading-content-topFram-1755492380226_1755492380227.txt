@@ -1,0 +1,26 @@
+all.582a6536.js:377 All: content script loaded
+content_topFrameLifeline.js:1 Loading content_topFrameLifeline.js
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+chunk-67DEV5DB.js?v=0d24a9b3:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+simple-peer.js?v=0d24a9b3:2348 Module "events" has been externalized for browser compatibility. Cannot access "events.EventEmitter" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+get @ simple-peer.js?v=0d24a9b3:2348
+simple-peer.js?v=0d24a9b3:2348 Module "events" has been externalized for browser compatibility. Cannot access "events.EventEmitter" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+get @ simple-peer.js?v=0d24a9b3:2348
+simple-peer.js?v=0d24a9b3:2368 Module "util" has been externalized for browser compatibility. Cannot access "util.debuglog" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+get @ simple-peer.js?v=0d24a9b3:2368
+simple-peer.js?v=0d24a9b3:2368 Module "util" has been externalized for browser compatibility. Cannot access "util.inspect" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+get @ simple-peer.js?v=0d24a9b3:2368
+index.js:1410 [HMR] Waiting for update signal from WDS...
+VideoCallContext.tsx:126 Cleaning up video call...
+supabaseAIService.ts:211 Supabase AI service connected successfully
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+logger.service.ts:4 [INFO] Contacts fetched successfully 
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+logger.service.ts:4 [INFO] Contacts fetched successfully 
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false
+ContactsWithRemote.tsx:14 ContactsWithRemote component mounted, showSettings: false

@@ -66,18 +66,20 @@ const ContactsWithRemote: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <button
+            <div 
               onClick={handleSettingsClick}
-              className={`p-2 rounded-md transition-colors cursor-pointer ${
+              className={`p-3 rounded-md transition-colors cursor-pointer border-2 ${
                 showSettings 
-                  ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+                  ? 'bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-300' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 border-gray-300'
               }`}
-              title="Remote Settings"
-              type="button"
+              title="Remote Settings - Click to configure Module Federation"
+              role="button"
+              tabIndex={0}
+              style={{ minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Settings className="h-5 w-5" />
-            </button>
+              <Settings className="h-6 w-6" />
+            </div>
             
             {remoteUrl && (
               <a
@@ -95,10 +97,17 @@ const ContactsWithRemote: React.FC = () => {
 
         {/* Remote Settings Panel */}
         {showSettings && (
-          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-              Remote Contacts Configuration
+          <div className="mt-4 p-6 bg-blue-50 dark:bg-gray-700 rounded-lg border-2 border-blue-200">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              🔧 Module Federation Configuration
             </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Connect your deployed Bolt contacts app to replace the local contacts interface.
+            </p>
+            
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+              <strong>Test:</strong> Settings panel is working! Current state: showSettings = {String(showSettings)}
+            </div>
             
             <div className="space-y-3">
               <div>
