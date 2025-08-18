@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAITools, AIToolType, getToolInfo } from '../components/AIToolsProvider';
+import { useAITools, AIToolType } from '../components/AIToolsProvider';
 import { 
   Brain, 
   Mail, 
@@ -73,6 +73,7 @@ const AITools: React.FC = () => {
     { id: 'meeting', name: 'Meeting Tools' },
     { id: 'content', name: 'Content Tools' },
     { id: 'analysis', name: 'Analysis Tools' },
+    { id: 'reasoning', name: 'AI Reasoning' },
     { id: 'voice', name: 'Voice & Audio' },
     { id: 'vision', name: 'Vision & Image' },
     { id: 'advanced', name: 'Advanced AI' },
@@ -317,6 +318,47 @@ const AITools: React.FC = () => {
       categories: ['content', 'realtime'],
       new: true,
       demoId: "auto-form"
+    },
+    // Reasoning-based content generators
+    {
+      title: "AI Reasoning Email Generator",
+      description: "Generate emails with step-by-step AI reasoning and explanations",
+      icon: <Mail className="h-6 w-6 text-blue-600" />,
+      id: "reasoning-email" as const,
+      categories: ['email', 'reasoning'],
+      new: true
+    },
+    {
+      title: "AI Reasoning Proposal Generator", 
+      description: "Create proposals with detailed reasoning and strategic insights",
+      icon: <FileText className="h-6 w-6 text-green-600" />,
+      id: "reasoning-proposal" as const,
+      categories: ['sales', 'reasoning'],
+      new: true
+    },
+    {
+      title: "AI Reasoning Call Script Generator",
+      description: "Build call scripts with reasoning-based conversation flows",
+      icon: <Phone className="h-6 w-6 text-purple-600" />,
+      id: "reasoning-script" as const,
+      categories: ['sales', 'reasoning'],
+      new: true
+    },
+    {
+      title: "AI Reasoning Objection Handler",
+      description: "Handle objections with AI-powered reasoning and counter-arguments",
+      icon: <Shield className="h-6 w-6 text-red-600" />,
+      id: "reasoning-objection" as const,
+      categories: ['sales', 'reasoning'],
+      new: true
+    },
+    {
+      title: "AI Reasoning Social Content Generator",
+      description: "Create social media content with strategic reasoning",
+      icon: <MessagesSquare className="h-6 w-6 text-pink-600" />,
+      id: "reasoning-social" as const,
+      categories: ['content', 'reasoning'],
+      new: true
     }
   ];
 
@@ -443,10 +485,10 @@ const AITools: React.FC = () => {
             <Zap className="h-10 w-10" />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">New Real-time AI Features</h2>
+            <h2 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Complete AI Tools Suite</h2>
             <p className="text-gray-700 text-lg">
-              Experience our latest real-time AI capabilities powered by Gemini 2.5 Flash and Pro models. Get instant responses, live analysis, and streaming results that feel more natural and responsive than ever before.
-              <span className="font-medium text-indigo-600 ml-1">Try the interactive demos below!</span>
+              Experience our latest AI capabilities powered by OpenAI's GPT-4o and other advanced models. Get intelligent responses, detailed analysis, and comprehensive results for all your CRM and sales needs.
+              <span className="font-medium text-indigo-600 ml-1">Click any tool below to get started!</span>
             </p>
           </div>
         </div>
@@ -457,7 +499,7 @@ const AITools: React.FC = () => {
           filteredTools.map((feature) => (
             <div 
               key={feature.id} 
-              onClick={() => feature.demoId ? handleOpenDemoTool(feature.demoId) : openTool(feature.id)}
+              onClick={() => openTool(feature.id)}
               className="card-modern p-6 hover:shadow-md transition-all duration-300 group cursor-pointer"
             >
               <div className="flex flex-col h-full">
@@ -471,10 +513,8 @@ const AITools: React.FC = () => {
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-gray-600 mb-4 flex-1">{feature.description}</p>
                 <div className="mt-auto">
-                  <span className={`inline-flex items-center font-medium transition-all duration-300 group-hover:translate-x-1 ${
-                    feature.demoId ? 'text-blue-700' : 'text-blue-600'
-                  }`}>
-                    {feature.demoId ? 'Try Interactive Demo' : 'Open Tool'}
+                  <span className="inline-flex items-center font-medium transition-all duration-300 group-hover:translate-x-1 text-blue-600">
+                    Use Tool
                     <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
