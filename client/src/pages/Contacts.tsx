@@ -84,7 +84,7 @@ const ContactsEnhanced: React.FC = () => {
     fetchContacts();
   }, [fetchContacts]);
 
-  // Apply search and advanced filters
+  // Apply search and advanced filters - optimized memoization
   const filteredContacts = useMemo(() => {
     let filtered = contactsArray;
 
@@ -519,54 +519,83 @@ const ContactsEnhanced: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'contacts' && (
         <>
-          {/* Contacts Grid/List */}
-          {filteredContacts.length === 0 ? (
+          {/* Loading State */}
+          {isLoading ? (
             <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || hasActiveFilters()
-                  ? 'Try adjusting your search or filters'
-                  : 'Get started by adding your first contact'
-                }
-              </p>
-              {(!searchTerm && !hasActiveFilters()) && (
-                <div className="mt-6">
-                  <button
-                    onClick={() => {
-                      setSelectedContactForModal(null);
-                      setContactModalMode('create');
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add Contact
-                  </button>
-                </div>
-              )}
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+              <h3 className="mt-4 text-sm font-medium text-gray-900">Loading contacts...</h3>
+              <p className="mt-1 text-sm text-gray-500">Please wait while we fetch your contacts</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="mx-auto h-12 w-12 text-red-400 flex items-center justify-center">
+                ⚠️
+              </div>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading contacts</h3>
+              <p className="mt-1 text-sm text-gray-500">{error}</p>
+              <div className="mt-6">
+                <button
+                  onClick={() => fetchContacts()}
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Try Again
+                </button>
+              </div>
             </div>
           ) : (
-            <div className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                : 'space-y-4'
-            }>
-              {filteredContacts.map((contact) => (
-                <EnhancedContactCard
-                  key={contact.id}
-                  contact={contact}
-                  isSelected={selectedContacts.includes(contact.id)}
-                  onSelect={toggleContactSelection}
-                  onEdit={handleEditContact}
-                  onDelete={(id) => {
-                    if (confirm('Delete this contact? This action cannot be undone.')) {
-                      deleteContact(id);
+            <>
+              {/* Contacts Grid/List */}
+              {filteredContacts.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts found</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {searchTerm || hasActiveFilters()
+                      ? 'Try adjusting your search or filters'
+                      : 'Get started by adding your first contact'
                     }
-                  }}
-                  onView={handleViewContact}
-                />
-              ))}
-            </div>
+                  </p>
+                  {(!searchTerm && !hasActiveFilters()) && (
+                    <div className="mt-6">
+                      <button
+                        onClick={() => {
+                          setSelectedContactForModal(null);
+                          setContactModalMode('create');
+                        }}
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Plus className="mr-2 h-5 w-5" />
+                        Add Contact
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                    : 'space-y-4'
+                }>
+                  {filteredContacts.map((contact) => (
+                    <EnhancedContactCard
+                      key={contact.id}
+                      contact={contact}
+                      isSelected={selectedContacts.includes(contact.id)}
+                      onSelect={toggleContactSelection}
+                      onEdit={handleEditContact}
+                      onDelete={(id) => {
+                        if (confirm('Delete this contact? This action cannot be undone.')) {
+                          deleteContact(id);
+                        }
+                      }}
+                      onView={handleViewContact}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}

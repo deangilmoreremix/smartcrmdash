@@ -186,10 +186,7 @@ export const useContactStore = create<ContactStore>((set, get) => ({
   fetchContacts: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Initialize Fuse.js for search
+      // Initialize Fuse.js for search immediately - no artificial delay
       const contacts = Object.values(get().contacts);
       const fuse = new Fuse(contacts, {
         keys: [
@@ -207,7 +204,7 @@ export const useContactStore = create<ContactStore>((set, get) => ({
       });
       
       set({ isLoading: false, fuse });
-      logger.info('Contacts fetched successfully');
+      logger.info('Contacts fetched successfully', `${contacts.length} contacts loaded`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch contacts';
       set({ error: errorMessage, isLoading: false });
