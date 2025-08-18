@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { BarChart3, TrendingUp, Calendar, Search, Bell, User, Sparkles, Brain, Zap, Activity } from 'lucide-react';
+import { BarChart3, TrendingUp, Calendar, Search, Bell, User, Sparkles, Brain, Zap } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
@@ -20,9 +20,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   
   // GPT-5 Enhanced State
   const [smartGreeting, setSmartGreeting] = useState<string>('');
-  const [aiInsight, setAIInsight] = useState<string>('');
   const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const [showAIInsights, setShowAIInsights] = useState(false);
   
   // Get current date and time context
   const currentDate = new Date();
@@ -69,11 +67,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
         if (greetingResult.greeting) {
           setSmartGreeting(greetingResult.greeting);
-        }
-        
-        if (greetingResult.insight) {
-          setAIInsight(greetingResult.insight);
-          setShowAIInsights(true);
         }
         
       } catch (error) {
@@ -125,26 +118,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <p className={`mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{subtitle}</p>
           )}
           
-          {/* GPT-5 AI Insights Panel */}
-          {showAIInsights && aiInsight && (
-            <div className={`mt-3 p-3 rounded-lg border ${
-              isDark 
-                ? 'border-green-500/30 bg-green-500/10' 
-                : 'border-green-200 bg-green-50'
-            }`}>
-              <div className="flex items-start gap-2">
-                <Activity className={`${isDark ? 'text-green-400' : 'text-green-600'} mt-0.5`} size={14} />
-                <div>
-                  <p className={`text-xs font-medium ${isDark ? 'text-green-300' : 'text-green-700'} mb-1`}>
-                    GPT-5 Strategic Insight
-                  </p>
-                  <p className={`text-xs ${isDark ? 'text-green-200' : 'text-green-600'}`}>
-                    {aiInsight}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
         
         <div className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm flex items-center`}>
