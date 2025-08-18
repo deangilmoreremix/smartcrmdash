@@ -23,6 +23,7 @@ const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
 const Contacts = lazy(() => import('./pages/Contacts')); // details handled via modal inside
 const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // Enhanced with Module Federation
+const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // Button test
 const Pipeline = lazy(() => import('./pages/Pipeline'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
@@ -121,12 +122,22 @@ function App() {
                             }
                           />
 
+                          {/* Test route for debugging buttons */}
+                          <Route
+                            path="/test-buttons"
+                            element={
+                              <ProtectedRoute>
+                                <SimpleContactsTest />
+                              </ProtectedRoute>
+                            }
+                          />
+                          
                           {/* Contacts with Module Federation support */}
                           <Route
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <ContactsWithRemote />
+                                <SimpleContactsTest />
                               </ProtectedRoute>
                             }
                           />
