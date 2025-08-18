@@ -225,7 +225,7 @@ const SmartEmailOptimizer: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </CardContent>
         </Card>
 
         {/* Email Performance by Contact */}
