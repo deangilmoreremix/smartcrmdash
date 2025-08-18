@@ -81,6 +81,12 @@ import ReasoningScriptGenerator from './aiTools/ReasoningScriptGenerator';
 import ReasoningObjectionHandler from './aiTools/ReasoningObjectionHandler';
 import ReasoningSocialContent from './aiTools/ReasoningSocialContent';
 
+// Placeholder for AgentWorkflowChat - assuming it exists or will be created
+import AgentWorkflowChat from './aiTools/AgentWorkflowChat';
+// Placeholder for ReasoningContentGenerator - assuming it exists or will be created
+import ReasoningContentGenerator from './aiTools/ReasoningContentGenerator';
+
+
 export type AIToolType = 
   | 'email-analysis' 
   | 'meeting-summary'
@@ -121,7 +127,17 @@ export type AIToolType =
   | 'reasoning-proposal'
   | 'reasoning-script'
   | 'reasoning-objection'
-  | 'reasoning-social';
+  | 'reasoning-social'
+  // New tool types
+  | 'agent-workflow'
+  | 'auto-form'
+  | 'realtime-email'
+  | 'realtime-form-validation'
+  | 'smart-search'
+  | 'reasoning-content'
+  | 'subject-line'
+  | 'voice-tone'
+  | 'visual-content';
 
 interface AIToolsContextProps {
   openTool: (tool: AIToolType) => void;
@@ -179,7 +195,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Proposal Generator',
           icon: <FileText size={24} />,
-          component: null
+          component: null // Placeholder, actual component not provided
         };
       case 'call-script':
         return {
@@ -282,7 +298,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Speech to Text',
           icon: <Mic size={24} />,
-          component: null
+          component: null // Placeholder, actual component not provided
         };
       case 'semantic-search':
         return {
@@ -294,7 +310,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Structured Data Extraction',
           icon: <FileJson size={24} />,
-          component: null
+          component: null // Placeholder, actual component not provided
         };
       case 'streaming-chat':
         return {
@@ -388,11 +404,67 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
           icon: <Hash size={24} />,
           component: <ReasoningSocialContent />
         };
+      // Updated cases based on the provided changes
+      case 'agent-workflow':
+        return {
+          title: 'AI Agent Workflow',
+          icon: <Users size={24} />, // Using Users icon as a placeholder
+          component: <AgentWorkflowChat />
+        };
+      case 'auto-form':
+        return {
+          title: 'AI Auto Form',
+          icon: <CheckCircle size={24} />,
+          component: <AutoFormCompleter />
+        };
+      case 'realtime-email':
+        return {
+          title: 'Real-time Email Composer',
+          icon: <Mail size={24} />,
+          component: <RealTimeEmailComposer />
+        };
+      case 'realtime-form-validation':
+        return {
+          title: 'Real-time Form Validation',
+          icon: <CheckCircle size={24} />,
+          component: <RealTimeFormValidation />
+        };
+      case 'smart-search':
+        return {
+          title: 'Smart Search',
+          icon: <Search size={24} />,
+          component: <SmartSearchRealtime />
+        };
+      case 'reasoning-content':
+        return {
+          title: 'AI Reasoning Content Generator',
+          icon: <FileText size={24} />, // Using FileText icon as a placeholder
+          component: <ReasoningContentGenerator />
+        };
+      case 'subject-line':
+        return {
+          title: 'Email Subject Line Optimizer',
+          icon: <Target size={24} />,
+          component: <SubjectLineContent />
+        };
+      case 'voice-tone':
+        return {
+          title: 'Voice Tone Optimizer',
+          icon: <Volume2 size={24} />,
+          component: <VoiceToneOptimizerContent />
+        };
+      case 'visual-content':
+        return {
+          title: 'Visual Content Generator',
+          icon: <Image size={24} />,
+          component: <VisualContentGeneratorContent />
+        };
+
       default:
         return {
           title: '',
           icon: <Brain size={24} />,
-          component: null
+          component: null // Default case for unknown tool types
         };
     }
   };
