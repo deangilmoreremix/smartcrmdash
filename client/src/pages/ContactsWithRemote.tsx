@@ -10,6 +10,9 @@ const ContactsWithRemote: React.FC = () => {
   const [useRemote, setUseRemote] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
+  // Debug component mount
+  console.log('ContactsWithRemote component mounted, showSettings:', showSettings);
+  
   const { contacts, fetchContacts } = useContactStore();
   
   // Convert contacts object to array for remote component
@@ -38,9 +41,14 @@ const ContactsWithRemote: React.FC = () => {
     fetchContacts();
   };
 
-  const handleSettingsClick = () => {
+  const handleSettingsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('Settings button clicked, current showSettings:', showSettings);
-    setShowSettings(!showSettings);
+    setShowSettings(prev => {
+      console.log('Setting showSettings from', prev, 'to', !prev);
+      return !prev;
+    });
   };
 
   return (
