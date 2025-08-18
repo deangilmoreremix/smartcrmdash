@@ -54,6 +54,13 @@ const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
 
+// Sales pages added
+import WinRateIntelligence from './pages/WinRateIntelligence';
+import AISalesForecast from './pages/AISalesForecast';
+import LiveDealAnalysis from './pages/LiveDealAnalysis';
+import CompetitorInsights from './pages/CompetitorInsights';
+import RevenueIntelligence from './pages/RevenueIntelligence';
+
 import './styles/design-system.css';
 
 
@@ -256,18 +263,18 @@ function App() {
                             }
                           />
                           <Route
-                            path="/sales-cycle-analytics"
-                            element={
-                              <ProtectedRoute>
-                                <SalesCycleAnalytics />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
                             path="/pipeline-health-dashboard"
                             element={
                               <ProtectedRoute>
                                 <PipelineHealthDashboard />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/sales-cycle-analytics"
+                            element={
+                              <ProtectedRoute>
+                                <SalesCycleAnalytics />
                               </ProtectedRoute>
                             }
                           />
@@ -301,6 +308,47 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <Invoicing />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Newly added sales pages */}
+                          <Route
+                            path="/win-rate-intelligence"
+                            element={
+                              <ProtectedRoute>
+                                <WinRateIntelligence />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/ai-sales-forecast"
+                            element={
+                              <ProtectedRoute>
+                                <AISalesForecast />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/live-deal-analysis"
+                            element={
+                              <ProtectedRoute>
+                                <LiveDealAnalysis />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/competitor-insights"
+                            element={
+                              <ProtectedRoute>
+                                <CompetitorInsights />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/revenue-intelligence"
+                            element={
+                              <ProtectedRoute>
+                                <RevenueIntelligence />
                               </ProtectedRoute>
                             }
                           />
