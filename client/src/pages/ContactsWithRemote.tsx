@@ -1,6 +1,6 @@
 // Enhanced Contacts Page with Remote Component Integration
 import React, { useState } from 'react';
-import { Settings, RefreshCw, ExternalLink } from 'lucide-react';
+import { Settings, ExternalLink } from 'lucide-react';
 import RemoteContactsLoader from '../components/RemoteContactsLoader';
 import ContactsEnhanced from './Contacts'; // Your existing contacts component
 import { useContactStore } from '../hooks/useContactStore';
@@ -10,10 +10,8 @@ const ContactsWithRemote: React.FC = () => {
   const [useRemote, setUseRemote] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
-  // Debug component mount
-  console.log('ContactsWithRemote component mounted, showSettings:', showSettings);
-  
-  const { contacts, fetchContacts } = useContactStore();
+  const contacts = useContactStore((state) => state.contacts);
+  const fetchContacts = useContactStore((state) => state.fetchContacts);
   
   // Convert contacts object to array for remote component
   const contactsArray = Array.isArray(contacts) ? contacts : Object.values(contacts || {});
@@ -41,10 +39,9 @@ const ContactsWithRemote: React.FC = () => {
     fetchContacts();
   };
 
-  const handleSettingsClick = () => {
-    console.log('Settings button clicked! Current showSettings:', showSettings);
+  const handleSettingsToggle = () => {
+    console.log('Settings button clicked!');
     setShowSettings(!showSettings);
-    console.log('After click, showSettings should be:', !showSettings);
   };
 
   return (
@@ -62,26 +59,22 @@ const ContactsWithRemote: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            {/* Test button to verify clicks work */}
+            {/* Simple test button */}
             <button 
-              onClick={() => {console.log('TEST BUTTON CLICKED!'); setShowSettings(true);}}
-              className="px-3 py-2 bg-green-500 text-white rounded text-sm"
+              onClick={handleSettingsToggle}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
-              Test Open
+              Settings
             </button>
             
             <button 
-              onClick={handleSettingsClick}
-              onMouseDown={(e) => console.log('Mouse down on settings button')}
-              onMouseUp={(e) => console.log('Mouse up on settings button')}
-              className={`p-3 rounded-md transition-colors cursor-pointer border-2 ${
+              onClick={handleSettingsToggle}
+              className={`p-3 rounded-md transition-colors border-2 ${
                 showSettings 
                   ? 'bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-300' 
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 border-gray-300'
               }`}
-              title="Remote Settings - Click to configure Module Federation"
-              type="button"
-              style={{ minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Remote Settings"
             >
               <Settings className="h-6 w-6" />
             </button>
@@ -110,15 +103,8 @@ const ContactsWithRemote: React.FC = () => {
               Connect your deployed Bolt contacts app to replace the local contacts interface.
             </p>
             
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-              <strong>Test:</strong> Settings panel is working! Current state: showSettings = {String(showSettings)}
-              <br />
-              <button 
-                onClick={() => setShowSettings(false)}
-                className="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs"
-              >
-                Close Panel (Test Button)
-              </button>
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm">
+              <strong>Success!</strong> Settings panel is working! Current state: showSettings = {String(showSettings)}
             </div>
             
             <div className="space-y-3">
@@ -145,13 +131,29 @@ const ContactsWithRemote: React.FC = () => {
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="useRemote" className="text-xs text-gray-700 dark:text-gray-300">
-                  Use remote contacts app
+                  Use remote contacts app (requires URL above)
                 </label>
               </div>
               
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                <p>Enter the URL of your deployed Bolt contacts app to use it instead of the local contacts.</p>
-                <p className="mt-1">The remote app must be configured with Module Federation.</p>
+              <div className="flex space-x-2 pt-2">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    if (remoteUrl) {
+                      setUseRemote(true);
+                      console.log('Enabling remote contacts with URL:', remoteUrl);
+                    }
+                  }}
+                  disabled={!remoteUrl}
+                  className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                >
+                  Apply
+                </button>
               </div>
             </div>
           </div>
@@ -159,7 +161,7 @@ const ContactsWithRemote: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="flex-1">
         {useRemote && remoteUrl ? (
           <RemoteContactsLoader
             remoteUrl={remoteUrl}
