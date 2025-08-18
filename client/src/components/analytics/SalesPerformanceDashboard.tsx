@@ -103,11 +103,32 @@ const SalesPerformanceDashboard: React.FC = () => {
 
   const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
 
+  // Debug: Log analytics data
+  console.log('Analytics Data:', { 
+    contactsCount: Object.keys(contacts).length, 
+    analytics, 
+    isLoading 
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
       </div>
+    );
+  }
+
+  // Show message if no data loaded yet
+  if (!contacts || Object.keys(contacts).length === 0) {
+    return (
+      <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+        <div className="space-y-8">
+          <div className="text-center py-12">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sales Analytics</h1>
+            <p className="text-gray-600 dark:text-gray-400">Loading contact data...</p>
+          </div>
+        </div>
+      </main>
     );
   }
 

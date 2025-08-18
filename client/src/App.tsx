@@ -27,7 +27,7 @@ const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // 
 const ContactsWorking = lazy(() => import('./pages/ContactsWorking')); // Working contacts with inline styles
 const Pipeline = lazy(() => import('./pages/Pipeline'));
 const AITools = lazy(() => import('./pages/AITools'));
-const Analytics = lazy(() => import('./pages/Analytics'));
+const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
 const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
 const SalesTools = lazy(() => import('./pages/SalesTools'));
