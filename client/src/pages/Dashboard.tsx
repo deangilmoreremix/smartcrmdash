@@ -7,9 +7,8 @@ import { useTaskStore } from '../store/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
 import { useAITools } from '../components/AIToolsProvider';
 import AppointmentWidget from '../components/AppointmentWidget';
-import AIToolsCard from '../components/Dashboard/AIToolsCard';
+import AIGoalsCard from '../components/AIGoalsCard';
 import DealAnalytics from '../components/DealAnalytics';
-import HelpTooltip from '../components/ui/HelpTooltip';
 import { useEnhancedHelp } from '../contexts/EnhancedHelpContext';
 import { 
   BarChart3, 
@@ -42,7 +41,7 @@ import {
 } from 'lucide-react';
 
 // Import AI tools components
-import StreamingChat from '../components/aiTools/StreamingChat';
+import AIAssistantChat from '../components/aiTools/AIAssistantChat';
 import SmartSearchRealtime from '../components/aiTools/SmartSearchRealtime';
 import LiveDealAnalysis from '../components/aiTools/LiveDealAnalysis';
 
@@ -253,10 +252,22 @@ const Dashboard: React.FC = () => {
   // Prepare data for charts
   const prepareChartData = () => {
     // Pipeline by stage chart data
+    // Calculate stage values from deals
+    const calculateStageValues = () => {
+      const stages = { qualification: 0, proposal: 0, negotiation: 0 };
+      Object.values(deals).forEach(deal => {
+        if (deal.stage === 'qualification') stages.qualification += deal.value || 0;
+        else if (deal.stage === 'proposal') stages.proposal += deal.value || 0;
+        else if (deal.stage === 'negotiation') stages.negotiation += deal.value || 0;
+      });
+      return stages;
+    };
+    
+    const stageValues = calculateStageValues();
     const pipelineByStage = [
-      { stage: 'Qual', value: stageValues.qualification || 0 },
-      { stage: 'Proposal', value: stageValues.proposal || 0 },
-      { stage: 'Negotiation', value: stageValues.negotiation || 0 },
+      { stage: 'Qual', value: stageValues.qualification },
+      { stage: 'Proposal', value: stageValues.proposal },
+      { stage: 'Negotiation', value: stageValues.negotiation },
     ];
     
     // Deal probability distribution

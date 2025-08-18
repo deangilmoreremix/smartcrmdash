@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useOpenAI } from '../services/openaiService';
 import { useGemini } from '../services/geminiService';
 import { useContactStore } from '../store/contactStore';
-import { Contact } from '../types';
-import CustomizableAIToolbar from '../components/ai/CustomizableAIToolbar';
+import { Contact } from '../types/contact';
 import { 
   Mail, 
   Phone, 
@@ -33,7 +32,7 @@ const ContactDetail: React.FC = () => {
   const navigate = useNavigate();
   
   // Get contact from store instead of local state
-  const { contacts, updateContact, deleteContact, selectContact } = useContactStore();
+  const { contacts, updateContact, deleteContact } = useContactStore();
   const [contact, setContact] = useState<Contact | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
