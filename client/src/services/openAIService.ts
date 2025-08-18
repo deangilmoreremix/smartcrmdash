@@ -48,13 +48,13 @@ class OpenAIService {
    * Check if API key is valid (not a placeholder)
    */
   private isValidApiKey(): boolean {
-    return this.apiKey && 
+    return !!(this.apiKey && 
            this.apiKey.length > 10 && 
            !this.apiKey.includes('your_openai_api_key') &&
            !this.apiKey.includes('your_ope') &&
            !this.apiKey.includes('placeholder') &&
            !this.apiKey.startsWith('your_') &&
-           this.apiKey !== 'your_openai_api_key';
+           this.apiKey !== 'your_openai_api_key');
   }
 
   /**

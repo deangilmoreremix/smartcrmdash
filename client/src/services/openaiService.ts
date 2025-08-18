@@ -185,6 +185,7 @@ export const useOpenAI = () => {
       const nameparts = parts[0].split('.');
       
       return {
+        name: `${nameparts[0]?.charAt(0).toUpperCase() + nameparts[0]?.slice(1) || ''} ${nameparts[1]?.charAt(0).toUpperCase() + nameparts[1]?.slice(1) || ''}`.trim(),
         firstName: nameparts[0]?.charAt(0).toUpperCase() + nameparts[0]?.slice(1) || '',
         lastName: nameparts[1]?.charAt(0).toUpperCase() + nameparts[1]?.slice(1) || '',
         email: email,

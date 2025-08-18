@@ -61,7 +61,7 @@ const DocumentAnalyzerRealtime: React.FC<DocumentAnalyzerRealtimeProps> = ({
       'application/pdf': ['.pdf']
     },
     maxFiles: 1,
-    onDrop: (acceptedFiles) => {
+    onDrop: (acceptedFiles: File[]) => {
       setError(null);
       const file = acceptedFiles[0];
       if (file) {
@@ -156,7 +156,7 @@ const DocumentAnalyzerRealtime: React.FC<DocumentAnalyzerRealtimeProps> = ({
               "Section 7.3: Intellectual property ownership remains with vendor",
               "Section 9.1: Change requests may incur additional fees"
             ],
-            riskLevel: 'medium',
+            riskLevel: 'medium' as 'low' | 'medium' | 'high',
             recommendations: [
               "Negotiate the auto-renewal clause to require affirmative renewal",
               "Request more favorable payment terms (e.g., 25/50/25)",
