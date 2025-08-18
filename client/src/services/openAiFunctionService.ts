@@ -186,7 +186,7 @@ export function useOpenAIFunctions() {
           const searchResult = executeFunctionCall({
             name: 'searchContacts',
             arguments: { query: userQuery.split(' ').slice(-1)[0] || '', limit: 5 }
-          });
+          }) as { contacts: any[], count: number, query: string };
           
           response = `I found ${searchResult.count} contacts:\n\n`;
           searchResult.contacts.forEach((contact: any) => {
@@ -197,7 +197,7 @@ export function useOpenAIFunctions() {
           const searchResult = executeFunctionCall({
             name: 'searchDeals',
             arguments: { limit: 5 }
-          });
+          }) as { deals: any[], count: number, totalValue: number };
           
           response = `Here are the current deals (Total value: $${searchResult.totalValue.toLocaleString()}):\n\n`;
           searchResult.deals.forEach((deal: any) => {
@@ -210,7 +210,7 @@ export function useOpenAIFunctions() {
         const createResult = executeFunctionCall({
           name: 'createTask',
           arguments: { title: taskTitle || 'New task', priority: 'medium' }
-        });
+        }) as { task: any, message: string };
         
         response = createResult.message;
         functionCalled = true;
@@ -221,7 +221,7 @@ export function useOpenAIFunctions() {
             contactName: 'Selected Contact', 
             date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           }
-        });
+        }) as { followUp: any, message: string };
         
         response = scheduleResult.message;
         functionCalled = true;
