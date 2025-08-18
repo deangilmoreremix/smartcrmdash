@@ -6,7 +6,7 @@ const ContactsWorking: React.FC = () => {
   const [useRemote, setUseRemote] = useState(false);
   
   return (
-    <div style={{ minHeight: '100vh', padding: '20px', backgroundColor: '#f9fafb' }}>
+    <div style={{ minHeight: '100vh', padding: '20px', backgroundColor: '#f9fafb', pointerEvents: 'auto' }}>
       <div style={{ backgroundColor: 'white', padding: '20px', marginBottom: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
@@ -29,7 +29,10 @@ const ContactsWorking: React.FC = () => {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '14px'
+                fontSize: '14px',
+                pointerEvents: 'auto',
+                zIndex: 9999,
+                position: 'relative'
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
@@ -49,7 +52,10 @@ const ContactsWorking: React.FC = () => {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '14px'
+                fontSize: '14px',
+                pointerEvents: 'auto',
+                zIndex: 9999,
+                position: 'relative'
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = showSettings ? '#2563eb' : '#4b5563'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = showSettings ? '#3b82f6' : '#6b7280'}
