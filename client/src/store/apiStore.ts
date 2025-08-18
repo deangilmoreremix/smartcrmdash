@@ -2,32 +2,30 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface ApiStore {
-  openaiApiKey: string;
-  geminiApiKey: string;
-  setOpenaiApiKey: (key: string) => void;
-  setGeminiApiKey: (key: string) => void;
-  getOpenaiApiKey: () => string;
-  getGeminiApiKey: () => string;
+  apiKeys: {
+    openai: string;
+    google: string;
+  };
+  setApiKey: (service: 'openai' | 'google', key: string) => void;
 }
 
 export const useApiStore = create<ApiStore>()(
   persist(
-    (set, get) => ({
-      openaiApiKey: '',
-      geminiApiKey: '',
-      
-      setOpenaiApiKey: (key: string) => set({ openaiApiKey: key }),
-      setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
-      
-      getOpenaiApiKey: () => get().openaiApiKey,
-      getGeminiApiKey: () => get().geminiApiKey,
+    (set) => ({
+      apiKeys: {
+        openai: '',
+        google: ''
+      },
+      setApiKey: (service, key) =>
+        set((state) => ({
+          apiKeys: {
+            ...state.apiKeys,
+            [service]: key
+          }
+        })),
     }),
     {
-      name: 'api-store',
-      partialize: (state) => ({
-        openaiApiKey: state.openaiApiKey,
-        geminiApiKey: state.geminiApiKey,
-      }),
+      name: 'ai-tools-api-keys',
     }
   )
 );

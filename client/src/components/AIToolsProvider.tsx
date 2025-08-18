@@ -39,7 +39,7 @@ import {
   X,
   Hash
 } from 'lucide-react';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import StreamingChat from '../components/aiTools/StreamingChat';
 import RealTimeFormValidation from '../components/aiTools/RealTimeFormValidation';
 import LiveDealAnalysis from '../components/aiTools/LiveDealAnalysis';
@@ -54,21 +54,20 @@ import AutoFormCompleter from '../components/aiTools/AutoFormCompleter';
 import EmailAnalysisContent from './aiTools/EmailAnalysisContent';
 import MeetingSummaryContent from './aiTools/MeetingSummaryContent';
 import CallScriptContent from './aiTools/CallScriptContent';
-// Import working AI tool components (temporarily commenting out problematic ones)
 import SubjectLineContent from './aiTools/SubjectLineContent';
 import CompetitorAnalysisContent from './aiTools/CompetitorAnalysisContent';
 import MarketTrendContent from './aiTools/MarketTrendContent';
 import SalesInsightsContent from './aiTools/SalesInsightsContent';
 import SalesForecastContent from './aiTools/SalesForecastContent';
-// import EmailComposerContent from './aiTools/EmailComposerContent'; // Has import issues
+import EmailComposerContent from './aiTools/EmailComposerContent';
 import ObjectionHandlerContent from './aiTools/ObjectionHandlerContent';
 import CustomerPersonaContent from './aiTools/CustomerPersonaContent';
 import VoiceToneOptimizerContent from './aiTools/VoiceToneOptimizerContent';
 import EmailResponseContent from './aiTools/EmailResponseContent';
-// import VisualContentGeneratorContent from './aiTools/VisualContentGeneratorContent'; // Has import issues
+import VisualContentGeneratorContent from './aiTools/VisualContentGeneratorContent';
 import MeetingAgendaContent from './aiTools/MeetingAgendaContent';
 
-// Feature Components  
+// Feature Components
 import AIAssistantChat from './aiTools/AIAssistantChat';
 import VisionAnalyzerContent from './aiTools/VisionAnalyzerContent';
 import ImageGeneratorContent from './aiTools/ImageGeneratorContent';
@@ -131,250 +130,20 @@ interface AIToolsContextProps {
   currentTool: AIToolType | null;
 }
 
-const AIToolsContext = createContext<AIToolsContextProps>({
-  openTool: () => {},
-  closeTool: () => {},
-  isToolOpen: false,
-  currentTool: null
-});
+const AIToolsContext = createContext<AIToolsContextProps | null>(null);
 
-export const useAITools = () => useContext(AIToolsContext);
-
-// Export getToolInfo function for external use
-export const getToolInfo = (tool: AIToolType | null) => {
-  if (!tool) {
-    return {
-      title: '',
-      icon: <Brain size={24} />,
-      component: null
-    };
+export const useAITools = () => {
+  const context = useContext(AIToolsContext);
+  if (!context) {
+    console.error('AITools context not found - checking provider hierarchy');
+    throw new Error('useAITools must be used within an AIToolsProvider');
   }
-
-  switch (tool) {
-    case 'email-analysis':
-      return {
-        title: 'Email Analysis',
-        icon: <Mail size={24} />,
-        component: <EmailAnalysisContent />
-      };
-    case 'meeting-summary':
-      return {
-        title: 'Meeting Summary Generator',
-        icon: <Calendar size={24} />,
-        component: <MeetingSummaryContent />
-      };
-    case 'call-script':
-      return {
-        title: 'Call Script Generator',
-        icon: <Phone size={24} />,
-        component: <CallScriptContent />
-      };
-    case 'competitor-analysis':
-      return {
-        title: 'Competitor Analysis',
-        icon: <Eye size={24} />,
-        component: <CompetitorAnalysisContent />
-      };
-    case 'market-trends':
-      return {
-        title: 'Market Trend Analysis',
-        icon: <TrendingUp size={24} />,
-        component: <MarketTrendContent />
-      };
-    case 'subject-optimizer':
-      return {
-        title: 'Subject Line Optimizer',
-        icon: <Mail size={24} />,
-        component: <SubjectLineContent />
-      };
-    case 'sales-insights':
-      return {
-        title: 'Sales Insights',
-        icon: <BarChart3 size={24} />,
-        component: <SalesInsightsContent />
-      };
-    case 'sales-forecast':
-      return {
-        title: 'Sales Forecast',
-        icon: <TrendingUp size={24} />,
-        component: <SalesForecastContent />
-      };
-    case 'voice-tone-optimizer':
-      return {
-        title: 'Voice Tone Optimizer',
-        icon: <Volume2 size={24} />,
-        component: <VoiceToneOptimizerContent />
-      };
-    case 'email-response':
-      return {
-        title: 'Email Response Generator',
-        icon: <Reply size={24} />,
-        component: <EmailResponseContent />
-      };
-    case 'visual-content-generator':
-      return {
-        title: 'Visual Content Generator',
-        icon: <Image size={24} />,
-        component: <ImageGeneratorContent />
-      };
-    case 'ai-assistant':
-      return {
-        title: 'AI Assistant Chat',
-        icon: <MessageSquare size={24} />,
-        component: <AIAssistantChat />
-      };
-    case 'vision-analyzer':
-      return {
-        title: 'Vision Analyzer',
-        icon: <Eye size={24} />,
-        component: <VisionAnalyzerContent />
-      };
-    case 'semantic-search':
-      return {
-        title: 'Semantic Search',
-        icon: <Search size={24} />,
-        component: <SemanticSearchContent />
-      };
-    case 'function-assistant':
-      return {
-        title: 'Function Assistant',
-        icon: <FileCode size={24} />,
-        component: <FunctionAssistantContent />
-      };
-    case 'reasoning-email':
-      return {
-        title: 'AI Reasoning Email Generator',
-        icon: <Mail size={24} />,
-        component: <ReasoningEmailGenerator />
-      };
-    case 'reasoning-proposal':
-      return {
-        title: 'AI Reasoning Proposal Generator',
-        icon: <FileText size={24} />,
-        component: <ReasoningProposalGenerator />
-      };
-    case 'reasoning-script':
-      return {
-        title: 'AI Reasoning Script Generator',
-        icon: <Phone size={24} />,
-        component: <ReasoningScriptGenerator />
-      };
-    case 'reasoning-objection':
-      return {
-        title: 'AI Reasoning Objection Handler',
-        icon: <Shield size={24} />,
-        component: <ReasoningObjectionHandler />
-      };
-    case 'reasoning-social':
-      return {
-        title: 'AI Reasoning Social Content',
-        icon: <Hash size={24} />,
-        component: <ReasoningSocialContent />
-      };
-    case 'email-composer':
-      return {
-        title: 'Email Composer',
-        icon: <Mail size={24} />,
-        component: <EmailResponseContent />
-      };
-    case 'objection-handler':
-      return {
-        title: 'Objection Handler',
-        icon: <Shield size={24} />,
-        component: <ObjectionHandlerContent />
-      };
-    case 'customer-persona':
-      return {
-        title: 'Customer Persona Generator',
-        icon: <User size={24} />,
-        component: <CustomerPersonaContent />
-      };
-    case 'meeting-agenda':
-      return {
-        title: 'Meeting Agenda Generator',
-        icon: <Calendar size={24} />,
-        component: <MeetingAgendaContent />
-      };
-    case 'image-generator':
-      return {
-        title: 'Image Generator',
-        icon: <Image size={24} />,
-        component: <ImageGeneratorContent />
-      };
-    case 'streaming-chat':
-      return {
-        title: 'AI Streaming Chat',
-        icon: <MessageSquare size={24} />,
-        component: <StreamingChat />
-      };
-    case 'form-validation':
-      return {
-        title: 'Real-Time Form Validation',
-        icon: <CheckCheck size={24} />,
-        component: <RealTimeFormValidation />
-      };
-    case 'live-deal-analysis':
-      return {
-        title: 'Live Deal Analysis',
-        icon: <BarChart3 size={24} />,
-        component: <LiveDealAnalysis />
-      };
-    case 'instant-response':
-      return {
-        title: 'Instant AI Response Generator',
-        icon: <Zap size={24} />,
-        component: <InstantAIResponseGenerator />
-      };
-    case 'document-analyzer-realtime':
-      return {
-        title: 'Document Analyzer Real-time',
-        icon: <FileSearch size={24} />,
-        component: <DocumentAnalyzerRealtime />
-      };
-    case 'realtime-email-composer':
-      return {
-        title: 'Real-Time Email Composer',
-        icon: <Mail size={24} />,
-        component: <RealTimeEmailComposer />
-      };
-    case 'voice-analysis-realtime':
-      return {
-        title: 'Voice Analysis Real-time',
-        icon: <Mic size={24} />,
-        component: <VoiceAnalysisRealtime />
-      };
-    case 'smart-search-realtime':
-      return {
-        title: 'Smart Search Real-time',
-        icon: <Search size={24} />,
-        component: <SmartSearchRealtime />
-      };
-    case 'auto-form-completer':
-      return {
-        title: 'Auto Form Completer',
-        icon: <FileText size={24} />,
-        component: <AutoFormCompleter />
-      };
-    default:
-      return {
-        title: 'AI Tool',
-        icon: <Brain size={24} />,
-        component: null
-      };
-  }
+  return context;
 };
 
 interface AIToolsProviderProps {
   children: ReactNode;
 }
-
-const defaultFormFields = [
-  { name: 'name', label: 'Full Name', type: 'text' as const, value: '', required: true },
-  { name: 'email', label: 'Email Address', type: 'email' as const, value: '', required: true },
-  { name: 'phone', label: 'Phone Number', type: 'tel' as const, value: '', required: false },
-  { name: 'company', label: 'Company Name', type: 'text' as const, value: '', required: true },
-  { name: 'message', label: 'Message', type: 'textarea' as const, value: '', required: true }
-];
 
 export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) => {
   const [isToolOpen, setIsToolOpen] = useState(false);
@@ -422,7 +191,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Email Subject Line Optimizer',
           icon: <Target size={24} />,
-          component: null
+          component: <SubjectLineContent />
         };
       case 'competitor-analysis':
         return {
@@ -440,19 +209,19 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Sales Insights',
           icon: <Brain size={24} />,
-          component: null
+          component: <SalesInsightsContent />
         };
       case 'sales-forecast':
         return {
           title: 'Sales Forecasting',
           icon: <PieChart size={24} />,
-          component: null
+          component: <SalesForecastContent />
         };
       case 'email-composer':
         return {
           title: 'Smart Email Composer',
           icon: <Mail size={24} />,
-          component: <EmailResponseContent />
+          component: <EmailComposerContent />
         };
       case 'objection-handler':
         return {
@@ -470,19 +239,19 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Voice Tone Optimizer',
           icon: <Volume2 size={24} />,
-          component: null
+          component: <VoiceToneOptimizerContent />
         };
       case 'email-response':
         return {
           title: 'Email Response Generator',
           icon: <Reply size={24} />,
-          component: null
+          component: <EmailResponseContent />
         };
       case 'visual-content-generator':
         return {
           title: 'Visual Content Generator',
           icon: <Image size={24} />,
-          component: null
+          component: <VisualContentGeneratorContent />
         };
       case 'meeting-agenda':
         return {
@@ -495,13 +264,13 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'AI Assistant',
           icon: <Brain size={24} />,
-          component: null
+          component: <AIAssistantChat />
         };
       case 'vision-analyzer':
         return {
           title: 'Vision Analyzer',
           icon: <Eye size={24} />,
-          component: null
+          component: <VisionAnalyzerContent />
         };
       case 'image-generator':
         return {
@@ -519,7 +288,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'Semantic Search',
           icon: <Search size={24} />,
-          component: null
+          component: <SemanticSearchContent />
         };
       case 'json-tools':
         return {
@@ -537,7 +306,7 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'CRM Function Assistant',
           icon: <Zap size={24} />,
-          component: null
+          component: <FunctionAssistantContent />
         };
       // New real-time tools
       case 'form-validation':
@@ -593,31 +362,31 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
         return {
           title: 'AI Reasoning Email Generator',
           icon: <Mail size={24} />,
-          component: null
+          component: <ReasoningEmailGenerator />
         };
       case 'reasoning-proposal':
         return {
           title: 'AI Reasoning Proposal Generator',
           icon: <FileText size={24} />,
-          component: null
+          component: <ReasoningProposalGenerator />
         };
       case 'reasoning-script':
         return {
           title: 'AI Reasoning Call Script Generator',
           icon: <Phone size={24} />,
-          component: null
+          component: <ReasoningScriptGenerator />
         };
       case 'reasoning-objection':
         return {
           title: 'AI Reasoning Objection Handler',
           icon: <Shield size={24} />,
-          component: null
+          component: <ReasoningObjectionHandler />
         };
       case 'reasoning-social':
         return {
           title: 'AI Reasoning Social Content Generator',
           icon: <Hash size={24} />,
-          component: null
+          component: <ReasoningSocialContent />
         };
       default:
         return {
@@ -634,15 +403,15 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
     <AIToolsContext.Provider value={{ openTool, closeTool, isToolOpen, currentTool }}>
       {children}
 
-      <AIToolModal 
-        isOpen={isToolOpen}
-        onClose={closeTool}
-        title={toolInfo.title}
-        icon={toolInfo.icon}
-        maxWidth="max-w-5xl"
-      >
-        {toolInfo.component}
-      </AIToolModal>
+      {isToolOpen && currentTool && (
+        <AIToolModal 
+          isOpen={isToolOpen}
+          onClose={closeTool}
+          title={toolInfo?.title || 'AI Tool'}
+        >
+          {toolInfo?.component}
+        </AIToolModal>
+      )}
     </AIToolsContext.Provider>
   );
 };
