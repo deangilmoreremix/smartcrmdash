@@ -65,6 +65,11 @@ import RevenueIntelligence from './pages/RevenueIntelligence';
 import ActivityAnalytics from './pages/ActivityAnalytics';
 import ResponseIntelligence from './pages/ResponseIntelligence';
 import ChannelSyncHub from './pages/ChannelSyncHub';
+// New imports for additional Communication pages
+import SmartEmailOptimizer from './pages/SmartEmailOptimizer';
+import SentimentMonitor from './pages/SentimentMonitor';
+import CommPerformance from './pages/CommPerformance';
+
 
 import './styles/design-system.css';
 
@@ -436,6 +441,30 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <ChannelSyncHub />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/smart-email-optimizer"
+                            element={
+                              <ProtectedRoute>
+                                <SmartEmailOptimizer />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/sentiment-monitor"
+                            element={
+                              <ProtectedRoute>
+                                <SentimentMonitor />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/comm-performance"
+                            element={
+                              <ProtectedRoute>
+                                <CommPerformance />
                               </ProtectedRoute>
                             }
                           />
