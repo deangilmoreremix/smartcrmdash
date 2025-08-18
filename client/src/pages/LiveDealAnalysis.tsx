@@ -227,7 +227,7 @@ const LiveDealAnalysis: React.FC = () => {
                       {deal.title}
                     </p>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {deal.contactName} • Last activity: {Math.floor(Math.random() * 5) + 1}h ago
+                      {(deal as any).contactName || 'Unknown'} • Last activity: {Math.floor(Math.random() * 5) + 1}h ago
                     </p>
                   </div>
                 </div>
