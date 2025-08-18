@@ -1,9 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
 const ContactsWorking: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const [remoteUrl, setRemoteUrl] = useState('');
+  const [remoteUrl, setRemoteUrl] = useState('https://taupe-sprinkles-83c9ee.netlify.app/');
   const [useRemote, setUseRemote] = useState(false);
+  const [RemoteContacts, setRemoteContacts] = useState<React.ComponentType | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadRemoteContacts = async (url: string) => {
+    if (!url) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Loading remote contacts from:', url);
+      
+      // Try to load the remote module
+      const module = await loadRemoteComponent(url, 'ContactsApp', './ContactsApp');
+      
+      if (module && (module.default || module)) {
+        setRemoteContacts(() => module.default || module);
+        console.log('Remote contacts loaded successfully');
+      } else {
+        throw new Error('Remote module did not export a component');
+      }
+    } catch (err) {
+      console.error('Failed to load remote contacts:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMsg);
+      // Don't disable useRemote automatically, let user see the error and try again
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Don't auto-load on mount to prevent runtime errors
+  // Only load when user explicitly clicks Apply
   
   return (
     <div style={{ minHeight: '100vh', padding: '20px', backgroundColor: '#f9fafb', pointerEvents: 'auto' }}>
@@ -136,22 +171,25 @@ const ContactsWorking: React.FC = () => {
                 onClick={() => {
                   if (remoteUrl) {
                     setUseRemote(true);
+                    setRemoteContacts(null); // Force reload
+                    setError(null); // Clear previous errors
                     console.log('Enabling remote contacts with URL:', remoteUrl);
-                    alert(`Remote contacts enabled with: ${remoteUrl}`);
+                    loadRemoteContacts(remoteUrl);
                   }
                 }}
-                disabled={!remoteUrl}
+                disabled={!remoteUrl || loading}
                 style={{
                   padding: '4px 12px',
                   fontSize: '12px',
-                  backgroundColor: remoteUrl ? '#3b82f6' : '#9ca3af',
+                  backgroundColor: (remoteUrl && !loading) ? '#3b82f6' : '#9ca3af',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: remoteUrl ? 'pointer' : 'not-allowed'
+                  cursor: (remoteUrl && !loading) ? 'pointer' : 'not-allowed',
+                  pointerEvents: 'auto'
                 }}
               >
-                Apply
+                {loading ? 'Loading...' : 'Connect Remote App'}
               </button>
             </div>
           </div>
@@ -160,18 +198,65 @@ const ContactsWorking: React.FC = () => {
 
       <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Contacts Content</h2>
-        <p style={{ color: '#6b7280' }}>
-          {useRemote && remoteUrl 
-            ? `🔗 Remote contacts would load from: ${remoteUrl}` 
-            : '📋 Local contacts interface would be displayed here'
-          }
-        </p>
         
-        {useRemote && remoteUrl && (
-          <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fef3c7', border: '1px solid #f59e0b', borderRadius: '4px' }}>
-            <p style={{ margin: 0, fontSize: '14px' }}>
-              <strong>Next Step:</strong> Deploy your Bolt contacts app and enter the URL above to enable Module Federation!
-            </p>
+        {loading && (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+            <div style={{ fontSize: '16px', marginBottom: '8px' }}>🔄 Loading remote contacts...</div>
+            <div style={{ fontSize: '14px' }}>Connecting to: {remoteUrl}</div>
+          </div>
+        )}
+        
+        {error && (
+          <div style={{ padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #ef4444', borderRadius: '4px', marginBottom: '16px' }}>
+            <div style={{ color: '#dc2626', fontWeight: '500', marginBottom: '8px' }}>❌ Module Federation Setup Required</div>
+            <div style={{ color: '#7f1d1d', fontSize: '14px', marginBottom: '12px' }}>{error}</div>
+            
+            <div style={{ padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #f59e0b', borderRadius: '4px', fontSize: '12px' }}>
+              <div style={{ fontWeight: '500', marginBottom: '4px', color: '#92400e' }}>Setup Instructions:</div>
+              <div style={{ color: '#92400e', lineHeight: '1.4' }}>
+                1. In your Bolt app, add the files from the docs/ folder<br/>
+                2. Make sure vite.config.js includes Module Federation plugin<br/>
+                3. Redeploy your Bolt app<br/>
+                4. Click Apply again to retry connection
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                setError(null);
+                loadRemoteContacts(remoteUrl);
+              }}
+              style={{
+                marginTop: '8px',
+                padding: '4px 12px',
+                fontSize: '12px',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                pointerEvents: 'auto'
+              }}
+            >
+              Retry Connection
+            </button>
+          </div>
+        )}
+        
+        {useRemote && RemoteContacts && !loading && (
+          <div style={{ border: '2px solid #10b981', borderRadius: '8px', padding: '16px', backgroundColor: '#f0fdf4' }}>
+            <div style={{ marginBottom: '12px', color: '#065f46', fontWeight: '500' }}>
+              ✅ Remote Contacts App Connected
+            </div>
+            <div style={{ border: '1px solid #d1d5db', borderRadius: '4px', minHeight: '400px', backgroundColor: 'white' }}>
+              <RemoteContacts />
+            </div>
+          </div>
+        )}
+        
+        {!useRemote && (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+            📋 Local contacts interface would be displayed here
           </div>
         )}
       </div>

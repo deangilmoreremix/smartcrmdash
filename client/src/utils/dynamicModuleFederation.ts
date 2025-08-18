@@ -47,11 +47,39 @@ class DynamicModuleFederation {
       const script = document.createElement('script');
       script.type = 'text/javascript';
       script.async = true;
-      script.src = url;
       
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+      // Try different possible script URLs
+      const possibleUrls = [
+        `${url}/assets/remoteEntry.js`,
+        `${url}/remoteEntry.js`,
+        `${url}/static/js/remoteEntry.js`,
+        url.endsWith('.js') ? url : `${url}/remoteEntry.js`
+      ];
       
+      let currentUrlIndex = 0;
+      
+      const tryNextUrl = () => {
+        if (currentUrlIndex >= possibleUrls.length) {
+          reject(new Error(`Failed to load remote script from any of: ${possibleUrls.join(', ')}`));
+          return;
+        }
+        
+        script.src = possibleUrls[currentUrlIndex];
+        console.log(`Trying to load Module Federation script from: ${script.src}`);
+        currentUrlIndex++;
+      };
+      
+      script.onload = () => {
+        console.log(`Successfully loaded Module Federation script from: ${script.src}`);
+        resolve();
+      };
+      
+      script.onerror = () => {
+        console.warn(`Failed to load script from: ${script.src}`);
+        tryNextUrl();
+      };
+      
+      tryNextUrl();
       document.head.appendChild(script);
     });
   }
