@@ -329,9 +329,23 @@ const EmbeddedContactsApp: React.FC<EmbeddedContactsAppProps> = ({
         {showAdvancedFilter && (
           <div className="mt-4">
             <AdvancedContactFilter
-              filters={activeFilters}
-              onFiltersChange={setActiveFilters}
-              contactsCount={contactsArray.length}
+              isOpen={showAdvancedFilter}
+              onClose={() => setShowAdvancedFilter(false)}
+              onApplyFilters={setActiveFilters}
+              onClearFilters={() => setActiveFilters({
+                status: [],
+                interestLevel: [],
+                industry: [],
+                tags: [],
+                scoreRange: { min: 0, max: 100 },
+                location: [],
+                source: [],
+                isFavorite: undefined,
+                hasCustomFields: undefined,
+                lastContactDays: undefined
+              })}
+              contacts={contactsArray}
+              currentFilters={activeFilters}
             />
           </div>
         )}
@@ -431,7 +445,6 @@ const EmbeddedContactsApp: React.FC<EmbeddedContactsAppProps> = ({
         onClose={handleModalClose}
         contact={selectedContactForModal || undefined}
         mode={contactModalMode}
-        onSave={handleContactSave}
       />
     </div>
   );

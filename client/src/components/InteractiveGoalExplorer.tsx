@@ -154,7 +154,7 @@ const InteractiveGoalExplorer: React.FC<InteractiveGoalExplorerProps> = ({
     onGoalSelected?.(goal);
     
     if (!executingGoals.has(goal.id)) {
-      setExecutingGoals(prev => new Set([...prev, goal.id]));
+      setExecutingGoals(prev => new Set([...Array.from(prev), goal.id]));
       setExecutionProgress(prev => ({ ...prev, [goal.id]: 0 }));
       
       // Simulate execution progress
@@ -170,7 +170,7 @@ const InteractiveGoalExplorer: React.FC<InteractiveGoalExplorerProps> = ({
               newSet.delete(goal.id);
               return newSet;
             });
-            setCompletedGoals(prevSet => new Set([...prevSet, goal.id]));
+            setCompletedGoals(prevSet => new Set([...Array.from(prevSet), goal.id]));
           }
           
           return { ...prev, [goal.id]: newProgress };
@@ -203,7 +203,7 @@ const InteractiveGoalExplorer: React.FC<InteractiveGoalExplorerProps> = ({
 
   const handleExecutionComplete = (result: any) => {
     if (executingGoal) {
-      setCompletedGoals(prev => new Set([...prev, executingGoal.id]));
+      setCompletedGoals(prev => new Set([...Array.from(prev), executingGoal.id]));
       setExecutingGoals(prev => {
         const newSet = new Set(prev);
         newSet.delete(executingGoal.id);

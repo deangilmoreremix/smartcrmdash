@@ -18,7 +18,7 @@ interface ContactStore {
   
   // Actions
   fetchContacts: () => Promise<void>;
-  addContact: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addContact: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => Contact;
   updateContact: (id: string, updates: Partial<Contact>) => void;
   deleteContact: (id: string) => void;
   
@@ -237,6 +237,7 @@ export const useContactStore = create<ContactStore>((set, get) => ({
       return { contacts: newContacts, fuse };
     });
     logger.info('Contact added successfully', { contactId: newContact.id });
+    return newContact;
   },
 
   updateContact: (id, updates) => {

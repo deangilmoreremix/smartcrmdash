@@ -77,9 +77,9 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
           
         case 'REQUEST_CONTACTS':
           // Send current contacts to the remote app
-          const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({
+          const requestIframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
+          if (requestIframe && requestIframe.contentWindow) {
+            requestIframe.contentWindow.postMessage({
               type: 'CONTACTS_DATA',
               data: { contacts: Object.values(contacts) }
             }, '*');
@@ -90,9 +90,9 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
           console.log('Remote contacts app is ready');
           setIsIframeLoaded(true);
           // Send initial data
-          const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({
+          const appReadyIframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
+          if (appReadyIframe && appReadyIframe.contentWindow) {
+            appReadyIframe.contentWindow.postMessage({
               type: 'INIT_DATA',
               data: { 
                 contacts: Object.values(contacts),
