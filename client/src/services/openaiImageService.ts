@@ -256,3 +256,30 @@ export const useOpenAIImageGeneration = () => {
 };
 
 export type { ImageGenerationOptions, ImageGenerationResult };
+
+// Alias for compatibility with existing components
+export const useOpenAIImage = () => {
+  const generateImage = async (
+    prompt: string, 
+    size: '1024x1024' | '1792x1024' | '1024x1792' = '1024x1024',
+    quality: 'standard' | 'hd' = 'standard',
+    style: 'vivid' | 'natural' = 'natural'
+  ) => {
+    const result = await openaiImageService.generateImage({
+      prompt,
+      size,
+      quality,
+      style,
+      model: 'dall-e-3'
+    });
+    
+    return {
+      url: result.url,
+      revisedPrompt: result.revised_prompt
+    };
+  };
+
+  return {
+    generateImage
+  };
+};
