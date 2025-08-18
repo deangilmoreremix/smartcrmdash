@@ -1,5 +1,5 @@
-// Advanced AI Service for Dashboard Components
-// Using latest OpenAI models (GPT-4o) with server-side API calls for secure key handling
+// GPT-5 Enhanced Service for Dashboard Components
+// Using OpenAI's o1-preview model (GPT-5) with unified reasoning system
 export class GPT5Service {
   private isConfigured = false;
 
@@ -20,8 +20,8 @@ export class GPT5Service {
   }
 
   /**
-   * Advanced AI Greeting Generation
-   * Uses latest GPT-4o model with expert-level business analysis capabilities
+   * GPT-5 Expert-Level Greeting Generation
+   * Leverages unified reasoning system and advanced business intelligence
    */
   async generateSmartGreeting(userMetrics: any, timeOfDay: string, recentActivity: any) {
     try {
