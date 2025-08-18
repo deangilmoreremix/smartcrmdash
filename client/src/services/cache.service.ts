@@ -14,11 +14,12 @@ export const cacheService = {
     }
   },
 
-  set<T>(namespace: string, key: string, data: T, ttl?: number): void {
+  set<T>(namespace: string, key: string, data: T, ttl?: number, tags?: string[]): void {
     try {
       const item = {
         data,
-        expiry: ttl ? Date.now() + ttl : null
+        expiry: ttl ? Date.now() + ttl : null,
+        tags: tags || []
       };
       localStorage.setItem(`${namespace}_${key}`, JSON.stringify(item));
     } catch {
