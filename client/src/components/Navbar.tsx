@@ -456,15 +456,24 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <button
                             key={index}
                             onClick={() => {
-                              if (tool.tool === 'deal-pipeline') {
-                                onOpenPipelineModal?.();
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              } else {
-                                navigate(`/${tool.tool}`);
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              }
+                              console.log('Sales tool clicked:', tool.tool, tool.name);
+                              const routeMap: { [key: string]: string } = {
+                                'deal-pipeline': '/pipeline-intelligence',
+                                'deal-risk': '/deal-risk-monitor',
+                                'conversion-insights': '/smart-conversion-insights',
+                                'pipeline-health': '/pipeline-health-dashboard',
+                                'sales-cycle': '/sales-cycle-analytics',
+                                'win-rate-analysis': '/win-rate-intelligence',
+                                'ai-sales-forecast': '/ai-sales-forecast',
+                                'live-deal-analysis': '/live-deal-analysis',
+                                'competitor-insights': '/competitor-insights',
+                                'revenue-intelligence': '/revenue-intelligence'
+                              };
+                              
+                              const route = routeMap[tool.tool] || `/${tool.tool}`;
+                              navigate(route);
+                              setActiveDropdown(null);
+                              setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
