@@ -102,12 +102,14 @@ Design Implementation: Always use the exact design, styling, and structure from 
 - **State Management**: Zustand-based goal store with persistence, execution tracking, and performance analytics
 - **Data Architecture**: Structured goal types, execution steps, progress tracking, and result management
 
-## Remote Contacts Module Integration (Completed 2025-01-18)
-- **Iframe Embedding**: Direct integration of remote contacts module (https://taupe-sprinkles-83c9ee.netlify.app) within CRM interface
-- **Bidirectional Communication**: PostMessage-based bridge system for real-time data synchronization between remote module and CRM
-- **Navigation Bridge**: Remote module can control parent CRM navigation (dashboard, deals, tasks, calendar routing)
-- **Contact Synchronization**: Automatic sync of contact data between remote module and local CRM store
-- **Bridge Services**: RemoteContactsBridge service managing secure cross-origin communication with fallback mechanisms
+## Remote Modules Integration (Completed 2025-01-18)
+- **Remote Contacts Module**: Direct integration of remote contacts module (https://taupe-sprinkles-83c9ee.netlify.app) within CRM interface
+- **Remote Pipeline Module**: Full integration of remote pipeline module (https://cheery-syrniki-b5b6ca.netlify.app) with deal management capabilities
+- **Bidirectional Communication**: PostMessage-based bridge system for real-time data synchronization between remote modules and CRM
+- **Navigation Bridge**: Remote modules can control parent CRM navigation (dashboard, deals, tasks, calendar routing)
+- **Data Synchronization**: Automatic sync of contact/deal data between remote modules and local CRM stores
+- **Bridge Services**: Comprehensive bridge services managing secure cross-origin communication with fallback mechanisms
+- **Connection Monitoring**: Real-time connection status indicators, retry logic, and graceful error handling
 - **Developer Integration**: Complete documentation and JavaScript bridge code for extending remote module functionality
 
 ## External Dependencies

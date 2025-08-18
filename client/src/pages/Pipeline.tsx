@@ -34,7 +34,7 @@ const Pipeline: React.FC = () => {
   const [showLocalFallback, setShowLocalFallback] = useState(false);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   
-  const REMOTE_PIPELINE_URL = 'https://taupe-sprinkles-83c9ee.netlify.app';
+  const REMOTE_PIPELINE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
   const MAX_CONNECTION_ATTEMPTS = 3;
 
   // Remote Pipeline Bridge Communication
@@ -205,7 +205,8 @@ const Pipeline: React.FC = () => {
               </h2>
             </div>
             <p className={`mb-4 ${isDark ? 'text-yellow-200' : 'text-yellow-700'}`}>
-              The remote pipeline module couldn't be loaded. This might be due to network issues or the remote service being temporarily unavailable.
+              The remote pipeline module couldn't be loaded from https://cheery-syrniki-b5b6ca.netlify.app. 
+              This might be due to network issues or the remote service being temporarily unavailable.
             </p>
             <div className="flex gap-3">
               <button
