@@ -11,6 +11,9 @@ const ContactsWithRemote: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   
   const { contacts, fetchContacts } = useContactStore();
+  
+  // Convert contacts object to array for remote component
+  const contactsArray = Array.isArray(contacts) ? contacts : Object.values(contacts || {});
 
   const handleContactSelect = (contact: any) => {
     console.log('Contact selected from remote:', contact);
@@ -125,7 +128,7 @@ const ContactsWithRemote: React.FC = () => {
             onContactCreate={handleContactCreate}
             onContactUpdate={handleContactUpdate}
             onContactDelete={handleContactDelete}
-            initialContacts={contacts}
+            initialContacts={contactsArray}
             theme="light"
             fallbackComponent={ContactsEnhanced}
           />
