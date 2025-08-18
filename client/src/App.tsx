@@ -26,6 +26,7 @@ const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // 
 const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // Button test
 const ContactsWorking = lazy(() => import('./pages/ContactsWorking')); // Working contacts with inline styles
 const Pipeline = lazy(() => import('./pages/Pipeline'));
+const PipelinePage = lazy(() => import('./pages/PipelinePage'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
@@ -116,7 +117,7 @@ function App() {
                             path="/pipeline"
                             element={
                               <ProtectedRoute>
-                                <Pipeline />
+                                <PipelinePage />
                               </ProtectedRoute>
                             }
                           />

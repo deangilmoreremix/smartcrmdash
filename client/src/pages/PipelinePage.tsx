@@ -1,0 +1,242 @@
+import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Target, BarChart3, Users, TrendingUp } from 'lucide-react';
+
+const PipelinePage: React.FC = () => {
+  const { isDark } = useTheme();
+
+  return (
+    <div className={`min-h-screen ${
+      isDark ? 'bg-gray-900' : 'bg-gray-50'
+    } transition-colors duration-200`}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className={`text-3xl font-bold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            Pipeline Management
+          </h1>
+          <p className={`mt-2 ${
+            isDark ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            Manage your sales pipeline, track deals, and optimize your conversion process
+          </p>
+        </div>
+
+        {/* Embedded Pipeline Component */}
+        <Card className={`${
+          isDark 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-white border-gray-200'
+        } mb-6`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
+              <Target className="h-5 w-5 mr-2 text-green-500" />
+              Interactive Deal Pipeline
+            </CardTitle>
+            <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+              Your comprehensive pipeline management system with drag-and-drop functionality
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="w-full h-[900px] rounded-lg overflow-hidden">
+              <iframe 
+                src="https://cheery-syrniki-b5b6ca.netlify.app"
+                className="w-full h-full border-0"
+                title="Pipeline Management System"
+                allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+                loading="lazy"
+                style={{ minHeight: '900px' }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pipeline Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className={`${
+            isDark 
+              ? 'bg-gradient-to-br from-blue-900/20 to-indigo-900/20 border-blue-800' 
+              : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+          }`}>
+            <CardHeader className="pb-2">
+              <CardTitle className={`text-sm font-medium ${
+                isDark ? 'text-blue-200' : 'text-blue-800'
+              }`}>
+                Active Deals
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                isDark ? 'text-blue-100' : 'text-blue-900'
+              }`}>
+                24
+              </div>
+              <p className={`text-xs mt-1 flex items-center ${
+                isDark ? 'text-blue-300' : 'text-blue-600'
+              }`}>
+                <TrendingUp className="inline h-3 w-3 mr-1" />
+                +12% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${
+            isDark 
+              ? 'bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-800' 
+              : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+          }`}>
+            <CardHeader className="pb-2">
+              <CardTitle className={`text-sm font-medium ${
+                isDark ? 'text-green-200' : 'text-green-800'
+              }`}>
+                Pipeline Value
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                isDark ? 'text-green-100' : 'text-green-900'
+              }`}>
+                $1.2M
+              </div>
+              <p className={`text-xs mt-1 flex items-center ${
+                isDark ? 'text-green-300' : 'text-green-600'
+              }`}>
+                <TrendingUp className="inline h-3 w-3 mr-1" />
+                +8% growth
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${
+            isDark 
+              ? 'bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border-yellow-800' 
+              : 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200'
+          }`}>
+            <CardHeader className="pb-2">
+              <CardTitle className={`text-sm font-medium ${
+                isDark ? 'text-yellow-200' : 'text-yellow-800'
+              }`}>
+                Win Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                isDark ? 'text-yellow-100' : 'text-yellow-900'
+              }`}>
+                68%
+              </div>
+              <p className={`text-xs mt-1 flex items-center ${
+                isDark ? 'text-yellow-300' : 'text-yellow-600'
+              }`}>
+                <TrendingUp className="inline h-3 w-3 mr-1" />
+                Industry avg: 52%
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${
+            isDark 
+              ? 'bg-gradient-to-br from-purple-900/20 to-violet-900/20 border-purple-800' 
+              : 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200'
+          }`}>
+            <CardHeader className="pb-2">
+              <CardTitle className={`text-sm font-medium ${
+                isDark ? 'text-purple-200' : 'text-purple-800'
+              }`}>
+                Avg Deal Size
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                isDark ? 'text-purple-100' : 'text-purple-900'
+              }`}>
+                $50K
+              </div>
+              <p className={`text-xs mt-1 flex items-center ${
+                isDark ? 'text-purple-300' : 'text-purple-600'
+              }`}>
+                <TrendingUp className="inline h-3 w-3 mr-1" />
+                +15% increase
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Pipeline Instructions */}
+        <Card className={`${
+          isDark 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-white border-gray-200'
+        }`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
+              <Users className="h-5 w-5 mr-2 text-blue-500" />
+              Pipeline Management Tips
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className={`font-medium mb-2 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Drag & Drop
+                </h4>
+                <p className={`text-sm ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Move deals between stages by dragging them to different columns
+                </p>
+              </div>
+              <div>
+                <h4 className={`font-medium mb-2 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Quick Actions
+                </h4>
+                <p className={`text-sm ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Click on any deal card to view details or edit information
+                </p>
+              </div>
+              <div>
+                <h4 className={`font-medium mb-2 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Stage Management
+                </h4>
+                <p className={`text-sm ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Customize pipeline stages to match your sales process
+                </p>
+              </div>
+              <div>
+                <h4 className={`font-medium mb-2 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Analytics Integration
+                </h4>
+                <p className={`text-sm ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  All pipeline changes sync automatically with your analytics dashboard
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default PipelinePage;

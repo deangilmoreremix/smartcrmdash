@@ -463,37 +463,6 @@ const SalesPerformanceDashboard: React.FC = () => {
             
             {/* Deal Pipeline Tab */}
             <TabsContent value="deals" className="space-y-6 mt-8">
-              {/* Embedded Pipeline Component */}
-              <Card className={`${
-                isDark 
-                  ? 'bg-gray-800 border-gray-700' 
-                  : 'bg-white border-gray-200'
-              } mb-6`}>
-                <CardHeader>
-                  <CardTitle className={`flex items-center ${
-                    isDark ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    <Target className="h-5 w-5 mr-2 text-green-500" />
-                    Interactive Deal Pipeline
-                  </CardTitle>
-                  <CardDescription className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                    Your comprehensive pipeline management system
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="w-full h-[800px] rounded-lg overflow-hidden">
-                    <iframe 
-                      src="https://cheery-syrniki-b5b6ca.netlify.app"
-                      className="w-full h-full border-0"
-                      title="Pipeline Management System"
-                      allowFullScreen
-                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                      loading="lazy"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Pipeline Analytics Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className={`${
