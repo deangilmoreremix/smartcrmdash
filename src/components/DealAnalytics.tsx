@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import Avatar from './ui/Avatar';
 import { getInitials } from '../utils/avatars';
+import { isDealInStage, isDealNotInStages, getDealStageId } from '../utils/dealUtils';
 
 interface KPIMetric {
   title: string;
@@ -52,10 +53,13 @@ interface PipelineStage {
 }
 
 const DealAnalytics: React.FC = () => {
-  const { deals, stageValues } = useDealStore();
+  const { deals, getStageValues } = useDealStore();
   const { contacts } = useContactStore();
   const { isDark } = useTheme();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('month');
+
+  // Get stage values
+  const stageValues = getStageValues();
 
   // Render avatar stack
   const renderAvatarStack = (contacts: Array<{ id: string; name: string; avatar?: string }>, maxVisible: number = 3) => {
@@ -92,10 +96,10 @@ const DealAnalytics: React.FC = () => {
   const calculateKPIs = (): KPIMetric[] => {
     const dealsArray = deals ? Object.values(deals) : [];
     const totalRevenue = dealsArray
-      .filter(deal => deal.stage === 'closed-won')
+      .filter(deal => isDealInStage(deal, 'closed-won'))
       .reduce((sum, deal) => sum + deal.value, 0);
     const totalDeals = dealsArray.length;
-    const wonDeals = dealsArray.filter(deal => deal.stage === 'closed-won').length;
+    const wonDeals = dealsArray.filter(deal => isDealInStage(deal, 'closed-won')).length;
     const conversionRate = totalDeals > 0 ? (wonDeals / totalDeals) * 100 : 0;
     const totalContacts = Object.keys(contacts).length || 0;
     const avgDealSize = wonDeals > 0 ? totalRevenue / wonDeals : 0;
@@ -109,7 +113,7 @@ const DealAnalytics: React.FC = () => {
 
     // Get contacts associated with won deals
     const wonDealContacts = dealsArray
-      .filter(deal => deal.stage === 'closed-won')
+      .filter(deal => isDealInStage(deal, 'closed-won'))
       .map(deal => {
         const contact = contacts[deal.contactId];
         return contact ? {
@@ -177,11 +181,11 @@ const DealAnalytics: React.FC = () => {
   const calculateDealCounts = () => {
     const dealsArray = Object.values(deals);
     return {
-      qualification: dealsArray.filter(deal => deal.stage === 'qualification').length,
-      proposal: dealsArray.filter(deal => deal.stage === 'proposal').length,
-      negotiation: dealsArray.filter(deal => deal.stage === 'negotiation').length,
-      'closed-won': dealsArray.filter(deal => deal.stage === 'closed-won').length,
-      'closed-lost': dealsArray.filter(deal => deal.stage === 'closed-lost').length
+      qualification: dealsArray.filter(deal => isDealInStage(deal, 'qualification')).length,
+      proposal: dealsArray.filter(deal => isDealInStage(deal, 'proposal')).length,
+      negotiation: dealsArray.filter(deal => isDealInStage(deal, 'negotiation')).length,
+      'closed-won': dealsArray.filter(deal => isDealInStage(deal, 'closed-won')).length,
+      'closed-lost': dealsArray.filter(deal => isDealInStage(deal, 'closed-lost')).length
     };
   };
 
@@ -191,7 +195,7 @@ const DealAnalytics: React.FC = () => {
     
     // Get active deals with contacts
     const activeDealsWithContacts = dealsArray
-      .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+      .filter(deal => isDealNotInStages(deal, ['closed-won', 'closed-lost']))
       .map(deal => ({
         ...deal,
         contact: contacts[deal.contactId]
@@ -201,7 +205,7 @@ const DealAnalytics: React.FC = () => {
     
     // Get won deals with contacts
     const wonDealsWithContacts = dealsArray
-      .filter(deal => deal.stage === 'closed-won')
+      .filter(deal => isDealInStage(deal, 'closed-won'))
       .map(deal => ({
         ...deal,
         contact: contacts[deal.contactId]
@@ -211,7 +215,7 @@ const DealAnalytics: React.FC = () => {
     
     // Get lost deals with contacts
     const lostDealsWithContacts = dealsArray
-      .filter(deal => deal.stage === 'closed-lost')
+      .filter(deal => isDealInStage(deal, 'closed-lost'))
       .map(deal => ({
         ...deal,
         contact: contacts[deal.contactId]
@@ -221,13 +225,13 @@ const DealAnalytics: React.FC = () => {
     
     return {
       active: dealsArray
-        .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+        .filter(deal => isDealNotInStages(deal, ['closed-won', 'closed-lost']))
         .reduce((sum, deal) => sum + deal.value, 0),
       won: dealsArray
-        .filter(deal => deal.stage === 'closed-won')
+        .filter(deal => isDealInStage(deal, 'closed-won'))
         .reduce((sum, deal) => sum + deal.value, 0),
       lost: dealsArray
-        .filter(deal => deal.stage === 'closed-lost')
+        .filter(deal => isDealInStage(deal, 'closed-lost'))
         .reduce((sum, deal) => sum + deal.value, 0),
       activeDealsWithContacts,
       wonDealsWithContacts,
@@ -308,7 +312,7 @@ const DealAnalytics: React.FC = () => {
   // Calculate monthly pipeline value
   const pipelineByMonth: Record<string, number> = {};
   Object.values(deals).forEach(deal => {
-    if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
+    if (isDealNotInStages(deal, ['closed-won', 'closed-lost'])) {
       const month = deal.dueDate ? 
         `${deal.dueDate.getFullYear()}-${String(deal.dueDate.getMonth() + 1).padStart(2, '0')}` : 
         'No date';

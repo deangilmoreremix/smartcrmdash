@@ -71,13 +71,15 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   define: {
-    global: 'window',
+    global: 'globalThis',
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
   },
   resolve: {
     alias: {
       events: 'events',
       util: 'util',
       stream: 'stream-browserify',
+      buffer: 'buffer',
     },
   },
   build: {

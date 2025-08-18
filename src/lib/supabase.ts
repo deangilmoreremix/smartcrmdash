@@ -45,7 +45,7 @@ export const supabase = isConfigured
         autoRefreshToken: true
       }
     })
-  : createClient('https://example.org', 'placeholder-key', {
+  : createClient('https://placeholder.supabase.co', 'placeholder-key', {
       auth: {
         persistSession: false,
         autoRefreshToken: false

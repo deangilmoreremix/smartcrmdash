@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Grid3X3, ExternalLink, Megaphone, Users, FileText, Palette } from 'lucide-react';
+import { LayoutGrid, ExternalLink, Megaphone, Users, FileText, Palette } from 'lucide-react';
 
 const ConnectedApps: React.FC = () => {
   const { isDark } = useTheme();
@@ -58,7 +58,7 @@ const ConnectedApps: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <div className={`p-2 rounded-lg ${isDark ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400' : 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600'} mr-3`}>
-            <Grid3X3 size={20} />
+            <LayoutGrid size={20} />
           </div>
           <div>
             <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Connected Apps</h3>

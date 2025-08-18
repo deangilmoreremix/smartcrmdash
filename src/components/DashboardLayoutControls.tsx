@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { 
   Settings, 
   RotateCcw, 
-  Move3D, 
+  Move3d, 
   Eye, 
   EyeOff, 
   ChevronDown,
@@ -102,7 +102,7 @@ const DashboardLayoutControls: React.FC = () => {
                 } transition-colors`}
               >
                 <div className="flex items-center space-x-2">
-                  <Move3D size={16} />
+                  <Move3d size={16} />
                   <span className="text-sm font-medium">Drag & Drop Mode</span>
                 </div>
                 <div className={`w-5 h-5 rounded border-2 ${

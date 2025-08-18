@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap, TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase, Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat, Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart, Edit3, ExternalLink, Menu, X } from 'lucide-react';
+import { Icon, Icons } from '../utils/icons';
+import { User, X, Menu, Sun, Moon } from 'lucide-react';
+import { aiTools } from '../utils/aiToolsData';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDealStore } from '../store/dealStore';
@@ -18,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
-  const { openAITool } = useNavigation();
+  const { navigateToTool } = useNavigation();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -28,10 +30,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { tasks } = useTaskStore();
   const { appointments } = useAppointmentStore();
 
+  // Import the utility function at the top level to use here
+  const isDealNotInStages = (deal: any, stageIds: string[]): boolean => {
+    if (deal.stage && typeof deal.stage === 'object' && 'id' in deal.stage) {
+      return !stageIds.includes(deal.stage.id);
+    }
+    // @ts-ignore - Fallback for runtime safety
+    return !stageIds.includes(deal.stage || '');
+  };
+
   // Use useMemo to calculate counters and prevent recalculation on every render
   const counters = React.useMemo(() => {
     const activeDeals = Object.values(deals).filter(deal =>
-      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+      isDealNotInStages(deal, ['closed-won', 'closed-lost'])
     ).length;
     
     const hotContacts = Object.values(contacts).filter(contact => 
@@ -60,61 +71,61 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   // Tasks dropdown tools
   const taskTools = [
-    { name: 'Task Management', tool: 'task-management', icon: CheckSquare },
-    { name: 'Task Automation', tool: 'task-automation', icon: Bot },
-    { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },
-    { name: 'Time Tracking', tool: 'time-tracking', icon: Clock },
-    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat },
-    { name: 'Deadline Manager', tool: 'deadline-manager', icon: AlertTriangle }
+    { name: 'Task Management', tool: 'task-management', iconName: 'check-square' },
+    { name: 'Task Automation', tool: 'task-automation', iconName: 'bot' },
+    { name: 'Project Tracker', tool: 'project-tracker', iconName: 'layers' },
+    { name: 'Time Tracking', tool: 'time-tracking', iconName: 'clock' },
+    { name: 'Workflow Builder', tool: 'workflow-builder', iconName: 'repeat' },
+    { name: 'Deadline Manager', tool: 'deadline-manager', iconName: 'alert-triangle' }
   ];
 
   // Sales dropdown tools
   const salesTools = [
-    { name: 'Sales Tools', tool: 'sales-tools', icon: DollarSign },
-    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
-    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: Target },
-    { name: 'Appointments', tool: 'appointments', icon: Calendar },
-    { name: 'Phone System', tool: 'phone-system', icon: Phone },
-    { name: 'Invoicing', tool: 'invoicing', icon: Receipt },
-    { name: 'Sales Analytics', tool: 'sales-analytics', icon: TrendingUp },
-    { name: 'Deal Pipeline', tool: 'deal-pipeline', icon: Briefcase },
-    { name: 'Quote Builder', tool: 'quote-builder', icon: FileText },
-    { name: 'Commission Tracker', tool: 'commission-tracker', icon: PieChart },
-    { name: 'Follow-up Reminders', tool: 'follow-up-reminders', icon: Bell },
-    { name: 'Territory Management', tool: 'territory-management', icon: Globe }
+    { name: 'Sales Tools', tool: 'sales-tools', iconName: 'dollar-sign' },
+    { name: 'Lead Automation', tool: 'lead-automation', iconName: 'bot' },
+    { name: 'Circle Prospecting', tool: 'circle-prospecting', iconName: 'target' },
+    { name: 'Appointments', tool: 'appointments', iconName: 'calendar' },
+    { name: 'Phone System', tool: 'phone-system', iconName: 'phone' },
+    { name: 'Invoicing', tool: 'invoicing', iconName: 'receipt' },
+    { name: 'Sales Analytics', tool: 'sales-analytics', iconName: 'trending-up' },
+    { name: 'Deal Pipeline', tool: 'deal-pipeline', iconName: 'briefcase' },
+    { name: 'Quote Builder', tool: 'quote-builder', iconName: 'file-text' },
+    { name: 'Commission Tracker', tool: 'commission-tracker', iconName: 'pie-chart' },
+    { name: 'Follow-up Reminders', tool: 'follow-up-reminders', iconName: 'bell' },
+    { name: 'Territory Management', tool: 'territory-management', iconName: 'globe' }
   ];
 
   // Communication dropdown tools - Enhanced with SDRButtons features
   const communicationTools = [
-    { name: 'Video Email', tool: 'video-email', icon: Video },
-    { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
-    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone },
+    { name: 'Video Email', tool: 'video-email', iconName: 'video' },
+    { name: 'Text Messages', tool: 'text-messages', iconName: 'message-square' },
+    { name: 'Email Composer', tool: 'email-composer', iconName: 'mail' },
+    { name: 'Campaigns', tool: 'campaigns', iconName: 'megaphone' },
     // Enhanced SDRButtons Communication Features
-    { name: 'Group Calls', tool: 'group-calls', icon: Users },
-    { name: 'Call Recording', tool: 'call-recording', icon: Mic },
-    { name: 'In-Call Messaging', tool: 'in-call-messaging', icon: MessageCircle },
-    { name: 'Call Analytics', tool: 'call-analytics', icon: BarChart3 },
-    { name: 'Connection Quality Monitor', tool: 'connection-quality', icon: Activity }
+    { name: 'Group Calls', tool: 'group-calls', iconName: 'users' },
+    { name: 'Call Recording', tool: 'call-recording', iconName: 'mic' },
+    { name: 'In-Call Messaging', tool: 'in-call-messaging', iconName: 'message-circle' },
+    { name: 'Call Analytics', tool: 'call-analytics', iconName: 'bar-chart-3' },
+    { name: 'Connection Quality Monitor', tool: 'connection-quality', iconName: 'activity' }
   ];
 
   // Content dropdown tools
   const contentTools = [
-    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
-    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
-    { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3 },
-    { name: 'Image Generator', tool: 'image-generator', icon: Camera },
-    { name: 'Forms', tool: 'forms', icon: FileText },
-    { name: 'AI Model Demo', tool: 'ai-model-demo', icon: Brain }
+    { name: 'Content Library', tool: 'content-library', iconName: 'book-open' },
+    { name: 'Voice Profiles', tool: 'voice-profiles', iconName: 'mic' },
+    { name: 'Business Analysis', tool: 'business-analysis', iconName: 'bar-chart-3' },
+    { name: 'Image Generator', tool: 'image-generator', iconName: 'camera' },
+    { name: 'Forms', tool: 'forms', iconName: 'file-text' },
+    { name: 'AI Model Demo', tool: 'ai-model-demo', iconName: 'brain' }
   ];
 
   // Connected apps
   const connectedApps = [
-    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
-    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
-    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
-    { name: 'Mobile View', url: '/mobile', icon: Camera, isExternal: false },
-    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
+    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', iconName: 'megaphone', isExternal: true },
+    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', iconName: 'users', isExternal: true },
+    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', iconName: 'file-text', isExternal: true },
+    { name: 'Mobile View', url: '/mobile', iconName: 'camera', isExternal: false },
+    { name: 'White-Label Customization', url: '/white-label', iconName: 'palette', isExternal: false }
   ];
 
   // Close dropdowns when clicking outside
@@ -145,52 +156,20 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     setIsMobileMenuOpen(false);
   }, [navigate]);
 
-  // Optimize AI tool click handler with useCallback
+  // Enhanced click handler using centralized navigation
   const handleAIToolClick = useCallback((toolName: string) => {
-    if (toolName === 'sales-tools') navigate('/sales-tools');
-    else if (toolName === 'lead-automation') navigate('/lead-automation');
-    else if (toolName === 'circle-prospecting') navigate('/circle-prospecting');
-    else if (toolName === 'appointments') navigate('/appointments');
-    else if (toolName === 'phone-system') navigate('/phone-system');
-    else if (toolName === 'invoicing') navigate('/invoicing');
-    else if (toolName === 'video-email') navigate('/video-email');
-    else if (toolName === 'text-messages') navigate('/text-messages');
-    else if (toolName === 'content-library') navigate('/content-library');
-    else if (toolName === 'voice-profiles') navigate('/voice-profiles');
-    else if (toolName === 'business-analysis') navigate('/business-analysis');
-    else if (toolName === 'forms') navigate('/forms');
-    else if (toolName === 'sales-analytics') navigate('/sales-analytics');
-    else if (toolName === 'deal-pipeline') {
+    // Special case for deal pipeline which should open the modal directly
+    if (toolName === 'deal-pipeline') {
       onOpenPipelineModal?.();
-      setActiveDropdown(null);
+    } else {
+      // Use the centralized navigation system
+      navigateToTool(toolName);
     }
-    else if (toolName === 'quote-builder') navigate('/quote-builder');
-    else if (toolName === 'commission-tracker') navigate('/commission-tracker');
-    else if (toolName === 'follow-up-reminders') navigate('/follow-up-reminders');
-    else if (toolName === 'territory-management') navigate('/territory-management');
-    else if (toolName === 'task-management') navigate('/tasks');
-    else if (toolName === 'task-automation') navigate('/task-automation');
-    else if (toolName === 'project-tracker') navigate('/project-tracker');
-    else if (toolName === 'time-tracking') navigate('/time-tracking');
-    else if (toolName === 'workflow-builder') navigate('/workflow-builder');
-    else if (toolName === 'deadline-manager') navigate('/deadline-manager');
-    else if (toolName === 'email-composer') navigate('/email-composer');
-    else if (toolName === 'campaigns') navigate('/campaigns');
-    else if (toolName === 'image-generator') navigate('/image-generator');
-    else if (toolName === 'ai-model-demo') navigate('/ai-model-demo');
-    // Enhanced SDRButtons Communication Features
-    else if (toolName === 'group-calls') navigate('/group-calls');
-    else if (toolName === 'call-recording') navigate('/call-recording');
-    else if (toolName === 'in-call-messaging') navigate('/in-call-messaging');
-    else if (toolName === 'call-analytics') navigate('/call-analytics');
-    else if (toolName === 'connection-quality') navigate('/connection-quality');
-    else {
-      // For other AI tools, open in AI tools page
-      openAITool(toolName);
-    }
+    
+    // Close menus after navigation
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-  }, [navigate, openAITool, onOpenPipelineModal]);
+  }, [navigateToTool, onOpenPipelineModal]);
 
   // Update active tab based on current route
   useEffect(() => {
@@ -204,59 +183,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else setActiveTab('');
   }, [location.pathname]);
 
-  // Complete AI Tools list - 29+ tools organized by category
-  const aiTools = [
-    // Core AI Tools (8 tools)
-    { name: 'Email Analysis', tool: 'email-analysis', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Meeting Summarizer', tool: 'meeting-summarizer', icon: Video, category: 'Core AI Tools' },
-    { name: 'Proposal Generator', tool: 'proposal-generator', icon: FileText, category: 'Core AI Tools' },
-    { name: 'Call Script Generator', tool: 'call-script', icon: Phone, category: 'Core AI Tools' },
-    { name: 'Subject Line Optimizer', tool: 'subject-optimizer', icon: Mail, category: 'Core AI Tools' },
-    { name: 'Competitor Analysis', tool: 'competitor-analysis', icon: Shield, category: 'Core AI Tools' },
-    { name: 'Market Trends', tool: 'market-trends', icon: TrendingUp, category: 'Core AI Tools' },
-    { name: 'Sales Insights', tool: 'sales-insights', icon: BarChart3, category: 'Core AI Tools' },
-    { name: 'Sales Forecast', tool: 'sales-forecast', icon: LineChart, category: 'Core AI Tools' },
-
-    // Communication (4 tools)
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail, category: 'Communication' },
-    { name: 'Objection Handler', tool: 'objection-handler', icon: MessageSquare, category: 'Communication' },
-    { name: 'Email Response', tool: 'email-response', icon: Mail, category: 'Communication' },
-    { name: 'Voice Tone Optimizer', tool: 'voice-tone', icon: Volume2, category: 'Communication' },
-
-    // Customer & Content (3 tools)
-    { name: 'Customer Persona', tool: 'customer-persona', icon: User, category: 'Customer & Content' },
-    { name: 'Visual Content Generator', tool: 'visual-content', icon: Image, category: 'Customer & Content' },
-    { name: 'Meeting Agenda', tool: 'meeting-agenda', icon: Calendar, category: 'Customer & Content' },
-
-    // Advanced Features (5 tools)
-    { name: 'AI Assistant', tool: 'ai-assistant', icon: Bot, category: 'Advanced Features' },
-    { name: 'Vision Analyzer', tool: 'vision-analyzer', icon: Eye, category: 'Advanced Features' },
-    { name: 'Image Generator', tool: 'image-generator', icon: Camera, category: 'Advanced Features' },
-    { name: 'Semantic Search', tool: 'semantic-search', icon: Search, category: 'Advanced Features' },
-    { name: 'Function Assistant', tool: 'function-assistant', icon: Code, category: 'Advanced Features' },
-
-    // Real-time Features (6 tools)
-    { name: 'Streaming Chat', tool: 'streaming-chat', icon: MessageCircle, category: 'Real-time Features' },
-    { name: 'Form Validation', tool: 'form-validation', icon: CheckSquare, category: 'Real-time Features' },
-    { name: 'Live Deal Analysis', tool: 'live-deal-analysis', icon: Activity, category: 'Real-time Features' },
-    { name: 'Instant Response', tool: 'instant-response', icon: Zap, category: 'Real-time Features' },
-    { name: 'Real-time Email Composer', tool: 'realtime-email', icon: Mail, category: 'Real-time Features' },
-    { name: 'Voice Analysis Real-time', tool: 'voice-analysis', icon: Mic, category: 'Real-time Features' },
-
-    // Reasoning Generators (5 tools)
-    { name: 'Reasoning Email', tool: 'reasoning-email', icon: Brain, category: 'Reasoning Generators' },
-    { name: 'Reasoning Proposal', tool: 'reasoning-proposal', icon: FileText, category: 'Reasoning Generators' },
-    { name: 'Reasoning Script', tool: 'reasoning-script', icon: Phone, category: 'Reasoning Generators' },
-    { name: 'Reasoning Objection', tool: 'reasoning-objection', icon: AlertTriangle, category: 'Reasoning Generators' },
-    { name: 'Reasoning Social', tool: 'reasoning-social', icon: Users, category: 'Reasoning Generators' }
-  ];
+  // AI tools are imported at the top of the file from utils/aiToolsData
 
   // Main navigation tabs
   const mainTabs = [
     {
       id: 'dashboard',
       label: '',
-      icon: () => null,
+      icon: Menu,
+      iconName: 'menu',
       action: () => handleNavigation('/dashboard', 'dashboard'),
       badge: null,
       color: 'from-blue-500 to-green-500'
@@ -264,7 +199,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'contacts',
       label: 'Contacts',
-      icon: Users,
+      iconName: 'users',
       action: () => handleNavigation('/contacts', 'contacts'),
       badge: 1,
       color: 'from-purple-500 to-indigo-500'
@@ -272,7 +207,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'pipeline',
       label: 'Pipeline',
-      icon: Briefcase,
+      iconName: 'briefcase',
       action: () => {
         onOpenPipelineModal?.();
         setActiveTab('pipeline');
@@ -285,7 +220,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'analytics',
       label: 'Analytics',
-      icon: BarChart3,
+      iconName: 'bar-chart-3',
       action: () => handleNavigation('/analytics', 'analytics'),
       badge: null,
       color: 'from-blue-500 to-cyan-500'
@@ -293,7 +228,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'ai-goals',
       label: 'AI Goals',
-      icon: Target,
+      iconName: 'target',
       action: () => handleNavigation('/ai-goals', 'ai-goals'),
       badge: 58,
       color: 'from-purple-500 to-pink-500'
@@ -301,7 +236,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'ai-tools',
       label: 'AI Tools',
-      icon: Brain,
+      iconName: 'brain',
       action: () => handleNavigation('/ai-tools', 'ai-tools'),
       badge: aiTools.length,
       color: 'from-pink-500 to-rose-500'
@@ -309,7 +244,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'appointments',
       label: 'Calendar',
-      icon: Calendar,
+      iconName: 'calendar',
       action: () => handleNavigation('/appointments', 'appointments'),
       badge: 1,
       color: 'from-cyan-500 to-blue-500'
@@ -321,7 +256,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'sales',
       label: 'Sales',
-      icon: DollarSign,
+      iconName: 'dollar-sign',
       badge: salesTools.length,
       color: 'from-green-500 to-teal-500',
       badgeColor: 'bg-green-500'
@@ -329,7 +264,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'tasks',
       label: 'Tasks',
-      icon: CheckSquare,
+      iconName: 'check-square',
       badge: taskTools.length,
       color: 'from-orange-500 to-red-500',
       badgeColor: 'bg-orange-500'
@@ -337,7 +272,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'communication',
       label: 'Comm',
-      icon: MessageSquare,
+      iconName: 'message-square',
       badge: communicationTools.length,
       color: 'from-blue-500 to-sky-500',
       badgeColor: 'bg-blue-500'
@@ -345,7 +280,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'content',
       label: 'Content',
-      icon: Edit3,
+      iconName: 'edit-3',
       badge: contentTools.length,
       color: 'from-amber-500 to-orange-500',
       badgeColor: 'bg-amber-500'
@@ -353,7 +288,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'apps',
       label: 'Apps',
-      icon: Grid3X3,
+      iconName: 'grid-3x3',
       badge: connectedApps.length,
       color: 'from-purple-500 to-violet-500',
       badgeColor: 'bg-purple-500'
@@ -361,7 +296,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'ai-categories',
       label: 'AI',
-      icon: Brain,
+      iconName: 'brain',
       badge: 31,
       color: 'from-pink-500 to-rose-500',
       badgeColor: 'bg-pink-500'
@@ -390,7 +325,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-5 h-5 text-white" />
+                  <Icon icon={Icons.Sparkles} className="w-5 h-5 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -429,7 +364,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       `}
                       title={tab.label}
                     >
-                      <tab.icon 
+                      <Icon 
+                        name={tab.iconName} 
                         size={14} 
                         className={`transition-transform duration-300 ${
                           isActive ? 'scale-110' : 'group-hover:scale-110'
@@ -479,9 +415,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       group
                     `}
                   >
-                    <menu.icon size={14} className="transition-transform duration-300 group-hover:scale-110" />
+                    <Icon name={menu.iconName} size={14} className="transition-transform duration-300 group-hover:scale-110" />
                     <span className="text-xs font-medium">{menu.label}</span>
-                    <ChevronDown 
+                    <Icon name="chevron-down"
                       size={12} 
                       className={`transition-transform duration-300 ${
                         activeDropdown === menu.id ? 'rotate-180' : ''
@@ -507,7 +443,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             onClick={() => handleAIToolClick(tool.tool)}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-green-500" />
+                            <Icon name={tool.iconName} size={16} className="text-green-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -525,7 +461,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             onClick={() => handleAIToolClick(tool.tool)}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-orange-500" />
+                            <Icon name={tool.iconName} size={16} className="text-orange-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -543,7 +479,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             onClick={() => handleAIToolClick(tool.tool)}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-blue-500" />
+                            <Icon name={tool.iconName} size={16} className="text-blue-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -561,7 +497,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             onClick={() => handleAIToolClick(tool.tool)}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-amber-500" />
+                            <Icon name={tool.iconName} size={16} className="text-amber-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -596,7 +532,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 onClick={() => handleAIToolClick(tool.tool)}
                                 className={`text-left flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                               >
-                                <tool.icon size={12} className="text-blue-500" />
+                                <tool.icon className="w-3 h-3 text-blue-500" />
                                 <span className="text-xs">{tool.name}</span>
                               </button>
                             ))}
@@ -620,7 +556,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 onClick={() => handleAIToolClick(tool.tool)}
                                 className={`text-left flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                               >
-                                <tool.icon size={12} className="text-green-500" />
+                                <tool.icon className="w-3 h-3 text-green-500" />
                                 <span className="text-xs">{tool.name}</span>
                               </button>
                             ))}
@@ -644,7 +580,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 onClick={() => handleAIToolClick(tool.tool)}
                                 className={`text-left flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                               >
-                                <tool.icon size={12} className="text-purple-500" />
+                                <tool.icon className="w-3 h-3 text-purple-500" />
                                 <span className="text-xs">{tool.name}</span>
                               </button>
                             ))}
@@ -676,10 +612,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
                               <div className="flex items-center space-x-3">
-                                <app.icon size={16} className="text-purple-500" />
+                                <Icon name={app.iconName} size={16} className="text-purple-500" />
                                 <span className="text-sm font-medium">{app.name}</span>
                               </div>
-                              <ExternalLink size={12} className="opacity-50" />
+                              <Icon name="external-link" size={12} className="opacity-50" />
                             </a>
                           ) : (
                             <button
@@ -687,7 +623,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               onClick={() => handleNavigation(app.url, 'white-label')}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              <app.icon size={16} className="text-purple-500" />
+                              <Icon name={app.iconName} size={16} className="text-purple-500" />
                               <span className="text-sm font-medium">{app.name}</span>
                             </button>
                           )
@@ -708,7 +644,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 }}
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
               >
-                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {isMobileMenuOpen ? <Icon name="x" size={20} /> : <Icon name="menu" size={20} />}
               </button>
             </div>
 
@@ -716,12 +652,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             <div className="hidden lg:flex items-center space-x-2">
               {/* Search */}
               <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
+                <Icon name="search" size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
               
               {/* Notifications */}
               <button className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
+                <Icon name="bell" size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
 
@@ -730,7 +666,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 onClick={toggleTheme}
                 className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
               >
-                {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
+                {isDark ? <Icon icon={Icons.Sun} size={16} className="text-white" /> : <Icon icon={Icons.Moon} size={16} className="text-gray-600" />}
               </button>
               
               {/* User Profile */}
@@ -762,7 +698,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   onClick={tab.action}
                   className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                 >
-                  <tab.icon size={18} />
+                  <Icon name={tab.iconName} size={18} />
                   <span className="font-medium">{tab.label}</span>
                   {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
                 </button>
