@@ -38,6 +38,11 @@ const ContactsWithRemote: React.FC = () => {
     fetchContacts();
   };
 
+  const handleSettingsClick = () => {
+    console.log('Settings button clicked, current showSettings:', showSettings);
+    setShowSettings(!showSettings);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header with Remote Settings */}
@@ -54,9 +59,14 @@ const ContactsWithRemote: React.FC = () => {
           
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              onClick={handleSettingsClick}
+              className={`p-2 rounded-md transition-colors cursor-pointer ${
+                showSettings 
+                  ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+              }`}
               title="Remote Settings"
+              type="button"
             >
               <Settings className="h-5 w-5" />
             </button>
