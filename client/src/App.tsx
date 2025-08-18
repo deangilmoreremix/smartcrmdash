@@ -30,6 +30,7 @@ const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
 const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
+const SalesTools = lazy(() => import('./pages/SalesTools'));
 
 import './components/styles/design-system.css';
 
@@ -192,7 +193,11 @@ function App() {
                           {/* ===== Dropdown: Sales ===== */}
                           <Route
                             path="/sales-tools"
-                            element={<PlaceholderPage title="Sales Tools" />}
+                            element={
+                              <ProtectedRoute>
+                                <SalesTools />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/lead-automation"
