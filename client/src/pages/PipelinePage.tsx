@@ -1,10 +1,121 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, BarChart3, Users, TrendingUp } from 'lucide-react';
+import { Target, BarChart3, Users, TrendingUp, Wifi, WifiOff, ExternalLink } from 'lucide-react';
+import { useDealStore } from '../store/dealStore';
+import { useContactStore } from '../hooks/useContactStore';
+import { RemotePipelineBridge, CRMDeal, CRMPipelineData } from '../services/remotePipelineBridge';
 
 const PipelinePage: React.FC = () => {
   const { isDark } = useTheme();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const bridgeRef = useRef<RemotePipelineBridge | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const { deals, addDeal, updateDeal, deleteDeal } = useDealStore();
+  const { contacts } = useContactStore();
+
+  // Convert Deal to CRMDeal format
+  const convertToCRMDeal = (deal: any): CRMDeal => ({
+    id: deal.id,
+    title: deal.title || deal.name,
+    value: deal.value || 0,
+    stage: typeof deal.stage === 'string' ? deal.stage : deal.stage?.name || 'prospect',
+    contactId: deal.contactId,
+    contactName: contacts[deal.contactId]?.name,
+    company: contacts[deal.contactId]?.company,
+    probability: deal.probability,
+    expectedCloseDate: deal.expectedCloseDate,
+    notes: deal.notes,
+    createdAt: typeof deal.createdAt === 'string' ? deal.createdAt : deal.createdAt?.toISOString(),
+    updatedAt: typeof deal.updatedAt === 'string' ? deal.updatedAt : deal.updatedAt?.toISOString()
+  });
+
+  // Initialize bridge and set up communication
+  useEffect(() => {
+    const bridge = new RemotePipelineBridge();
+    bridgeRef.current = bridge;
+
+    // Set up message handlers
+    bridge.onMessage('REMOTE_READY', () => {
+      setIsConnected(true);
+      console.log('✅ Remote pipeline module connected');
+    });
+
+    bridge.onMessage('DEAL_CREATED', (deal) => {
+      console.log('📝 Remote deal created:', deal);
+      addDeal(deal);
+    });
+
+    bridge.onMessage('DEAL_UPDATED', (deal) => {
+      console.log('✏️ Remote deal updated:', deal);
+      updateDeal(deal.id, deal);
+    });
+
+    bridge.onMessage('DEAL_DELETED', (data) => {
+      console.log('🗑️ Remote deal deleted:', data.id);
+      deleteDeal(data.id);
+    });
+
+    bridge.onMessage('DEAL_STAGE_CHANGED', (data) => {
+      console.log('↔️ Remote deal stage changed:', data);
+      updateDeal(data.dealId, { stage: data.newStage });
+    });
+
+    bridge.onMessage('REQUEST_PIPELINE_DATA', () => {
+      console.log('📤 Remote requesting pipeline data');
+      const crmDeals = Object.values(deals).map(convertToCRMDeal);
+      const pipelineData: CRMPipelineData = {
+        deals: crmDeals,
+        stages: ['prospect', 'qualified', 'proposal', 'negotiation', 'closed-won', 'closed-lost'],
+        totalValue: crmDeals.reduce((sum, deal) => sum + deal.value, 0),
+        activeDeals: crmDeals.filter(deal => !deal.stage.includes('closed')).length
+      };
+      bridge.syncDeals(crmDeals);
+    });
+
+    bridge.onMessage('NAVIGATE', (data) => {
+      console.log('🧭 Remote requesting navigation to:', data.route);
+      if (data.route && typeof data.route === 'string') {
+        if (data.route.startsWith('/')) {
+          window.location.pathname = data.route;
+        } else {
+          window.location.hash = '#/' + data.route;
+        }
+      }
+    });
+
+    return () => {
+      bridge.disconnect();
+    };
+  }, [addDeal, updateDeal, deleteDeal, deals, contacts]);
+
+  // Handle iframe load and initialize CRM connection
+  const handleIframeLoad = () => {
+    if (iframeRef.current && bridgeRef.current) {
+      bridgeRef.current.setIframe(iframeRef.current);
+      
+      // Try to inject bridge code into remote module
+      setTimeout(() => {
+        bridgeRef.current?.injectBridgeCode();
+      }, 1000);
+      
+      // Wait for remote app to initialize, then send CRM data
+      setTimeout(() => {
+        const crmDeals = Object.values(deals).map(convertToCRMDeal);
+        const pipelineData: CRMPipelineData = {
+          deals: crmDeals,
+          stages: ['prospect', 'qualified', 'proposal', 'negotiation', 'closed-won', 'closed-lost'],
+          totalValue: crmDeals.reduce((sum, deal) => sum + deal.value, 0),
+          activeDeals: crmDeals.filter(deal => !deal.stage.includes('closed')).length
+        };
+        
+        bridgeRef.current?.initializeCRM(pipelineData, {
+          name: 'CRM Pipeline System',
+          version: '1.0'
+        });
+      }, 2000);
+    }
+  };
 
   return (
     <div className={`min-h-screen ${
@@ -12,16 +123,49 @@ const PipelinePage: React.FC = () => {
     } transition-colors duration-200`}>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`}>
-            Pipeline Management
-          </h1>
-          <p className={`mt-2 ${
-            isDark ? 'text-gray-400' : 'text-gray-600'
-          }`}>
-            Manage your sales pipeline, track deals, and optimize your conversion process
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className={`text-3xl font-bold ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>
+                Pipeline Management
+              </h1>
+              <p className={`mt-2 ${
+                isDark ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Manage your sales pipeline, track deals, and optimize your conversion process
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className={`flex items-center space-x-2 px-3 py-2 rounded-full ${
+                isConnected 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                  : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+              }`}>
+                {isConnected ? (
+                  <Wifi className="h-4 w-4" />
+                ) : (
+                  <WifiOff className="h-4 w-4" />
+                )}
+                <span className="text-sm font-medium">
+                  {isConnected ? 'Connected' : 'Connecting...'}
+                </span>
+              </div>
+              <a
+                href="https://cheery-syrniki-b5b6ca.netlify.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center space-x-1 px-3 py-2 rounded-full ${
+                  isDark 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                } transition-colors`}
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span className="text-sm">Open in New Tab</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Embedded Pipeline Component */}
@@ -42,14 +186,16 @@ const PipelinePage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="w-full h-[900px] rounded-lg overflow-hidden">
+            <div className="w-full h-[900px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
               <iframe 
+                ref={iframeRef}
                 src="https://cheery-syrniki-b5b6ca.netlify.app"
                 className="w-full h-full border-0"
                 title="Pipeline Management System"
                 allowFullScreen
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
                 loading="lazy"
+                onLoad={handleIframeLoad}
                 style={{ minHeight: '900px' }}
               />
             </div>
