@@ -172,15 +172,18 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
               <span>Sync</span>
             </button>
             
-            <a
-              href={remoteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => {
+                const iframe = document.getElementById('remote-contacts-iframe') as HTMLIFrameElement;
+                if (iframe) {
+                  iframe.src = iframe.src; // Reload iframe
+                }
+              }}
               className="flex items-center space-x-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
             >
-              <ExternalLink className="h-3 w-3" />
-              <span>Open</span>
-            </a>
+              <RefreshCw className="h-3 w-3" />
+              <span>Reload</span>
+            </button>
           </div>
         </div>
       </div>
@@ -188,13 +191,17 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
       {/* Remote App Container */}
       <div className="relative w-full" style={{ height: 'calc(100vh - 120px)' }}>
         {!isIframeLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading contacts app...</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                Connecting to {remoteUrl}
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 z-10">
+            <div className="text-center p-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Loading Remote Contacts</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-1">Connecting to remote application...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                {remoteUrl}
               </p>
+              <div className="mt-4 text-xs text-gray-400">
+                This may take a few moments on first load
+              </div>
             </div>
           </div>
         )}
@@ -204,7 +211,8 @@ const RemoteContactsIntegration: React.FC<RemoteContactsIntegrationProps> = ({
           src={iframeSrc}
           className={`w-full h-full border-0 ${isIframeLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleIframeLoad}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation"
+          allow="camera; microphone; geolocation"
           title="Remote Contacts Application"
         />
       </div>

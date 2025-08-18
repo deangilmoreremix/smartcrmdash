@@ -97,17 +97,7 @@ const ContactsWithRemote: React.FC = () => {
               <Settings className="h-6 w-6" />
             </button>
             
-            {remoteUrl && (
-              <a
-                href={remoteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                title="Open Remote App"
-              >
-                <ExternalLink className="h-5 w-5" />
-              </a>
-            )}
+            
           </div>
         </div>
 
