@@ -16,7 +16,7 @@ import {
   CheckCheck,
   Zap
 } from 'lucide-react';
-import { useOpenAI } from '../services/openaiService';
+import { useOpenAI } from '../services/openaiLegacyService';
 import { useForm } from 'react-hook-form';
 import Avatar from 'react-avatar';
 import { CSVLink } from 'react-csv';

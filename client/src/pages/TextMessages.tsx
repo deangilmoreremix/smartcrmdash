@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useOpenAI } from '../services/openaiService';
+import { useOpenAI } from '../services/openaiLegacyService';
 import { 
   MessageSquare, 
   Send, 

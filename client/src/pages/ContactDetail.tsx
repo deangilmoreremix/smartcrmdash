@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useOpenAI } from '../services/openaiService';
+import { useOpenAI } from '../services/openaiLegacyService';
 import { useGemini } from '../services/geminiService';
 import { Contact } from '../types';
 import { 

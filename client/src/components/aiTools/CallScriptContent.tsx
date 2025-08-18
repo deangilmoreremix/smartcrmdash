@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as edgeFunctionService from '../../services/edgeFunctionService';
 import AIToolContent from '../shared/AIToolContent';
 import { Phone, Tag, User, Building } from 'lucide-react';
-import { useOpenAI } from '../../services/openaiService';
+import { useOpenAI } from '../../services/openaiLegacyService';
 import ReasoningToggle from '../shared/ReasoningToggle';
 
 const CallScriptContent: React.FC = () => {

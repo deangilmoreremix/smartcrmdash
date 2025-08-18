@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useOpenAI } from '../services/openaiService';
+import { useOpenAI } from '../services/openaiLegacyService';
 import { useGemini } from '../services/geminiService';
 import * as edgeFunctionService from '../services/edgeFunctionService';
 import { 
