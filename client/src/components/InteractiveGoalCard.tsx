@@ -17,21 +17,25 @@ import {
 interface InteractiveGoalCardProps {
   goal: Goal;
   onExecute: (goal: Goal) => void;
+  onPreview?: (goal: Goal) => void;
   isExecuting?: boolean;
   executionProgress?: number;
-  realMode?: boolean;
-  onPreview?: (goal: Goal) => void;
   isCompleted?: boolean;
+  realMode?: boolean;
+  showExpandedDetails?: boolean;
+  onToggleDetails?: () => void;
 }
 
 const InteractiveGoalCard: React.FC<InteractiveGoalCardProps> = ({
   goal,
   onExecute,
+  onPreview,
   isExecuting = false,
   executionProgress = 0,
+  isCompleted = false,
   realMode = false,
-  onPreview,
-  isCompleted = false
+  showExpandedDetails = false,
+  onToggleDetails
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [liveMetrics, setLiveMetrics] = useState({
@@ -69,6 +73,22 @@ const InteractiveGoalCard: React.FC<InteractiveGoalCardProps> = ({
       case 'Content': return 'from-yellow-500 to-yellow-600';
       default: return 'from-gray-500 to-gray-600';
     }
+  };
+
+  // Calculate estimated value based on goal properties
+  const getEstimatedValue = (): string => {
+    const baseValue = parseInt(goal.roi.replace(/[^0-9]/g, '')) || 300;
+    const multiplier = goal.priority === 'High' ? 10000 : goal.priority === 'Medium' ? 5000 : 2000;
+    const complexity = goal.complexity === 'Advanced' ? 1.5 : goal.complexity === 'Intermediate' ? 1.2 : 1.0;
+    
+    const estimatedValue = baseValue * multiplier * complexity;
+    
+    if (estimatedValue >= 1000000) {
+      return `$${(estimatedValue / 1000000).toFixed(1)}M`;
+    } else if (estimatedValue >= 1000) {
+      return `$${(estimatedValue / 1000).toFixed(0)}K`;
+    }
+    return `$${estimatedValue.toLocaleString()}`;
   };
 
   // Simulate live metrics updates in real mode
@@ -161,10 +181,10 @@ const InteractiveGoalCard: React.FC<InteractiveGoalCardProps> = ({
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
             <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs mb-1">
               <TrendingUp className="h-3 w-3 mr-1" />
-              ROI
+              Estimated Value
             </div>
             <div className="font-semibold text-green-600 dark:text-green-400 text-sm">
-              {goal.roi}
+              {getEstimatedValue()}
             </div>
           </div>
           
