@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTaskStore } from '../store/taskStore';
-import { Task } from '../store/taskStore';
+import { Task } from '../types';
 import { 
   CheckSquare, 
   Plus, 
   Calendar, 
+  List, 
   CheckCircle, 
   Clock, 
   AlertCircle, 
   Search,
-  X,
-  User,
-  Briefcase
+  SortAsc,
+  SortDesc,
+  Filter,
+  Trash2,
+  Edit,
+  Flag,
+  MessageSquare,
+  X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 
 const Tasks: React.FC = () => {
   const { 
@@ -37,7 +46,7 @@ const Tasks: React.FC = () => {
     dateRange: 'all'
   });
   
-  const [sortBy] = useState<{
+  const [sortBy, setSortBy] = useState<{
     field: 'dueDate' | 'priority' | 'title';
     direction: 'asc' | 'desc';
   }>({
@@ -56,80 +65,83 @@ const Tasks: React.FC = () => {
     completed: false,
     category: 'follow-up'
   });
-
-  // Get all tasks as array
-  const allTasks = Object.values(tasks);
   
-  // Filter tasks based on current filters
-  const filteredTasks = allTasks.filter(task => {
-    // Status filter
-    if (filter.status === 'completed' && !task.completed) return false;
-    if (filter.status === 'uncompleted' && task.completed) return false;
-    
-    // Priority filter
-    if (filter.priority !== 'all' && task.priority !== filter.priority) return false;
-    
-    // Date range filter
-    if (filter.dateRange !== 'all' && task.dueDate) {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const weekFromNow = new Date(today);
-      weekFromNow.setDate(weekFromNow.getDate() + 7);
-      
-      switch (filter.dateRange) {
-        case 'overdue':
-          if (task.dueDate >= today) return false;
-          break;
-        case 'today':
-          if (task.dueDate < today || task.dueDate >= tomorrow) return false;
-          break;
-        case 'thisWeek':
-          if (task.dueDate < today || task.dueDate >= weekFromNow) return false;
-          break;
-      }
+  // Filter tasks based on selected filters and search term
+  const filteredTasks = Object.values(tasks).filter(task => {
+    // Check search term
+    if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
     
-    // Search filter
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return task.title.toLowerCase().includes(searchLower) ||
-             (task.description || '').toLowerCase().includes(searchLower);
+    // Check status filter
+    if (
+      (filter.status === 'completed' && !task.completed) ||
+      (filter.status === 'uncompleted' && task.completed)
+    ) {
+      return false;
+    }
+    
+    // Check priority filter
+    if (filter.priority !== 'all' && task.priority !== filter.priority) {
+      return false;
+    }
+    
+    // Check date filter
+    if (filter.dateRange !== 'all' && task.dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
+      
+      if (filter.dateRange === 'overdue' && (task.completed || task.dueDate >= today)) {
+        return false;
+      } else if (filter.dateRange === 'today' && (
+        task.dueDate < today || task.dueDate >= tomorrow
+      )) {
+        return false;
+      } else if (filter.dateRange === 'thisWeek' && (
+        task.dueDate < today || task.dueDate > endOfWeek
+      )) {
+        return false;
+      }
     }
     
     return true;
   });
   
-  // Sort filtered tasks
+  // Sort the filtered tasks
   const sortedTasks = [...filteredTasks].sort((a, b) => {
-    let comparison = 0;
-    
-    switch (sortBy.field) {
-      case 'title':
-        comparison = a.title.localeCompare(b.title);
-        break;
-      case 'priority':
-        const priorityOrder = { high: 3, medium: 2, low: 1, urgent: 4 };
-        comparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
-        break;
-      case 'dueDate':
-        if (!a.dueDate && !b.dueDate) comparison = 0;
-        else if (!a.dueDate) comparison = 1;
-        else if (!b.dueDate) comparison = -1;
-        else comparison = a.dueDate.getTime() - b.dueDate.getTime();
-        break;
+    if (sortBy.field === 'dueDate') {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return sortBy.direction === 'asc' ? 1 : -1;
+      if (!b.dueDate) return sortBy.direction === 'asc' ? -1 : 1;
+      return sortBy.direction === 'asc' 
+        ? a.dueDate.getTime() - b.dueDate.getTime()
+        : b.dueDate.getTime() - a.dueDate.getTime();
     }
     
-    return sortBy.direction === 'desc' ? -comparison : comparison;
+    if (sortBy.field === 'priority') {
+      const priorityOrder = { high: 2, medium: 1, low: 0 };
+      const aValue = priorityOrder[a.priority] || 0;
+      const bValue = priorityOrder[b.priority] || 0;
+      return sortBy.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+    
+    // Default to sorting by title
+    return sortBy.direction === 'asc'
+      ? a.title.localeCompare(b.title)
+      : b.title.localeCompare(a.title);
   });
-
-  // Group tasks by status and due date
+  
+  // Group tasks for display
   const groupedTasks = {
-    overdue: sortedTasks.filter(task => {
-      if (task.completed || !task.dueDate) return false;
-      return task.dueDate < new Date();
-    }),
+    overdue: sortedTasks.filter(
+      task => !task.completed && task.dueDate && task.dueDate < new Date()
+    ),
     today: sortedTasks.filter(task => {
       if (task.completed || !task.dueDate) return false;
       const today = new Date();
@@ -197,21 +209,22 @@ const Tasks: React.FC = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     
     if (date < today) {
-      return `Overdue - ${date.toLocaleDateString()}`;
+      return `Overdue: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     } else if (date >= today && date < tomorrow) {
-      return `Today - ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return `Today, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (date >= tomorrow && date < new Date(tomorrow.getTime() + 86400000)) {
+      return `Tomorrow, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     } else {
-      return date.toLocaleDateString();
+      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
   };
   
-  // Priority badge component
-  const PriorityBadge = ({ priority }: { priority: Task['priority'] }) => {
-    const colors: Record<string, string> = {
-      'urgent': 'bg-red-200 text-red-900',
-      'high': 'bg-red-100 text-red-800',
-      'medium': 'bg-yellow-100 text-yellow-800',
-      'low': 'bg-green-100 text-green-800'
+  // Priority badge
+  const PriorityBadge = ({ priority }: { priority: 'high' | 'medium' | 'low' }) => {
+    const colors = {
+      high: 'bg-red-100 text-red-800',
+      medium: 'bg-yellow-100 text-yellow-800',
+      low: 'bg-green-100 text-green-800'
     };
     
     return (
@@ -228,9 +241,6 @@ const Tasks: React.FC = () => {
       'email': 'bg-blue-100 text-blue-800',
       'meeting': 'bg-indigo-100 text-indigo-800',
       'follow-up': 'bg-amber-100 text-amber-800',
-      'proposal': 'bg-pink-100 text-pink-800',
-      'research': 'bg-cyan-100 text-cyan-800',
-      'administrative': 'bg-gray-100 text-gray-800',
       'other': 'bg-gray-100 text-gray-800'
     };
     
@@ -348,20 +358,20 @@ const Tasks: React.FC = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Total Tasks</p>
-            <p className="text-xl font-semibold">
-              {Object.values(tasks).length}
-            </p>
+            <p className="text-xl font-semibold">{Object.keys(tasks).length}</p>
           </div>
         </div>
         
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 flex items-center">
-          <div className="h-10 w-10 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
-            <Clock size={20} />
+          <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center text-red-600 mr-3">
+            <AlertCircle size={20} />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Pending</p>
+            <p className="text-sm text-gray-500">Overdue</p>
             <p className="text-xl font-semibold">
-              {Object.values(tasks).filter(task => !task.completed).length}
+              {Object.values(tasks).filter(
+                task => !task.completed && task.dueDate && task.dueDate < new Date()
+              ).length}
             </p>
           </div>
         </div>
@@ -389,46 +399,52 @@ const Tasks: React.FC = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search size={16} className="text-gray-400" />
                 </div>
-                <input
+                <input 
                   type="text"
-                  placeholder="Search tasks..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  placeholder="Search tasks..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
               
-              <select
-                value={`${filter.status}`}
-                onChange={(e) => setFilter({...filter, status: e.target.value as any})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="uncompleted">Pending</option>
-                <option value="completed">Completed</option>
-              </select>
+              <div className="relative">
+                <select 
+                  value={filter.priority} 
+                  onChange={(e) => setFilter({...filter, priority: e.target.value as any})}
+                  className="block w-full py-2 pl-3 pr-10 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="all">All Priorities</option>
+                  <option value="high">High Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="low">Low Priority</option>
+                </select>
+              </div>
               
-              <select
-                value={filter.priority}
-                onChange={(e) => setFilter({...filter, priority: e.target.value as any})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                <option value="all">All Priorities</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
+              <div className="relative">
+                <select 
+                  value={filter.status} 
+                  onChange={(e) => setFilter({...filter, status: e.target.value as any})}
+                  className="block w-full py-2 pl-3 pr-10 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="uncompleted">Uncompleted</option>
+                </select>
+              </div>
               
-              <select
-                value={filter.dateRange}
-                onChange={(e) => setFilter({...filter, dateRange: e.target.value as any})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              >
-                <option value="all">All Dates</option>
-                <option value="overdue">Overdue</option>
-                <option value="today">Today</option>
-                <option value="thisWeek">This Week</option>
-              </select>
+              <div className="relative">
+                <select 
+                  value={filter.dateRange} 
+                  onChange={(e) => setFilter({...filter, dateRange: e.target.value as any})}
+                  className="block w-full py-2 pl-3 pr-10 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="all">All Dates</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="today">Today</option>
+                  <option value="thisWeek">This Week</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -533,13 +549,15 @@ const Tasks: React.FC = () => {
                           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                             Description
                           </label>
-                          <textarea
-                            id="description"
-                            rows={3}
+                          <SimpleMDE
                             value={taskForm.description || ''}
-                            onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            placeholder="Task description or notes"
+                            onChange={(value) => setTaskForm({...taskForm, description: value})}
+                            options={{
+                              placeholder: 'Task description or notes',
+                              status: false,
+                              spellChecker: false,
+                              toolbar: ["bold", "italic", "heading", "|", "unordered-list", "ordered-list", "|", "link"],
+                            }}
                           />
                         </div>
                         
@@ -588,9 +606,6 @@ const Tasks: React.FC = () => {
                             <option value="email">Email</option>
                             <option value="meeting">Meeting</option>
                             <option value="follow-up">Follow-up</option>
-                            <option value="proposal">Proposal</option>
-                            <option value="research">Research</option>
-                            <option value="administrative">Administrative</option>
                             <option value="other">Other</option>
                           </select>
                         </div>
@@ -656,7 +671,7 @@ const Tasks: React.FC = () => {
                           <div className="mt-4">
                             <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
                             <div className="prose prose-sm max-w-none bg-gray-50 p-3 rounded-md border border-gray-200">
-                              <p className="whitespace-pre-wrap">{tasks[selectedTask].description}</p>
+                              <ReactMarkdown>{tasks[selectedTask].description}</ReactMarkdown>
                             </div>
                           </div>
                         )}
@@ -730,8 +745,8 @@ const Tasks: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        if (window.confirm('Are you sure you want to delete this task?')) {
-                          deleteTask(selectedTask!);
+                        if (confirm('Are you sure you want to delete this task?')) {
+                          deleteTask(selectedTask);
                           setShowTaskModal(false);
                         }
                       }}
@@ -754,6 +769,24 @@ const Tasks: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+// Helper components for the task list
+const PriorityBadge = ({ priority }: { priority: string }) => {
+  const colors = {
+    high: 'bg-red-100 text-red-800',
+    medium: 'bg-yellow-100 text-yellow-800',
+    low: 'bg-green-100 text-green-800'
+  };
+  
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+      colors[priority as keyof typeof colors] || colors.medium
+    }`}>
+      <Flag size={10} className="mr-1" />
+      {priority}
+    </span>
   );
 };
 

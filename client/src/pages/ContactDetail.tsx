@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOpenAI } from '../services/openaiService';
 import { useGemini } from '../services/geminiService';
+import { useContactStore } from '../store/contactStore';
 import { Contact } from '../types';
+import CustomizableAIToolbar from '../components/ai/CustomizableAIToolbar';
 import { 
   Mail, 
   Phone, 
@@ -30,7 +32,8 @@ const ContactDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  // This would normally come from a router parameter and database
+  // Get contact from store instead of local state
+  const { contacts, updateContact, deleteContact, selectContact } = useContactStore();
   const [contact, setContact] = useState<Contact | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -43,18 +46,22 @@ const ContactDetail: React.FC = () => {
   const [leadScoreLoading, setLeadScoreLoading] = useState(false);
   const [leadScoreError, setLeadScoreError] = useState<string | null>(null);
   
-  const [personalizationResult, setPersonalizationResult] = useState<string | null>(null);
+  const [personalizationResult, setPersonalizationResult] = useState<any>(null);
   const [personalizationLoading, setPersonalizationLoading] = useState(false);
   const [personalizationError, setPersonalizationError] = useState<string | null>(null);
   
-  // Mock data for the contact - in a real app this would come from an API
   useEffect(() => {
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    // Get contact from store if it exists
+    if (id && contacts[id]) {
+      setContact(contacts[id]);
+      setEditFormData(contacts[id]);
+      setIsLoading(false);
+    } else if (id) {
+      // If not in store yet (e.g., direct URL access), set a mock contact for demo
       const mockContact: Contact = {
-        id: id || '1',
+        id: id,
         name: 'John Doe',
         email: 'john.doe@example.com',
         phone: '(555) 123-4567',
@@ -71,8 +78,8 @@ const ContactDetail: React.FC = () => {
       setContact(mockContact);
       setEditFormData(mockContact);
       setIsLoading(false);
-    }, 500);
-  }, [id]);
+    }
+  }, [id, contacts]);
   
   // Handle editing the contact
   const handleEditToggle = () => {
@@ -85,19 +92,28 @@ const ContactDetail: React.FC = () => {
   // Handle saving the edited contact
   const handleSaveContact = () => {
     if (contact && editFormData) {
-      setContact({
-        ...contact,
-        ...editFormData
-      });
-      setIsEditing(false);
+      // Update contact in Supabase via store
+      updateContact(contact.id, editFormData)
+        .then(() => {
+          setContact({ ...contact, ...editFormData });
+          setIsEditing(false);
+        })
+        .catch(error => {
+          console.error("Failed to update contact:", error);
+        });
     }
   };
   
   // Handle delete contact
   const handleDeleteContact = () => {
-    if (confirm('Are you sure you want to delete this contact?')) {
-      // In a real app, you would call an API to delete the contact
-      navigate('/contacts');
+    if (contact && confirm('Are you sure you want to delete this contact?')) {
+      deleteContact(contact.id)
+        .then(() => {
+          navigate('/contacts');
+        })
+        .catch(error => {
+          console.error("Failed to delete contact:", error);
+        });
     }
   };
   
@@ -210,16 +226,16 @@ const ContactDetail: React.FC = () => {
         <div className="mt-4 sm:mt-0 flex flex-wrap gap-2">
           <button 
             onClick={handleEditToggle}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200/60 shadow-sm text-sm font-semibold rounded-full text-gray-700 hover:from-gray-100 hover:to-gray-200 transition-all duration-200"
           >
             {isEditing ? (
               <>
-                <X size={16} className="mr-1" />
+                <X size={16} className="mr-2" />
                 Cancel
               </>
             ) : (
               <>
-                <Edit size={16} className="mr-1" />
+                <Edit size={16} className="mr-2" />
                 Edit
               </>
             )}
@@ -227,17 +243,17 @@ const ContactDetail: React.FC = () => {
           {isEditing ? (
             <button 
               onClick={handleSaveContact}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-300/20 shadow-sm text-sm font-semibold rounded-full text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
             >
-              <Check size={16} className="mr-1" />
+              <Check size={16} className="mr-2" />
               Save
             </button>
           ) : (
             <button 
               onClick={handleDeleteContact}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 border border-red-300/20 shadow-sm text-sm font-semibold rounded-full text-white hover:from-red-600 hover:to-red-700 transition-all duration-200"
             >
-              <Trash2 size={16} className="mr-1" />
+              <Trash2 size={16} className="mr-2" />
               Delete
             </button>
           )}
@@ -251,7 +267,7 @@ const ContactDetail: React.FC = () => {
             {/* Status Badge */}
             <div className="mb-4">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                statusColors[contact.status]
+                statusColors[contact.status as keyof typeof statusColors]
               }`}>
                 {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
               </span>
@@ -367,7 +383,7 @@ const ContactDetail: React.FC = () => {
                   />
                 </div>
                 
-                <div className="col-span-2">
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Notes
                   </label>
@@ -545,11 +561,25 @@ const ContactDetail: React.FC = () => {
               <h3 className="text-lg font-medium">AI Insights</h3>
             </div>
             
+            {/* AI Action Toolbar */}
+            <div className="mb-6 pb-4 border-b border-gray-100">
+              <CustomizableAIToolbar
+                entityType="contact"
+                entityId={contact.id}
+                entityData={contact}
+                location="contactDetail"
+                layout="vertical"
+                size="md"
+                className="w-full"
+                showCustomizeButton={true}
+              />
+            </div>
+            
             <div className="space-y-4">
               <button
                 onClick={handleLeadScoreAnalysis}
                 disabled={leadScoreLoading}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors disabled:bg-blue-300"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-full font-semibold transition-all duration-200 disabled:from-blue-300 disabled:to-blue-400 shadow-sm border border-blue-300/20"
               >
                 {leadScoreLoading ? (
                   <>
@@ -581,7 +611,7 @@ const ContactDetail: React.FC = () => {
               <button
                 onClick={handlePersonalization}
                 disabled={personalizationLoading}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-colors disabled:bg-indigo-300 mt-2"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white py-3 px-4 rounded-full font-semibold transition-all duration-200 disabled:from-indigo-300 disabled:to-indigo-400 shadow-sm border border-indigo-300/20 mt-2"
               >
                 {personalizationLoading ? (
                   <>
@@ -602,7 +632,39 @@ const ContactDetail: React.FC = () => {
               
               {personalizationResult && !personalizationError && (
                 <div className="bg-blue-50 text-gray-800 p-4 rounded-md">
-                  <div className="whitespace-pre-wrap text-sm">{personalizationResult}</div>
+                  <h3 className="font-medium mb-3">Personalization Recommendations</h3>
+                  <div className="space-y-3 text-sm">
+                    {typeof personalizationResult === 'string' ? (
+                      <div className="whitespace-pre-wrap">{personalizationResult}</div>
+                    ) : (
+                      <>
+                        {personalizationResult.personalizedMessage && (
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-1">Personalized Message:</h4>
+                            <p className="text-gray-600">{personalizationResult.personalizedMessage}</p>
+                          </div>
+                        )}
+                        {personalizationResult.talkingPoints && (
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-1">Talking Points:</h4>
+                            <p className="text-gray-600">{personalizationResult.talkingPoints}</p>
+                          </div>
+                        )}
+                        {personalizationResult.iceBreakers && (
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-1">Ice Breakers:</h4>
+                            <p className="text-gray-600">{personalizationResult.iceBreakers}</p>
+                          </div>
+                        )}
+                        {personalizationResult.followUpSuggestions && (
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-1">Follow-up Suggestions:</h4>
+                            <p className="text-gray-600">{personalizationResult.followUpSuggestions}</p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
