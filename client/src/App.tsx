@@ -47,6 +47,7 @@ const VoiceProfiles = lazy(() => import('./pages/VoiceProfiles'));
 const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
+const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
 
 import './styles/design-system.css';
 
@@ -130,6 +131,14 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <PipelinePage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/remote-pipeline"
+                            element={
+                              <ProtectedRoute>
+                                <RemotePipeline />
                               </ProtectedRoute>
                             }
                           />
