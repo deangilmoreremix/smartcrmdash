@@ -266,21 +266,21 @@ const FormsAndSurveys: React.FC = () => {
           <p className="text-gray-600 mt-1">Create and manage forms to collect information from your leads and customers</p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <button 
+          <ModernButton 
             onClick={() => {
               setSelectedForm(null);
               setShowCreateForm(true);
             }}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+            variant="primary"
           >
             <Plus size={18} className="mr-1" />
             Create Form
-          </button>
+          </ModernButton>
         </div>
       </header>
       
       {/* Forms List */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 mb-6">
+      <GlassCard className="overflow-hidden mb-6">
         <div className="p-4 border-b border-gray-200">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative max-w-md w-full">
@@ -298,13 +298,14 @@ const FormsAndSurveys: React.FC = () => {
             
             <div className="flex items-center space-x-2">
               <div className="relative">
-                <button 
-                  className="flex items-center px-3 py-2 border rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50"
+                <ModernButton 
+                  variant="outline"
+                  size="sm"
                 >
                   <Filter size={16} className="mr-1" />
                   Sort by
                   <ChevronDown size={16} className="ml-1" />
-                </button>
+                </ModernButton>
               </div>
             </div>
           </div>
@@ -322,16 +323,16 @@ const FormsAndSurveys: React.FC = () => {
             <p className="text-gray-500 mb-4">
               {searchTerm ? 'No forms match your search criteria' : 'Create your first form to get started'}
             </p>
-            <button
+            <ModernButton
               onClick={() => {
                 setSelectedForm(null);
                 setShowCreateForm(true);
               }}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              variant="primary"
             >
               <Plus size={18} className="mr-1" />
               Create Form
-            </button>
+            </ModernButton>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -437,12 +438,12 @@ const FormsAndSurveys: React.FC = () => {
             </table>
           </div>
         )}
-      </div>
+      </GlassCard>
 
       {/* Create/Edit Form Modal */}
       {(showCreateForm || showEditForm) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
+          <GlassCard className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold">
                 {showEditForm ? 'Edit Form' : 'Create New Form'}
@@ -508,13 +509,14 @@ const FormsAndSurveys: React.FC = () => {
                         <option value="number">Number</option>
                         <option value="date">Date</option>
                       </select>
-                      <button
+                      <ModernButton
                         onClick={addField}
-                        className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                        variant="primary"
+                        size="sm"
                       >
                         <Plus size={14} className="mr-1" />
                         Add Field
-                      </button>
+                      </ModernButton>
                     </div>
                   </div>
                   
@@ -581,32 +583,33 @@ const FormsAndSurveys: React.FC = () => {
             </div>
             
             <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
-              <button
+              <ModernButton
                 onClick={() => {
                   setShowCreateForm(false);
                   setShowEditForm(false);
                   setSelectedForm(null);
                 }}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </ModernButton>
+              <ModernButton
                 onClick={saveForm}
                 disabled={!formName || isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                variant="primary"
+                loading={isLoading}
               >
                 {isLoading ? 'Saving...' : (showEditForm ? 'Update Form' : 'Create Form')}
-              </button>
+              </ModernButton>
             </div>
-          </div>
+          </GlassCard>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && selectedForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-backdrop">
+          <GlassCard className="max-w-md w-full">
             <div className="p-6">
               <div className="flex items-center mb-4">
                 <AlertCircle className="h-6 w-6 text-red-600 mr-2" />
@@ -616,25 +619,27 @@ const FormsAndSurveys: React.FC = () => {
                 Are you sure you want to delete "{selectedForm.name}"? This action cannot be undone.
               </p>
               <div className="flex justify-end space-x-3">
-                <button
+                <ModernButton
                   onClick={() => {
                     setShowDeleteConfirm(false);
                     setSelectedForm(null);
                   }}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  variant="outline"
                 >
                   Cancel
-                </button>
-                <button
+                </ModernButton>
+                <ModernButton
                   onClick={confirmDeleteForm}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                  variant="primary"
+                  className="bg-red-600 hover:bg-red-700"
+                  loading={isLoading}
                 >
                   {isLoading ? 'Deleting...' : 'Delete Form'}
-                </button>
+                </ModernButton>
               </div>
             </div>
-          </div>
+          </GlassCard>
         </div>
       )}
     </div>

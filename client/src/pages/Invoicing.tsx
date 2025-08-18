@@ -1,11 +1,13 @@
 import React from 'react';
+import GlassCard from '@/components/ui/GlassCard';
+import ModernButton from '@/components/ui/ModernButton';
 
 const Invoicing = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Invoicing</h1>
       
-      <div className="bg-white rounded-lg shadow p-6">
+      <GlassCard className="p-6">
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Invoice Management</h2>
           <p className="text-gray-600">Create, send, and track invoices to your clients and customers.</p>
@@ -32,7 +34,7 @@ const Invoicing = () => {
             <p className="text-sm text-gray-500">Offer multiple payment methods to your clients.</p>
           </div>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 };
