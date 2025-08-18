@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, User, Building, Tag, RefreshCw, Copy } from 'lucide-react';
 import AIToolContent from '../shared/AIToolContent';
-import { useOpenAI } from '../../services/openaiLegacyService';
+import { useOpenAI } from '../../services/openaiService';
 
 const CallScriptContent: React.FC = () => {
   const [formData, setFormData] = useState({

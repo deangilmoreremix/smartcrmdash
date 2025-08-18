@@ -54,33 +54,33 @@ import AutoFormCompleter from '../components/aiTools/AutoFormCompleter';
 import EmailAnalysisContent from './aiTools/EmailAnalysisContent';
 import MeetingSummaryContent from './aiTools/MeetingSummaryContent';
 import CallScriptContent from './aiTools/CallScriptContent';
-// Import existing components (commented out missing ones)
-// import SubjectLineContent from './aiTools/SubjectLineContent';
+// Import all available AI tool components
+import SubjectLineContent from './aiTools/SubjectLineContent';
 import CompetitorAnalysisContent from './aiTools/CompetitorAnalysisContent';
 import MarketTrendContent from './aiTools/MarketTrendContent';
-// import SalesInsightsContent from './aiTools/SalesInsightsContent';
-// import SalesForecastContent from './aiTools/SalesForecastContent';
+import SalesInsightsContent from './aiTools/SalesInsightsContent';
+import SalesForecastContent from './aiTools/SalesForecastContent';
 import EmailComposerContent from './aiTools/EmailComposerContent';
 import ObjectionHandlerContent from './aiTools/ObjectionHandlerContent';
 import CustomerPersonaContent from './aiTools/CustomerPersonaContent';
-// import VoiceToneOptimizerContent from './aiTools/VoiceToneOptimizerContent';
-// import EmailResponseContent from './aiTools/EmailResponseContent';
-// import VisualContentGeneratorContent from './aiTools/VisualContentGeneratorContent';
+import VoiceToneOptimizerContent from './aiTools/VoiceToneOptimizerContent';
+import EmailResponseContent from './aiTools/EmailResponseContent';
+import VisualContentGeneratorContent from './aiTools/VisualContentGeneratorContent';
 import MeetingAgendaContent from './aiTools/MeetingAgendaContent';
 
 // Feature Components  
-// import AIAssistantChat from './aiTools/AIAssistantChat';
-// import VisionAnalyzerContent from './aiTools/VisionAnalyzerContent';
+import AIAssistantChat from './aiTools/AIAssistantChat';
+import VisionAnalyzerContent from './aiTools/VisionAnalyzerContent';
 import ImageGeneratorContent from './aiTools/ImageGeneratorContent';
-// import SemanticSearchContent from './aiTools/SemanticSearchContent';
-// import FunctionAssistantContent from './aiTools/FunctionAssistantContent';
+import SemanticSearchContent from './aiTools/SemanticSearchContent';
+import FunctionAssistantContent from './aiTools/FunctionAssistantContent';
 
 // Reasoning-based content generators
-// import ReasoningEmailGenerator from './aiTools/ReasoningEmailGenerator';
-// import ReasoningProposalGenerator from './aiTools/ReasoningProposalGenerator';
-// import ReasoningScriptGenerator from './aiTools/ReasoningScriptGenerator';
-// import ReasoningObjectionHandler from './aiTools/ReasoningObjectionHandler';
-// import ReasoningSocialContent from './aiTools/ReasoningSocialContent';
+import ReasoningEmailGenerator from './aiTools/ReasoningEmailGenerator';
+import ReasoningProposalGenerator from './aiTools/ReasoningProposalGenerator';
+import ReasoningScriptGenerator from './aiTools/ReasoningScriptGenerator';
+import ReasoningObjectionHandler from './aiTools/ReasoningObjectionHandler';
+import ReasoningSocialContent from './aiTools/ReasoningSocialContent';
 
 export type AIToolType = 
   | 'email-analysis' 
