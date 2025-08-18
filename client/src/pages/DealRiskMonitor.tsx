@@ -279,3 +279,258 @@ const DealRiskMonitor: React.FC = () => {
 };
 
 export default DealRiskMonitor;
+import React, { useState } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { AlertTriangle, TrendingDown, Clock, DollarSign, Target, Users, Calendar, Activity, ArrowUpRight, ArrowDownRight, Filter, Search } from 'lucide-react';
+import { useDealStore } from '../store/dealStore';
+import { useContactStore } from '../store/contactStore';
+import Avatar from '../components/ui/Avatar';
+import { getInitials } from '../utils/avatars';
+
+const DealRiskMonitor: React.FC = () => {
+  const { isDark } = useTheme();
+  const { deals } = useDealStore();
+  const { contacts } = useContactStore();
+  const [selectedRiskLevel, setSelectedRiskLevel] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Calculate risk levels for deals
+  const calculateDealRisk = (deal: any) => {
+    let riskScore = 0;
+    const daysToClose = deal.expectedCloseDate ? 
+      Math.ceil((new Date(deal.expectedCloseDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 30;
+    
+    // Risk factors
+    if (daysToClose < 7) riskScore += 30;
+    else if (daysToClose < 14) riskScore += 20;
+    else if (daysToClose < 30) riskScore += 10;
+    
+    if (deal.probability < 30) riskScore += 40;
+    else if (deal.probability < 50) riskScore += 25;
+    else if (deal.probability < 70) riskScore += 15;
+    
+    if (deal.value > 50000) riskScore += 10;
+    if (deal.stage === 'negotiation') riskScore += 15;
+    
+    if (riskScore >= 60) return 'high';
+    if (riskScore >= 35) return 'medium';
+    return 'low';
+  };
+
+  const dealsWithRisk = Object.values(deals)
+    .filter(deal => deal.stage !== 'closed-won' && deal.stage !== 'closed-lost')
+    .map(deal => ({
+      ...deal,
+      riskLevel: calculateDealRisk(deal),
+      contact: contacts[deal.contactId]
+    }))
+    .filter(deal => deal.contact);
+
+  const filteredDeals = dealsWithRisk.filter(deal => {
+    const matchesRisk = selectedRiskLevel === 'all' || deal.riskLevel === selectedRiskLevel;
+    const matchesSearch = deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         deal.contact?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRisk && matchesSearch;
+  });
+
+  const riskCounts = {
+    high: dealsWithRisk.filter(d => d.riskLevel === 'high').length,
+    medium: dealsWithRisk.filter(d => d.riskLevel === 'medium').length,
+    low: dealsWithRisk.filter(d => d.riskLevel === 'low').length
+  };
+
+  const totalAtRiskValue = dealsWithRisk
+    .filter(d => d.riskLevel === 'high')
+    .reduce((sum, deal) => sum + deal.value, 0);
+
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'high': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      case 'medium': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+      case 'low': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  return (
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-6`}>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 shadow-lg">
+                <AlertTriangle className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Deal Risk Monitor
+                </h1>
+                <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                  Monitor and mitigate risks across your sales pipeline
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Risk Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { 
+              title: 'High Risk Deals', 
+              value: riskCounts.high.toString(),
+              icon: AlertTriangle,
+              color: 'from-red-500 to-red-600',
+              change: '+12%'
+            },
+            { 
+              title: 'At Risk Value', 
+              value: formatCurrency(totalAtRiskValue),
+              icon: DollarSign,
+              color: 'from-orange-500 to-red-500',
+              change: '+8%'
+            },
+            { 
+              title: 'Medium Risk', 
+              value: riskCounts.medium.toString(),
+              icon: Clock,
+              color: 'from-yellow-500 to-orange-500',
+              change: '-5%'
+            },
+            { 
+              title: 'Low Risk', 
+              value: riskCounts.low.toString(),
+              icon: Target,
+              color: 'from-green-500 to-emerald-500',
+              change: '+15%'
+            }
+          ].map((metric, index) => (
+            <div
+              key={index}
+              className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-xl bg-gradient-to-r ${metric.color} shadow-lg`}>
+                  <metric.icon className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex items-center text-green-400">
+                  <ArrowUpRight className="h-4 w-4 mr-1" />
+                  <span className="text-sm font-medium">{metric.change}</span>
+                </div>
+              </div>
+              <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>
+                {metric.value}
+              </h3>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{metric.title}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters and Search */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDark ? 'text-gray-400' : 'text-gray-500'} h-5 w-5`} />
+                <input
+                  type="text"
+                  placeholder="Search deals..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
+                    isDark 
+                      ? 'bg-white/5 border-white/10 text-white placeholder-gray-400' 
+                      : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {['all', 'high', 'medium', 'low'].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setSelectedRiskLevel(level)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedRiskLevel === level
+                      ? 'bg-blue-500 text-white'
+                      : isDark
+                        ? 'bg-white/5 text-gray-300 hover:bg-white/10'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)} Risk
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Deals List */}
+        <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>
+            Risk Analysis Results ({filteredDeals.length} deals)
+          </h2>
+          
+          <div className="space-y-4">
+            {filteredDeals.map((deal) => (
+              <div
+                key={deal.id}
+                className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 hover:${isDark ? 'bg-white/10' : 'bg-gray-100'} transition-colors`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <Avatar
+                      src={deal.contact?.avatarSrc || deal.contact?.avatar}
+                      alt={deal.contact?.name}
+                      size="md"
+                      fallback={getInitials(deal.contact?.name || '')}
+                    />
+                    <div>
+                      <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {deal.title}
+                      </h3>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {deal.contact?.name} • {deal.company}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {formatCurrency(deal.value)}
+                      </p>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {deal.probability}% probability
+                      </p>
+                    </div>
+                    
+                    <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getRiskColor(deal.riskLevel)}`}>
+                      {deal.riskLevel.toUpperCase()} RISK
+                    </div>
+                    
+                    <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-200'} transition-colors`}>
+                      <Activity className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DealRiskMonitor;
