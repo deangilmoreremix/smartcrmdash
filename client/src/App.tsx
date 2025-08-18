@@ -133,12 +133,12 @@ function App() {
                             }
                           />
                           
-                          {/* Contacts with Module Federation support */}
+                          {/* Contacts page */}
                           <Route
                             path="/contacts"
                             element={
                               <ProtectedRoute>
-                                <ContactsWorking />
+                                <Contacts />
                               </ProtectedRoute>
                             }
                           />
