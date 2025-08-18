@@ -1,28 +1,31 @@
-// Types for contact enrichment data
 export interface ContactEnrichmentData {
-  firstName: string;
-  lastName?: string;
-  name: string;
-  email?: string;
   phone?: string;
-  title?: string;
-  company?: string;
   industry?: string;
-  location?: {
-    city?: string;
-    state?: string;
-    country?: string;
-  };
+  avatar?: string;
+  notes?: string;
   socialProfiles?: {
     linkedin?: string;
     twitter?: string;
-    website?: string;
+    facebook?: string;
   };
-  bio?: string;
-  confidence: number;
-  notes?: string;
-  [key: string]: any;
+  confidence?: number;
 }
 
-// This service would contain the actual implementation of contact enrichment
-// For now, it's just a type definition file
+export const aiEnrichmentService = {
+  async enrichContactMultimodal(contact: any, avatarUrl: string): Promise<any> {
+    // Simulate AI enrichment
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return {
+      inferredPersonalityTraits: 'Professional, analytical, detail-oriented',
+      communicationStyle: 'Direct and concise',
+      professionalDemeanor: 'Confident and approachable',
+      imageAnalysisNotes: 'Professional headshot, formal attire, confident expression'
+    };
+  },
+
+  async findContactImage(name: string, company?: string): Promise<string> {
+    // Simulate finding new image
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return 'https://via.placeholder.com/100x100';
+  }
+};
