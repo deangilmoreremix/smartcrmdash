@@ -403,13 +403,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               })}
 
               {/* Dropdowns */}
-              {[
-                { id: 'sales', items: salesTools, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-                { id: 'tasks', items: taskTools, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
-                { id: 'communication', items: communicationTools, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-                { id: 'content', items: contentTools, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-                { id: 'apps', items: connectedApps, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
-              ].map(menu => (
+              {dropdownMenus.map(menu => (
                 <div key={menu.id} className="relative">
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleDropdown(menu.id, e); }}
@@ -442,16 +436,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : 'Apps'}
                     </span>
                     <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
-                    {renderBadge(
-                      menu.id === 'sales' ? salesTools.length
-                        : menu.id === 'tasks' ? taskTools.length
-                        : menu.id === 'communication' ? communicationTools.length
-                        : menu.id === 'business-intel' ? 35
-                        : menu.id === 'wl' ? 1
-                        : menu.id === 'intel' ? 1
-                        : connectedApps.length,
-                      menu.badgeColor
-                    )}
+                    {renderBadge(menu.badge, menu.badgeColor)}
                     {activeDropdown === menu.id && (
                       <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
                     )}
