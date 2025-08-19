@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { 
@@ -49,12 +49,8 @@ import InteractiveFeaturesGrid from '../../components/Landing/InteractiveFeature
 import ParticleBackground from '../../components/Landing/ParticleBackground';
 
 const LandingPage = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  
   // Function to handle page initialization only once
   useEffect(() => {
-    console.log("LandingPage component mounted");
-    
     const preloadHighPriorityAssets = () => {
       // Preload critical images
       const criticalImages = [
@@ -64,8 +60,6 @@ const LandingPage = () => {
       if (typeof window !== 'undefined') {
         criticalImages.forEach(url => {
           const img = new window.Image();
-          img.onload = () => console.log(`Image loaded: ${url}`);
-          img.onerror = () => console.error(`Failed to load image: ${url}`);
           img.src = url;
         });
       }
@@ -73,45 +67,7 @@ const LandingPage = () => {
 
     // Call the preload function
     preloadHighPriorityAssets();
-    
-    // Check animations.css is loaded
-    const animationsStylesheet = document.querySelector('link[href*="animations.css"]');
-    console.log("Animations CSS loaded:", !!animationsStylesheet);
-    
-    // Add a small delay to ensure everything is ready
-    const timer = setTimeout(() => {
-      console.log("Setting isLoaded to true");
-      setIsLoaded(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Debug CSS classes for background elements
-  useEffect(() => {
-    if (isLoaded) {
-      console.log("Landing page marked as loaded");
-      
-      // Check animation classes
-      const animatedElements = document.querySelectorAll('.animate-float, .animate-pulse, .animate-spin');
-      console.log(`Found ${animatedElements.length} animated elements`);
-      
-      // Check background classes
-      const bgElements = document.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-b, .parallax-bg');
-      console.log(`Found ${bgElements.length} background elements`);
-      
-      if (bgElements.length > 0) {
-        Array.from(bgElements).forEach((el, i) => {
-          const computedStyle = window.getComputedStyle(el as Element);
-          console.log(`Background element ${i} style:`, {
-            background: computedStyle.background,
-            backgroundImage: computedStyle.backgroundImage,
-            opacity: computedStyle.opacity
-          });
-        });
-      }
-    }
-  }, [isLoaded]);
+  }, []);  // Empty dependency array ensures this only runs once
   
   return (
     <div className="bg-white content-stable">

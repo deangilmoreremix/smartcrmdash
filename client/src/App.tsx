@@ -103,21 +103,26 @@ function App() {
               <NavigationProvider>
                 <DashboardLayoutProvider>
                   <AIProvider>
-                    <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-                      <Navbar />
-                      <div className="flex-1 overflow-hidden">
-                        <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
-                        <Routes>
-                          {/* Landing page routes (no auth) */}
-                          <Route path="/" element={<LandingPage />} />
-                          <Route path="/signin" element={<SignInPage />} />
-                          <Route path="/signup" element={<SignUpPage />} />
-                          <Route path="/demo" element={<LandingPage />} />
-                          
-                          {/* App routes redirect to dashboard */}
-                          <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+                    <Routes>
+                      {/* Landing page routes (no navbar) */}
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/signin" element={<SignInPage />} />
+                      <Route path="/signup" element={<SignUpPage />} />
+                      <Route path="/login" element={<SignInPage />} />
+                      <Route path="/register" element={<SignUpPage />} />
+                      <Route path="/demo" element={<LandingPage />} />
+                      
+                      {/* All other routes with navbar */}
+                      <Route path="/*" element={
+                        <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                          <Navbar />
+                          <div className="flex-1 overflow-hidden">
+                            <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                              <Routes>
+                                {/* App routes redirect to dashboard */}
+                                <Route path="/app" element={<Navigate to="/dashboard" replace />} />
 
-                          {/* Core pages */}
+                                {/* Core pages */}
                           <Route
                             path="/system-overview"
                             element={
@@ -571,12 +576,14 @@ function App() {
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PipelineWithRemote />} />
 
-                          {/* Fallback */}
-                          <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                        </Suspense>
-                      </div>
-                    </div>
+                                {/* Fallback */}
+                                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                              </Routes>
+                            </Suspense>
+                          </div>
+                        </div>
+                      } />
+                    </Routes>
                   </AIProvider>
                 </DashboardLayoutProvider>
               </NavigationProvider>
