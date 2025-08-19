@@ -415,12 +415,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       } else if (menu.id === 'intel') {
                         handleNavigation('/intel', 'intel');
                       } else if (menu.id === 'communication') {
-                        // Trigger video call popup instead of dropdown
-                        initiateCall({
-                          id: 'demo-contact',
-                          name: 'Team Member',
-                          email: 'team@company.com'
-                        }, 'video');
+                        // Show video call demo message instead of actual call
+                        alert('Video call feature demo - In a real environment, this would initiate a video call with your team. Camera/microphone permissions would be required.');
                       } else {
                         toggleDropdown(menu.id, e);
                       }
