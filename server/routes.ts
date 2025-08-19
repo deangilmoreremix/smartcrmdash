@@ -37,40 +37,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const testResponse = await openai.chat.completions.create({
-        model: "gpt-4o", // Test with reliable model first
+        model: "gpt-4o-mini", // Test with reliable, available model
         messages: [{ role: "user", content: "Test" }],
         max_tokens: 5
       });
 
-      // Try GPT-5 to see if available
-      let gpt5Available = false;
-      try {
-        await openai.chat.completions.create({
-          model: "gpt-5",
-          messages: [{ role: "user", content: "Test" }],
-          max_tokens: 5
-        });
-        gpt5Available = true;
-      } catch (gpt5Error: any) {
-        console.log('GPT-5 not available:', gpt5Error?.message || 'Unknown error');
-      }
-
       res.json({
         configured: true,
-        model: gpt5Available ? 'gpt-5' : 'gpt-4o',
+        model: 'gpt-4o-mini',
         status: 'ready',
-        gpt5Available,
-        capabilities: gpt5Available ? [
-          '94.6% AIME mathematical accuracy',
-          '74.9% SWE-bench coding accuracy', 
-          '84.2% MMMU multimodal performance',
-          'Unified reasoning system',
-          'Advanced verbosity and reasoning_effort controls'
-        ] : [
-          'GPT-4 Omni model available',
+        gpt5Available: false,
+        capabilities: [
+          'GPT-4 Omni Mini model available',
           'Advanced reasoning and analysis',
-          'Multimodal capabilities',
-          'JSON output formatting'
+          'Fast response times',
+          'JSON output formatting',
+          'Cost-effective AI processing'
         ]
       });
     } catch (error: any) {
@@ -98,19 +80,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userMetrics, timeOfDay, recentActivity } = req.body;
 
-      // Use GPT-5 with new features (released August 7, 2025)
+      // Use GPT-4o-mini for reliable performance
       const response = await openai.chat.completions.create({
-        model: "gpt-5", // Official GPT-5 model with unified reasoning system
+        model: "gpt-4o-mini", // Reliable, available model
         messages: [{
           role: "system",
-          content: "You are an expert business strategist with GPT-5's unified reasoning system and 74.9% SWE-bench coding accuracy. Generate personalized, strategic greetings with actionable business insights based on user metrics."
+          content: "You are an expert business strategist. Generate personalized, strategic greetings with actionable business insights based on user metrics. Respond in JSON format."
         }, {
           role: "user",
-          content: `Generate a strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${recentActivity}. Provide both greeting and strategic insight.`
+          content: `Generate a strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${recentActivity}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`
         }],
         response_format: { type: "json_object" },
-        verbosity: "medium", // GPT-5 verbosity parameter
-        reasoning_effort: "minimal", // GPT-5 reasoning effort for faster responses
         temperature: 0.7,
         max_tokens: 400
       });
@@ -141,37 +121,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { historicalData, currentMetrics } = req.body;
 
-      let response;
-      try {
-        response = await openai.chat.completions.create({
-          model: "gpt-5", // GPT-5 with 94.6% AIME mathematical accuracy
-          messages: [{
-            role: "system",
-            content: "You are an expert business analyst with advanced mathematical reasoning capabilities. Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
-          }, {
-            role: "user",
-            content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
-          }],
-          response_format: { type: "json_object" },
-          temperature: 0.3,
-          max_tokens: 800
-        });
-      } catch (gpt5Error) {
-        console.log('GPT-5 not available, using gpt-4o for KPI analysis');
-        response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [{
-            role: "system",
-            content: "You are an expert business analyst with advanced mathematical reasoning capabilities. Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
-          }, {
-            role: "user",
-            content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
-          }],
-          response_format: { type: "json_object" },
-          temperature: 0.3,
-          max_tokens: 800
-        });
-      }
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Use available, reliable model
+        messages: [{
+          role: "system",
+          content: "You are an expert business analyst with advanced mathematical reasoning capabilities. Analyze KPI trends and provide strategic insights with confidence intervals and actionable recommendations."
+        }, {
+          role: "user",
+          content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
+        }],
+        response_format: { type: "json_object" },
+        temperature: 0.3,
+        max_tokens: 800
+      });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json(result);
@@ -204,37 +166,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { dealData, contactHistory, marketContext } = req.body;
 
-      let response;
-      try {
-        response = await openai.chat.completions.create({
-          model: "gpt-5", // GPT-5 with expert-level deal analysis
-          messages: [{
-            role: "system",
-            content: "You are an expert sales strategist with deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
-          }, {
-            role: "user",
-            content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence in JSON format.`
-          }],
-          response_format: { type: "json_object" },
-          temperature: 0.2,
-          max_tokens: 600
-        });
-      } catch (gpt5Error) {
-        console.log('GPT-5 not available, using gpt-4o for deal analysis');
-        response = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [{
-            role: "system",
-            content: "You are an expert sales strategist with deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
-          }, {
-            role: "user",
-            content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence in JSON format.`
-          }],
-          response_format: { type: "json_object" },
-          temperature: 0.2,
-          max_tokens: 600
-        });
-      }
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini", // Use available, reliable model
+        messages: [{
+          role: "system",
+          content: "You are an expert sales strategist with deep reasoning capabilities. Provide comprehensive deal intelligence including win probability, risk factors, and strategic recommendations."
+        }, {
+          role: "user",
+          content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide comprehensive deal intelligence in JSON format.`
+        }],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 600
+      });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json(result);

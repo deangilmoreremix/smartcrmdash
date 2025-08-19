@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useOpenAI } from '../services/openaiService';
+import openAIService from '../services/openAIService';
 import { 
   MessageSquare, 
   Send, 
@@ -51,7 +51,8 @@ interface MessageTemplate {
 }
 
 const TextMessages: React.FC = () => {
-  const openai = useOpenAI();
+  // OpenAI service for generating content
+  const openai = openAIService;
   
   // Mock contacts with message history
   const [contacts, setContacts] = useState<Contact[]>([
@@ -271,17 +272,18 @@ const TextMessages: React.FC = () => {
     
     try {
       // Use the OpenAI service to generate a text message suggestion
-      const result = await openai.generateEmailDraft(
-        selectedContact.name,
-        "Short text message follow-up (keep it under 160 characters)"
-      );
+      const result = await openai.generateEmail({
+        recipient: selectedContact.name,
+        purpose: "Short text message follow-up (keep it under 160 characters)",
+        tone: 'casual'
+      });
       
-      // Extract just a simple message part from the generated content
-      let message = result;
+      // Extract just the body part for text messaging
+      let message = result.body;
       
       // If it has multiple paragraphs, just take the first one
-      if (result.includes('\n\n')) {
-        message = result.split('\n\n')[0];
+      if (message.includes('\n\n')) {
+        message = message.split('\n\n')[0];
       }
       
       // Remove any "Subject:" line if present
