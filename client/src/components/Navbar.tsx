@@ -55,9 +55,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     const pendingTasks = Object.values(tasks).filter(task => !task.completed).length;
 
     const todayAppointments = Object.values(appointments).filter(apt => {
-      if (!apt.date || !apt.time) return false;
+      if (!apt.date) return false;
       const today = new Date();
-      const aptDate = new Date(`${apt.date}T${apt.time}`);
+      const aptDate = new Date(apt.date);
       return aptDate.toDateString() === today.toDateString() && apt.status === 'scheduled';
     }).length;
 
@@ -220,11 +220,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const mainTabs = [
     {
       id: 'dashboard',
-      label: '',
-      icon: () => null,
+      label: 'Dashboard',
+      icon: BarChart3,
       action: () => handleNavigation('/dashboard', 'dashboard'),
       badge: null,
-      color: 'from-blue-500 to-green-500'
+      color: 'from-indigo-500 to-purple-500'
     },
     {
       id: 'contacts',
@@ -246,7 +246,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     {
       id: 'analytics',
       label: 'Analytics',
-      icon: BarChart3,
+      icon: TrendingUp,
       action: () => handleNavigation('/analytics', 'analytics'),
       badge: null,
       color: 'from-blue-500 to-cyan-500'
