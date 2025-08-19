@@ -41,7 +41,10 @@ import LeadAutomation from './pages/LeadAutomation';
 import CircleProspecting from './pages/CircleProspecting';
 const VideoEmail = lazy(() => import('./pages/VideoEmail'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
-const AIGoalsPage = lazy(() => import('./pages/AIGoalsPage'));
+const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 
 // New comprehensive implementations
 const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
@@ -105,8 +108,14 @@ function App() {
                       <div className="flex-1 overflow-hidden">
                         <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                         <Routes>
-                          {/* Redirect root to dashboard */}
-                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                          {/* Landing page routes (no auth) */}
+                          <Route path="/" element={<LandingPage />} />
+                          <Route path="/signin" element={<SignInPage />} />
+                          <Route path="/signup" element={<SignUpPage />} />
+                          <Route path="/demo" element={<LandingPage />} />
+                          
+                          {/* App routes redirect to dashboard */}
+                          <Route path="/app" element={<Navigate to="/dashboard" replace />} />
 
                           {/* Core pages */}
                           <Route
@@ -552,7 +561,7 @@ function App() {
                             path="/ai-goals"
                             element={
                               <ProtectedRoute>
-                                <AIGoalsPage />
+                                <AIGoalsWithRemote />
                               </ProtectedRoute>
                             }
                           />

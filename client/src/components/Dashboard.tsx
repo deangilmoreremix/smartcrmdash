@@ -14,6 +14,7 @@ import RemotePipelineLoader from './RemotePipelineLoader';
 import RemoteWhiteLabelLoader from './RemoteWhiteLabelLoader';
 import RemoteProductResearchLoader from './RemoteProductResearchLoader';
 import RemoteAIAnalyticsLoader from './RemoteAIAnalyticsLoader';
+import RemoteAIGoalsLoader from './RemoteAIGoalsLoader';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -229,6 +230,13 @@ const Dashboard: React.FC = React.memo(() => {
         return (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
             <RemoteAIAnalyticsLoader showHeader={true} />
+          </div>
+        );
+
+      case 'ai-goals-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+            <RemoteAIGoalsLoader showHeader={true} />
           </div>
         );
 
