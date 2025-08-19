@@ -56,6 +56,7 @@ Design Implementation: Always use the exact design, styling, and structure from 
 - **Route Isolation**: Landing page ("/") uses embedded iframe while preserving all other routes (/login, /register, /dashboard, etc.)
 - **Navigation Bridge**: Secure postMessage communication between embedded page and CRM for routing
 - **Authentication Preservation**: Sign in/sign out pages remain fully customizable and independent of embedded content
+- **Development Mode**: Authentication is currently bypassed for development - ProtectedRoute component allows access to all dashboard pages without login
 
 # System Architecture
 
