@@ -303,7 +303,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: taskTools.length, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'wl', label: 'WL', icon: Globe, badge: 1, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
@@ -463,7 +462,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     `}
                   >
                     {menu.id === 'sales' && <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'tasks' && <CheckSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'communication' && <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'business-intel' && <BarChart3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'wl' && <Globe size={14} className="transition-transform duration-300 group-hover:scale-110" />}
@@ -472,7 +470,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     <span className="text-xs font-medium">
                       {menu.id === 'sales' ? 'Sales'
-                        : menu.id === 'tasks' ? 'Tasks'
                         : menu.id === 'communication' ? 'Comm'
                         : menu.id === 'business-intel' ? 'Business Intel'
                         : menu.id === 'wl' ? 'WL'
@@ -480,7 +477,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : 'Apps'}
                     </span>
                     {/* Only show chevron for dropdown menus */}
-                    {(menu.id === 'sales' || menu.id === 'tasks' || menu.id === 'communication' || menu.id === 'apps') && (
+                    {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps') && (
                       <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                     )}
                     {renderBadge(menu.badge, menu.badgeColor)}
@@ -524,69 +521,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {menu.id === 'tasks' && activeDropdown === 'tasks' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                        {taskTools.map((tool, index) => {
-                          // Handle dividers
-                          if (tool.type === 'divider') {
-                            return (
-                              <div key={index} className={`h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'} my-2`} />
-                            );
-                          }
-                          
-                          return (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                console.log('Task tool clicked:', tool.tool, tool.name, tool.action);
-                                
-                                // Handle different action types
-                                switch (tool.action) {
-                                  case 'navigate':
-                                    // Navigate to tasks page with specific tab
-                                    if (tool.tab) {
-                                      navigate(`/tasks?tab=${tool.tab}`);
-                                    } else {
-                                      navigate('/tasks');
-                                    }
-                                    break;
-                                  case 'modal':
-                                    // Open specific modal/action
-                                    if (tool.tool === 'new-task') {
-                                      navigate('/tasks?action=new');
-                                    }
-                                    break;
-                                  case 'search':
-                                    navigate('/tasks?action=search');
-                                    break;
-                                  case 'templates':
-                                    navigate('/tasks?action=templates');
-                                    break;
-                                  default:
-                                    // AI Tools - use existing AI tool handler
-                                    if (openAITool && tool.tool) {
-                                      openAITool(tool.tool);
-                                    } else if (tool.tool) {
-                                      navigate(`/${tool.tool}`);
-                                    }
-                                    break;
-                                }
-                                
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              }}
-                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                            >
-                              {tool.icon && <tool.icon size={16} className="text-orange-500" />}
-                              <span className="text-sm font-medium">{tool.name}</span>
-                            </button>
-                          );
-                        })}
                       </div>
                     </div>
                   )}
