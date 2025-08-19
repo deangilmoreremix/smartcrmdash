@@ -48,9 +48,7 @@ const Dashboard: React.FC = React.memo(() => {
   const { 
     deals, 
     fetchDeals, 
-    isLoading,
-    stageValues,
-    totalPipelineValue 
+    isLoading 
   } = useDealStore();
   
   const { 
@@ -59,7 +57,7 @@ const Dashboard: React.FC = React.memo(() => {
     isLoading: contactsLoading 
   } = useContactStore();
   
-  const { tasks, fetchTasks } = useTaskStore();
+  const { tasks } = useTaskStore();
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { openTool } = useAITools();
   const { isDark } = useTheme();
@@ -180,6 +178,12 @@ const Dashboard: React.FC = React.memo(() => {
 
   return (
     <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      {/* Dashboard Header - Always visible */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
+      </div>
+
       {/* Dashboard Layout Controls */}
       <DashboardLayoutControls />
 
