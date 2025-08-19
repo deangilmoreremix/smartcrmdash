@@ -25,7 +25,7 @@ const Contacts = lazy(() => import('./pages/Contacts')); // details handled via 
 const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // Enhanced with Module Federation
 const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // Button test
 const ContactsWorking = lazy(() => import('./pages/ContactsWorking')); // Working contacts with inline styles
-const Pipeline = lazy(() => import('./pages/Pipeline'));
+const PipelineWithRemote = lazy(() => import('./pages/PipelineWithRemote'));
 const PipelinePage = lazy(() => import('./pages/PipelinePage'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
@@ -153,7 +153,7 @@ function App() {
                             path="/pipeline"
                             element={
                               <ProtectedRoute>
-                                <Pipeline />
+                                <PipelineWithRemote />
                               </ProtectedRoute>
                             }
                           />
@@ -560,7 +560,7 @@ function App() {
                           {/* Feature showcase routes (optional) */}
                           <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
-                          <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
+                          <Route path="/features/pipeline" element={<PipelineWithRemote />} />
 
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
