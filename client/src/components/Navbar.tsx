@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useVideoCall } from '../contexts/VideoCallContext';
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
 import { useTaskStore } from "../store/taskStore";
@@ -32,6 +33,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
+  const { initiateCall } = useVideoCall();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -95,6 +97,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const communicationTools = [
+    { name: 'Video Call', tool: 'video-call-popup', icon: Video, isVideoCall: true },
     { name: 'Video Email', tool: 'video-email', icon: Video },
     { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
     { name: 'Email Composer', tool: 'email-composer', icon: Mail },
@@ -285,7 +288,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: taskTools.length, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-    { id: 'content', label: 'Content', icon: Edit3, badge: contentTools.length, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'wl', label: 'WL', icon: Globe, badge: 1, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
+    { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
@@ -422,14 +427,18 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     {menu.id === 'sales' && <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'tasks' && <CheckSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'communication' && <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'content' && <Edit3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'business-intel' && <BarChart3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'wl' && <Globe size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'intel' && <Brain size={14} className="transition-transform duration-300 group-hover:scale-110" />}
                     {menu.id === 'apps' && <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
 
                     <span className="text-xs font-medium">
                       {menu.id === 'sales' ? 'Sales'
                         : menu.id === 'tasks' ? 'Tasks'
                         : menu.id === 'communication' ? 'Comm'
-                        : menu.id === 'content' ? 'Content'
+                        : menu.id === 'business-intel' ? 'Business Intel'
+                        : menu.id === 'wl' ? 'WL'
+                        : menu.id === 'intel' ? 'Intel'
                         : 'Apps'}
                     </span>
                     <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
@@ -437,7 +446,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       menu.id === 'sales' ? salesTools.length
                         : menu.id === 'tasks' ? taskTools.length
                         : menu.id === 'communication' ? communicationTools.length
-                        : menu.id === 'content' ? contentTools.length
+                        : menu.id === 'business-intel' ? 35
+                        : menu.id === 'wl' ? 1
+                        : menu.id === 'intel' ? 1
                         : connectedApps.length,
                       menu.badgeColor
                     )}
@@ -508,7 +519,17 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         {communicationTools.map((tool, index) => (
                           <button
                             key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
+                            onClick={() => { 
+                              if (tool.isVideoCall) {
+                                initiateCall({ id: 'demo-contact', name: 'Demo Contact', email: 'demo@example.com' }, 'video');
+                                setActiveDropdown(null); 
+                                setIsMobileMenuOpen(false);
+                              } else {
+                                navigate(`/${tool.tool}`); 
+                                setActiveDropdown(null); 
+                                setIsMobileMenuOpen(false); 
+                              }
+                            }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
                             <tool.icon size={16} className="text-blue-500" />
@@ -519,20 +540,36 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     </div>
                   )}
 
-                  {menu.id === 'content' && activeDropdown === 'content' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
-                        {contentTools.map((tool, index) => (
-                          <button
-                            key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
-                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                          >
-                            <tool.icon size={16} className="text-amber-500" />
-                            <span className="text-sm font-medium">{tool.name}</span>
-                          </button>
-                        ))}
-                      </div>
+                  {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
+                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <iframe
+                        src="https://ai-powered-analytics-fibd.bolt.host"
+                        className="w-full h-full rounded-2xl"
+                        title="Business Intelligence"
+                        frameBorder="0"
+                      />
+                    </div>
+                  )}
+
+                  {menu.id === 'wl' && activeDropdown === 'wl' && (
+                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <iframe
+                        src="https://moonlit-tarsier-239e70.netlify.app/"
+                        className="w-full h-full rounded-2xl"
+                        title="White Label"
+                        frameBorder="0"
+                      />
+                    </div>
+                  )}
+
+                  {menu.id === 'intel' && activeDropdown === 'intel' && (
+                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <iframe
+                        src="https://clever-syrniki-4df87f.netlify.app/"
+                        className="w-full h-full rounded-2xl"
+                        title="Intel"
+                        frameBorder="0"
+                      />
                     </div>
                   )}
 
