@@ -64,28 +64,74 @@ const LandingPage = () => {
         }}
         onLoad={() => {
           console.log('Landing page iframe loaded successfully from cerulean-crepe');
+          
+          // Intercept clicks on the existing buttons in the iframe
+          const iframe = document.querySelector('iframe[title="Smart CRM Landing Page"]') as HTMLIFrameElement;
+          if (iframe && iframe.contentWindow) {
+            try {
+              // Send message to iframe to set up click interception
+              iframe.contentWindow.postMessage({
+                type: 'intercept_buttons',
+                selectors: [
+                  'button:contains("Try")',
+                  'button:contains("Free")', 
+                  'a:contains("Try")',
+                  'a:contains("Free")',
+                  'a:contains("Start")',
+                  'button:contains("Start")',
+                  '.cta-button',
+                  '.try-button',
+                  '.start-button'
+                ],
+                redirectTo: window.location.origin + '/dashboard'
+              }, 'https://cerulean-crepe-9470cc.netlify.app');
+              
+              console.log('Button interception message sent to iframe');
+            } catch (error) {
+              console.log('Cross-origin restrictions prevent direct button interception');
+              
+              // Fallback: Create targeted overlay areas for likely button positions
+              const overlay = document.createElement('div');
+              overlay.style.position = 'absolute';
+              overlay.style.top = '0';
+              overlay.style.left = '0';
+              overlay.style.width = '100%';
+              overlay.style.height = '100%';
+              overlay.style.pointerEvents = 'none';
+              overlay.style.zIndex = '10';
+              
+              // Create click areas for common CTA button positions
+              const buttonAreas = [
+                { top: '15%', left: '35%', width: '30%', height: '10%' }, // Hero area
+                { top: '25%', left: '40%', width: '20%', height: '8%' },  // Secondary hero
+                { top: '85%', left: '35%', width: '30%', height: '10%' }, // Footer area
+                { top: '50%', left: '35%', width: '30%', height: '10%' }, // Mid-page CTA
+              ];
+              
+              buttonAreas.forEach(area => {
+                const clickArea = document.createElement('div');
+                clickArea.style.position = 'absolute';
+                clickArea.style.top = area.top;
+                clickArea.style.left = area.left;
+                clickArea.style.width = area.width;
+                clickArea.style.height = area.height;
+                clickArea.style.pointerEvents = 'auto';
+                clickArea.style.cursor = 'pointer';
+                clickArea.style.background = 'transparent';
+                clickArea.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Intercepted button click, redirecting to dashboard');
+                  navigate('/dashboard');
+                });
+                overlay.appendChild(clickArea);
+              });
+              
+              iframe.parentElement?.appendChild(overlay);
+            }
+          }
         }}
       />
-      
-      {/* Floating "Try Dashboard" button as overlay */}
-      <div className="absolute top-4 right-4 z-20">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-        >
-          → Go to Dashboard
-        </button>
-      </div>
-      
-      {/* Hero section overlay button */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="px-8 py-4 bg-green-600 text-white font-bold text-lg rounded-lg shadow-xl hover:bg-green-700 transition-all transform hover:scale-105"
-        >
-          🚀 Try Our CRM Dashboard
-        </button>
-      </div>
     </div>
   );
 };
