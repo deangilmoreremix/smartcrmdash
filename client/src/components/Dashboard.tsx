@@ -202,64 +202,22 @@ const Dashboard: React.FC = React.memo(() => {
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
       </div>
 
-      {/* Simple Dashboard Content - Always shows */}
+      {/* Dashboard Layout Controls - RESTORED */}
+      <DashboardLayoutControls />
+
+      {/* Draggable Sections - RESTORED */}
       <div className="space-y-8 pb-20">
-        {/* GPT-5 Enhanced Dashboard */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-          <GPT5EnhancedDashboard />
-        </div>
-
-        {/* Executive Overview */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-          <ExecutiveOverviewSection />
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-xl text-white">
-            <h3 className="text-lg font-semibold mb-2">Total Contacts</h3>
-            <p className="text-3xl font-bold">{Object.keys(contacts).length}</p>
-          </div>
-          <div className="bg-gradient-to-r from-green-500 to-teal-600 p-6 rounded-xl text-white">
-            <h3 className="text-lg font-semibold mb-2">Active Deals</h3>
-            <p className="text-3xl font-bold">{deals.length}</p>
-          </div>
-          <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6 rounded-xl text-white">
-            <h3 className="text-lg font-semibold mb-2">Pending Tasks</h3>
-            <p className="text-3xl font-bold">{tasks.filter(task => !task.completed).length}</p>
-          </div>
-          <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 rounded-xl text-white">
-            <h3 className="text-lg font-semibold mb-2">Appointments</h3>
-            <p className="text-3xl font-bold">{Object.keys(appointments).length}</p>
-          </div>
-        </div>
-
-        {/* Dashboard Layout Controls - Optional */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dashboard Layout</h3>
-          <div className="text-gray-600 dark:text-gray-400">
-            Dashboard layout controls available
-          </div>
-        </div>
-
-        {/* Additional Dashboard Sections */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Smart Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg">
-              <h4 className="font-semibold text-blue-700 dark:text-blue-300">Sales Pipeline Analytics</h4>
-              <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">Track deal progress and conversion rates</p>
+        {sectionOrder.map((sectionId, index) => (
+          <DraggableSection
+            key={sectionId}
+            sectionId={sectionId}
+            index={index}
+          >
+            <div id={sectionId}>
+              {renderSectionContent(sectionId)}
             </div>
-            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
-              <h4 className="font-semibold text-green-700 dark:text-green-300">Customer Management</h4>
-              <p className="text-sm text-green-600 dark:text-green-400 mt-1">Manage leads and customer relationships</p>
-            </div>
-            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
-              <h4 className="font-semibold text-purple-700 dark:text-purple-300">AI Communications</h4>
-              <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">Automated messaging and follow-ups</p>
-            </div>
-          </div>
-        </div>
+          </DraggableSection>
+        ))}
       </div>
 
       {/* Video Call Components */}
