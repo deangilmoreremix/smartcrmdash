@@ -43,6 +43,7 @@ const VideoEmail = lazy(() => import('./pages/VideoEmail'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
 const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
+import SalesLandingPage from './pages/SalesLandingPage';
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 
@@ -105,7 +106,7 @@ function App() {
                   <AIProvider>
                     <Routes>
                       {/* Landing page routes (no navbar) */}
-                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/" element={<SalesLandingPage />} />
                       <Route path="/signin" element={<SignInPage />} />
                       <Route path="/signup" element={<SignUpPage />} />
                       <Route path="/login" element={<SignInPage />} />
