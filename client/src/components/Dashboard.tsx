@@ -75,13 +75,19 @@ const Dashboard: React.FC = React.memo(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
     
-    // Fetch all data when component mounts
+    // Fetch deals immediately - they're fast
     fetchDeals();
-    fetchContacts();
+    
+    // Fetch contacts in background without blocking dashboard
+    setTimeout(() => {
+      fetchContacts();
+    }, 100);
     
     // Wrap in try/catch to prevent errors from breaking the app
     try {
-      fetchAppointments();
+      setTimeout(() => {
+        fetchAppointments();
+      }, 200);
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }

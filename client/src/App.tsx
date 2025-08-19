@@ -102,7 +102,7 @@ function App() {
                   <AIProvider>
                     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                       <Navbar />
-                      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+                      <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                         <Routes>
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
