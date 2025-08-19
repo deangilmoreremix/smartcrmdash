@@ -65,32 +65,10 @@ const LandingPage = () => {
         onLoad={() => {
           console.log('Landing page iframe loaded successfully from cerulean-crepe');
           
-          // Intercept clicks on the existing buttons in the iframe
+          // Create precise overlay areas to intercept button clicks
           const iframe = document.querySelector('iframe[title="Smart CRM Landing Page"]') as HTMLIFrameElement;
-          if (iframe && iframe.contentWindow) {
-            try {
-              // Send message to iframe to set up click interception
-              iframe.contentWindow.postMessage({
-                type: 'intercept_buttons',
-                selectors: [
-                  'button:contains("Try")',
-                  'button:contains("Free")', 
-                  'a:contains("Try")',
-                  'a:contains("Free")',
-                  'a:contains("Start")',
-                  'button:contains("Start")',
-                  '.cta-button',
-                  '.try-button',
-                  '.start-button'
-                ],
-                redirectTo: window.location.origin + '/dashboard'
-              }, 'https://cerulean-crepe-9470cc.netlify.app');
-              
-              console.log('Button interception message sent to iframe');
-            } catch (error) {
-              console.log('Cross-origin restrictions prevent direct button interception');
-              
-              // Fallback: Create targeted overlay areas for likely button positions
+          if (iframe) {
+            setTimeout(() => {
               const overlay = document.createElement('div');
               overlay.style.position = 'absolute';
               overlay.style.top = '0';
@@ -98,17 +76,27 @@ const LandingPage = () => {
               overlay.style.width = '100%';
               overlay.style.height = '100%';
               overlay.style.pointerEvents = 'none';
-              overlay.style.zIndex = '10';
+              overlay.style.zIndex = '999';
+              overlay.id = 'button-intercept-overlay';
               
-              // Create click areas for common CTA button positions
+              // Precise button overlay positions based on typical landing page layouts
               const buttonAreas = [
-                { top: '15%', left: '35%', width: '30%', height: '10%' }, // Hero area
-                { top: '25%', left: '40%', width: '20%', height: '8%' },  // Secondary hero
-                { top: '85%', left: '35%', width: '30%', height: '10%' }, // Footer area
-                { top: '50%', left: '35%', width: '30%', height: '10%' }, // Mid-page CTA
+                // Main hero "Try it for free" button (usually center-top area)
+                { top: '45%', left: '42%', width: '16%', height: '6%', name: 'hero-cta' },
+                // Secondary CTA in hero section
+                { top: '55%', left: '42%', width: '16%', height: '5%', name: 'hero-secondary' },
+                // Navigation "Get Started" button (top right)
+                { top: '5%', left: '85%', width: '12%', height: '4%', name: 'nav-cta' },
+                // Mid-page CTA
+                { top: '70%', left: '42%', width: '16%', height: '6%', name: 'mid-cta' },
+                // Footer CTA
+                { top: '90%', left: '42%', width: '16%', height: '5%', name: 'footer-cta' },
+                // Pricing section buttons
+                { top: '75%', left: '25%', width: '15%', height: '5%', name: 'pricing-left' },
+                { top: '75%', left: '60%', width: '15%', height: '5%', name: 'pricing-right' },
               ];
               
-              buttonAreas.forEach(area => {
+              buttonAreas.forEach((area, index) => {
                 const clickArea = document.createElement('div');
                 clickArea.style.position = 'absolute';
                 clickArea.style.top = area.top;
@@ -117,18 +105,37 @@ const LandingPage = () => {
                 clickArea.style.height = area.height;
                 clickArea.style.pointerEvents = 'auto';
                 clickArea.style.cursor = 'pointer';
-                clickArea.style.background = 'transparent';
+                // Make overlay visible for testing - change to transparent once working
+                clickArea.style.background = 'rgba(0,0,255,0.15)'; // Blue tint for testing
+                clickArea.style.border = '2px solid rgba(0,0,255,0.4)';
+                clickArea.style.borderRadius = '8px';
+                clickArea.style.transition = 'all 0.2s ease';
+                clickArea.title = `Click here to access dashboard (${area.name})`;
+                
                 clickArea.addEventListener('click', (e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Intercepted button click, redirecting to dashboard');
+                  console.log(`🎯 Intercepted ${area.name} button click, redirecting to dashboard`);
                   navigate('/dashboard');
                 });
+                
+                // Hover effects
+                clickArea.addEventListener('mouseenter', () => {
+                  clickArea.style.background = 'rgba(0,0,255,0.3)';
+                  clickArea.style.transform = 'scale(1.02)';
+                });
+                clickArea.addEventListener('mouseleave', () => {
+                  clickArea.style.background = 'rgba(0,0,255,0.15)';
+                  clickArea.style.transform = 'scale(1)';
+                });
+                
                 overlay.appendChild(clickArea);
               });
               
               iframe.parentElement?.appendChild(overlay);
-            }
+              console.log('Button intercept overlay created with', buttonAreas.length, 'click areas');
+              
+            }, 2000); // Wait for iframe to fully load
           }
         }}
       />
