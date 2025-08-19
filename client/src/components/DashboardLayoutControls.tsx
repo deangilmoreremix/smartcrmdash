@@ -47,7 +47,7 @@ const DashboardLayoutControls: React.FC = () => {
   ];
 
   return (
-    <div className="fixed top-20 right-4 z-50">
+    <div className="fixed top-24 right-2 sm:right-4 z-50">
       <div className="relative">
         {/* Control Button */}
         <button
@@ -68,7 +68,7 @@ const DashboardLayoutControls: React.FC = () => {
 
         {/* Controls Panel */}
         {isOpen && (
-          <div className={`absolute top-16 right-0 w-80 ${
+          <div className={`absolute top-16 right-0 w-72 sm:w-80 ${
             isDark 
               ? 'bg-gray-800/95 border-white/10' 
               : 'bg-white/95 border-gray-200'

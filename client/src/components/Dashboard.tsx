@@ -200,7 +200,7 @@ const Dashboard: React.FC = React.memo(() => {
   };
 
   return (
-    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-4">
+    <main className="w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pt-4">
       {/* Dashboard Header - Always visible */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
