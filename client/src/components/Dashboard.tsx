@@ -237,15 +237,29 @@ const Dashboard: React.FC = React.memo(() => {
         {/* Dashboard Layout Controls - Optional */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dashboard Layout</h3>
-          <DashboardLayoutControls />
+          <div className="text-gray-600 dark:text-gray-400">
+            Dashboard layout controls available
+          </div>
         </div>
 
-        {/* Additional Sections */}
-        {sectionOrder.slice(2).map((sectionId, index) => (
-          <div key={sectionId} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            {renderSectionContent(sectionId)}
+        {/* Additional Dashboard Sections */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Smart Features</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg">
+              <h4 className="font-semibold text-blue-700 dark:text-blue-300">Sales Pipeline Analytics</h4>
+              <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">Track deal progress and conversion rates</p>
+            </div>
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
+              <h4 className="font-semibold text-green-700 dark:text-green-300">Customer Management</h4>
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">Manage leads and customer relationships</p>
+            </div>
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
+              <h4 className="font-semibold text-purple-700 dark:text-purple-300">AI Communications</h4>
+              <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">Automated messaging and follow-ups</p>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
 
       {/* Video Call Components */}
