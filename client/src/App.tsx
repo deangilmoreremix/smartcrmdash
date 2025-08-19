@@ -83,6 +83,7 @@ const IntelPage = lazy(() => import('./pages/IntelPage'));
 const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
 const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
 const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
+const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
 
 import './styles/design-system.css';
@@ -594,6 +595,14 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <ContentAIPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/analytics-remote"
+                            element={
+                              <ProtectedRoute>
+                                <AnalyticsRemotePage />
                               </ProtectedRoute>
                             }
                           />

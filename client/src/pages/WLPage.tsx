@@ -3,10 +3,8 @@ import RemoteWLLoader from '../components/RemoteWLLoader';
 
 const WLPage: React.FC = () => {
   return (
-    <div className="w-full h-screen pt-16">
-      <div className="w-full h-full">
-        <RemoteWLLoader />
-      </div>
+    <div className="fixed inset-0 z-40">
+      <RemoteWLLoader />
     </div>
   );
 };

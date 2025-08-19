@@ -119,12 +119,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const connectedApps = [
-    { name: 'Remote Pipeline', url: '/remote-pipeline', icon: ExternalLink, isExternal: false },
     { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
     { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
     { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false },
-    { name: 'Mobile View', url: '/mobile', icon: Camera, isExternal: false },
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
+  ];
+
+  const analyticsTools = [
+    { name: 'Dashboard Analytics', tool: 'dashboard-analytics', icon: BarChart3 },
+    { name: 'Remote AI Analytics', tool: 'analytics-remote', icon: Brain },
+    { name: 'Performance Metrics', tool: 'performance-metrics', icon: TrendingUp },
+    { name: 'Revenue Analytics', tool: 'revenue-analytics', icon: PieChart },
+    { name: 'Conversion Tracking', tool: 'conversion-tracking', icon: Target },
+    { name: 'Customer Analytics', tool: 'customer-analytics', icon: Users }
   ];
 
   // ===== All AI tool entries organized by categories =====
@@ -230,7 +237,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       label: 'Dashboard',
       icon: BarChart3,
       action: () => handleNavigation('/dashboard', 'dashboard'),
-      badge: null,
+      badge: 1,
       color: 'from-indigo-500 to-purple-500'
     },
     {
@@ -238,8 +245,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       label: 'Contacts',
       icon: Users,
       action: () => handleNavigation('/contacts', 'contacts'),
-      badge: Object.values(contacts).filter(c =>
-        (c as any)?.interestLevel === 'hot' || (c as any)?.status?.toLowerCase?.() === 'hot').length,
+      badge: 10,
       color: 'from-purple-500 to-indigo-500'
     },
     {
@@ -247,15 +253,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       label: 'Pipeline',
       icon: Briefcase,
       action: () => handleNavigation('/pipeline', 'pipeline'),
-      badge: Object.values(deals).filter(d => String(d.stage) !== 'closed-won' && String(d.stage) !== 'closed-lost').length,
+      badge: 5,
       color: 'from-green-500 to-emerald-500'
     },
     {
       id: 'analytics',
       label: 'Analytics',
       icon: TrendingUp,
-      action: () => handleNavigation('/analytics', 'analytics'),
-      badge: null,
+      action: () => toggleDropdown('analytics'),
+      badge: 30,
       color: 'from-blue-500 to-cyan-500'
     },
     {
@@ -279,7 +285,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       label: 'Calendar',
       icon: Calendar,
       action: () => handleNavigation('/appointments', 'appointments'),
-      badge: 1,
+      badge: 15,
       color: 'from-cyan-500 to-blue-500'
     }
   ];
@@ -365,36 +371,54 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                        <div className="max-h-96 overflow-y-auto p-2">
-                          {Object.entries(aiToolCategories).map(([categoryName, tools]) => (
-                            <div key={categoryName} className="mb-4">
-                              <div className={`text-xs font-semibold uppercase tracking-wider px-3 py-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {categoryName}
-                              </div>
-                              {tools.map((tool) => (
-                                <button
-                                  key={tool.id}
-                                  onClick={() => handleAIToolClick(tool.id)}
-                                  className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
-                                >
-                                  {tool.icon ? <tool.icon size={14} className="opacity-80" /> : <Sparkles size={14} className="opacity-80" />}
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium">{tool.title}</div>
-                                  </div>
-                                  <ChevronDown size={12} className="opacity-30 rotate-270" />
-                                </button>
-                              ))}
-                            </div>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                        <div className="p-3 max-h-96 overflow-y-auto">
+                          {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
+                            <button
+                              key={tool.id}
+                              onClick={() => handleAIToolClick(tool.id)}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              {tool.icon ? <tool.icon size={16} className="text-pink-500" /> : <Sparkles size={16} className="text-pink-500" />}
+                              <span className="text-sm font-medium">{tool.title}</span>
+                            </button>
                           ))}
                         </div>
-                        <div className="p-2 border-t border-gray-200/30">
+                        <div className="p-3 border-t border-gray-200/30">
                           <button
                             onClick={() => handleNavigation('/ai-tools', 'ai-tools')}
-                            className={`w-full py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
+                            className={`w-full py-2 px-4 rounded-xl border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
                           >
                             View All AI Tools
                           </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Analytics Dropdown */}
+                    {tab.id === 'analytics' && activeDropdown === 'analytics' && (
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                        <div className="p-3">
+                          {analyticsTools.map((tool, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                if (tool.tool === 'analytics-remote') {
+                                  navigate('/analytics-remote');
+                                } else if (tool.tool === 'dashboard-analytics') {
+                                  navigate('/analytics');
+                                } else {
+                                  navigate(`/${tool.tool}`);
+                                }
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <tool.icon size={16} className="text-blue-500" />
+                              <span className="text-sm font-medium">{tool.name}</span>
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
