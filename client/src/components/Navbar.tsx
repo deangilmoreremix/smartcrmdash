@@ -305,9 +305,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 p-2">
-      <div className="max-w-7xl mx-auto will-change-transform">
+      <div className="max-w-[90rem] mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
-          <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center justify-between px-6 py-2">
 
             {/* Logo */}
             <div className="flex items-center space-x-3">
@@ -327,7 +327,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             </div>
 
             {/* Desktop nav pills */}
-            <div className="hidden lg:flex items-center space-x-0.5">
+            <div className="hidden lg:flex items-center space-x-1">
               {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -339,7 +339,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.action(); 
                       }}
                       className={`
-                        relative flex items-center space-x-1 px-1.5 py-1 rounded-full 
+                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
                         transition-all duration-300 transform hover:scale-105 text-xs
                         ${isActive 
                           ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20` 
@@ -350,7 +350,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       title={tab.label}
                     >
                       <tab.icon size={12} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                      <span className="text-xs font-medium hidden xl:block">{tab.label}</span>
+                      <span className="text-xs font-medium hidden lg:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
                         tab.id === 'pipeline' ? 'bg-green-500' :
@@ -453,7 +453,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : menu.id === 'intel' ? 'Intel'
                         : 'Apps'}
                     </span>
-                    <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                    {/* Only show chevron for dropdown menus */}
+                    {(menu.id === 'sales' || menu.id === 'tasks' || menu.id === 'apps') && (
+                      <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                    )}
                     {renderBadge(menu.badge, menu.badgeColor)}
                     {activeDropdown === menu.id && (
                       <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
