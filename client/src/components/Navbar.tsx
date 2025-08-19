@@ -6,7 +6,7 @@ import {
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -72,15 +72,26 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     };
   }, [deals, contacts, tasks, appointments]);
 
-  // ===== SALES / TASK / COMM / CONTENT MENUS (unchanged lists) =====
+  // ===== UNIFIED TASKS DROPDOWN: View Options + Quick Actions + AI Features =====
   const taskTools = [
-    { name: 'Dashboard', tool: 'dashboard', icon: BarChart3 },
-    { name: 'Task Management', tool: 'tasks', icon: CheckSquare },
-    { name: 'Task Automation', tool: 'task-automation', icon: Bot },
-    { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },
-    { name: 'Time Tracking', tool: 'time-tracking', icon: Clock },
-    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat },
-    { name: 'Deadline Manager', tool: 'deadline-manager', icon: AlertTriangle }
+    // VIEW OPTIONS (navigate to TasksNew.tsx tabs)
+    { name: 'Task Board', tool: 'tasks', icon: CheckSquare, action: 'navigate', tab: 'board' },
+    { name: 'Task Calendar', tool: 'tasks', icon: Calendar, action: 'navigate', tab: 'calendar' },
+    { name: 'Task Analytics', tool: 'tasks', icon: BarChart3, action: 'navigate', tab: 'analytics' },
+    { name: 'Activity Feed', tool: 'tasks', icon: Activity, action: 'navigate', tab: 'activity' },
+    { type: 'divider' },
+    
+    // QUICK ACTIONS
+    { name: 'New Task', tool: 'new-task', icon: Plus, action: 'modal' },
+    { name: 'Search Tasks', tool: 'search-tasks', icon: Search, action: 'search' },
+    { name: 'Task Templates', tool: 'task-templates', icon: FileText, action: 'templates' },
+    { type: 'divider' },
+    
+    // AI ENHANCEMENTS
+    { name: 'AI Task Assistant', tool: 'task-automation', icon: Bot },
+    { name: 'Smart Prioritization', tool: 'smart-priority', icon: Zap },
+    { name: 'Deadline Optimizer', tool: 'deadline-manager', icon: AlertTriangle },
+    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat }
   ];
 
   const salesTools = [
@@ -522,16 +533,62 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   {menu.id === 'tasks' && activeDropdown === 'tasks' && (
                     <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-3">
-                        {taskTools.map((tool, index) => (
-                          <button
-                            key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
-                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                          >
-                            <tool.icon size={16} className="text-orange-500" />
-                            <span className="text-sm font-medium">{tool.name}</span>
-                          </button>
-                        ))}
+                        {taskTools.map((tool, index) => {
+                          // Handle dividers
+                          if (tool.type === 'divider') {
+                            return (
+                              <div key={index} className={`h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'} my-2`} />
+                            );
+                          }
+                          
+                          return (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                console.log('Task tool clicked:', tool.tool, tool.name, tool.action);
+                                
+                                // Handle different action types
+                                switch (tool.action) {
+                                  case 'navigate':
+                                    // Navigate to tasks page with specific tab
+                                    if (tool.tab) {
+                                      navigate(`/tasks?tab=${tool.tab}`);
+                                    } else {
+                                      navigate('/tasks');
+                                    }
+                                    break;
+                                  case 'modal':
+                                    // Open specific modal/action
+                                    if (tool.tool === 'new-task') {
+                                      navigate('/tasks?action=new');
+                                    }
+                                    break;
+                                  case 'search':
+                                    navigate('/tasks?action=search');
+                                    break;
+                                  case 'templates':
+                                    navigate('/tasks?action=templates');
+                                    break;
+                                  default:
+                                    // AI Tools - use existing AI tool handler
+                                    if (openAITool && tool.tool) {
+                                      openAITool(tool.tool);
+                                    } else if (tool.tool) {
+                                      navigate(`/${tool.tool}`);
+                                    }
+                                    break;
+                                }
+                                
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              {tool.icon && <tool.icon size={16} className="text-orange-500" />}
+                              <span className="text-sm font-medium">{tool.name}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
