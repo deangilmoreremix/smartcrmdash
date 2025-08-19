@@ -11,6 +11,9 @@ import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import RemotePipelineLoader from './RemotePipelineLoader';
+import RemoteWhiteLabelLoader from './RemoteWhiteLabelLoader';
+import RemoteProductResearchLoader from './RemoteProductResearchLoader';
+import RemoteAIAnalyticsLoader from './RemoteAIAnalyticsLoader';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -205,6 +208,27 @@ const Dashboard: React.FC = React.memo(() => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tasks & Activities</h3>
             <LoadingSpinner message="Loading tasks..." size="lg" />
+          </div>
+        );
+
+      case 'white-label-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+            <RemoteWhiteLabelLoader showHeader={true} />
+          </div>
+        );
+
+      case 'product-research-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+            <RemoteProductResearchLoader showHeader={true} />
+          </div>
+        );
+
+      case 'ai-analytics-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+            <RemoteAIAnalyticsLoader showHeader={true} />
           </div>
         );
 

@@ -243,6 +243,30 @@ const sectionConfigs: Record<string, SectionConfig> = {
     icon: 'BarChart3',
     component: null,
     color: 'from-indigo-500 to-purple-500'
+  },
+  'white-label-section': {
+    id: 'white-label-section',
+    title: 'White Label Suite',
+    description: 'Comprehensive white label solutions and customization tools',
+    icon: 'Palette',
+    component: null,
+    color: 'from-indigo-500 to-purple-500'
+  },
+  'product-research-section': {
+    id: 'product-research-section',
+    title: 'Product Research',
+    description: 'Advanced product research and market analysis tools',
+    icon: 'Search',
+    component: null,
+    color: 'from-teal-500 to-cyan-500'
+  },
+  'ai-analytics-section': {
+    id: 'ai-analytics-section',
+    title: 'AI Analytics Dashboard',
+    description: 'Advanced AI-powered analytics and insights',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-emerald-500 to-green-500'
   }
 };
 
