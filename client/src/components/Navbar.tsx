@@ -127,10 +127,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const analyticsOptions = [
     { name: 'Analytics Dashboard', url: '/analytics', icon: BarChart3 },
-    { name: 'Sales Performance', url: '/sales-performance', icon: TrendingUp },
-    { name: 'Pipeline Analytics', url: '/pipeline-analytics', icon: Briefcase },
-    { name: 'Revenue Reports', url: '/revenue-reports', icon: DollarSign },
-    { name: 'Customer Insights', url: '/customer-insights', icon: Users },
     { name: 'Insights AI Module', url: '/analytics-remote', icon: Brain }
   ];
 
