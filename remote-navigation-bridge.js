@@ -1,7 +1,8 @@
 /**
- * Remote App Navigation Bridge
+ * Simplified Remote App Navigation Bridge
  * Add this code to each remote app to enable navigation control of the parent CRM
  * 
+ * This is a simplified version that focuses on navigation without complex data sync
  * Usage: Copy this entire code block into each remote app's main JavaScript file
  */
 
