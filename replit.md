@@ -50,6 +50,13 @@ Design Implementation: Always use the exact design, styling, and structure from 
 - Resolved performance issues by removing complex local implementations in favor of direct remote embedding
 - User confirmed navigation functionality is working as expected
 
+## Landing Page Embedding Implementation (2025-01-19)
+- **Embedded Landing Page Solution**: Successfully implemented iframe embedding for exact landing page design
+- **URL Updated**: Changed from https://clever-longma-b767dd.netlify.app to https://cerulean-crepe-9470cc.netlify.app per user request
+- **Route Isolation**: Landing page ("/") uses embedded iframe while preserving all other routes (/login, /register, /dashboard, etc.)
+- **Navigation Bridge**: Secure postMessage communication between embedded page and CRM for routing
+- **Authentication Preservation**: Sign in/sign out pages remain fully customizable and independent of embedded content
+
 # System Architecture
 
 ## Frontend Architecture

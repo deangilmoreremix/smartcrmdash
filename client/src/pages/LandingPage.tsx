@@ -8,7 +8,7 @@ const LandingPage = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Security: only accept messages from the embedded landing page
-      if (event.origin !== 'https://clever-longma-b767dd.netlify.app') return;
+      if (event.origin !== 'https://cerulean-crepe-9470cc.netlify.app') return;
       
       if (event.data?.type === 'navigate') {
         const path = event.data.path;
@@ -23,9 +23,9 @@ const LandingPage = () => {
   
   return (
     <div className="w-full h-screen overflow-hidden">
-      {/* Embedded Landing Page - Exact design from reference URL */}
+      {/* Embedded Landing Page - Updated design from new reference URL */}
       <iframe
-        src="https://clever-longma-b767dd.netlify.app"
+        src="https://cerulean-crepe-9470cc.netlify.app"
         className="w-full h-full border-0"
         title="Smart CRM Landing Page"
         style={{
@@ -33,7 +33,7 @@ const LandingPage = () => {
           background: 'white'
         }}
         onLoad={() => {
-          console.log('Landing page iframe loaded successfully');
+          console.log('Landing page iframe loaded successfully from cerulean-crepe');
         }}
       />
     </div>
