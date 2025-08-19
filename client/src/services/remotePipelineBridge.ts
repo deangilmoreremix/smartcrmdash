@@ -1,87 +1,116 @@
-// Remote Pipeline Bridge - Cross-Origin Communication Service
-export interface CRMDeal {
-  id: string;
-  title: string;
-  value: number;
-  stage: string;
-  contactId: string;
-  contactName?: string;
-  company?: string;
-  probability?: number;
-  expectedCloseDate?: string;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+// Remote Pipeline Bridge Service
+// Manages communication between CRM and remote pipeline module
 
-export interface CRMPipelineData {
-  deals: CRMDeal[];
-  stages: string[];
-  totalValue: number;
-  activeDeals: number;
+export interface RemotePipelineStatus {
+  isConnected: boolean;
+  lastSync: Date | null;
+  dealCount: number;
+  errorMessage?: string;
+  connectionAttempts: number;
 }
 
 export interface PipelineMessage {
   type: string;
-  data?: any;
-  source: 'CRM' | 'REMOTE_PIPELINE';
+  data: any;
+  source: string;
   timestamp: number;
 }
 
 export class RemotePipelineBridge {
   private iframe: HTMLIFrameElement | null = null;
-  private messageHandlers = new Map<string, (data: any) => void>();
-  private targetOrigin = 'https://cheery-syrniki-b5b6ca.netlify.app';
-  private isConnected = false;
+  private status: RemotePipelineStatus;
+  private statusCallback: (status: RemotePipelineStatus) => void;
+  private maxAttempts = 3;
+  private retryDelay = 2000;
+  private messageHandler: (event: MessageEvent) => void;
 
-  constructor() {
-    this.initialize();
+  constructor(statusCallback: (status: RemotePipelineStatus) => void) {
+    this.statusCallback = statusCallback;
+    this.status = {
+      isConnected: false,
+      lastSync: null,
+      dealCount: 0,
+      connectionAttempts: 0
+    };
+    
+    // Store bound message handler for proper cleanup
+    this.messageHandler = this.handleMessage.bind(this);
+    window.addEventListener('message', this.messageHandler);
   }
 
-  private initialize() {
-    // Listen for messages from remote pipeline
-    window.addEventListener('message', this.handleMessage.bind(this));
-
-    console.log('🔗 Pipeline Bridge initialized');
+  setIframe(iframe: HTMLIFrameElement | null) {
+    this.iframe = iframe;
   }
 
   private handleMessage(event: MessageEvent) {
-    // Security check - only accept messages from our target origin
-    if (event.origin !== this.targetOrigin) {
+    // Security check for allowed origins
+    const allowedOrigins = [
+      'https://cheery-syrniki-b5b6ca.netlify.app',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+    
+    if (!allowedOrigins.some(origin => event.origin.includes(origin.replace('https://', '').replace('http://', '')))) {
       return;
     }
 
     try {
       const message: PipelineMessage = event.data;
+      if (!message || message.source !== 'REMOTE_PIPELINE') return;
 
-      if (!message || typeof message !== 'object' || message.source !== 'REMOTE_PIPELINE') {
-        return;
-      }
+      console.log('📨 Remote pipeline message received:', message.type);
 
-      console.log('📨 Pipeline message received:', message.type, message.data);
-
-      const handler = this.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message.data);
+      switch (message.type) {
+        case 'REMOTE_READY':
+          console.log('🎯 Remote pipeline ready, initializing...');
+          this.updateStatus({ connectionAttempts: this.status.connectionAttempts + 1 });
+          this.initializePipeline();
+          break;
+          
+        case 'CRM_INIT_COMPLETE':
+          this.updateStatus({
+            isConnected: true,
+            lastSync: new Date(),
+            dealCount: message.data?.dealsReceived || 0
+          });
+          console.log('✅ Remote pipeline initialized successfully');
+          break;
+          
+        case 'BRIDGE_READY':
+          // Bridge code is loaded and ready
+          this.updateStatus({ connectionAttempts: this.status.connectionAttempts + 1 });
+          setTimeout(() => this.initializePipeline(), 500);
+          break;
+          
+        case 'DEAL_UPDATED':
+        case 'DEAL_CREATED':
+        case 'DEAL_DELETED':
+        case 'DEAL_STAGE_CHANGED':
+          this.updateStatus({ lastSync: new Date() });
+          // These would be handled by the parent component
+          break;
+          
+        case 'CONNECTION_ERROR':
+          this.updateStatus({
+            isConnected: false,
+            errorMessage: message.data?.error || 'Connection error'
+          });
+          break;
       }
     } catch (error) {
-      console.warn('⚠️ Failed to parse pipeline message:', error);
+      console.error('❌ Failed to handle remote pipeline message:', error);
     }
   }
 
-  public setIframe(iframe: HTMLIFrameElement) {
-    this.iframe = iframe;
-    console.log('📺 Pipeline iframe connected');
+  private updateStatus(updates: Partial<RemotePipelineStatus>) {
+    this.status = { ...this.status, ...updates };
+    this.statusCallback(this.status);
   }
 
-  public onMessage(type: string, handler: (data: any) => void) {
-    this.messageHandlers.set(type, handler);
-  }
-
-  private sendMessage(type: string, data?: any) {
-    if (!this.iframe || !this.iframe.contentWindow) {
-      console.warn('⚠️ No pipeline iframe available for messaging');
-      return;
+  private sendMessage(type: string, data: any = null) {
+    if (!this.iframe?.contentWindow) {
+      console.warn('⚠️ Remote pipeline iframe not ready');
+      return false;
     }
 
     const message: PipelineMessage = {
@@ -92,161 +121,214 @@ export class RemotePipelineBridge {
     };
 
     try {
-      this.iframe.contentWindow.postMessage(message, this.targetOrigin);
-      console.log('📤 Pipeline message sent:', type, data);
+      this.iframe.contentWindow.postMessage(message, '*');
+      console.log('📤 Message sent to remote pipeline:', type);
+      return true;
     } catch (error) {
-      console.error('❌ Failed to send pipeline message:', error);
+      console.error('❌ Failed to send message to remote pipeline:', error);
+      return false;
     }
   }
 
-  // Initialize CRM connection with pipeline data
-  public initializeCRM(pipelineData: CRMPipelineData, crmInfo: { name: string; version: string }) {
-    console.log('🚀 Initializing CRM connection with pipeline data');
-    this.sendMessage('CRM_INIT', {
-      pipelineData,
-      crmInfo,
-      timestamp: Date.now()
-    });
-  }
-
-  // Sync deals with remote pipeline
-  public syncDeals(deals: CRMDeal[]) {
-    console.log('🔄 Syncing deals with remote pipeline:', deals.length, 'deals');
-    this.sendMessage('SYNC_DEALS', { deals });
-  }
-
-  // Request pipeline data from remote
-  public requestPipelineData() {
-    console.log('📥 Requesting pipeline data from remote');
-    this.sendMessage('REQUEST_PIPELINE_DATA');
-  }
-
-  // Update deal in remote pipeline
-  public updateDeal(dealId: string, updates: Partial<CRMDeal>) {
-    console.log('✏️ Updating deal in remote pipeline:', dealId, updates);
-    this.sendMessage('UPDATE_DEAL', { dealId, updates });
-  }
-
-  // Create new deal in remote pipeline
-  public createDeal(deal: Omit<CRMDeal, 'id'>) {
-    console.log('📝 Creating deal in remote pipeline:', deal);
-    this.sendMessage('CREATE_DEAL', { deal });
-  }
-
-  // Delete deal in remote pipeline
-  public deleteDeal(dealId: string) {
-    console.log('🗑️ Deleting deal in remote pipeline:', dealId);
-    this.sendMessage('DELETE_DEAL', { dealId });
-  }
-
-  // Move deal to different stage
-  public moveDeal(dealId: string, newStage: string, position?: number) {
-    console.log('↔️ Moving deal in remote pipeline:', dealId, 'to', newStage);
-    this.sendMessage('MOVE_DEAL', { dealId, newStage, position });
-  }
-
-  // Set connection status
-  public setConnected(status: boolean) {
-    this.isConnected = status;
-    console.log('🔗 Pipeline connection status:', status ? 'Connected' : 'Disconnected');
-  }
-
-  public getConnectionStatus(): boolean {
-    return this.isConnected;
-  }
-
-  // Inject bridge code into remote pipeline (if accessible)
-  public injectBridgeCode() {
-    if (!this.iframe || !this.iframe.contentWindow) {
-      console.warn('⚠️ Cannot inject bridge code - no iframe available');
+  initializePipeline() {
+    if (!this.iframe?.contentWindow) {
+      console.warn('⚠️ Remote pipeline iframe not ready for initialization');
       return;
     }
 
-    const bridgeScript = `
-      // CRM Pipeline Bridge Integration
-      window.crmBridge = {
-        send: (type, data) => {
-          window.parent.postMessage({
-            type,
-            data,
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        },
+    // First, try to inject the bridge code
+    this.injectBridgeCode();
+    
+    // Then send initialization data
+    setTimeout(() => {
+      this.sendInitializationData();
+    }, 1000);
+  }
 
-        ready: () => {
-          window.parent.postMessage({
-            type: 'REMOTE_READY',
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        },
-
-        onDealUpdate: (deal) => {
-          window.parent.postMessage({
-            type: 'DEAL_UPDATED',
-            data: deal,
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        },
-
-        onDealCreate: (deal) => {
-          window.parent.postMessage({
-            type: 'DEAL_CREATED',
-            data: deal,
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        },
-
-        onDealDelete: (dealId) => {
-          window.parent.postMessage({
-            type: 'DEAL_DELETED',
-            data: { id: dealId },
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        },
-
-        onStageChange: (dealId, oldStage, newStage) => {
-          window.parent.postMessage({
-            type: 'DEAL_STAGE_CHANGED',
-            data: { dealId, oldStage, newStage },
-            source: 'REMOTE_PIPELINE',
-            timestamp: Date.now()
-          }, '*');
-        }
-      };
-
-      // Notify CRM that bridge is ready
-      setTimeout(() => {
+  private injectBridgeCode() {
+    const bridgeCode = `
+      (function() {
         if (window.crmBridge) {
-          window.crmBridge.ready();
+          console.log('CRM Bridge already exists');
+          window.parent.postMessage({
+            type: 'BRIDGE_READY',
+            source: 'REMOTE_PIPELINE',
+            timestamp: Date.now()
+          }, '*');
+          return;
         }
-      }, 1000);
+
+        console.log('Injecting CRM Bridge code...');
+        
+        class CRMPipelineBridge {
+          constructor() {
+            this.deals = [];
+            this.stages = [];
+            this.isInitialized = false;
+            window.addEventListener('message', this.handleMessage.bind(this));
+            console.log('CRM Pipeline Bridge initialized');
+            
+            // Notify parent that bridge is ready
+            window.parent.postMessage({
+              type: 'BRIDGE_READY',
+              source: 'REMOTE_PIPELINE',
+              timestamp: Date.now()
+            }, '*');
+          }
+
+          handleMessage(event) {
+            try {
+              const message = event.data;
+              if (!message || message.source !== 'CRM') return;
+              
+              console.log('CRM message received:', message.type);
+              
+              switch (message.type) {
+                case 'CRM_INIT':
+                  this.handleInit(message.data);
+                  break;
+                case 'SYNC_DEALS':
+                  this.handleDealsSync(message.data.deals);
+                  break;
+              }
+            } catch (error) {
+              console.error('Failed to handle CRM message:', error);
+            }
+          }
+
+          handleInit(data) {
+            console.log('CRM initialization received');
+            this.deals = data.pipelineData.deals || [];
+            this.stages = data.pipelineData.stages || [];
+            this.isInitialized = true;
+            
+            // Update UI if possible
+            this.updateUI();
+            
+            // Confirm initialization
+            window.parent.postMessage({
+              type: 'CRM_INIT_COMPLETE',
+              data: {
+                dealsReceived: this.deals.length,
+                stagesReceived: this.stages.length
+              },
+              source: 'REMOTE_PIPELINE',
+              timestamp: Date.now()
+            }, '*');
+          }
+
+          handleDealsSync(deals) {
+            console.log('Syncing deals:', deals.length);
+            this.deals = deals;
+            this.updateUI();
+          }
+
+          updateUI() {
+            // Try to update the UI with deal data
+            if (window.updatePipelineData) {
+              window.updatePipelineData(this.deals, this.stages);
+            }
+            
+            // Dispatch custom event for the app to listen
+            window.dispatchEvent(new CustomEvent('crmDataUpdated', {
+              detail: { deals: this.deals, stages: this.stages }
+            }));
+            
+            console.log('UI updated with', this.deals.length, 'deals');
+          }
+
+          sendToCRM(type, data) {
+            window.parent.postMessage({
+              type,
+              data,
+              source: 'REMOTE_PIPELINE',
+              timestamp: Date.now()
+            }, '*');
+          }
+        }
+
+        window.crmBridge = new CRMPipelineBridge();
+        console.log('CRM Bridge injection complete');
+      })();
     `;
 
+    // Try direct injection via eval in iframe context
     try {
-      // Attempt to inject script (will only work if same-origin or CORS allows)
-      const script = this.iframe.contentDocument?.createElement('script');
-      if (script) {
-        script.textContent = bridgeScript;
-        this.iframe.contentDocument?.head?.appendChild(script);
-        console.log('✅ Bridge script injected successfully');
+      if (this.iframe?.contentWindow) {
+        // Use setTimeout to inject after the remote app loads
+        setTimeout(() => {
+          try {
+            if (this.iframe?.contentWindow) {
+              this.iframe.contentWindow.eval(bridgeCode);
+              console.log('Bridge code injected via eval');
+            }
+          } catch (evalError) {
+            console.warn('Direct injection failed, trying postMessage method');
+            this.sendMessage('INJECT_BRIDGE', { code: bridgeCode });
+          }
+        }, 500);
       }
     } catch (error) {
-      console.log('ℹ️ Bridge injection not possible (CORS/Same-origin policy) - using postMessage only');
-      // Fallback: send bridge code as message
-      this.sendMessage('INJECT_BRIDGE', { script: bridgeScript });
+      console.warn('Bridge injection failed:', error);
     }
   }
 
-  // Cleanup
-  public disconnect() {
-    console.log('🔌 Disconnecting pipeline bridge');
-    this.messageHandlers.clear();
-    this.iframe = null;
-    this.isConnected = false;
+  private sendInitializationData() {
+    // Get deals and contacts from stores (these would be passed in)
+    const deals = []; // This would come from useDealStore
+    const contacts = []; // This would come from useContactStore
+    
+    const initData = {
+      crmInfo: {
+        name: 'Smart CRM Dashboard',
+        version: '2.0.0',
+        timestamp: new Date().toISOString()
+      },
+      pipelineData: {
+        deals,
+        stages: [
+          { id: 'lead', name: 'Lead', order: 1 },
+          { id: 'qualified', name: 'Qualified', order: 2 },
+          { id: 'proposal', name: 'Proposal', order: 3 },
+          { id: 'negotiation', name: 'Negotiation', order: 4 },
+          { id: 'won', name: 'Won', order: 5 },
+          { id: 'lost', name: 'Lost', order: 6 }
+        ]
+      },
+      contactsData: contacts
+    };
+
+    this.sendMessage('CRM_INIT', initData);
+  }
+
+  retry() {
+    if (this.status.connectionAttempts >= this.maxAttempts) {
+      this.updateStatus({
+        isConnected: false,
+        errorMessage: 'Max connection attempts reached'
+      });
+      return false;
+    }
+
+    this.updateStatus({
+      isConnected: false,
+      errorMessage: undefined,
+      connectionAttempts: this.status.connectionAttempts + 1
+    });
+
+    // Reload iframe
+    if (this.iframe) {
+      this.iframe.src = this.iframe.src;
+    }
+
+    return true;
+  }
+
+  getStatus(): RemotePipelineStatus {
+    return { ...this.status };
+  }
+
+  destroy() {
+    window.removeEventListener('message', this.messageHandler);
   }
 }

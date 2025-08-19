@@ -8,15 +8,9 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../hooks/useContactStore';
+import { useContactStore } from '../store/contactStore';
 import { useTheme } from '../contexts/ThemeContext';
-
-interface RemotePipelineBridge {
-  isConnected: boolean;
-  lastSync: Date | null;
-  dealCount: number;
-  errorMessage?: string;
-}
+import { RemotePipelineBridge, type RemotePipelineStatus } from '../services/remotePipelineBridge';
 
 const Pipeline: React.FC = () => {
   const { isDark } = useTheme();
@@ -25,169 +19,52 @@ const Pipeline: React.FC = () => {
   
   // Remote Pipeline Integration State
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [bridgeStatus, setBridgeStatus] = useState<RemotePipelineBridge>({
+  const bridgeRef = useRef<RemotePipelineBridge | null>(null);
+  const [bridgeStatus, setBridgeStatus] = useState<RemotePipelineStatus>({
     isConnected: false,
     lastSync: null,
-    dealCount: 0
+    dealCount: 0,
+    connectionAttempts: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showLocalFallback, setShowLocalFallback] = useState(false);
-  const [connectionAttempts, setConnectionAttempts] = useState(0);
   
   const REMOTE_PIPELINE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
   const MAX_CONNECTION_ATTEMPTS = 3;
 
-  // Remote Pipeline Bridge Communication
+  // Initialize Remote Pipeline Bridge
   useEffect(() => {
-    const handleRemoteMessage = (event: MessageEvent) => {
-      // Security check for remote pipeline domain
-      if (!event.origin.includes('netlify.app') && !event.origin.includes('localhost')) {
-        return;
-      }
-
-      try {
-        const message = event.data;
-        if (!message || message.source !== 'REMOTE_PIPELINE') return;
-
-        console.log('📨 Remote pipeline message:', message.type, message.data);
-
-        switch (message.type) {
-          case 'REMOTE_READY':
-            console.log('🎯 Remote pipeline ready, initializing...');
-            initializeRemotePipeline();
-            break;
-            
-          case 'CRM_INIT_COMPLETE':
-            setBridgeStatus(prev => ({
-              ...prev,
-              isConnected: true,
-              lastSync: new Date(),
-              dealCount: message.data?.dealsReceived || 0
-            }));
-            setIsLoading(false);
-            console.log('✅ Remote pipeline initialized successfully');
-            break;
-            
-          case 'DEAL_UPDATED':
-            if (message.data) {
-              updateDeal(message.data.id, message.data);
-              setBridgeStatus(prev => ({ ...prev, lastSync: new Date() }));
-            }
-            break;
-            
-          case 'DEAL_CREATED':
-            if (message.data) {
-              addDeal(message.data);
-              setBridgeStatus(prev => ({ ...prev, lastSync: new Date() }));
-            }
-            break;
-            
-          case 'DEAL_DELETED':
-            if (message.data?.id) {
-              deleteDeal(message.data.id);
-              setBridgeStatus(prev => ({ ...prev, lastSync: new Date() }));
-            }
-            break;
-            
-          case 'NAVIGATE':
-            // Handle navigation requests from remote pipeline
-            if (message.data?.route) {
-              window.location.hash = message.data.route;
-            }
-            break;
-        }
-      } catch (error) {
-        console.error('❌ Failed to handle remote pipeline message:', error);
-      }
-    };
-
-    window.addEventListener('message', handleRemoteMessage);
-    
-    // Initialize connection after a brief delay
-    const initTimer = setTimeout(() => {
-      if (!bridgeStatus.isConnected && connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
-        setConnectionAttempts(prev => prev + 1);
-      }
-    }, 2000);
+    if (!bridgeRef.current) {
+      bridgeRef.current = new RemotePipelineBridge((status: RemotePipelineStatus) => {
+        setBridgeStatus(status);
+        setIsLoading(!status.isConnected && status.connectionAttempts < MAX_CONNECTION_ATTEMPTS);
+        setShowLocalFallback(status.connectionAttempts >= MAX_CONNECTION_ATTEMPTS && !status.isConnected);
+      });
+    }
 
     return () => {
-      window.removeEventListener('message', handleRemoteMessage);
-      clearTimeout(initTimer);
+      if (bridgeRef.current) {
+        bridgeRef.current.destroy();
+        bridgeRef.current = null;
+      }
     };
-  }, [bridgeStatus.isConnected, connectionAttempts, addDeal, updateDeal, deleteDeal]);
+  }, []);
 
-  // Initialize Remote Pipeline with CRM Data
-  const initializeRemotePipeline = () => {
-    if (!iframeRef.current?.contentWindow) {
-      console.warn('⚠️ Remote pipeline iframe not ready');
-      return;
+  // Update iframe reference when it changes
+  useEffect(() => {
+    if (bridgeRef.current && iframeRef.current) {
+      bridgeRef.current.setIframe(iframeRef.current);
     }
-
-    const dealsArray = Array.isArray(deals) ? deals : Object.values(deals);
-    const contactsArray = Array.isArray(contacts) ? contacts : Object.values(contacts);
-
-    const initData = {
-      type: 'CRM_INIT',
-      data: {
-        crmInfo: {
-          name: 'Smart CRM Dashboard',
-          version: '2.0.0',
-          timestamp: new Date().toISOString()
-        },
-        pipelineData: {
-          deals: dealsArray,
-          stages: [
-            { id: 'lead', name: 'Lead', order: 1 },
-            { id: 'qualified', name: 'Qualified', order: 2 },
-            { id: 'proposal', name: 'Proposal', order: 3 },
-            { id: 'negotiation', name: 'Negotiation', order: 4 },
-            { id: 'won', name: 'Won', order: 5 },
-            { id: 'lost', name: 'Lost', order: 6 }
-          ]
-        },
-        contactsData: contactsArray
-      },
-      source: 'CRM',
-      timestamp: Date.now()
-    };
-
-    try {
-      iframeRef.current.contentWindow.postMessage(initData, '*');
-      console.log('📤 Initialization data sent to remote pipeline');
-    } catch (error) {
-      console.error('❌ Failed to send init data to remote pipeline:', error);
-      handleConnectionFailure();
-    }
-  };
-
-  // Handle connection failure
-  const handleConnectionFailure = () => {
-    setBridgeStatus(prev => ({
-      ...prev,
-      isConnected: false,
-      errorMessage: 'Failed to connect to remote pipeline'
-    }));
-    setIsLoading(false);
-    
-    if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
-      setShowLocalFallback(true);
-    }
-  };
+  }, [iframeRef.current]);
 
   // Retry connection
   const retryConnection = () => {
-    setIsLoading(true);
-    setBridgeStatus({
-      isConnected: false,
-      lastSync: null,
-      dealCount: 0
-    });
-    setConnectionAttempts(0);
-    setShowLocalFallback(false);
-    
-    // Reload iframe
-    if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
+    if (bridgeRef.current) {
+      const success = bridgeRef.current.retry();
+      if (success) {
+        setIsLoading(true);
+        setShowLocalFallback(false);
+      }
     }
   };
 
@@ -323,7 +200,7 @@ const Pipeline: React.FC = () => {
                 Connecting to remote pipeline module...
               </p>
               <div className={`mt-4 text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                Attempt {connectionAttempts + 1} of {MAX_CONNECTION_ATTEMPTS}
+                Attempt {bridgeStatus.connectionAttempts + 1} of {MAX_CONNECTION_ATTEMPTS}
               </div>
             </div>
           </div>
@@ -334,19 +211,26 @@ const Pipeline: React.FC = () => {
           src={REMOTE_PIPELINE_URL}
           className="w-full h-screen border-0"
           title="Remote Pipeline Management"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation"
+          allow="clipboard-read; clipboard-write"
           onLoad={() => {
             console.log('📱 Remote pipeline iframe loaded');
-            // Give the remote app time to initialize
+            // Give the remote app time to initialize before connecting bridge
             setTimeout(() => {
-              if (!bridgeStatus.isConnected && connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
-                initializeRemotePipeline();
+              if (bridgeRef.current) {
+                bridgeRef.current.initializePipeline();
               }
-            }, 1000);
+            }, 2000);
           }}
-          onError={() => {
-            console.error('❌ Remote pipeline iframe failed to load');
-            handleConnectionFailure();
+          onError={(e) => {
+            console.error('❌ Remote pipeline iframe failed to load:', e);
+            setIsLoading(false);
+            setBridgeStatus(prev => ({
+              ...prev,
+              isConnected: false,
+              errorMessage: 'Failed to load remote pipeline',
+              connectionAttempts: prev.connectionAttempts + 1
+            }));
           }}
         />
       </div>
