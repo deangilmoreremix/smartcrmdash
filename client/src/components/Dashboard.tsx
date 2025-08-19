@@ -195,29 +195,61 @@ const Dashboard: React.FC = React.memo(() => {
   };
 
   return (
-    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
+    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-4">
       {/* Dashboard Header - Always visible */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
       </div>
 
+      {/* Show section count for debugging */}
+      <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Sections loaded: {sectionOrder.length} | Active sections: {sectionOrder.join(', ')}
+      </div>
+
       {/* Dashboard Layout Controls - RESTORED */}
       <DashboardLayoutControls />
 
-      {/* Draggable Sections - RESTORED */}
+      {/* Draggable Sections - RESTORED with error boundary */}
       <div className="space-y-8 pb-20">
-        {sectionOrder.map((sectionId, index) => (
-          <DraggableSection
-            key={sectionId}
-            sectionId={sectionId}
-            index={index}
-          >
-            <div id={sectionId}>
-              {renderSectionContent(sectionId)}
-            </div>
-          </DraggableSection>
-        ))}
+        {sectionOrder && sectionOrder.length > 0 ? (
+          sectionOrder.map((sectionId, index) => {
+            try {
+              return (
+                <DraggableSection
+                  key={sectionId}
+                  sectionId={sectionId}
+                  index={index}
+                >
+                  <div id={sectionId}>
+                    {renderSectionContent(sectionId)}
+                  </div>
+                </DraggableSection>
+              );
+            } catch (error) {
+              console.error(`Error rendering section ${sectionId}:`, error);
+              return (
+                <div key={sectionId} className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                  <h3 className="text-red-800 dark:text-red-200 font-semibold">Error loading section: {sectionId}</h3>
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">Check console for details</p>
+                </div>
+              );
+            }
+          })
+        ) : (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-xl border border-blue-200 dark:border-blue-800">
+            <h3 className="text-blue-800 dark:text-blue-200 font-semibold mb-2">Dashboard Loading</h3>
+            <p className="text-blue-600 dark:text-blue-400">
+              No dashboard sections available. Please check the dashboard layout configuration.
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Reload Dashboard
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Video Call Components */}

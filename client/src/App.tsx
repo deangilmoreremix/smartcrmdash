@@ -100,9 +100,10 @@ function App() {
               <NavigationProvider>
                 <DashboardLayoutProvider>
                   <AIProvider>
-                    <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+                    <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
                       <Navbar />
-                      <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                      <div className="flex-1 overflow-hidden">
+                        <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                         <Routes>
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -564,7 +565,8 @@ function App() {
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
-                      </Suspense>
+                        </Suspense>
+                      </div>
                     </div>
                   </AIProvider>
                 </DashboardLayoutProvider>
