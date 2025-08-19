@@ -480,26 +480,8 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
           isOpen={isToolOpen}
           onClose={closeTool}
           title={toolInfo?.title || 'AI Tool'}
-          icon={toolInfo?.icon || <Brain size={24} />}
         >
-          {toolInfo?.component || (
-            <div className="text-center py-8">
-              <div className="mb-4">
-                {toolInfo?.icon || <Brain size={48} className="mx-auto text-gray-400" />}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                {toolInfo?.title || 'AI Tool'}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                This AI tool is currently being developed. Check back soon for full functionality!
-              </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm">
-                  🚀 Coming Soon: Advanced AI capabilities for enhanced productivity
-                </p>
-              </div>
-            </div>
-          )}
+          {toolInfo?.component}
         </AIToolModal>
       )}
     </AIToolsContext.Provider>
