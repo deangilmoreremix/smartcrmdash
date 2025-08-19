@@ -125,6 +125,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
 
+  const analyticsOptions = [
+    { name: 'Analytics Dashboard', url: '/analytics', icon: BarChart3 },
+    { name: 'Sales Performance', url: '/sales-performance', icon: TrendingUp },
+    { name: 'Pipeline Analytics', url: '/pipeline-analytics', icon: Briefcase },
+    { name: 'Revenue Reports', url: '/revenue-reports', icon: DollarSign },
+    { name: 'Customer Insights', url: '/customer-insights', icon: Users },
+    { name: 'Insights AI Module', url: '/analytics-remote', icon: Brain }
+  ];
+
 
 
   // ===== All AI tool entries organized by categories =====
@@ -393,15 +402,24 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     )}
 
-                    {/* Analytics Dropdown - placeholder for future analytics tools */}
+                    {/* Analytics Dropdown */}
                     {tab.id === 'analytics' && activeDropdown === 'analytics' && (
                       <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                         <div className="p-3">
-                          <div className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                            <BarChart3 size={32} className="mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">Analytics dropdown placeholder</p>
-                            <p className="text-xs opacity-75">What would you like to add here?</p>
-                          </div>
+                          {analyticsOptions.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                navigate(option.url);
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <option.icon size={16} className="text-blue-500" />
+                              <span className="text-sm font-medium">{option.name}</span>
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
