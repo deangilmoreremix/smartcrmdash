@@ -275,8 +275,8 @@ export class RemotePipelineBridge {
 
   private sendInitializationData() {
     // Get deals and contacts from stores (these would be passed in)
-    const deals = []; // This would come from useDealStore
-    const contacts = []; // This would come from useContactStore
+    const deals: any[] = []; // This would come from useDealStore
+    const contacts: any[] = []; // This would come from useContactStore
     
     const initData = {
       crmInfo: {
@@ -285,7 +285,7 @@ export class RemotePipelineBridge {
         timestamp: new Date().toISOString()
       },
       pipelineData: {
-        deals,
+        deals: deals as any[],
         stages: [
           { id: 'lead', name: 'Lead', order: 1 },
           { id: 'qualified', name: 'Qualified', order: 2 },
@@ -295,7 +295,7 @@ export class RemotePipelineBridge {
           { id: 'lost', name: 'Lost', order: 6 }
         ]
       },
-      contactsData: contacts
+      contactsData: contacts as any[]
     };
 
     this.sendMessage('CRM_INIT', initData);

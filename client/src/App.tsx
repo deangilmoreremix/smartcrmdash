@@ -152,7 +152,7 @@ function App() {
                             path="/pipeline"
                             element={
                               <ProtectedRoute>
-                                <PipelinePage />
+                                <Pipeline />
                               </ProtectedRoute>
                             }
                           />
