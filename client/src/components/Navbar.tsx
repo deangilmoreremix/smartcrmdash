@@ -447,9 +447,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         handleNavigation('/wl', 'wl');
                       } else if (menu.id === 'intel') {
                         handleNavigation('/intel', 'intel');
-                      } else if (menu.id === 'communication') {
-                        // Show video call demo message instead of actual call
-                        alert('Video call feature demo - In a real environment, this would initiate a video call with your team. Camera/microphone permissions would be required.');
                       } else {
                         toggleDropdown(menu.id, e);
                       }
@@ -483,7 +480,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : 'Apps'}
                     </span>
                     {/* Only show chevron for dropdown menus */}
-                    {(menu.id === 'sales' || menu.id === 'tasks' || menu.id === 'apps') && (
+                    {(menu.id === 'sales' || menu.id === 'tasks' || menu.id === 'communication' || menu.id === 'apps') && (
                       <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                     )}
                     {renderBadge(menu.badge, menu.badgeColor)}
