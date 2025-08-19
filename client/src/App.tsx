@@ -79,6 +79,11 @@ const BusinessIntelPage = lazy(() => import('./pages/BusinessIntelPage'));
 const WLPage = lazy(() => import('./pages/WLPage'));
 const IntelPage = lazy(() => import('./pages/IntelPage'));
 
+// Connected Apps Remote Pages
+const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
+const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
+const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
+
 
 import './styles/design-system.css';
 
@@ -563,6 +568,32 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <IntelPage />
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          {/* Connected Apps Remote Pages */}
+                          <Route
+                            path="/funnelcraft-ai"
+                            element={
+                              <ProtectedRoute>
+                                <FunnelCraftPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/smartcrm-closer"
+                            element={
+                              <ProtectedRoute>
+                                <SmartCRMPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/content-ai"
+                            element={
+                              <ProtectedRoute>
+                                <ContentAIPage />
                               </ProtectedRoute>
                             }
                           />

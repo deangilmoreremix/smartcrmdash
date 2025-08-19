@@ -48,6 +48,11 @@ Design Implementation: Always use the exact design, styling, and structure from 
 - **Integration**: Direct integration of multiple remote modules (Contacts, Pipeline, White Label Suite, Product Research, AI Analytics Dashboard) via iframes.
 - **Communication**: Bidirectional PostMessage-based bridge system for real-time data synchronization and navigation control between remote modules and CRM.
 - **Scalability**: Supports multiple remote modules with consistent loading patterns and a unified loading system.
+- **Connected Apps Conversion (2025-01-19)**: Converted external connected apps to remote embedded apps with full-screen integration:
+  - FunnelCraft AI (/funnelcraft-ai) - Enhanced funnel creation and AI optimization tools
+  - SmartCRM Closer (/smartcrm-closer) - Advanced sales closing and CRM intelligence  
+  - ContentAI (/content-ai) - AI-powered content generation and optimization platform
+- **Remote App Architecture**: All connected apps now use consistent remote loader pattern with light mode communication and full-screen display.
 
 ## Comprehensive CRM System Pages
 - Implemented 9 comprehensive, ready-to-use pages: PhoneSystem, Invoicing, ContentLibrary, FormsAndSurveys, VoiceProfiles, BusinessAnalysis, Appointments, CircleProspecting, CommunicationHub.

@@ -120,9 +120,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const connectedApps = [
     { name: 'Remote Pipeline', url: '/remote-pipeline', icon: ExternalLink, isExternal: false },
-    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
-    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
-    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
+    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
+    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
+    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false },
     { name: 'Mobile View', url: '/mobile', icon: Camera, isExternal: false },
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
