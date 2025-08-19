@@ -406,7 +406,25 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               {dropdownMenus.map(menu => (
                 <div key={menu.id} className="relative">
                   <button
-                    onClick={(e) => { e.stopPropagation(); toggleDropdown(menu.id, e); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      if (menu.id === 'business-intel') {
+                        handleNavigation('/business-intel', 'business-intel');
+                      } else if (menu.id === 'wl') {
+                        handleNavigation('/wl', 'wl');
+                      } else if (menu.id === 'intel') {
+                        handleNavigation('/intel', 'intel');
+                      } else if (menu.id === 'communication') {
+                        // Trigger video call popup instead of dropdown
+                        initiateCall({
+                          id: 'demo-contact',
+                          name: 'Team Member',
+                          email: 'team@company.com'
+                        }, 'video');
+                      } else {
+                        toggleDropdown(menu.id, e);
+                      }
+                    }}
                     data-dropdown-toggle="true"
                     className={`
                       relative flex items-center space-x-1 px-2 py-1.5 rounded-full 

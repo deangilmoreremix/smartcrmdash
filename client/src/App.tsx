@@ -74,6 +74,11 @@ import SmartEmailOptimizer from './pages/SmartEmailOptimizer';
 import SentimentMonitor from './pages/SentimentMonitor';
 import CommPerformance from './pages/CommPerformance';
 
+// New remote embed pages
+const BusinessIntelPage = lazy(() => import('./pages/BusinessIntelPage'));
+const WLPage = lazy(() => import('./pages/WLPage'));
+const IntelPage = lazy(() => import('./pages/IntelPage'));
+
 
 import './styles/design-system.css';
 
@@ -532,6 +537,32 @@ function App() {
                             element={
                               <ProtectedRoute>
                                 <BusinessAnalysis />
+                              </ProtectedRoute>
+                            }
+                          />
+                          
+                          {/* Remote Embed Pages */}
+                          <Route
+                            path="/business-intel"
+                            element={
+                              <ProtectedRoute>
+                                <BusinessIntelPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/wl"
+                            element={
+                              <ProtectedRoute>
+                                <WLPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/intel"
+                            element={
+                              <ProtectedRoute>
+                                <IntelPage />
                               </ProtectedRoute>
                             }
                           />
