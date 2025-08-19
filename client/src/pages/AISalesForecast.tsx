@@ -28,7 +28,7 @@ const AISalesForecast: React.FC = () => {
 
   // Calculate forecast metrics
   const dealsArray = Object.values(deals);
-  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(d.stage));
+  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(String(d.stage)));
   const totalPipelineValue = activeDeals.reduce((sum, deal) => sum + deal.value, 0);
   const weightedForecast = activeDeals.reduce((sum, deal) => sum + (deal.value * (deal.probability / 100)), 0);
   const bestCase = totalPipelineValue * 0.8;
@@ -215,16 +215,15 @@ const AISalesForecast: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Avatar
-                    name={deal.contactName || 'Unknown'}
                     size="sm"
-                    fallback={getInitials(deal.contactName || 'UN')}
+                    fallback={getInitials(deal.title || 'UN')}
                   />
                   <div>
                     <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {deal.title}
                     </p>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {deal.contactName} • {deal.stage}
+                      Deal #{deal.id} • {String(deal.stage)}
                     </p>
                   </div>
                 </div>
