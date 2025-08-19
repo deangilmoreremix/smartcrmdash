@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+// import { useAuth } from '../hooks/useAuth';
+import { HashLink } from 'react-router-hash-link';
 import { 
   Brain, 
   Mail, 
@@ -30,12 +32,26 @@ import {
   Calendar
 } from 'lucide-react';
 
-// Import landing page components
+import LandingHeader from './landing/components/LandingHeader';
+import LandingFooter from './landing/components/LandingFooter';
 import PricingCard from './landing/components/PricingCard';
 import FeatureCard from './landing/components/FeatureCard';
 import TestimonialCard from './landing/components/TestimonialCard';
+// Advanced components will be implemented in phases
+// Using existing components for now to match the exact design structure
 
 const LandingPage = () => {
+  // const { user, isLoaded } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  // useEffect(() => {
+  //   if (isLoaded && user) {
+  //     console.log('✅ Authenticated user detected, redirecting to dashboard');
+  //     navigate('/dashboard');
+  //   }
+  // }, [isLoaded, user, navigate]);
+
   // Function to handle page initialization only once
   useEffect(() => {
     const preloadHighPriorityAssets = () => {
@@ -58,26 +74,77 @@ const LandingPage = () => {
   
   return (
     <div className="bg-white content-stable">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <LandingHeader />
+      
+      {/* Hero Section - Professional design matching reference */}
+      <section className="pt-24 pb-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden relative">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Smart CRM</span>
-            </Link>
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
-              <a href="#faq" className="text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
-              <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Get Started
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Smart CRM for Modern Sales Teams
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+              Boost your sales with AI-powered insights, automated workflows, and comprehensive customer relationship management.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/register" className="px-8 py-4 bg-white text-blue-700 font-medium rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105">
+                Start Your Free Trial
               </Link>
-            </nav>
+              <Link to="/dashboard" className="px-8 py-4 bg-green-500 bg-opacity-90 hover:bg-opacity-100 text-white font-medium rounded-lg hover:shadow-lg transition duration-300 flex items-center">
+                <ExternalLink size={18} className="mr-1.5" />
+                Go to Dashboard
+              </Link>
+            </div>
+            <p className="mt-4 opacity-80">No credit card required • Free for 14 days</p>
           </div>
         </div>
-      </header>
+      </section>
+
+      {/* Stats Counter Section */}
+      <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">The Impact of Smart CRM</h2>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+              Real results from businesses using our AI-powered CRM platform
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="bg-white rounded-xl p-6 text-center shadow-lg">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp size={24} />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">32%</div>
+              <div className="text-gray-600">Sales Growth</div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 text-center shadow-lg">
+              <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock size={24} />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">9.5</div>
+              <div className="text-gray-600">Hours Saved Weekly</div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 text-center shadow-lg">
+              <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart size={24} />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">24%</div>
+              <div className="text-gray-600">Lead Conversion</div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 text-center shadow-lg">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users size={24} />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">5000+</div>
+              <div className="text-gray-600">Happy Customers</div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden relative">
