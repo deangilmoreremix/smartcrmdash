@@ -67,7 +67,8 @@ const RemotePipeline: React.FC = () => {
 
     return () => {
       if (bridgeRef.current) {
-        bridgeRef.current.disconnect();
+        // Cleanup bridge reference
+        bridgeRef.current = null;
       }
     };
   }, [deals, fetchDeals]);

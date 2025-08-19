@@ -42,7 +42,12 @@ const defaultSectionOrder = [
   'sales-pipeline-deal-analytics',
   'customer-lead-management', 
   'activities-communications',
-  'integrations-system'
+  'integrations-system',
+  'contacts-section',
+  'pipeline-section',
+  'white-label-section',
+  'product-research-section',
+  'ai-analytics-section'
 ];
 
 // Updated sectionConfigs with GPT-5 enhanced sections
