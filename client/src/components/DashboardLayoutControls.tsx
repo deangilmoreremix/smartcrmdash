@@ -38,8 +38,17 @@ const DashboardLayoutControls: React.FC = () => {
   };
 
   const allSections = [
-    'ai-section',
-    'pipeline-section', 
+    'gpt5-enhanced-dashboard',
+    'gpt5-smart-kpi-section',
+    'executive-overview-section',
+    'gpt5-analytics-section',
+    'gpt5-deal-intelligence-section',
+    'ai-smart-features-hub',
+    'sales-pipeline-deal-analytics',
+    'customer-lead-management',
+    'activities-communications',
+    'integrations-system',
+    'pipeline-section',
     'contacts-section',
     'tasks-section',
     'apps-section',

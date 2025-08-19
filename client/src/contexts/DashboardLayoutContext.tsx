@@ -261,7 +261,7 @@ export const DashboardLayoutProvider: React.FC<{ children: React.ReactNode }> = 
       console.warn('Failed to load dashboard sections from localStorage:', error);
       localStorage.removeItem('dashboard-section-order');
     }
-    console.log('Using default section order:', defaultSectionOrder);
+
     return [...defaultSectionOrder];
   });
   

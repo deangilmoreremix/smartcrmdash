@@ -63,10 +63,7 @@ const Dashboard: React.FC = React.memo(() => {
   const { isDark } = useTheme();
   const { sectionOrder } = useDashboardLayout();
   
-  // Debug log
-  useEffect(() => {
-    console.log('Dashboard sectionOrder updated:', sectionOrder);
-  }, [sectionOrder]);
+
   
   const gemini = useGemini();
   
@@ -207,10 +204,7 @@ const Dashboard: React.FC = React.memo(() => {
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
       </div>
 
-      {/* Show section count for debugging */}
-      <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Sections loaded: {sectionOrder.length} | Active sections: {sectionOrder.join(', ')}
-      </div>
+
 
       {/* Dashboard Layout Controls - RESTORED */}
       <DashboardLayoutControls />
