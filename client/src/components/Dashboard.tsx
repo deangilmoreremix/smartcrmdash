@@ -9,6 +9,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
 import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';
+import { LoadingSpinner } from './ui/LoadingSpinner';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -182,6 +183,30 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'apps-section':
         return <ConnectedApps />;
+
+      case 'contacts-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contacts & Leads</h3>
+            <LoadingSpinner message="Loading contacts..." size="lg" />
+          </div>
+        );
+
+      case 'pipeline-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pipeline & Deals</h3>
+            <LoadingSpinner message="Loading pipeline..." size="lg" />
+          </div>
+        );
+
+      case 'tasks-section':
+        return (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tasks & Activities</h3>
+            <LoadingSpinner message="Loading tasks..." size="lg" />
+          </div>
+        );
 
       default:
         // Show fallback content instead of null
