@@ -295,7 +295,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 p-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 p-2">
       <div className="max-w-7xl mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
           <div className="flex items-center justify-between px-4 py-2">

@@ -4,19 +4,30 @@
 
 /* Essential full-screen setup */
 html, body {
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
-  width: 100%;
   overflow-x: hidden;
+  position: relative;
 }
 
 #root {
-  min-height: 100vh;
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  position: relative;
+}
+
+/* Hide any development banners or overlays */
+.replit-banner,
+.replit-dev-banner,
+[class*="replit"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Custom scrollbar for dark mode */

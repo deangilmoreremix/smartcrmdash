@@ -100,7 +100,7 @@ function App() {
               <NavigationProvider>
                 <DashboardLayoutProvider>
                   <AIProvider>
-                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                    <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
                       <Navbar />
                       <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                         <Routes>
