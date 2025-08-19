@@ -10,6 +10,7 @@ import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
 import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import RemotePipelineLoader from './RemotePipelineLoader';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -194,9 +195,8 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'pipeline-section':
         return (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pipeline & Deals</h3>
-            <LoadingSpinner message="Loading pipeline..." size="lg" />
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+            <RemotePipelineLoader showHeader={true} />
           </div>
         );
 
