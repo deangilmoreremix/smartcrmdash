@@ -248,9 +248,21 @@ const sectionConfigs: Record<string, SectionConfig> = {
 
 export const DashboardLayoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
-    // Load from localStorage first, then use default
-    const saved = localStorage.getItem('dashboard-section-order');
-    return saved ? JSON.parse(saved) : defaultSectionOrder;
+    // Ensure we always have sections loaded
+    try {
+      const saved = localStorage.getItem('dashboard-section-order');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load dashboard sections from localStorage:', error);
+      localStorage.removeItem('dashboard-section-order');
+    }
+    console.log('Using default section order:', defaultSectionOrder);
+    return [...defaultSectionOrder];
   });
   
   const [isDragging, setIsDragging] = useState(false);

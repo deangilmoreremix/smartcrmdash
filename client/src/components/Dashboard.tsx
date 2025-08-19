@@ -63,6 +63,11 @@ const Dashboard: React.FC = React.memo(() => {
   const { isDark } = useTheme();
   const { sectionOrder } = useDashboardLayout();
   
+  // Debug log
+  useEffect(() => {
+    console.log('Dashboard sectionOrder updated:', sectionOrder);
+  }, [sectionOrder]);
+  
   const gemini = useGemini();
   
   // Prevent repeated data fetching by using a ref to track initialization
