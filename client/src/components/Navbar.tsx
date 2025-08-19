@@ -194,6 +194,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     setActiveTab(tabName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
+    // Force update to ensure tab state is properly set
+    setTimeout(() => {
+      setActiveTab(tabName);
+    }, 100);
   }, [navigate, location.pathname]);
 
   const handleAIToolClick = useCallback((toolId: string) => {
@@ -330,8 +334,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.action(); 
                       }}
                       className={`
-                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
-                        transition-all duration-300 transform hover:scale-105
+                        relative flex items-center space-x-1 px-1.5 py-1 rounded-full 
+                        transition-all duration-300 transform hover:scale-105 text-xs
                         ${isActive 
                           ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20` 
                           : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
@@ -340,8 +344,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       `}
                       title={tab.label}
                     >
-                      <tab.icon size={14} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                      <span className="text-xs font-medium">{tab.label}</span>
+                      <tab.icon size={12} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      <span className="text-xs font-medium hidden xl:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
                         tab.id === 'pipeline' ? 'bg-green-500' :
