@@ -202,21 +202,49 @@ const Dashboard: React.FC = React.memo(() => {
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
       </div>
 
-      {/* Dashboard Layout Controls */}
-      <DashboardLayoutControls />
-
-      {/* Draggable Sections */}
+      {/* Simple Dashboard Content - Always shows */}
       <div className="space-y-8 pb-20">
-        {sectionOrder.map((sectionId, index) => (
-          <DraggableSection
-            key={sectionId}
-            sectionId={sectionId}
-            index={index}
-          >
-            <div id={sectionId}>
-              {renderSectionContent(sectionId)}
-            </div>
-          </DraggableSection>
+        {/* GPT-5 Enhanced Dashboard */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <GPT5EnhancedDashboard />
+        </div>
+
+        {/* Executive Overview */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <ExecutiveOverviewSection />
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-xl text-white">
+            <h3 className="text-lg font-semibold mb-2">Total Contacts</h3>
+            <p className="text-3xl font-bold">{Object.keys(contacts).length}</p>
+          </div>
+          <div className="bg-gradient-to-r from-green-500 to-teal-600 p-6 rounded-xl text-white">
+            <h3 className="text-lg font-semibold mb-2">Active Deals</h3>
+            <p className="text-3xl font-bold">{deals.length}</p>
+          </div>
+          <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6 rounded-xl text-white">
+            <h3 className="text-lg font-semibold mb-2">Pending Tasks</h3>
+            <p className="text-3xl font-bold">{tasks.filter(task => !task.completed).length}</p>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 rounded-xl text-white">
+            <h3 className="text-lg font-semibold mb-2">Appointments</h3>
+            <p className="text-3xl font-bold">{Object.keys(appointments).length}</p>
+          </div>
+        </div>
+
+        {/* Dashboard Layout Controls - Optional */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dashboard Layout</h3>
+          <DashboardLayoutControls />
+        </div>
+
+        {/* Additional Sections */}
+        {sectionOrder.slice(2).map((sectionId, index) => (
+          <div key={sectionId} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            {renderSectionContent(sectionId)}
+          </div>
         ))}
       </div>
 
