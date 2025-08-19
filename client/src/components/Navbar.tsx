@@ -125,14 +125,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
   ];
 
-  const analyticsTools = [
-    { name: 'Dashboard Analytics', tool: 'dashboard-analytics', icon: BarChart3 },
-    { name: 'Remote AI Analytics', tool: 'analytics-remote', icon: Brain },
-    { name: 'Performance Metrics', tool: 'performance-metrics', icon: TrendingUp },
-    { name: 'Revenue Analytics', tool: 'revenue-analytics', icon: PieChart },
-    { name: 'Conversion Tracking', tool: 'conversion-tracking', icon: Target },
-    { name: 'Customer Analytics', tool: 'customer-analytics', icon: Users }
-  ];
+
 
   // ===== All AI tool entries organized by categories =====
   const aiToolCategories = {
@@ -262,7 +255,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       icon: TrendingUp,
       action: () => toggleDropdown('analytics'),
       badge: 30,
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
+      hasDropdown: true
     },
     {
       id: 'ai-goals',
@@ -364,7 +358,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'ai-goals' ? 'bg-orange-500' :
                         tab.id === 'ai-tools' ? 'bg-pink-500' :
                         tab.id === 'appointments' ? 'bg-cyan-500' :
+                        tab.id === 'analytics' ? 'bg-blue-500' :
                         'bg-blue-500'
+                      )}
+                      {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
+                        <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
@@ -395,30 +393,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     )}
 
-                    {/* Analytics Dropdown */}
+                    {/* Analytics Dropdown - placeholder for future analytics tools */}
                     {tab.id === 'analytics' && activeDropdown === 'analytics' && (
                       <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                         <div className="p-3">
-                          {analyticsTools.map((tool, index) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                if (tool.tool === 'analytics-remote') {
-                                  navigate('/analytics-remote');
-                                } else if (tool.tool === 'dashboard-analytics') {
-                                  navigate('/analytics');
-                                } else {
-                                  navigate(`/${tool.tool}`);
-                                }
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              }}
-                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                            >
-                              <tool.icon size={16} className="text-blue-500" />
-                              <span className="text-sm font-medium">{tool.name}</span>
-                            </button>
-                          ))}
+                          <div className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <BarChart3 size={32} className="mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">Analytics dropdown placeholder</p>
+                            <p className="text-xs opacity-75">What would you like to add here?</p>
+                          </div>
                         </div>
                       </div>
                     )}
