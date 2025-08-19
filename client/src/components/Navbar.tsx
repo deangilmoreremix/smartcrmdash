@@ -6,11 +6,11 @@ import {
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
-import { useVideoCall } from '../contexts/VideoCallContext';
+
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
 import { useTaskStore } from "../store/taskStore";
@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
-  const { initiateCall } = useVideoCall();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -108,16 +108,17 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const communicationTools = [
-    { name: 'Video Call', tool: 'video-call-popup', icon: Video, isVideoCall: true },
+    { name: 'Appointments', tool: 'appointments', icon: Calendar },
     { name: 'Video Email', tool: 'video-email', icon: Video },
     { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
-    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone },
-    { name: 'Group Calls', tool: 'group-calls', icon: Users },
-    { name: 'Call Recording', tool: 'call-recording', icon: Mic },
-    { name: 'In-Call Messaging', tool: 'in-call-messaging', icon: MessageCircle },
-    { name: 'Call Analytics', tool: 'call-analytics', icon: BarChart3 },
-    { name: 'Connection Quality Monitor', tool: 'connection-quality', icon: Activity }
+    { name: 'Phone System', tool: 'phone-system', icon: Phone },
+    { name: 'Invoicing', tool: 'invoicing', icon: FileText },
+    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
+    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: MapPin },
+    { name: 'Forms & Surveys', tool: 'forms', icon: FileCheck },
+    { name: 'Business Analyzer', tool: 'business-analysis', icon: BarChart3 },
+    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
+    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic }
   ];
 
   const contentTools = [
@@ -599,16 +600,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         {communicationTools.map((tool, index) => (
                           <button
                             key={index}
-                            onClick={() => { 
-                              if (tool.isVideoCall) {
-                                initiateCall({ id: 'demo-contact', name: 'Demo Contact', email: 'demo@example.com' }, 'video');
-                                setActiveDropdown(null); 
-                                setIsMobileMenuOpen(false);
-                              } else {
-                                navigate(`/${tool.tool}`); 
-                                setActiveDropdown(null); 
-                                setIsMobileMenuOpen(false); 
-                              }
+                            onClick={() => {
+                              navigate(`/${tool.tool}`); 
+                              setActiveDropdown(null); 
+                              setIsMobileMenuOpen(false); 
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
