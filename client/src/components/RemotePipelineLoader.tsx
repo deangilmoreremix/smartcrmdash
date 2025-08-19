@@ -1,8 +1,6 @@
-// Remote Pipeline Loader - Similar to contacts without spinner
-import React, { useEffect, useRef, useState } from 'react';
+// Remote Pipeline Loader - Simplified to match other remote apps
+import React, { useRef, useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
-import { RemotePipelineBridge } from '../services/remotePipelineBridge';
-import { useDealStore } from '../store/dealStore';
 
 interface RemotePipelineLoaderProps {
   showHeader?: boolean;
@@ -12,59 +10,19 @@ const RemotePipelineLoader: React.FC<RemotePipelineLoaderProps> = ({
   showHeader = false 
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const bridgeRef = useRef<RemotePipelineBridge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { deals, fetchDeals } = useDealStore();
   const REMOTE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
 
   useEffect(() => {
-    // Initialize the bridge
-    if (!bridgeRef.current) {
-      bridgeRef.current = new RemotePipelineBridge((status) => {
-        setIsConnected(status.isConnected);
-        setIsLoading(false);
-        if (status.errorMessage) {
-          setError(status.errorMessage);
-        }
-      });
-    }
-
-    return () => {
-      if (bridgeRef.current) {
-        // Cleanup bridge reference
-        bridgeRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     const iframe = iframeRef.current;
-    if (iframe && bridgeRef.current) {
+    if (iframe) {
       const handleLoad = () => {
         setError(null);
         setIsLoading(false);
-        
-        if (bridgeRef.current) {
-          bridgeRef.current.setIframe(iframe);
-          // Quick injection for faster loading
-          setTimeout(() => {
-            if (bridgeRef.current) {
-              try {
-                // Try to initialize pipeline if method exists
-                if (typeof bridgeRef.current.initializePipeline === 'function') {
-                  bridgeRef.current.initializePipeline();
-                } else {
-                  console.log('Pipeline initialization method not available');
-                }
-              } catch (e) {
-                console.warn('Pipeline initialization skipped:', e);
-              }
-            }
-          }, 500);
-        }
+        setIsConnected(true);
       };
 
       const handleError = () => {
@@ -93,7 +51,6 @@ const RemotePipelineLoader: React.FC<RemotePipelineLoaderProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Optional Header */}
       {showHeader && (
         <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
@@ -122,7 +79,6 @@ const RemotePipelineLoader: React.FC<RemotePipelineLoaderProps> = ({
         </div>
       )}
 
-      {/* Content */}
       <div className="flex-1 relative">
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 dark:bg-red-900/20">
@@ -144,7 +100,6 @@ const RemotePipelineLoader: React.FC<RemotePipelineLoaderProps> = ({
           </div>
         )}
 
-        {/* Show iframe immediately without loading overlay */}
         <iframe
           ref={iframeRef}
           src={REMOTE_URL}
