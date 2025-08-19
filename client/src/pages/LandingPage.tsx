@@ -31,8 +31,6 @@ import {
 } from 'lucide-react';
 
 // Import landing page components
-import LandingHeader from './landing/components/LandingHeader';
-import LandingFooter from './landing/components/LandingFooter';
 import PricingCard from './landing/components/PricingCard';
 import FeatureCard from './landing/components/FeatureCard';
 import TestimonialCard from './landing/components/TestimonialCard';
@@ -60,7 +58,26 @@ const LandingPage = () => {
   
   return (
     <div className="bg-white content-stable">
-      <LandingHeader />
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <Brain className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">Smart CRM</span>
+            </Link>
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
+              <a href="#faq" className="text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
+              <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
+              <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Get Started
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
       
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden relative">
@@ -273,9 +290,9 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <PricingCard
-              title="Starter"
-              price="Free"
-              period=""
+              tier="Starter"
+              price={0}
+              description="Perfect for getting started"
               features={[
                 "Up to 1,000 contacts",
                 "Basic pipeline management",
@@ -284,13 +301,12 @@ const LandingPage = () => {
                 "Standard support"
               ]}
               buttonText="Get Started Free"
-              buttonLink="/register"
             />
             
             <PricingCard
-              title="Professional"
-              price="$29"
-              period="per user/month"
+              tier="Professional"
+              price={29}
+              description="Most popular choice"
               features={[
                 "Unlimited contacts",
                 "Advanced AI tools",
@@ -300,14 +316,13 @@ const LandingPage = () => {
                 "Integrations"
               ]}
               buttonText="Start Free Trial"
-              buttonLink="/register"
-              highlighted={true}
+              popular={true}
             />
             
             <PricingCard
-              title="Enterprise"
-              price="Custom"
-              period=""
+              tier="Enterprise"
+              price={99}
+              description="For large organizations"
               features={[
                 "Everything in Professional",
                 "Custom AI models",
@@ -317,7 +332,6 @@ const LandingPage = () => {
                 "Training & onboarding"
               ]}
               buttonText="Contact Sales"
-              buttonLink="/contact"
             />
           </div>
         </div>
@@ -337,27 +351,30 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <TestimonialCard
+              quote="This CRM transformed our sales process. The AI insights helped us increase our close rate by 40%."
               name="Sarah Johnson"
-              role="Sales Director"
+              position="Sales Director"
               company="TechCorp Inc."
-              rating={5}
-              text="This CRM transformed our sales process. The AI insights helped us increase our close rate by 40%."
+              image="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
+              stars={5}
             />
             
             <TestimonialCard
+              quote="The automation features saved us 20 hours per week. Best investment we've made for our sales team."
               name="Michael Chen"
-              role="Founder"
+              position="Founder"
               company="StartupXYZ"
-              rating={5}
-              text="The automation features saved us 20 hours per week. Best investment we've made for our sales team."
+              image="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
+              stars={5}
             />
             
             <TestimonialCard
+              quote="Incredible platform! The communication hub keeps all our customer interactions organized and accessible."
               name="Emily Davis"
-              role="Marketing Manager"
+              position="Marketing Manager"
               company="GrowthCo"
-              rating={5}
-              text="Incredible platform! The communication hub keeps all our customer interactions organized and accessible."
+              image="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
+              stars={5}
             />
           </div>
         </div>
@@ -407,8 +424,50 @@ const LandingPage = () => {
           </Link>
         </div>
       </section>
-      
-      <LandingFooter />
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1">
+              <div className="flex items-center space-x-2 mb-4">
+                <Brain className="h-8 w-8 text-blue-400" />
+                <span className="text-xl font-bold text-white">Smart CRM</span>
+              </div>
+              <p className="text-gray-400 mb-4">
+                The AI-powered CRM that transforms how sales teams work and win.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Product</h4>
+              <ul className="space-y-2">
+                <li><Link to="/features/ai-tools" className="hover:text-white transition-colors">AI Tools</Link></li>
+                <li><Link to="/features/contacts" className="hover:text-white transition-colors">Contact Management</Link></li>
+                <li><Link to="/features/pipeline" className="hover:text-white transition-colors">Pipeline</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400">© 2025 Smart CRM. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
