@@ -72,6 +72,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   // ===== SALES / TASK / COMM / CONTENT MENUS (unchanged lists) =====
   const taskTools = [
+    { name: 'Dashboard', tool: 'dashboard', icon: BarChart3 },
     { name: 'Task Management', tool: 'tasks', icon: CheckSquare },
     { name: 'Task Automation', tool: 'task-automation', icon: Bot },
     { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },

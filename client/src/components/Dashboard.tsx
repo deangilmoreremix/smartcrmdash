@@ -105,10 +105,20 @@ const Dashboard: React.FC = React.memo(() => {
     switch (sectionId) {
       // Check if section component exists before rendering
       case 'executive-overview-section':
-        return typeof ExecutiveOverviewSection === 'function' ? <ExecutiveOverviewSection /> : null;
+        return typeof ExecutiveOverviewSection === 'function' ? <ExecutiveOverviewSection /> : (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Executive Overview</h3>
+            <p className="text-gray-600 dark:text-gray-400">Dashboard content loading...</p>
+          </div>
+        );
 
       case 'ai-smart-features-hub':
-        return typeof AISmartFeaturesHub === 'function' ? <AISmartFeaturesHub /> : null;
+        return typeof AISmartFeaturesHub === 'function' ? <AISmartFeaturesHub /> : (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Smart Features Hub</h3>
+            <p className="text-gray-600 dark:text-gray-400">AI tools and features loading...</p>
+          </div>
+        );
 
       case 'sales-pipeline-deal-analytics':
         return typeof SalesPipelineDealAnalytics === 'function' ? <SalesPipelineDealAnalytics /> : null;
@@ -172,7 +182,15 @@ const Dashboard: React.FC = React.memo(() => {
         return <ConnectedApps />;
 
       default:
-        return null;
+        // Show fallback content instead of null
+        return (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {sectionId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">Loading dashboard content...</p>
+          </div>
+        );
     }
   };
 
