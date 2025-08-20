@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TenantProvider } from './contexts/TenantProvider';
@@ -14,6 +14,7 @@ import { AIProvider } from './contexts/AIContext';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
+import { universalDataSync } from './services/universalDataSync';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
@@ -120,13 +121,19 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 function App() {
-  // Initialize universal sync on app start
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Initialize universal data sync
   useEffect(() => {
-    // Initialize universal data sync service on app start
-    import('./services/universalDataSync').then(({ universalDataSync }) => {
-      universalDataSync.initialize();
-      console.log('🚀 Universal Data Sync initialized');
-    });
+    console.log('🚀 Starting Universal Data Sync System');
+    universalDataSync.initialize();
+
+    return () => {
+      universalDataSync.destroy();
+    };
   }, []);
 
   return (
