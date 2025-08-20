@@ -123,7 +123,7 @@ function App() {
                       <Route path="/login" element={<SignInPage />} />
                       <Route path="/register" element={<SignUpPage />} />
                       <Route path="/demo" element={<LandingPage />} />
-                      
+
                       {/* All other routes with navbar */}
                       <Route path="/*" element={
                         <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
@@ -546,7 +546,7 @@ function App() {
                               </ProtectedRoute>
                             }
                           />
-                          
+
                           {/* Remote Embed Pages */}
                           <Route
                             path="/business-intel"
