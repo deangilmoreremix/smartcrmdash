@@ -310,7 +310,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-    { id: 'wl', label: 'WL', icon: Globe, badge: 1, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
+    { id: 'wl', label: 'WL', icon: Globe, badge: connectedApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
     { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
@@ -598,74 +598,38 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
-                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
-                        <div className="h-full flex flex-col">
-                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
-                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>White Label Suite - Full Screen</h3>
-                            <div className="flex items-center space-x-2">
-                              <button 
-                                onClick={() => window.open('https://moonlit-tarsier-239e70.netlify.app/', '_blank')}
-                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                                title="Open in new tab"
-                              >
-                                <ExternalLink size={16} />
-                              </button>
-                              <button 
-                                onClick={() => setActiveDropdown(null)}
-                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                                title="Close"
-                              >
-                                <X size={16} />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex-1 p-2 relative">
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 dark:bg-gray-800/50 rounded-xl z-10">
-                              <div className="flex flex-col items-center space-y-3">
-                                <RefreshCw className="w-8 h-8 animate-spin text-indigo-500" />
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Loading White Label Suite...</p>
+                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        {connectedApps.map((app, index) =>
+                          app.isExternal ? (
+                            <a
+                              key={index}
+                              href={app.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <app.icon size={16} className="text-indigo-500" />
+                                <span className="text-sm font-medium">{app.name}</span>
                               </div>
-                            </div>
-                            <iframe
-                              src="https://moonlit-tarsier-239e70.netlify.app/"
-                              className="w-full h-full rounded-xl border-0"
-                              title="White Label Suite"
-                              frameBorder="0"
-                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
-                              onLoad={(e) => {
-                                try {
-                                  // Hide loading indicator
-                                  const loadingDiv = (e.target as HTMLIFrameElement).parentElement?.querySelector('.absolute');
-                                  if (loadingDiv) {
-                                    (loadingDiv as HTMLElement).style.display = 'none';
-                                  }
-                                  
-                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
-                                    type: 'FULLSCREEN_MODE',
-                                    fullscreen: true
-                                  }, '*');
-                                } catch (error) {
-                                  console.log('Could not communicate with iframe:', error);
-                                }
+                              <ExternalLink size={12} className="opacity-50" />
+                            </a>
+                          ) : (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                handleNavigation(app.url, 'white-label');
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
                               }}
-                              onError={(e) => {
-                                console.error('White Label Suite failed to load');
-                                const loadingDiv = (e.target as HTMLIFrameElement).parentElement?.querySelector('.absolute');
-                                if (loadingDiv) {
-                                  loadingDiv.innerHTML = `
-                                    <div class="flex flex-col items-center space-y-3">
-                                      <AlertTriangle class="w-8 h-8 text-red-500" />
-                                      <p class="text-sm text-red-600 dark:text-red-400">Failed to load White Label Suite</p>
-                                      <button onclick="location.reload()" class="px-3 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600">Retry</button>
-                                    </div>
-                                  `;
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <app.icon size={16} className="text-indigo-500" />
+                              <span className="text-sm font-medium">{app.name}</span>
+                            </button>
+                          )
+                        )}
                       </div>
                     </div>
                   )}
