@@ -158,7 +158,8 @@ function App() {
                       <AIProvider>
                       <Routes>
                         {/* Landing page routes (no navbar) */}
-                        <Route path="/" element={<SalesLandingPage />} />
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/sales" element={<SalesLandingPage />} />
                         <Route path="/signin" element={<SignInPage />} />
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/login" element={<SignInPage />} />
