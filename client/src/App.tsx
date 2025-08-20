@@ -13,6 +13,7 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
@@ -717,6 +718,7 @@ function App() {
                         </div>
                       } />
                     </Routes>
+                    <RemoteAppRefreshManager />
                   </AIProvider>
                   </DashboardLayoutProvider>
                 </NavigationProvider>

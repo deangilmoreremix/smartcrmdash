@@ -1,37 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import AutoRefreshRemoteApp from './AutoRefreshRemoteApp';
 
 const RemoteAnalyticsLoader: React.FC = () => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    const handleLoad = () => {
-      // Try to communicate with the iframe to set light mode
-      try {
-        iframe.contentWindow?.postMessage({ 
-          type: 'SET_THEME', 
-          theme: 'light' 
-        }, '*');
-      } catch (error) {
-        console.log('Unable to communicate with iframe for theme setting');
-      }
-    };
-
-    iframe.addEventListener('load', handleLoad);
-    return () => iframe.removeEventListener('load', handleLoad);
-  }, []);
-
   return (
-    <div className="w-full h-full bg-white">
-      <iframe
-        ref={iframeRef}
-        src="https://resilient-frangipane-6289c8.netlify.app"
-        className="w-full h-full border-0"
-        title="AI Analytics Platform"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
+    <div className="w-full h-full">
+      <AutoRefreshRemoteApp
+        src="https://ai-powered-analytics-fibd.bolt.host"
+        title="Analytics Dashboard"
+        defaultRefreshInterval={180} // 3 minutes for analytics
+        allowFullscreen={true}
       />
     </div>
   );

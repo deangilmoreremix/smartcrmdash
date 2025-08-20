@@ -1,39 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import React from 'react';
+import AutoRefreshRemoteApp from './AutoRefreshRemoteApp';
 
 const RemoteWLLoader: React.FC = () => {
-  const { isDark } = useTheme();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    const handleLoad = () => {
-      // Try to communicate with the iframe to set light mode
-      try {
-        iframe.contentWindow?.postMessage({ 
-          type: 'SET_THEME', 
-          theme: 'light' 
-        }, '*');
-      } catch (error) {
-        console.log('Unable to communicate with iframe for theme setting');
-      }
-    };
-
-    iframe.addEventListener('load', handleLoad);
-    return () => iframe.removeEventListener('load', handleLoad);
-  }, []);
-
   return (
     <div className="w-full h-full bg-white">
-      <iframe
-        ref={iframeRef}
+      <AutoRefreshRemoteApp
         src="https://moonlit-tarsier-239e70.netlify.app/"
-        className="w-full h-full border-0"
         title="White Label Platform"
+        defaultRefreshInterval={300} // 5 minutes
+        allowFullscreen={true}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
       />
     </div>
   );
