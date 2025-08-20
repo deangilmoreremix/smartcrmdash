@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { 
@@ -13,7 +12,7 @@ import {
   ArrowRight 
 } from 'lucide-react';
 
-const LandingFooter: React.FC = () => {
+const LandingFooter = () => {
   const currentYear = new Date().getFullYear();
   
   return (
@@ -67,13 +66,8 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/features/communications" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Communication Tools
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/automation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Sales Automation
+                <Link to="/features/analytics" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Analytics
                 </Link>
               </li>
             </ul>
@@ -94,18 +88,13 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/press" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Press
+                </Link>
+              </li>
+              <li>
                 <Link to="/blog" className="text-gray-400 hover:text-blue-400 transition-colors">
                   Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/news" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  News
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Contact
                 </Link>
               </li>
             </ul>
@@ -121,13 +110,8 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/documentation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link to="/api" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  API Reference
+                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Contact Us
                 </Link>
               </li>
               <li>
@@ -136,8 +120,8 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/security" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Security
+                <Link to="/faq" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  FAQ
                 </Link>
               </li>
             </ul>
@@ -145,231 +129,63 @@ const LandingFooter: React.FC = () => {
         </div>
         
         {/* Newsletter Signup */}
-        <div className="mt-16 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-xl font-semibold mb-2">Stay Updated</h3>
-              <p className="text-gray-400">Get the latest updates and features delivered to your inbox.</p>
+        <div className="border-t border-gray-800 pt-12 mt-12">
+          <div className="flex flex-col lg:flex-row justify-between items-center">
+            <div className="mb-6 lg:mb-0">
+              <h3 className="text-xl font-bold mb-2">Stay Updated</h3>
+              <p className="text-gray-400">Get the latest updates on new features and product releases.</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 min-w-[280px]"
               />
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center">
-                Subscribe <ArrowRight className="ml-2 h-4 w-4" />
+              <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:shadow-md transition duration-300 flex items-center justify-center">
+                Subscribe
+                <ArrowRight className="h-4 w-4 ml-2" />
               </button>
             </div>
           </div>
         </div>
         
-        {/* Social Links & Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex space-x-6 mb-4 md:mb-0">
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Twitter className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Linkedin className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Facebook className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Youtube className="h-5 w-5" />
-            </a>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-            <div className="flex space-x-6 text-sm">
-              <Link to="/privacy" className="text-gray-400 hover:text-blue-400 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-blue-400 transition-colors">
-                Terms of Service
-              </Link>
-              <Link to="/cookies" className="text-gray-400 hover:text-blue-400 transition-colors">
-                Cookie Policy
-              </Link>
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 pt-8 mt-12">
+          <div className="flex justify-between items-center">
+            <div className="flex space-x-6">
+              <a href="https://twitter.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="https://linkedin.com/company/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a href="https://facebook.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="https://instagram.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href="https://youtube.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
+                <Youtube className="h-5 w-5" />
+              </a>
             </div>
-            <p className="text-gray-400 text-sm">
-              © {currentYear} Smart CRM. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-};
-
-export default LandingFooter;
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { HashLink } from 'react-router-hash-link';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Twitter, 
-  Linkedin, 
-  Facebook, 
-  Instagram, 
-  Youtube, 
-  ArrowRight 
-} from 'lucide-react';
-
-const LandingFooter: React.FC = () => {
-  const currentYear = new Date().getFullYear();
-  
-  return (
-    <footer className="bg-gray-900 text-white pt-20 pb-10">
-      <div className="container mx-auto px-4">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          {/* Company Info */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="text-2xl font-bold mb-6 inline-block">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                Smart<span className="text-white">CRM</span>
-              </span>
-            </Link>
-            <p className="text-gray-400 mb-6 max-w-sm">
-              The all-in-one sales platform that combines powerful CRM capabilities with AI-driven insights to transform your sales process.
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <Mail className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">contact@smartcrm.com</span>
+            
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
+              <div className="flex space-x-6 text-sm">
+                <Link to="/privacy" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link to="/terms" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Terms of Service
+                </Link>
+                <Link to="/cookies" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Cookie Policy
+                </Link>
               </div>
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">(555) 123-4567</span>
-              </div>
-              <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">123 Sales Street, San Francisco, CA 94103</span>
-              </div>
+              <p className="text-gray-400 text-sm">
+                © {currentYear} Smart CRM. All rights reserved.
+              </p>
             </div>
-          </div>
-          
-          {/* Features */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Features</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/features/ai-tools" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  AI Sales Tools
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/contacts" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Contact Management
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/pipeline" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Deal Pipeline
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/communications" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Communication Tools
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/automation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Sales Automation
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          {/* Company */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Company</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/about" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/careers" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Careers
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          {/* Resources */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Resources</h3>
-            <ul className="space-y-3">
-              <li>
-                <HashLink to="/#pricing" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Pricing
-                </HashLink>
-              </li>
-              <li>
-                <Link to="/resources/documentation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/guides" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Guides
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/api" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  API Reference
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        {/* Bottom Footer */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <p className="text-gray-400 text-sm">
-              &copy; {currentYear} SmartCRM. All rights reserved.
-            </p>
-          </div>
-          
-          <div className="flex space-x-8">
-            <Link to="/legal/privacy" className="text-gray-400 hover:text-blue-400 transition-colors text-sm">
-              Privacy Policy
-            </Link>
-            <Link to="/legal/terms" className="text-gray-400 hover:text-blue-400 transition-colors text-sm">
-              Terms of Service
-            </Link>
-          </div>
-          
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Twitter size={20} />
-            </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Linkedin size={20} />
-            </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
-              <Facebook size={20} />
-            </a>
           </div>
         </div>
       </div>
