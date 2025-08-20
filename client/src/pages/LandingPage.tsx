@@ -17,88 +17,111 @@ const LandingPage = () => {
       }
     };
 
-    // Intercept navigation attempts by monitoring URL changes
+    // Intercept navigation by overriding window.open globally
     const interceptNavigation = () => {
-      const iframe = document.querySelector('iframe[title="Smart CRM Landing Page"]') as HTMLIFrameElement;
-      if (!iframe) return;
+      // Store original window.open
+      if (!window.originalWindowOpen) {
+        window.originalWindowOpen = window.open;
+      }
 
-      // Override window.open and similar methods in iframe
-      try {
-        const originalOpen = window.open;
-        window.open = function(url?: string | URL, target?: string, features?: string) {
-          if (url && typeof url === 'string') {
-            // Check if this is a navigation to an old app
-            if (url.includes('app') || url.includes('dashboard') || url.includes('signup') || url.includes('login')) {
-              console.log('Intercepted navigation attempt to:', url);
-              // Redirect to our current app instead
-              if (url.includes('signup') || url.includes('register')) {
-                navigate('/signup');
-              } else if (url.includes('login') || url.includes('signin')) {
-                navigate('/signin');
-              } else {
-                navigate('/dashboard');
-              }
-              return null;
+      // Override window.open globally to catch any navigation attempts
+      window.open = function(url?: string | URL, target?: string, features?: string) {
+        if (url && typeof url === 'string') {
+          console.log('Navigation attempt detected:', url);
+          
+          // Check if this is a navigation to any app/dashboard/auth pages
+          if (url.includes('app') || url.includes('dashboard') || url.includes('signup') || url.includes('login') || url.includes('signin') || url.includes('register')) {
+            console.log('Intercepted navigation to:', url);
+            
+            // Route to current app instead
+            if (url.includes('signup') || url.includes('register')) {
+              navigate('/signup');
+            } else if (url.includes('login') || url.includes('signin')) {
+              navigate('/signin');
+            } else if (url.includes('dashboard') || url.includes('app')) {
+              navigate('/dashboard');
             }
+            return null;
           }
-          return originalOpen.call(this, url, target, features);
-        };
+        }
+        return window.originalWindowOpen?.call(this, url, target, features) || null;
+      };
 
-        // Also try to inject navigation override into iframe
+      // Also try to inject into iframe when it loads
+      const iframe = document.querySelector('iframe[title="Smart CRM Landing Page"]') as HTMLIFrameElement;
+      if (iframe) {
         iframe.addEventListener('load', () => {
           try {
             const currentUrl = window.location.origin;
-            const script = `
-              // Override all navigation to point to current app
-              const originalOpen = window.open;
-              window.open = function(url, target, features) {
-                if (url && (url.includes('app') || url.includes('dashboard') || url.includes('signup') || url.includes('login'))) {
-                  if (url.includes('signup') || url.includes('register')) {
-                    window.parent.postMessage({type: 'navigate', path: '/signup'}, '${currentUrl}');
-                  } else if (url.includes('login') || url.includes('signin')) {
-                    window.parent.postMessage({type: 'navigate', path: '/signin'}, '${currentUrl}');
-                  } else {
-                    window.parent.postMessage({type: 'navigate', path: '/dashboard'}, '${currentUrl}');
-                  }
-                  return null;
-                }
-                return originalOpen.call(this, url, target, features);
-              };
-              
-              // Override link clicks
-              document.addEventListener('click', function(e) {
-                const link = e.target.closest('a');
-                if (link && link.href) {
-                  if (link.href.includes('app') || link.href.includes('dashboard') || link.href.includes('signup') || link.href.includes('login')) {
-                    e.preventDefault();
-                    if (link.href.includes('signup') || link.href.includes('register')) {
-                      window.parent.postMessage({type: 'navigate', path: '/signup'}, '${currentUrl}');
-                    } else if (link.href.includes('login') || link.href.includes('signin')) {
-                      window.parent.postMessage({type: 'navigate', path: '/signin'}, '${currentUrl}');
+            console.log('Iframe loaded, attempting navigation override injection');
+            
+            // Try to inject navigation override script
+            const script = document.createElement('script');
+            script.textContent = `
+              (function() {
+                console.log('CRM Navigation override script loaded');
+                const currentAppUrl = '${currentUrl}';
+                
+                // Override window.open in iframe
+                const originalOpen = window.open;
+                window.open = function(url, target, features) {
+                  console.log('Iframe window.open called with:', url);
+                  if (url && (url.includes('app') || url.includes('dashboard') || url.includes('signup') || url.includes('login'))) {
+                    console.log('Redirecting to parent CRM:', url);
+                    if (url.includes('signup') || url.includes('register')) {
+                      window.parent.postMessage({type: 'navigate', path: '/signup'}, currentAppUrl);
+                    } else if (url.includes('login') || url.includes('signin')) {
+                      window.parent.postMessage({type: 'navigate', path: '/signin'}, currentAppUrl);
                     } else {
-                      window.parent.postMessage({type: 'navigate', path: '/dashboard'}, '${currentUrl}');
+                      window.parent.postMessage({type: 'navigate', path: '/dashboard'}, currentAppUrl);
+                    }
+                    return null;
+                  }
+                  return originalOpen.call(this, url, target, features);
+                };
+                
+                // Override link clicks
+                document.addEventListener('click', function(e) {
+                  const link = e.target.closest('a');
+                  if (link && link.href) {
+                    console.log('Link clicked:', link.href);
+                    if (link.href.includes('app') || link.href.includes('dashboard') || link.href.includes('signup') || link.href.includes('login')) {
+                      e.preventDefault();
+                      console.log('Link redirected to parent CRM');
+                      if (link.href.includes('signup') || link.href.includes('register')) {
+                        window.parent.postMessage({type: 'navigate', path: '/signup'}, currentAppUrl);
+                      } else if (link.href.includes('login') || link.href.includes('signin')) {
+                        window.parent.postMessage({type: 'navigate', path: '/signin'}, currentAppUrl);
+                      } else {
+                        window.parent.postMessage({type: 'navigate', path: '/dashboard'}, currentAppUrl);
+                      }
                     }
                   }
-                }
-              });
+                });
+              })();
             `;
             
-            if (iframe.contentWindow) {
-              iframe.contentWindow.eval(script);
+            if (iframe.contentDocument) {
+              iframe.contentDocument.head.appendChild(script);
             }
           } catch (error) {
-            console.log('Cannot inject navigation override due to CORS policy');
+            console.log('Cannot inject navigation override due to CORS policy:', error.message);
           }
         });
-      } catch (error) {
-        console.log('Navigation interception setup failed:', error);
       }
     };
 
     window.addEventListener('message', handleMessage);
-    setTimeout(interceptNavigation, 1000); // Give iframe time to load
+    // Wait a bit longer for iframe to fully load
+    setTimeout(interceptNavigation, 2000);
     
-    return () => window.removeEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      // Restore original window.open when component unmounts
+      if (window.originalWindowOpen) {
+        window.open = window.originalWindowOpen;
+      }
+    };
   }, [navigate]);
   
   return (
