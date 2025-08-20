@@ -628,6 +628,26 @@ function App() {
                             path="/white-label"
                             element={<PlaceholderPage title="White-Label Customization" />}
                           />
+                          <Route
+                            path="/white-label-management"
+                            element={<PlaceholderPage title="White-Label Management Dashboard" />}
+                          />
+                          <Route
+                            path="/revenue-sharing"
+                            element={<PlaceholderPage title="Revenue Sharing Dashboard" />}
+                          />
+                          <Route
+                            path="/package-builder"
+                            element={<PlaceholderPage title="White-Label Package Builder" />}
+                          />
+                          <Route
+                            path="/partner-dashboard"
+                            element={<PlaceholderPage title="Partner Dashboard" />}
+                          />
+                          <Route
+                            path="/partner-onboarding"
+                            element={<PlaceholderPage title="Partner Onboarding" />}
+                          />
 
                           {/* Misc / Settings */}
                           <Route

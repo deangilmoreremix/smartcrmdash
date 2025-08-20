@@ -6,7 +6,7 @@ import {
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -134,7 +134,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
     { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
     { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false },
-    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
+    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false },
+    { name: 'WL Management Dashboard', url: '/white-label-management', icon: Settings, isExternal: false },
+    { name: 'Revenue Sharing', url: '/revenue-sharing', icon: DollarSign, isExternal: false },
+    { name: 'Package Builder', url: '/package-builder', icon: Package, isExternal: false },
+    { name: 'Partner Dashboard', url: '/partner-dashboard', icon: Users, isExternal: false },
+    { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
   ];
 
   const analyticsOptions = [
