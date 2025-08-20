@@ -552,12 +552,24 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
                     <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-2 h-full">
+                        <div className="h-4 bg-transparent"></div>
                         <iframe
                           src="https://ai-powered-analytics-fibd.bolt.host"
-                          className="w-full h-full rounded-xl border-0"
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 1rem)', marginTop: '0px' }}
                           title="Business Intelligence"
                           frameBorder="0"
-                          style={{ marginTop: '0px' }}
+                          onLoad={(e) => {
+                            // Send message to iframe to add top padding
+                            try {
+                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                type: 'ADD_TOP_PADDING',
+                                padding: '80px'
+                              }, '*');
+                            } catch (error) {
+                              console.log('Could not communicate with iframe');
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -566,12 +578,24 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
                     <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-2 h-full">
+                        <div className="h-4 bg-transparent"></div>
                         <iframe
                           src="https://moonlit-tarsier-239e70.netlify.app/"
-                          className="w-full h-full rounded-xl border-0"
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 1rem)', marginTop: '0px' }}
                           title="White Label"
                           frameBorder="0"
-                          style={{ marginTop: '0px' }}
+                          onLoad={(e) => {
+                            // Send message to iframe to add top padding
+                            try {
+                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                type: 'ADD_TOP_PADDING',
+                                padding: '80px'
+                              }, '*');
+                            } catch (error) {
+                              console.log('Could not communicate with iframe');
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -580,12 +604,24 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
                     <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-2 h-full">
+                        <div className="h-4 bg-transparent"></div>
                         <iframe
                           src="https://clever-syrniki-4df87f.netlify.app/"
-                          className="w-full h-full rounded-xl border-0"
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 1rem)', marginTop: '0px' }}
                           title="Intel"
                           frameBorder="0"
-                          style={{ marginTop: '0px' }}
+                          onLoad={(e) => {
+                            // Send message to iframe to add top padding
+                            try {
+                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                type: 'ADD_TOP_PADDING',
+                                padding: '80px'
+                              }, '*');
+                            } catch (error) {
+                              console.log('Could not communicate with iframe');
+                            }
+                          }}
                         />
                       </div>
                     </div>

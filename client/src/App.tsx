@@ -94,6 +94,11 @@ const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
 const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
 const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
+// Added lazy import for WhiteLabelAIEnhancer
+const WhiteLabelAIEnhancer = lazy(() => import('./pages/WhiteLabelAIEnhancer'));
+// Added lazy import for IframeOverlapChecker
+const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
+
 
 import './styles/design-system.css';
 
@@ -701,7 +706,11 @@ function App() {
                           <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
                           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
                           <Route path="/features/pipeline" element={<PipelineWithRemote />} />
+                                {/* Added route for WhiteLabel AI Enhancer */}
+                                <Route path="/white-label-ai-enhancer" element={<Suspense fallback={<LoadingSpinner />}><WhiteLabelAIEnhancer /></Suspense>} />
+                                <Route path="/iframe-overlap-checker" element={<Suspense fallback={<LoadingSpinner />}><IframeOverlapChecker /></Suspense>} />
 
+            {/* System and Analytics Routes */}
                                 {/* Fallback */}
                                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
                               </Routes>
