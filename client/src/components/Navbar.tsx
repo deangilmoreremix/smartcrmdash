@@ -583,34 +583,49 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
-                      <div className="p-4 h-full">
-                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
-                          <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>White Label Suite</h3>
-                          <button 
-                            onClick={() => setActiveDropdown(null)}
-                            className={`p-1 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                          >
-                            <X size={16} />
-                          </button>
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
+                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>White Label Suite - Full Screen</h3>
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={() => window.open('https://moonlit-tarsier-239e70.netlify.app/', '_blank')}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Open in new tab"
+                              >
+                                <ExternalLink size={16} />
+                              </button>
+                              <button 
+                                onClick={() => setActiveDropdown(null)}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Close"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-2">
+                            <iframe
+                              src="https://moonlit-tarsier-239e70.netlify.app/"
+                              className="w-full h-full rounded-xl border-0"
+                              title="White Label Suite"
+                              frameBorder="0"
+                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              onLoad={(e) => {
+                                try {
+                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                    type: 'FULLSCREEN_MODE',
+                                    fullscreen: true
+                                  }, '*');
+                                } catch (error) {
+                                  console.log('Could not communicate with iframe');
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
-                        <iframe
-                          src="https://moonlit-tarsier-239e70.netlify.app/"
-                          className="w-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
-                          title="White Label"
-                          frameBorder="0"
-                          onLoad={(e) => {
-                            try {
-                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
-                                type: 'ADD_TOP_PADDING',
-                                padding: '120px'
-                              }, '*');
-                            } catch (error) {
-                              console.log('Could not communicate with iframe');
-                            }
-                          }}
-                        />
                       </div>
                     </div>
                   )}
