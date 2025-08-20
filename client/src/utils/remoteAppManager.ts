@@ -7,14 +7,28 @@ class RemoteAppManager {
   // Check if remote app has updates
   async checkForUpdates(url: string): Promise<boolean> {
     try {
-      const response = await fetch(url, { 
-        method: 'HEAD',
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      });
+      // Try HEAD request first, but handle CORS gracefully
+      let response;
+      try {
+        response = await fetch(url, { 
+          method: 'HEAD',
+          mode: 'no-cors', // Allow cross-origin requests
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
+      } catch (headError) {
+        // If HEAD fails, fall back to time-based refresh
+        console.log('HEAD request failed, using time-based refresh for:', url);
+        return this.shouldRefreshByTime(url);
+      }
+      
+      // With no-cors mode, we can't read headers, so fall back to time-based refresh
+      if (response.type === 'opaque') {
+        return this.shouldRefreshByTime(url);
+      }
       
       const lastModified = response.headers.get('last-modified');
       const etag = response.headers.get('etag');
@@ -33,24 +47,30 @@ class RemoteAppManager {
       }
       
       // Force refresh every 2 minutes regardless
-      const currentCheck = Date.now();
-      const lastCheck = this.lastUpdateChecks.get(url) || 0;
+      return this.shouldRefreshByTime(url);
       
-      if (currentCheck - lastCheck > 120000) { // 2 minutes
-        this.lastUpdateChecks.set(url, currentCheck);
-        return true;
-      }
-      
-      return false;
     } catch (error) {
-      console.warn('Failed to check for updates:', error);
-      // Return true on error to trigger refresh and potentially fix connection issues
-      return true;
+      console.log('Update check failed, using time-based refresh:', error.message);
+      // Fall back to time-based refresh instead of always returning true
+      return this.shouldRefreshByTime(url);
     }
   }
 
+  private shouldRefreshByTime(url: string): boolean {
+    const currentCheck = Date.now();
+    const lastCheck = this.lastUpdateChecks.get(url) || 0;
+    
+    // Refresh every 5 minutes instead of 2 to reduce errors
+    if (currentCheck - lastCheck > 300000) { // 5 minutes
+      this.lastUpdateChecks.set(url, currentCheck);
+      return true;
+    }
+    
+    return false;
+  }
+
   // Auto-refresh iframe when updates detected
-  startAutoRefresh(iframeId: string, url: string, intervalMs: number = 30000) {
+  startAutoRefresh(iframeId: string, url: string, intervalMs: number = 60000) { // Default 1 minute
     if (this.refreshIntervals.has(iframeId)) {
       this.stopAutoRefresh(iframeId);
     }
@@ -58,10 +78,15 @@ class RemoteAppManager {
     console.log(`Starting auto-refresh for ${iframeId} every ${intervalMs}ms`);
 
     const interval = setInterval(async () => {
-      const hasUpdates = await this.checkForUpdates(url);
-      if (hasUpdates) {
-        console.log(`Refreshing ${iframeId} due to detected updates`);
-        this.refreshIframe(iframeId);
+      try {
+        const hasUpdates = await this.checkForUpdates(url);
+        if (hasUpdates) {
+          console.log(`Refreshing ${iframeId} due to detected updates`);
+          this.refreshIframe(iframeId);
+        }
+      } catch (error) {
+        console.log(`Auto-refresh check failed for ${iframeId}:`, error.message);
+        // Continue the interval but don't refresh on error
       }
     }, intervalMs);
 
@@ -125,7 +150,7 @@ export function useRemoteAppUpdates(
   iframeId: string, 
   url: string, 
   autoRefresh: boolean = true, 
-  refreshInterval: number = 30000
+  refreshInterval: number = 120000 // Default 2 minutes to reduce CORS issues
 ) {
   const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
   const [isChecking, setIsChecking] = useState(false);
