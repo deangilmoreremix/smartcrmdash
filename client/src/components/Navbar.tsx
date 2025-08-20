@@ -447,8 +447,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       e.stopPropagation(); 
                       if (menu.id === 'business-intel') {
                         handleNavigation('/business-intel', 'business-intel');
-                      } else if (menu.id === 'wl') {
-                        handleNavigation('/wl', 'wl');
                       } else if (menu.id === 'intel') {
                         handleNavigation('/intel', 'intel');
                       } else {
@@ -482,7 +480,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         : 'Apps'}
                     </span>
                     {/* Only show chevron for dropdown menus */}
-                    {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps') && (
+                    {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
                       <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                     )}
                     {renderBadge(menu.badge, menu.badgeColor)}
@@ -581,6 +579,43 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         title="Intel"
                         frameBorder="0"
                       />
+                    </div>
+                  )}
+
+                  {menu.id === 'wl' && activeDropdown === 'wl' && (
+                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        {connectedApps.map((app, index) =>
+                          app.isExternal ? (
+                            <a
+                              key={index}
+                              href={app.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <app.icon size={16} className="text-indigo-500" />
+                                <span className="text-sm font-medium">{app.name}</span>
+                              </div>
+                              <ExternalLink size={12} className="opacity-50" />
+                            </a>
+                          ) : (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                handleNavigation(app.url, 'white-label');
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <app.icon size={16} className="text-indigo-500" />
+                              <span className="text-sm font-medium">{app.name}</span>
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   )}
 
