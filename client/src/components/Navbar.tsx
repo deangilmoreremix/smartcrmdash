@@ -620,7 +620,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               </button>
                             </div>
                           </div>
-                          <div className="flex-1 p-2">
+                          <div className="flex-1 p-2 relative">
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 dark:bg-gray-800/50 rounded-xl z-10">
+                              <div className="flex flex-col items-center space-y-3">
+                                <RefreshCw className="w-8 h-8 animate-spin text-indigo-500" />
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Loading White Label Suite...</p>
+                              </div>
+                            </div>
                             <iframe
                               src="https://moonlit-tarsier-239e70.netlify.app/"
                               className="w-full h-full rounded-xl border-0"
@@ -630,12 +636,31 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
                               onLoad={(e) => {
                                 try {
+                                  // Hide loading indicator
+                                  const loadingDiv = (e.target as HTMLIFrameElement).parentElement?.querySelector('.absolute');
+                                  if (loadingDiv) {
+                                    (loadingDiv as HTMLElement).style.display = 'none';
+                                  }
+                                  
                                   (e.target as HTMLIFrameElement).contentWindow?.postMessage({
                                     type: 'FULLSCREEN_MODE',
                                     fullscreen: true
                                   }, '*');
                                 } catch (error) {
-                                  console.log('Could not communicate with iframe');
+                                  console.log('Could not communicate with iframe:', error);
+                                }
+                              }}
+                              onError={(e) => {
+                                console.error('White Label Suite failed to load');
+                                const loadingDiv = (e.target as HTMLIFrameElement).parentElement?.querySelector('.absolute');
+                                if (loadingDiv) {
+                                  loadingDiv.innerHTML = `
+                                    <div class="flex flex-col items-center space-y-3">
+                                      <AlertTriangle class="w-8 h-8 text-red-500" />
+                                      <p class="text-sm text-red-600 dark:text-red-400">Failed to load White Label Suite</p>
+                                      <button onclick="location.reload()" class="px-3 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600">Retry</button>
+                                    </div>
+                                  `;
                                 }
                               }}
                             />
