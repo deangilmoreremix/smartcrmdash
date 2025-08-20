@@ -26,6 +26,7 @@
     if (document.body) {
       document.body.style.paddingTop = padding;
       document.body.style.boxSizing = 'border-box';
+      document.body.style.marginTop = '0px';
     }
     
     // Method 2: Create and inject CSS
@@ -99,8 +100,8 @@
     ];
     
     if (indicators.some(Boolean)) {
-      // Apply default 80px padding
-      addTopPadding('80px');
+      // Apply default 120px padding to ensure proper clearance
+      addTopPadding('120px');
     }
   }
   

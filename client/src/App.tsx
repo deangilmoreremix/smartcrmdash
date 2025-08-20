@@ -142,7 +142,7 @@ function App() {
                       <Route path="/*" element={
                         <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
                           <Navbar />
-                          <div className="flex-1 overflow-hidden">
+                          <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
                             <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                               <Routes>
                                 {/* App routes redirect to dashboard */}

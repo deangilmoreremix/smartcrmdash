@@ -550,9 +550,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
-                    <div className={`absolute top-16 right-0 w-full max-w-5xl h-[85vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
                       <div className="p-4 h-full">
-                        <div className="h-6 bg-transparent flex items-center justify-between mb-2">
+                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
                           <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Business Intelligence Dashboard</h3>
                           <button 
                             onClick={() => setActiveDropdown(null)}
@@ -563,15 +563,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         </div>
                         <iframe
                           src="https://ai-powered-analytics-fibd.bolt.host"
-                          className="w-full h-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 2.5rem)' }}
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
                           title="Business Intelligence"
                           frameBorder="0"
                           onLoad={(e) => {
                             try {
                               (e.target as HTMLIFrameElement).contentWindow?.postMessage({
                                 type: 'ADD_TOP_PADDING',
-                                padding: '100px'
+                                padding: '120px'
                               }, '*');
                             } catch (error) {
                               console.log('Could not communicate with iframe');
@@ -583,9 +583,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-16 right-0 w-full max-w-5xl h-[85vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
                       <div className="p-4 h-full">
-                        <div className="h-6 bg-transparent flex items-center justify-between mb-2">
+                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
                           <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>White Label Suite</h3>
                           <button 
                             onClick={() => setActiveDropdown(null)}
@@ -596,15 +596,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         </div>
                         <iframe
                           src="https://moonlit-tarsier-239e70.netlify.app/"
-                          className="w-full h-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 2.5rem)' }}
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
                           title="White Label"
                           frameBorder="0"
                           onLoad={(e) => {
                             try {
                               (e.target as HTMLIFrameElement).contentWindow?.postMessage({
                                 type: 'ADD_TOP_PADDING',
-                                padding: '100px'
+                                padding: '120px'
                               }, '*');
                             } catch (error) {
                               console.log('Could not communicate with iframe');
@@ -616,9 +616,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
-                    <div className={`absolute top-16 right-0 w-full max-w-5xl h-[85vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
                       <div className="p-4 h-full">
-                        <div className="h-6 bg-transparent flex items-center justify-between mb-2">
+                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
                           <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard</h3>
                           <button 
                             onClick={() => setActiveDropdown(null)}
@@ -629,15 +629,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         </div>
                         <iframe
                           src="https://clever-syrniki-4df87f.netlify.app/"
-                          className="w-full h-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 2.5rem)' }}
+                          className="w-full rounded-xl border-0"
+                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
                           title="Intel"
                           frameBorder="0"
                           onLoad={(e) => {
                             try {
                               (e.target as HTMLIFrameElement).contentWindow?.postMessage({
                                 type: 'ADD_TOP_PADDING',
-                                padding: '100px'
+                                padding: '120px'
                               }, '*');
                             } catch (error) {
                               console.log('Could not communicate with iframe');
