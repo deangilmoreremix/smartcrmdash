@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Palette, Upload, Eye, Save, RotateCcw, Sparkles, Globe, Code, Monitor, Mail } from 'lucide-react';
-import { useTenant } from '../components/TenantProvider';
+import { useTenant } from '../contexts/TenantProvider';
 import { ConditionalRender } from '../components/RoleBasedAccess';
 
 interface BrandingConfig {
