@@ -130,16 +130,21 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'AI Model Demo', tool: 'ai-model-demo', icon: Brain }
   ];
 
-  const connectedApps = [
-    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
-    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
-    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false },
+  // White Label specific apps
+  const wlApps = [
     { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false },
     { name: 'WL Management Dashboard', url: '/white-label-management', icon: Settings, isExternal: false },
     { name: 'Revenue Sharing', url: '/revenue-sharing', icon: DollarSign, isExternal: false },
     { name: 'Package Builder', url: '/package-builder', icon: Package, isExternal: false },
     { name: 'Partner Dashboard', url: '/partner-dashboard', icon: Users, isExternal: false },
     { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
+  ];
+
+  // General connected apps
+  const connectedApps = [
+    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
+    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
+    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
   ];
 
   const analyticsOptions = [
@@ -310,7 +315,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-    { id: 'wl', label: 'WL', icon: Globe, badge: connectedApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
+    { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
     { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
@@ -600,7 +605,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
                     <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                        {connectedApps.map((app, index) =>
+                        {wlApps.map((app, index) =>
                           app.isExternal ? (
                             <a
                               key={index}
