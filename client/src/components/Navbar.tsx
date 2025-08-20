@@ -647,7 +647,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard - Full Screen</h3>
                             <div className="flex items-center space-x-2">
                               <button 
-                                onClick={() => window.open('https://clever-syrniki-4df87f.netlify.app/', '_blank')}
+                                onClick={() => window.open('https://product-research-mod-uay0.bolt.host/', '_blank')}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Open in new tab"
                               >
@@ -664,7 +664,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           </div>
                           <div className="flex-1 p-2">
                             <iframe
-                              src="https://clever-syrniki-4df87f.netlify.app/"
+                              src="https://product-research-mod-uay0.bolt.host/"
                               className="w-full h-full rounded-xl border-0"
                               title="Intel Dashboard"
                               frameBorder="0"

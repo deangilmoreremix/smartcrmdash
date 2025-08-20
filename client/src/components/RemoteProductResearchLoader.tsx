@@ -14,7 +14,7 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const REMOTE_URL = 'https://clever-syrniki-4df87f.netlify.app';
+  const REMOTE_URL = 'https://product-research-mod-uay0.bolt.host/';
 
   useEffect(() => {
     const iframe = iframeRef.current;
