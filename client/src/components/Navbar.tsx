@@ -550,34 +550,49 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
-                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
-                      <div className="p-4 h-full">
-                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
-                          <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Business Intelligence Dashboard</h3>
-                          <button 
-                            onClick={() => setActiveDropdown(null)}
-                            className={`p-1 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                          >
-                            <X size={16} />
-                          </button>
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
+                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Business Intelligence Dashboard - Full Screen</h3>
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={() => window.open('https://ai-powered-analytics-fibd.bolt.host', '_blank')}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Open in new tab"
+                              >
+                                <ExternalLink size={16} />
+                              </button>
+                              <button 
+                                onClick={() => setActiveDropdown(null)}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Close"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-2">
+                            <iframe
+                              src="https://ai-powered-analytics-fibd.bolt.host"
+                              className="w-full h-full rounded-xl border-0"
+                              title="Business Intelligence Dashboard"
+                              frameBorder="0"
+                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              onLoad={(e) => {
+                                try {
+                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                    type: 'FULLSCREEN_MODE',
+                                    fullscreen: true
+                                  }, '*');
+                                } catch (error) {
+                                  console.log('Could not communicate with iframe');
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
-                        <iframe
-                          src="https://ai-powered-analytics-fibd.bolt.host"
-                          className="w-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
-                          title="Business Intelligence"
-                          frameBorder="0"
-                          onLoad={(e) => {
-                            try {
-                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
-                                type: 'ADD_TOP_PADDING',
-                                padding: '120px'
-                              }, '*');
-                            } catch (error) {
-                              console.log('Could not communicate with iframe');
-                            }
-                          }}
-                        />
                       </div>
                     </div>
                   )}
@@ -631,74 +646,54 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
-                    <div className={`absolute top-20 right-0 w-full max-w-5xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`} style={{ marginTop: '8px' }}>
-                      <div className="p-4 h-full">
-                        <div className="h-8 bg-transparent flex items-center justify-between mb-4">
-                          <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard</h3>
-                          <button 
-                            onClick={() => setActiveDropdown(null)}
-                            className={`p-1 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                          >
-                            <X size={16} />
-                          </button>
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
+                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard - Full Screen</h3>
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={() => window.open('https://clever-syrniki-4df87f.netlify.app/', '_blank')}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Open in new tab"
+                              >
+                                <ExternalLink size={16} />
+                              </button>
+                              <button 
+                                onClick={() => setActiveDropdown(null)}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Close"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-2">
+                            <iframe
+                              src="https://clever-syrniki-4df87f.netlify.app/"
+                              className="w-full h-full rounded-xl border-0"
+                              title="Intel Dashboard"
+                              frameBorder="0"
+                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              onLoad={(e) => {
+                                try {
+                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                    type: 'FULLSCREEN_MODE',
+                                    fullscreen: true
+                                  }, '*');
+                                } catch (error) {
+                                  console.log('Could not communicate with iframe');
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
-                        <iframe
-                          src="https://clever-syrniki-4df87f.netlify.app/"
-                          className="w-full rounded-xl border-0"
-                          style={{ height: 'calc(100% - 4rem)', paddingTop: '0px' }}
-                          title="Intel"
-                          frameBorder="0"
-                          onLoad={(e) => {
-                            try {
-                              (e.target as HTMLIFrameElement).contentWindow?.postMessage({
-                                type: 'ADD_TOP_PADDING',
-                                padding: '120px'
-                              }, '*');
-                            } catch (error) {
-                              console.log('Could not communicate with iframe');
-                            }
-                          }}
-                        />
                       </div>
                     </div>
                   )}
 
-                  {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                        {connectedApps.map((app, index) =>
-                          app.isExternal ? (
-                            <a
-                              key={index}
-                              href={app.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                            >
-                              <div className="flex items-center space-x-3">
-                                <app.icon size={16} className="text-indigo-500" />
-                                <span className="text-sm font-medium">{app.name}</span>
-                              </div>
-                              <ExternalLink size={12} className="opacity-50" />
-                            </a>
-                          ) : (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                handleNavigation(app.url, 'white-label');
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              }}
-                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                            >
-                              <app.icon size={16} className="text-indigo-500" />
-                              <span className="text-sm font-medium">{app.name}</span>
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  
 
                   {menu.id === 'apps' && activeDropdown === 'apps' && (
                     <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
