@@ -5,7 +5,7 @@ const RemoteIntelLoader: React.FC = () => {
   return (
     <div className="w-full h-full">
       <AutoRefreshRemoteApp
-        src="https://clever-syrniki-4df87f.netlify.app/"
+        src="https://product-research-mod-uay0.bolt.host/"
         title="Intel Dashboard"
         defaultRefreshInterval={240} // 4 minutes
         allowFullscreen={true}
