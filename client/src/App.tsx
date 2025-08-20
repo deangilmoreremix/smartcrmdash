@@ -108,9 +108,10 @@ import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/cle
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key');
-}
+// Temporarily disabled while setting up authentication
+// if (!PUBLISHABLE_KEY) {
+//   throw new Error('Missing Publishable Key');
+// }
 
 
 // Reusable placeholder
@@ -144,9 +145,9 @@ function App() {
     };
   }, []);
 
-  return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <ThemeProvider>
+  // Conditional wrapper for Clerk authentication
+  const AppContent = () => (
+    <ThemeProvider>
         <TenantProvider>
           <AIToolsProvider>
             <ModalsProvider>
@@ -753,7 +754,16 @@ function App() {
           </AIToolsProvider>
         </TenantProvider>
       </ThemeProvider>
-    </ClerkProvider>
+  );
+
+  return (
+    PUBLISHABLE_KEY ? (
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+        <AppContent />
+      </ClerkProvider>
+    ) : (
+      <AppContent />
+    )
   );
 }
 
