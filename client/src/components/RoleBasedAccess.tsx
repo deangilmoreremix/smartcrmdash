@@ -51,12 +51,12 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const fetchUserRole = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get current user with role information
       const response = await fetch('/api/auth/user-role', {
         headers: tenant ? { 'X-Tenant-ID': tenant.id } : {},
       });
-      
+
       if (response.ok) {
         const userData = await response.json();
         setUser(userData.user);
@@ -84,34 +84,29 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
 
   const canAccess = (resource: string): boolean => {
     if (!user) return false;
-    
+
     // Super admin can access everything
     if (user.role === 'super_admin') return true;
-    
-    // Define resource access rules
-    const accessRules: Record<string, string[]> = {
-      'super_admin_dashboard': ['super_admin'],
-      'partner_dashboard': ['super_admin', 'partner_admin'],
-      'customer_management': ['super_admin', 'partner_admin'],
+
+    // Resource-specific access control
+    const resourcePermissions: Record<string, string[]> = {
       'tenant_management': ['super_admin'],
+      'partner_management': ['super_admin', 'partner_admin'],
       'user_management': ['super_admin', 'partner_admin', 'customer_admin'],
       'billing_management': ['super_admin', 'partner_admin'],
-      'analytics': ['super_admin', 'partner_admin', 'customer_admin'],
-      'ai_tools': ['super_admin', 'partner_admin', 'customer_admin', 'end_user'],
-      'crm_features': ['super_admin', 'partner_admin', 'customer_admin', 'end_user'],
+      'advanced_analytics': ['super_admin', 'partner_admin', 'customer_admin'],
       'custom_branding': ['super_admin', 'partner_admin'],
-      'feature_flags': ['super_admin'],
-      'audit_logs': ['super_admin', 'partner_admin', 'customer_admin'],
+      'api_access': ['super_admin', 'partner_admin', 'customer_admin'],
     };
 
-    const allowedRoles = accessRules[resource];
-    return allowedRoles ? allowedRoles.includes(user.role) : false;
+    const allowedRoles = resourcePermissions[resource] || [];
+    return allowedRoles.includes(user.role);
   };
 
-  const isSuperAdmin = (): boolean => hasRole('super_admin');
-  const isPartnerAdmin = (): boolean => hasRole('partner_admin');
-  const isCustomerAdmin = (): boolean => hasRole('customer_admin');
-  const isEndUser = (): boolean => hasRole('end_user');
+  const isSuperAdmin = (): boolean => user?.role === 'super_admin';
+  const isPartnerAdmin = (): boolean => user?.role === 'partner_admin';
+  const isCustomerAdmin = (): boolean => user?.role === 'customer_admin';
+  const isEndUser = (): boolean => user?.role === 'end_user';
 
   return (
     <RoleContext.Provider
@@ -269,7 +264,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className = '' }) =>
 // Permission checker hook
 export const usePermissions = () => {
   const { user, hasPermission, hasRole, canAccess } = useRole();
-  
+
   return {
     user,
     can: hasPermission,

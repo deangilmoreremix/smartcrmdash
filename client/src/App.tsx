@@ -3,6 +3,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { TenantProvider } from './contexts/TenantProvider';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
@@ -116,13 +117,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{child
 function App() {
   return (
     <ThemeProvider>
-      <AIToolsProvider>
-        <ModalsProvider>
-          <EnhancedHelpProvider>
-            <VideoCallProvider>
-              <NavigationProvider>
-                <DashboardLayoutProvider>
-                  <AIProvider>
+      <TenantProvider>
+        <AIToolsProvider>
+          <ModalsProvider>
+            <EnhancedHelpProvider>
+              <VideoCallProvider>
+                <NavigationProvider>
+                  <DashboardLayoutProvider>
+                    <AIProvider>
                     <Routes>
                       {/* Landing page routes (no navbar) */}
                       <Route path="/" element={<SalesLandingPage />} />
@@ -709,12 +711,13 @@ function App() {
                       } />
                     </Routes>
                   </AIProvider>
-                </DashboardLayoutProvider>
-              </NavigationProvider>
-            </VideoCallProvider>
-          </EnhancedHelpProvider>
-        </ModalsProvider>
-      </AIToolsProvider>
+                  </DashboardLayoutProvider>
+                </NavigationProvider>
+              </VideoCallProvider>
+            </EnhancedHelpProvider>
+          </ModalsProvider>
+        </AIToolsProvider>
+      </TenantProvider>
     </ThemeProvider>
   );
 }
