@@ -29,6 +29,12 @@ const ContactsWithRemote: React.FC = () => {
     const bridge = new RemoteContactsBridge();
     bridgeRef.current = bridge;
 
+    // Register with universal manager
+    remoteAppManager.registerBridge('contacts', bridge);
+
+    // Initialize universal sync
+    universalDataSync.initialize();
+
     // Set up message handlers
     bridge.onMessage('REMOTE_READY', () => {
       setIsConnected(true);

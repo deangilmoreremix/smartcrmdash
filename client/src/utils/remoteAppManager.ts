@@ -3,6 +3,9 @@ class RemoteAppManager {
   private refreshIntervals: Map<string, NodeJS.Timeout> = new Map();
   private lastUpdateChecks: Map<string, number> = new Map();
   private updateHashCache: Map<string, string> = new Map();
+  private bridges: Map<string, any> = new Map();
+  private crossAppData: Map<string, any> = new Map();
+  private eventHandlers: Map<string, Function[]> = new Map();
 
   // Check if remote app has updates
   async checkForUpdates(url: string): Promise<boolean> {
@@ -131,6 +134,98 @@ class RemoteAppManager {
     return this.refreshIntervals.size;
   }
 
+  // Register a bridge for cross-app communication
+  registerBridge(appId: string, bridge: any) {
+    this.bridges.set(appId, bridge);
+    console.log(`Bridge registered for ${appId}`);
+  }
+
+  // Broadcast data to all connected apps
+  broadcastToAllApps(eventType: string, data: any, sourceApp?: string) {
+    console.log(`Broadcasting ${eventType} to all apps`, data);
+    
+    this.bridges.forEach((bridge, appId) => {
+      if (appId !== sourceApp && bridge.sendMessage) {
+        bridge.sendMessage(eventType, {
+          ...data,
+          sourceApp,
+          timestamp: Date.now()
+        });
+      }
+    });
+
+    // Also dispatch to local event handlers
+    this.dispatchLocalEvent(eventType, data, sourceApp);
+  }
+
+  // Send data to specific app
+  sendToApp(targetAppId: string, eventType: string, data: any, sourceApp?: string) {
+    const bridge = this.bridges.get(targetAppId);
+    if (bridge && bridge.sendMessage) {
+      bridge.sendMessage(eventType, {
+        ...data,
+        sourceApp,
+        targetApp: targetAppId,
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  // Store cross-app shared data
+  setSharedData(key: string, data: any) {
+    this.crossAppData.set(key, data);
+    
+    // Broadcast data update to all apps
+    this.broadcastToAllApps('SHARED_DATA_UPDATE', {
+      key,
+      data,
+      allSharedData: Object.fromEntries(this.crossAppData)
+    });
+  }
+
+  // Get shared data
+  getSharedData(key: string) {
+    return this.crossAppData.get(key);
+  }
+
+  // Subscribe to cross-app events
+  onCrossAppEvent(eventType: string, handler: Function) {
+    if (!this.eventHandlers.has(eventType)) {
+      this.eventHandlers.set(eventType, []);
+    }
+    this.eventHandlers.get(eventType)!.push(handler);
+  }
+
+  // Dispatch local events
+  private dispatchLocalEvent(eventType: string, data: any, sourceApp?: string) {
+    const handlers = this.eventHandlers.get(eventType) || [];
+    handlers.forEach(handler => {
+      try {
+        handler(data, sourceApp);
+      } catch (error) {
+        console.error(`Error in event handler for ${eventType}:`, error);
+      }
+    });
+  }
+
+  // Sync contacts to all apps
+  syncContactsToAllApps(contacts: any[]) {
+    this.setSharedData('contacts', contacts);
+    this.broadcastToAllApps('CONTACTS_SYNC', { contacts }, 'crm');
+  }
+
+  // Sync deals/pipeline to all apps
+  syncDealsToAllApps(deals: any[]) {
+    this.setSharedData('deals', deals);
+    this.broadcastToAllApps('DEALS_SYNC', { deals }, 'crm');
+  }
+
+  // Sync tasks to all apps
+  syncTasksToAllApps(tasks: any[]) {
+    this.setSharedData('tasks', tasks);
+    this.broadcastToAllApps('TASKS_SYNC', { tasks }, 'crm');
+  }
+
   // Clean up all intervals
   cleanup() {
     console.log(`Cleaning up ${this.refreshIntervals.size} auto-refresh intervals`);
@@ -138,6 +233,9 @@ class RemoteAppManager {
     this.refreshIntervals.clear();
     this.lastUpdateChecks.clear();
     this.updateHashCache.clear();
+    this.bridges.clear();
+    this.crossAppData.clear();
+    this.eventHandlers.clear();
   }
 }
 

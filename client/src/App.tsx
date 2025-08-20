@@ -120,6 +120,15 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 function App() {
+  // Initialize universal sync on app start
+  useEffect(() => {
+    // Initialize universal data sync service on app start
+    import('./services/universalDataSync').then(({ universalDataSync }) => {
+      universalDataSync.initialize();
+      console.log('🚀 Universal Data Sync initialized');
+    });
+  }, []);
+
   return (
     <ThemeProvider>
       <TenantProvider>

@@ -75,6 +75,26 @@ export const RemoteAppProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   }, [apps, refreshApp]);
 
+  const syncDataToAllApps = useCallback((dataType: string, data: any) => {
+    // Dispatch to all registered remote apps
+    window.dispatchEvent(new CustomEvent('syncToRemoteApps', { 
+      detail: { dataType, data, timestamp: Date.now() } 
+    }));
+  }, []);
+
+  const broadcastToRemoteApps = useCallback((eventType: string, data: any) => {
+    Object.keys(apps).forEach(appId => {
+      window.dispatchEvent(new CustomEvent('remoteAppMessage', {
+        detail: {
+          targetApp: appId,
+          eventType,
+          data,
+          timestamp: Date.now()
+        }
+      }));
+    });
+  }, [apps]);
+
   const toggleAutoRefresh = useCallback((id: string) => {
     setApps(prev => ({
       ...prev,
@@ -107,7 +127,9 @@ export const RemoteAppProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     refreshAllApps,
     toggleAutoRefresh,
     setRefreshInterval,
-    getAppStatus
+    getAppStatus,
+    syncDataToAllApps,
+    broadcastToRemoteApps
   };
 
   return (

@@ -91,6 +91,12 @@ const PipelinePage: React.FC = () => {
     const bridge = new RemotePipelineBridge();
     bridgeRef.current = bridge;
 
+    // Register with universal manager
+    remoteAppManager.registerBridge('pipeline', bridge);
+
+    // Initialize universal sync
+    universalDataSync.initialize();
+
     // Set up message event listener
     const handleMessage = (event: MessageEvent) => {
       const allowedOrigins = [
