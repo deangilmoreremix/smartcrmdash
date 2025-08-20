@@ -550,35 +550,44 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
-                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <iframe
-                        src="https://ai-powered-analytics-fibd.bolt.host"
-                        className="w-full h-full rounded-2xl"
-                        title="Business Intelligence"
-                        frameBorder="0"
-                      />
+                    <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-2 h-full">
+                        <iframe
+                          src="https://ai-powered-analytics-fibd.bolt.host"
+                          className="w-full h-full rounded-xl border-0"
+                          title="Business Intelligence"
+                          frameBorder="0"
+                          style={{ marginTop: '0px' }}
+                        />
+                      </div>
                     </div>
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <iframe
-                        src="https://moonlit-tarsier-239e70.netlify.app/"
-                        className="w-full h-full rounded-2xl"
-                        title="White Label"
-                        frameBorder="0"
-                      />
+                    <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-2 h-full">
+                        <iframe
+                          src="https://moonlit-tarsier-239e70.netlify.app/"
+                          className="w-full h-full rounded-xl border-0"
+                          title="White Label"
+                          frameBorder="0"
+                          style={{ marginTop: '0px' }}
+                        />
+                      </div>
                     </div>
                   )}
 
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
-                    <div className={`absolute top-14 right-0 w-full h-96 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <iframe
-                        src="https://clever-syrniki-4df87f.netlify.app/"
-                        className="w-full h-full rounded-2xl"
-                        title="Intel"
-                        frameBorder="0"
-                      />
+                    <div className={`absolute top-14 right-0 w-full max-w-4xl h-[80vh] ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className="p-2 h-full">
+                        <iframe
+                          src="https://clever-syrniki-4df87f.netlify.app/"
+                          className="w-full h-full rounded-xl border-0"
+                          title="Intel"
+                          frameBorder="0"
+                          style={{ marginTop: '0px' }}
+                        />
+                      </div>
                     </div>
                   )}
 
