@@ -79,6 +79,14 @@ const BusinessIntelPage = lazy(() => import('./pages/BusinessIntelPage'));
 const WLPage = lazy(() => import('./pages/WLPage'));
 const IntelPage = lazy(() => import('./pages/IntelPage'));
 
+// White-label management components
+const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomization'));
+const WhiteLabelManagementDashboard = lazy(() => import('./pages/WhiteLabelManagementDashboard'));
+const WhiteLabelPackageBuilder = lazy(() => import('./pages/WhiteLabelPackageBuilder'));
+const RevenueSharingPage = lazy(() => import('./pages/RevenueSharingPage'));
+const PartnerDashboard = lazy(() => import('./pages/PartnerDashboard'));
+const PartnerOnboardingPage = lazy(() => import('./pages/PartnerOnboardingPage'));
+
 // Connected Apps Remote Pages
 const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
 const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
@@ -626,27 +634,51 @@ function App() {
                           {/* ===== Apps dropdown internal links ===== */}
                           <Route
                             path="/white-label"
-                            element={<PlaceholderPage title="White-Label Customization" />}
+                            element={
+                              <ProtectedRoute>
+                                <WhiteLabelCustomization />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/white-label-management"
-                            element={<PlaceholderPage title="White-Label Management Dashboard" />}
+                            element={
+                              <ProtectedRoute>
+                                <WhiteLabelManagementDashboard />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/revenue-sharing"
-                            element={<PlaceholderPage title="Revenue Sharing Dashboard" />}
+                            element={
+                              <ProtectedRoute>
+                                <RevenueSharingPage />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/package-builder"
-                            element={<PlaceholderPage title="White-Label Package Builder" />}
+                            element={
+                              <ProtectedRoute>
+                                <WhiteLabelPackageBuilder />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/partner-dashboard"
-                            element={<PlaceholderPage title="Partner Dashboard" />}
+                            element={
+                              <ProtectedRoute>
+                                <PartnerDashboard />
+                              </ProtectedRoute>
+                            }
                           />
                           <Route
                             path="/partner-onboarding"
-                            element={<PlaceholderPage title="Partner Onboarding" />}
+                            element={
+                              <ProtectedRoute>
+                                <PartnerOnboardingPage />
+                              </ProtectedRoute>
+                            }
                           />
 
                           {/* Misc / Settings */}
