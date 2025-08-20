@@ -1,6 +1,7 @@
 // Remote White Label Suite Loader
 import React, { useRef, useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { useRemoteAppUpdates } from '../utils/remoteAppManager';
 
 interface RemoteWhiteLabelLoaderProps {
   showHeader?: boolean;
@@ -15,6 +16,13 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
   const [error, setError] = useState<string | null>(null);
   
   const REMOTE_URL = 'https://moonlit-tarsier-239e70.netlify.app';
+  const IFRAME_ID = 'wl-remote-iframe';
+  
+  const { manualRefresh, checkForUpdates, isChecking } = useRemoteAppUpdates(
+    IFRAME_ID, 
+    REMOTE_URL, 
+    true // Enable auto-refresh
+  );
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -42,11 +50,9 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
   }, []);
 
   const handleRefresh = () => {
-    if (iframeRef.current) {
-      setIsLoading(true);
-      setError(null);
-      iframeRef.current.src = iframeRef.current.src;
-    }
+    setIsLoading(true);
+    setError(null);
+    manualRefresh();
   };
 
   return (
@@ -101,6 +107,7 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
         )}
 
         <iframe
+          id={IFRAME_ID}
           ref={iframeRef}
           src={REMOTE_URL}
           className="w-full h-full border-0"
