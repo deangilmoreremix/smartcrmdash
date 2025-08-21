@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Brain, Mail, Lock } from 'lucide-react';
-import { useSignIn } from '@clerk/clerk-react';
+import { Eye, EyeOff, Brain, Mail, Lock, User, Building, Check } from 'lucide-react';
 
 const SignInPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,8 +8,6 @@ const SignInPage: React.FC = () => {
     email: '',
     password: ''
   });
-
-  const { signIn, isLoaded, setActive } = useSignIn(); // Use Clerk's useSignIn hook
 
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,32 +17,34 @@ const SignInPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    if (!signIn || !isLoaded) {
-      setError('Authentication system is not ready. Please try again.');
-      setIsLoading(false);
-      return;
-    }
-
+    // Simulate a direct sign-in process
+    // In a real application, you would make an API call here to your backend
+    // for authentication. For this example, we'll just simulate a success/failure.
     try {
-      const result = await signIn.create({
-        identifier: formData.email,
-        password: formData.password,
+      // Replace with your actual authentication API call
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
 
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
+      const data = await response.json();
+
+      if (response.ok) {
         console.log('Sign-in successful, redirecting to development dashboard...');
         // Force redirect to current domain's dashboard
         const currentDomain = window.location.origin;
         window.location.href = `${currentDomain}/dashboard`;
       } else {
-        console.log('Sign-in status:', result.status);
-        setError(`Sign-in incomplete. Status: ${result.status}. Please check your credentials or complete any required verification.`);
+        console.error('Sign-in failed:', data);
+        const errorMessage = data?.message || 'Invalid email or password. Please try again.';
+        setError(errorMessage);
       }
     } catch (error: any) {
       console.error('Sign-in error:', error);
-      const errorMessage = error?.errors?.[0]?.message || error?.message || 'An unexpected error occurred during sign-in.';
-      setError(errorMessage);
+      setError('An unexpected error occurred during sign-in. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -57,11 +56,6 @@ const SignInPage: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
-
-  if (!isLoaded) {
-    // Optionally show a loading state while Clerk is initializing
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -83,7 +77,7 @@ const SignInPage: React.FC = () => {
               <p className="text-sm">{error}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -163,7 +157,7 @@ const SignInPage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || !isLoaded}
+              disabled={isLoading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
@@ -181,7 +175,7 @@ const SignInPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Social Sign In Buttons - These would need to be adapted to use Clerk's social sign-in methods */}
+            {/* Social Sign In Buttons - These would need to be adapted to your backend authentication methods */}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <svg className="h-5 w-5" viewBox="0 0 24 24">

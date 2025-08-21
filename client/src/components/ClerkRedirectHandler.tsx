@@ -7,13 +7,13 @@ const ClerkRedirectHandler: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // If user is redirected from Clerk's hosted pages, redirect to our custom pages
+    // If user tries to access auth pages, redirect to dashboard
     const pathname = location.pathname;
     
-    if (pathname.includes('sign-in') || pathname === '/sign-in') {
-      navigate('/signin', { replace: true });
-    } else if (pathname.includes('sign-up') || pathname === '/sign-up') {
-      navigate('/signup', { replace: true });
+    if (pathname.includes('sign-in') || pathname === '/sign-in' || pathname.includes('signin')) {
+      navigate('/dashboard', { replace: true });
+    } else if (pathname.includes('sign-up') || pathname === '/sign-up' || pathname.includes('signup')) {
+      navigate('/dashboard', { replace: true });
     }
   }, [navigate, location]);
 

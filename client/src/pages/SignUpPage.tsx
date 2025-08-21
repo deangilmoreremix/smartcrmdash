@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Brain, Mail, Lock, User, Building, Check } from 'lucide-react';
-import { useSignUp } from '@clerk/clerk-react';
 
 const SignUpPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,8 +15,6 @@ const SignUpPage: React.FC = () => {
     agreeToTerms: false
   });
 
-  const { signUp, isLoaded } = useSignUp();
-
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,45 +23,12 @@ const SignUpPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    if (!isLoaded) {
-      setError('Authentication system is not ready. Please try again.');
-      setIsLoading(false);
-      return;
-    }
+    // Since we're not using authentication, just redirect to dashboard
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 500);
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const result = await signUp.create({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        emailAddress: formData.email,
-        password: formData.password,
-      });
-
-      console.log('Sign up result:', result);
-      
-      if (result.status === 'complete') {
-        console.log('Sign up successful, redirecting...');
-        // Force redirect to current domain's dashboard
-        const currentDomain = window.location.origin;
-        window.location.href = `${currentDomain}/dashboard`;
-      } else {
-        // Handle email verification or other requirements
-        console.log('Sign up requires verification');
-        setError('Please check your email to verify your account before signing in.');
-      }
-    } catch (error: any) {
-      console.error('Sign up error:', error);
-      const errorMessage = error?.errors?.[0]?.message || error?.message || 'An unexpected error occurred during sign-up.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,14 +38,6 @@ const SignUpPage: React.FC = () => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-        <p>Loading Clerk...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
