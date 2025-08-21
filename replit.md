@@ -2,6 +2,12 @@
 
 This project is a modern CRM (Customer Relationship Management) application designed to streamline sales and marketing operations. It features comprehensive contact management, deal tracking, task organization, and leverages AI for advanced automation. The system uses a monorepo structure, ensuring seamless integration and shared type definitions between its React/TypeScript frontend and Node.js/Express backend. The business vision is to provide a robust, AI-powered platform that significantly enhances sales velocity, win rates, deal sizes, and overall productivity for users.
 
+## Recent Updates (January 2025)
+- **Multi-Tenant Email System**: Complete implementation of app context tracking and email template routing
+- **Supabase Authentication**: Full integration with custom email templates matching SmartCRM branding
+- **Webhook Configuration**: Automated user routing system for multi-app email isolation
+- **Email Templates**: 5 professional templates with simplified support contact (support@videoremix.io)
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
