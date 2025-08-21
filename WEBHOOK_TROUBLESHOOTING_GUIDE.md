@@ -7,19 +7,24 @@
 
 ## Why Your Webhook Might Not Be Working
 
-### 1. Webhook Not Configured in Supabase Dashboard
-**Most Common Issue:** The webhook hasn't been set up in your Supabase project.
+### 1. UPDATED: Supabase Uses Different Email Template System
+**After reviewing Supabase docs:** Auth Hooks are for password validation and MFA, not email template routing.
 
-**To Fix:**
-1. Go to your Supabase Dashboard
-2. Navigate to **Authentication > Settings > Webhooks**
-3. Click **"Add webhook"**
-4. Configure:
-   - **Hook name**: SmartCRM Email Routing
-   - **URL**: `https://9f38fddb-d049-4cd4-9f57-c41b6a878a9d-00-2xv27ubfspt46.riker.replit.dev/api/auth-webhook`
-   - **Events to send**: Check `user.created` and `user.updated`
-   - **HTTP method**: POST
-   - **HTTP headers**: `Content-Type: application/json`
+**For Email Templates, Use:**
+1. Go to **Authentication → Emails** in your Supabase Dashboard
+2. Upload custom email templates directly
+3. Set default templates for:
+   - Confirm signup
+   - Magic link
+   - Recovery (password reset)
+   - Invite user
+   - Email change
+
+### 2. Alternative: Direct Template Upload
+Instead of webhooks, upload our email templates:
+- Use the HTML files from `/email-templates/` folder
+- Upload directly in Authentication → Emails → Templates
+- This ensures SmartCRM branding for all auth emails
 
 ### 2. Wrong Event Types Selected
 Make sure you have selected:
