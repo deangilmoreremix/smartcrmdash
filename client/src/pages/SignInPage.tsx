@@ -35,7 +35,7 @@ const SignInPage: React.FC = () => {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         console.log('Sign-in successful, redirecting...');
-        // Redirect to dashboard since we can't modify Clerk settings
+        // Redirect to dashboard
         window.location.href = '/dashboard';
       } else {
         console.log('Sign-in status:', result.status);

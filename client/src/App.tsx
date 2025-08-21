@@ -135,6 +135,7 @@ import './styles/design-system.css';
 
 // Clerk Provider Setup
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } from '@clerk/clerk-react';
+import ClerkRedirectHandler from './components/ClerkRedirectHandler';
 
 // Environment-based Clerk key selection
 const isDevelopment = window.location.hostname.includes('replit.app');
@@ -204,6 +205,9 @@ function App() {
                         {/* Auth routes - no protection needed */}
                         <Route path="/signin" element={<SignInPage />} />
                         <Route path="/signup" element={<SignUpPage />} />
+                        <Route path="/sign-in" element={<SignIn />} />
+                        <Route path="/sign-up" element={<SignUp />} />
+                        <Route path="/auth/*" element={<ClerkRedirectHandler />} />
 
                         {/* All other routes with navbar - Protected by Clerk */}
                         <Route path="/*" element={
