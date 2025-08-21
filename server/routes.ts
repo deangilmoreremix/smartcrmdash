@@ -134,46 +134,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Test with GPT-5 o1-preview model first
+      // Test with GPT-4o (most advanced available model)
       const testResponse = await openai.chat.completions.create({
-        model: "o1-preview", // GPT-5 reasoning model
+        model: "gpt-4o", // Advanced GPT-4 Omni model
         messages: [{ role: "user", content: "Test" }],
         max_tokens: 50
       });
 
       res.json({
         configured: true,
-        model: 'o1-preview',
+        model: 'gpt-4o',
         status: 'ready',
-        gpt5Available: true,
+        gpt5Available: false,
+        gpt4Available: true,
         capabilities: [
-          'GPT-5 o1-preview model (Advanced Reasoning)',
-          'GPT-5 o1-mini model (Efficient Processing)',
+          'GPT-4 Omni model (Latest OpenAI)',
+          'GPT-4o-mini model (Efficient Processing)',
           'Expert-level business intelligence',
-          '94.6% AIME mathematical accuracy',
-          'Advanced strategic analysis',
-          'Unified reasoning system'
+          'Advanced reasoning and analysis',
+          'Multimodal capabilities',
+          'JSON output formatting'
         ]
       });
     } catch (error: any) {
-      // Fallback to o1-mini if o1-preview fails
+      // Fallback to gpt-4o-mini if gpt-4o fails
       try {
         const fallbackResponse = await openai.chat.completions.create({
-          model: "o1-mini", // GPT-5 efficient model
+          model: "gpt-4o-mini", // Efficient GPT-4 model
           messages: [{ role: "user", content: "Test" }],
           max_tokens: 50
         });
 
         res.json({
           configured: true,
-          model: 'o1-mini',
+          model: 'gpt-4o-mini',
           status: 'ready',
-          gpt5Available: true,
+          gpt5Available: false,
+          gpt4Available: true,
           capabilities: [
-            'GPT-5 o1-mini model (Efficient Processing)',
+            'GPT-4o-mini model (Efficient Processing)',
             'Advanced reasoning capabilities',
             'Expert-level analysis',
-            'Cost-effective GPT-5 access',
+            'Cost-effective AI processing',
             'Fast response times'
           ]
         });
