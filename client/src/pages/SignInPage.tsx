@@ -17,37 +17,13 @@ const SignInPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate a direct sign-in process
-    // In a real application, you would make an API call here to your backend
-    // for authentication. For this example, we'll just simulate a success/failure.
-    try {
-      // Replace with your actual authentication API call
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    // Since we're bypassing authentication, directly redirect to dashboard
+    setTimeout(() => {
+      console.log('Redirecting directly to dashboard...');
+      window.location.href = '/dashboard';
+    }, 500);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('Sign-in successful, redirecting to development dashboard...');
-        // Force redirect to current domain's dashboard
-        const currentDomain = window.location.origin;
-        window.location.href = `${currentDomain}/dashboard`;
-      } else {
-        console.error('Sign-in failed:', data);
-        const errorMessage = data?.message || 'Invalid email or password. Please try again.';
-        setError(errorMessage);
-      }
-    } catch (error: any) {
-      console.error('Sign-in error:', error);
-      setError('An unexpected error occurred during sign-in. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
