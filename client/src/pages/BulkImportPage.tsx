@@ -123,7 +123,7 @@ jane.smith@business.com,Jane,Smith,Tech Solutions,(555) 987-6543,Director`;
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Bulk User Import</h1>
-        <p className="text-gray-600 mt-2">Import your existing clients and send them notifications</p>
+        <p className="text-gray-600 mt-2">Import users for SmartCRM. All users get access to the complete suite of apps and features.</p>
       </div>
 
       {/* Progress Steps */}
