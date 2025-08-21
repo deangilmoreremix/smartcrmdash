@@ -293,6 +293,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Multi-tenant email routing webhook for Supabase
   app.post('/api/auth-webhook', (req, res) => {
     try {
+      // Optional webhook signature verification
+      const signature = req.headers['x-webhook-signature'] as string;
+      const expectedSignature = process.env.SUPABASE_WEBHOOK_SECRET;
+      
+      if (expectedSignature && signature && signature !== expectedSignature) {
+        console.warn('⚠️ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
       const { type, record } = req.body;
       
       if (type === 'INSERT' && record) {
@@ -301,10 +310,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                           record.user_metadata?.app_context || 
                           'smartcrm';
         
-        console.log(`New user signup for app: ${appContext}`, {
+        // Enhanced logging for monitoring
+        console.log(`🎯 Email routing: ${record.email} → ${appContext} templates`, {
           userId: record.id,
           email: record.email,
           appContext,
+          timestamp: new Date().toISOString(),
           metadata: record.raw_user_meta_data || record.user_metadata
         });
         
@@ -312,16 +323,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           success: true, 
           appContext,
-          message: `User routed to ${appContext} email templates`
+          message: `User routed to ${appContext} email templates`,
+          timestamp: new Date().toISOString()
         });
       } else {
         res.json({ success: true, message: 'Event processed' });
       }
     } catch (error) {
-      console.error('Auth webhook error:', error);
+      console.error('❌ Auth webhook error:', error);
       res.status(500).json({ 
         success: false, 
-        error: 'Failed to process auth webhook' 
+        error: 'Failed to process auth webhook',
+        timestamp: new Date().toISOString()
       });
     }
   });
