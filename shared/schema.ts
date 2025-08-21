@@ -155,8 +155,27 @@ export const aiQueries = pgTable("ai_queries", {
   profileId: uuid("profile_id").references(() => profiles.id),
 });
 
+// Entitlements table for subscription and payment management
+export const entitlements = pgTable("entitlements", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => profiles.id), // Link to Supabase user
+  status: text("status").notNull().default("active"), // active, past_due, canceled, refunded, inactive
+  productType: text("product_type"), // lifetime, monthly, yearly, payment_plan
+  revokeAt: timestamp("revoke_at", { withTimezone: true }), // When access should flip off (UTC)
+  lastInvoiceStatus: text("last_invoice_status"), // paid, open, uncollectible, void, failed
+  delinquencyCount: integer("delinquency_count").default(0), // For payment plan misses
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  stripeCustomerId: text("stripe_customer_id"),
+  zaxaaSubscriptionId: text("zaxaa_subscription_id"),
+  planName: text("plan_name"),
+  planAmount: decimal("plan_amount", { precision: 10, scale: 2 }),
+  currency: text("currency").default("USD"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Define relations
-export const profilesRelations = relations(profiles, ({ many }) => ({
+export const profilesRelations = relations(profiles, ({ many, one }) => ({
   contacts: many(contacts),
   deals: many(deals),
   tasks: many(tasks),
@@ -166,6 +185,10 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   documents: many(documents),
   automationRules: many(automationRules),
   aiQueries: many(aiQueries),
+  entitlement: one(entitlements, {
+    fields: [profiles.id],
+    references: [entitlements.userId],
+  }),
 }));
 
 export const contactsRelations = relations(contacts, ({ one, many }) => ({
@@ -276,6 +299,13 @@ export const aiQueriesRelations = relations(aiQueries, ({ one }) => ({
   }),
 }));
 
+export const entitlementsRelations = relations(entitlements, ({ one }) => ({
+  user: one(profiles, {
+    fields: [entitlements.userId],
+    references: [profiles.id],
+  }),
+}));
+
 // Insert schemas
 export const insertProfileSchema = createInsertSchema(profiles).pick({
   username: true,
@@ -337,6 +367,12 @@ export const insertAiQuerySchema = createInsertSchema(aiQueries).omit({
   createdAt: true,
 });
 
+export const insertEntitlementSchema = createInsertSchema(entitlements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Export types
 export type Profile = typeof profiles.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
@@ -358,6 +394,8 @@ export type AutomationRule = typeof automationRules.$inferSelect;
 export type InsertAutomationRule = z.infer<typeof insertAutomationRuleSchema>;
 export type AiQuery = typeof aiQueries.$inferSelect;
 export type InsertAiQuery = z.infer<typeof insertAiQuerySchema>;
+export type Entitlement = typeof entitlements.$inferSelect;
+export type InsertEntitlement = z.infer<typeof insertEntitlementSchema>;
 
 // Backward compatibility - keep User types but make them reference Profile
 export type User = Profile;

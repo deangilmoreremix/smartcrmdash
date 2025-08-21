@@ -3,6 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import OpenAI from 'openai';
 import { registerBulkImportRoutes } from './bulk-import';
+import { handleStripeWebhook } from './stripe-webhook';
+import { handleZaxaaWebhook } from './zaxaa-webhook';
+import { getUserEntitlement, isUserActive, handleSuccessfulPurchase } from './entitlements-utils';
+import { db } from './db';
+import { entitlements } from '@shared/schema';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize OpenAI client
@@ -342,6 +347,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register bulk import routes
   registerBulkImportRoutes(app);
+
+  // Entitlements API routes
+  app.get('/api/entitlements/check', async (req, res) => {
+    try {
+      // Get user ID from session or authentication
+      const userId = (req as any).user?.id; // Implement proper auth middleware
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const entitlement = await getUserEntitlement(userId);
+      const isActive = isUserActive(entitlement);
+
+      res.json({
+        entitlement,
+        isActive,
+        hasAccess: isActive
+      });
+    } catch (error) {
+      console.error('Error checking entitlement:', error);
+      res.status(500).json({ error: 'Failed to check entitlement' });
+    }
+  });
+
+  app.get('/api/entitlements/list', async (req, res) => {
+    try {
+      // For admin access - in production, add proper admin authentication
+      const entitlementsList = await db.select().from(entitlements).limit(100);
+      
+      res.json({
+        entitlements: entitlementsList || [],
+        total: entitlementsList?.length || 0
+      });
+    } catch (error) {
+      console.error('Error listing entitlements:', error);
+      res.status(500).json({ error: 'Failed to list entitlements' });
+    }
+  });
+
+  app.post('/api/entitlements/create', async (req, res) => {
+    try {
+      const { userId, productType, planName, planAmount, currency } = req.body;
+      
+      if (!userId || !productType || !planName) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Create entitlement using the utility function
+      const entitlement = await handleSuccessfulPurchase(
+        userId,
+        productType,
+        {
+          planName,
+          planAmount: planAmount?.toString(),
+          currency: currency || 'USD',
+        }
+      );
+
+      res.json({ success: true, entitlement });
+    } catch (error) {
+      console.error('Error creating entitlement:', error);
+      res.status(500).json({ error: 'Failed to create entitlement' });
+    }
+  });
+
+  // Webhook endpoints
+  app.post('/api/webhooks/stripe', handleStripeWebhook);
+  app.post('/api/webhooks/zaxaa', handleZaxaaWebhook);
 
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {

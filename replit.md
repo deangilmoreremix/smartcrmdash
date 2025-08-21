@@ -3,10 +3,12 @@
 This project is a modern CRM (Customer Relationship Management) application designed to streamline sales and marketing operations. It features comprehensive contact management, deal tracking, task organization, and leverages AI for advanced automation. The system uses a monorepo structure, ensuring seamless integration and shared type definitions between its React/TypeScript frontend and Node.js/Express backend. The business vision is to provide a robust, AI-powered platform that significantly enhances sales velocity, win rates, deal sizes, and overall productivity for users.
 
 ## Recent Updates (January 2025)
+- **Enhanced Entitlements System**: Complete subscription management with product types (lifetime, monthly, yearly, payment_plan), usage tracking, and automated enforcement
 - **Multi-Tenant Email System**: Complete implementation of app context tracking and email template routing
 - **Supabase Authentication**: Full integration with custom email templates matching SmartCRM branding
 - **Webhook Configuration**: Automated user routing system for multi-app email isolation
-- **Email Templates**: 5 professional templates with simplified support contact (support@videoremix.io)
+- **Email Templates**: Professional templates optimized for spam filter avoidance using "Confirm Reauthentication" approach
+- **Bulk Import System**: CSV-based user creation with automated email notifications and Supabase integration
 
 # User Preferences
 
@@ -31,13 +33,15 @@ Design Implementation: Always use the exact design, styling, and structure from 
 ## Data Storage Solutions
 - **Database**: PostgreSQL with Neon serverless hosting for production.
 - **ORM**: Drizzle ORM for type-safe database operations.
-- **Schema**: Shared TypeScript schema definitions for core entities.
+- **Schema**: Shared TypeScript schema definitions for core entities including comprehensive entitlements system.
 - **Development**: In-memory storage.
+- **Entitlements**: Advanced subscription management with timezone-aware revocation, payment tracking, and automated enforcement.
 
 ## Authentication and Authorization
 - **Session Management**: PostgreSQL-backed session storage.
 - **Multi-tenancy**: Built-in support for tenant-based access control.
 - **User Roles**: Hierarchical permission system (super admin, partner admin, customer admin, end user).
+- **Entitlements System**: Product-type based access control (lifetime, monthly, yearly, payment_plan) with automated enforcement and timezone-aware revocation.
 
 ## AI Integration Architecture
 - **GPT-5 Official Integration**: Full implementation using OpenAI's GPT-5 model, utilizing its advanced API parameters (verbosity, reasoning_effort, custom tools, context-free grammar).

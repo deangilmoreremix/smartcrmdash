@@ -124,6 +124,9 @@ import Pipeline from './pages/PipelinePage'; // Assuming this path
 // Bulk import page
 const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
 
+// Entitlements management page
+const EntitlementsPage = lazy(() => import('./pages/EntitlementsPage'));
+
 // Feature pages
 import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
 import AiToolsFeaturePage from './pages/landing/FeaturePage/AiToolsFeaturePage';
@@ -750,6 +753,14 @@ function App() {
                               element={
                                 <ProtectedRoute>
                                   <BulkImportPage />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="/entitlements"
+                              element={
+                                <ProtectedRoute>
+                                  <EntitlementsPage />
                                 </ProtectedRoute>
                               }
                             />
