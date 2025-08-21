@@ -7,7 +7,7 @@ const LandingHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
-  
+
   // Track scroll position to change header style
   useEffect(() => {
     const handleScroll = () => {
@@ -17,7 +17,7 @@ const LandingHeader = () => {
         setIsScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -36,7 +36,7 @@ const LandingHeader = () => {
               Smart<span className="text-gray-900">CRM</span>
             </span>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             <div className="relative">
@@ -47,7 +47,7 @@ const LandingHeader = () => {
               >
                 Features <ChevronDown size={16} className={`ml-1 transition-transform ${featuresOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {featuresOpen && (
                 <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-10">
                   <div className="grid grid-cols-2 gap-2">
@@ -79,7 +79,7 @@ const LandingHeader = () => {
                 </div>
               )}
             </div>
-            
+
             <HashLink smooth to="/#pricing" className="text-gray-700 hover:text-blue-600 transition-colors">
               Pricing
             </HashLink>
@@ -89,15 +89,18 @@ const LandingHeader = () => {
             <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors">
               FAQ
             </HashLink>
-            <Link to="/login" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Sign In
-            </Link>
-            <Link 
-              to="/register" 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              Get Started
-            </Link>
+            <a 
+                href="https://accounts.smart-crm.videoremix.io/sign-in"
+                className="text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                Sign In
+              </a>
+            <a 
+                href="https://accounts.smart-crm.videoremix.io/sign-up"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Get Started Free
+              </a>
           </nav>
 
           {/* Mobile Menu Button */}
