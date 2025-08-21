@@ -134,23 +134,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Test with GPT-5 o1-mini (most advanced available model)
-      const testResponse = await openai.chat.completions.create({
-        model: "o1-mini", // GPT-5 efficient model
-        messages: [{ role: "user", content: "Test" }],
-        max_completion_tokens: 50
+      // Test with GPT-5 using new responses API
+      const testResponse = await openai.responses.create({
+        model: "gpt-5",
+        input: "Test GPT-5 connection",
+        reasoning: { "effort": "low" },
+        text: { "verbosity": "low" }
       });
 
       res.json({
         configured: true,
-        model: 'o1-mini',
+        model: 'gpt-5',
         status: 'ready',
         gpt5Available: true,
         gpt4Available: true,
         capabilities: [
-          'GPT-5 o1-mini model (Advanced Reasoning)',
-          'GPT-4o model (Multimodal Processing)',
-          'GPT-4o-mini model (Efficient Processing)',
+          'GPT-5 with advanced reasoning',
+          'Configurable reasoning effort levels',
+          'Unified reasoning system',
           'Expert-level business intelligence',
           '94.6% AIME mathematical accuracy',
           'Advanced strategic analysis'
@@ -205,17 +206,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userMetrics, timeOfDay, recentActivity } = req.body;
 
-      // Use GPT-5 o1-mini for expert-level insights
-      const response = await openai.chat.completions.create({
-        model: "o1-mini", // GPT-5 efficient model
-        messages: [{
-          role: "user",
-          content: `You are an expert business strategist. Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`
-        }],
-        max_completion_tokens: 400
+      // Use GPT-5 with reasoning for expert-level insights
+      const response = await openai.responses.create({
+        model: "gpt-5",
+        input: `You are an expert business strategist. Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`,
+        reasoning: { "effort": "medium" },
+        text: { "verbosity": "medium" }
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const result = JSON.parse(response.output_text || '{}');
       res.json(result);
 
     } catch (error) {
