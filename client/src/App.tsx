@@ -132,16 +132,6 @@ import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyze
 
 import './styles/design-system.css';
 
-// Clerk Provider Setup
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-// Temporarily disabled while setting up authentication
-// if (!PUBLISHABLE_KEY) {
-//   throw new Error('Missing Publishable Key');
-// }
-
 
 // Reusable placeholder
 const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
@@ -174,8 +164,7 @@ function App() {
     };
   }, []);
 
-  // Conditional wrapper for Clerk authentication
-  const AppContent = () => (
+  return (
     <ThemeProvider>
         <TenantProvider>
           <AIToolsProvider>
@@ -808,14 +797,6 @@ function App() {
       </ThemeProvider>
   );
 
-  return (
-    PUBLISHABLE_KEY ? (
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <AppContent />
-      </ClerkProvider>
-    ) : (
-      <AppContent />
-    )
   );
 }
 

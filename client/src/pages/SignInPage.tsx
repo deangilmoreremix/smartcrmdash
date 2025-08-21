@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Brain, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const SignInPage: React.FC = () => {
@@ -8,11 +9,13 @@ const SignInPage: React.FC = () => {
     email: '',
     password: ''
   });
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // No auth functionality - just form handling
+    // Direct navigation to dashboard without authentication
     console.log('Sign in form submitted:', formData);
+    navigate('/dashboard');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
