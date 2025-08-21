@@ -15,7 +15,8 @@ const SignInPage: React.FC = () => {
     e.preventDefault();
     // Direct navigation to dashboard without authentication
     console.log('Sign in form submitted:', formData);
-    navigate('/dashboard');
+    // Use window.location.href to ensure we stay on current domain
+    window.location.href = '/dashboard';
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
