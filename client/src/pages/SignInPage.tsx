@@ -34,8 +34,8 @@ const SignInPage: React.FC = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        console.log('Sign-in successful, redirecting...');
-        // Redirect to dashboard
+        console.log('Sign-in successful, redirecting to development dashboard...');
+        // Force redirect to local dashboard
         window.location.href = '/dashboard';
       } else {
         console.log('Sign-in status:', result.status);

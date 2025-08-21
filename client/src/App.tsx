@@ -137,11 +137,9 @@ import './styles/design-system.css';
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } from '@clerk/clerk-react';
 import ClerkRedirectHandler from './components/ClerkRedirectHandler';
 
-// Environment-based Clerk key selection
-const isDevelopment = window.location.hostname.includes('replit.app');
-const PUBLISHABLE_KEY = isDevelopment
-  ? import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-  : import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Force development environment - disable production
+const isDevelopment = true; // Always use development in Replit
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
@@ -186,6 +184,10 @@ function App() {
   const AppContent = () => (
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
+      signInUrl="/signin"
+      signUpUrl="/signup"
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
     >
       <ThemeProvider>
         <TenantProvider>
