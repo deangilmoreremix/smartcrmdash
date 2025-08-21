@@ -168,6 +168,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <AuthProvider>
         <TenantProvider>
           <AIToolsProvider>
             <ModalsProvider>
@@ -176,7 +177,7 @@ function App() {
                   <NavigationProvider>
                     <DashboardLayoutProvider>
                       <AIProvider>
-                      <Routes>
+                        <Routes>
                         {/* Landing page routes (no navbar) */}
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/sales" element={<SalesLandingPage />} />
@@ -789,7 +790,7 @@ function App() {
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
-                    </AIProvider>
+                      </AIProvider>
                     </DashboardLayoutProvider>
                   </NavigationProvider>
                 </VideoCallProvider>
@@ -797,7 +798,7 @@ function App() {
             </ModalsProvider>
           </AIToolsProvider>
         </TenantProvider>
-      </AuthProvider> {/* Close AuthProvider wrapper */}
+      </AuthProvider>
     </ThemeProvider>
   );
 }
