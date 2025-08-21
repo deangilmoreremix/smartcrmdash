@@ -83,8 +83,8 @@ const DashboardComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize data stores
-  const { contacts, loadContacts, isLoading: contactsLoading } = useContactStore();
-  const { deals, loadDeals, isLoading: dealsLoading } = useDealStore();
+  const { contacts, isLoading: contactsLoading } = useContactStore();
+  const { deals, isLoading: dealsLoading } = useDealStore();
 
   const { 
     fetchDeals, 
@@ -112,8 +112,8 @@ const DashboardComponent: React.FC = () => {
         setIsLoading(true);
         // Try to load data, but don't fail if it doesn't work
         await Promise.allSettled([
-          loadContacts(),
-          loadDeals()
+          fetchContacts(),
+          fetchDeals()
         ]);
       } catch (err) {
         console.error('Dashboard data loading issue:', err);
@@ -327,7 +327,7 @@ const DashboardComponent: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
-        <LoadingSpinner message="Loading Dashboard..." size="xl" />
+        <LoadingSpinner message="Loading Dashboard..." size="lg" />
       </div>
     );
   }
