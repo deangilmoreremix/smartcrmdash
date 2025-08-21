@@ -178,9 +178,9 @@ function App() {
   const AppContent = () => (
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY}
-      afterSignInUrl="/dashboard"
-      afterSignUpUrl="/dashboard"
-      afterSignOutUrl="/"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      signOutRedirectUrl="/"
     >
       <ThemeProvider>
         <TenantProvider>
