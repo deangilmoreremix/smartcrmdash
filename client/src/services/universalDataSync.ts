@@ -63,27 +63,27 @@ export class UniversalDataSyncService {
 
   private setupRemoteAppListeners() {
     // Listen for incoming data from remote apps
-    remoteAppManager.onCrossAppEvent('CONTACT_CREATED', (data, sourceApp) => {
+    remoteAppManager.onCrossAppEvent('CONTACT_CREATED', (data: any, sourceApp: string) => {
       console.log(`📝 Contact created in ${sourceApp}:`, data);
       this.handleIncomingContactData('create', data);
     });
 
-    remoteAppManager.onCrossAppEvent('CONTACT_UPDATED', (data, sourceApp) => {
+    remoteAppManager.onCrossAppEvent('CONTACT_UPDATED', (data: any, sourceApp: string) => {
       console.log(`✏️ Contact updated in ${sourceApp}:`, data);
       this.handleIncomingContactData('update', data);
     });
 
-    remoteAppManager.onCrossAppEvent('DEAL_CREATED', (data, sourceApp) => {
+    remoteAppManager.onCrossAppEvent('DEAL_CREATED', (data: any, sourceApp: string) => {
       console.log(`💰 Deal created in ${sourceApp}:`, data);
       this.handleIncomingDealData('create', data);
     });
 
-    remoteAppManager.onCrossAppEvent('DEAL_UPDATED', (data, sourceApp) => {
+    remoteAppManager.onCrossAppEvent('DEAL_UPDATED', (data: any, sourceApp: string) => {
       console.log(`💼 Deal updated in ${sourceApp}:`, data);
       this.handleIncomingDealData('update', data);
     });
 
-    remoteAppManager.onCrossAppEvent('TASK_CREATED', (data, sourceApp) => {
+    remoteAppManager.onCrossAppEvent('TASK_CREATED', (data: any, sourceApp: string) => {
       console.log(`📋 Task created in ${sourceApp}:`, data);
       this.handleIncomingTaskData('create', data);
     });
