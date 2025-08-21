@@ -158,12 +158,12 @@ const ParallaxHero: React.FC = () => {
           </p>
           
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/dashboard" className="
+            <Link to="/signup" className="
               px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl 
               hover:shadow-lg transition duration-300 transform hover:translate-y-[-2px]
               flex items-center
             ">
-              Try it for Free <ArrowRight size={18} className="ml-2" />
+              Sign Up Now <ArrowRight size={18} className="ml-2" />
             </Link>
             
             <HashLink to="#features" className="
