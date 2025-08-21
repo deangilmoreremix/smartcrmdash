@@ -131,15 +131,18 @@ const LandingHeader = () => {
               <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
                 FAQ
               </HashLink>
-              <Link to="/login" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              <a 
+                href="https://accounts.smart-crm.videoremix.io/sign-in"
+                className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+              >
                 Sign In
-              </Link>
-              <Link 
-                to="/register" 
+              </a>
+              <a 
+                href="https://accounts.smart-crm.videoremix.io/sign-up"
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
               >
                 Get Started
-              </Link>
+              </a>
             </nav>
           </div>
         )}
