@@ -49,46 +49,97 @@ import PersistentVideoCallButton from './PersistentVideoCallButton';
 import VideoCallPreviewWidget from './VideoCallPreviewWidget';
 import VideoCallOverlay from './VideoCallOverlay';
 
-// Memo Dashboard component to prevent unnecessary re-renders
-const Dashboard: React.FC = React.memo(() => {
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Dashboard component error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null; // Silently fail
+    }
+
+    return this.props.children;
+  }
+}
+
+// Dashboard Component
+const DashboardComponent: React.FC = () => {
+  const { isDark } = useTheme();
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize data stores
+  const { contacts, loadContacts, isLoading: contactsLoading } = useContactStore();
+  const { deals, loadDeals, isLoading: dealsLoading } = useDealStore();
+
   const { 
-    deals, 
     fetchDeals, 
-    isLoading 
+    isLoading: dealsLoadingForLayout
   } = useDealStore();
-  
+
   const { 
-    contacts, 
     fetchContacts, 
-    isLoading: contactsLoading 
+    isLoading: contactsLoadingForLayout
   } = useContactStore();
-  
-  const { tasks } = useTaskStore();
+
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { openTool } = useAITools();
-  const { isDark } = useTheme();
   const { sectionOrder } = useDashboardLayout();
-  
 
-  
   const gemini = useGemini();
-  
+
   // Prevent repeated data fetching by using a ref to track initialization
   const initializedRef = useRef(false);
-  
+
+  // Load data with error handling
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        // Try to load data, but don't fail if it doesn't work
+        await Promise.allSettled([
+          loadContacts(),
+          loadDeals()
+        ]);
+      } catch (err) {
+        console.error('Dashboard data loading issue:', err);
+        // Don't set error - just log it and continue
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [loadContacts, loadDeals]);
+
+
   useEffect(() => {
     // Only fetch data once
     if (initializedRef.current) return;
     initializedRef.current = true;
-    
+
     // Fetch deals immediately - they're fast
     fetchDeals();
-    
+
     // Fetch contacts in background without blocking dashboard
     setTimeout(() => {
       fetchContacts();
     }, 100);
-    
+
     // Wrap in try/catch to prevent errors from breaking the app
     try {
       setTimeout(() => {
@@ -97,7 +148,7 @@ const Dashboard: React.FC = React.memo(() => {
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }
-    
+
     // Set up timer to refresh data periodically
     const intervalId = window.setInterval(() => {
       fetchDeals();
@@ -107,7 +158,7 @@ const Dashboard: React.FC = React.memo(() => {
     // Proper cleanup
     return () => window.clearInterval(intervalId);
   }, []);
-  
+
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
@@ -152,7 +203,7 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'quick-actions-section':
         return <QuickActions />;
-        
+
       case 'ai-insights-section':
         return <AIInsightsPanel />;
 
@@ -253,6 +304,35 @@ const Dashboard: React.FC = React.memo(() => {
     }
   };
 
+  // If there's an error, show error state
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">⚠️ Dashboard Error</div>
+          <p className="text-gray-600 mb-4">
+            {error}
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Reload Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <LoadingSpinner message="Loading Dashboard..." size="xl" />
+      </div>
+    );
+  }
+
+
   return (
     <main className="w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pt-4">
       {/* Dashboard Header - Always visible */}
@@ -260,8 +340,6 @@ const Dashboard: React.FC = React.memo(() => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
       </div>
-
-
 
       {/* Dashboard Layout Controls - RESTORED */}
       <DashboardLayoutControls />
@@ -314,6 +392,9 @@ const Dashboard: React.FC = React.memo(() => {
       <VideoCallOverlay />
     </main>
   );
-});
+};
+
+// Memo Dashboard component to prevent unnecessary re-renders
+const Dashboard = React.memo(DashboardComponent);
 
 export default Dashboard;
