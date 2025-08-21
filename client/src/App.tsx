@@ -138,10 +138,9 @@ import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } 
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Temporarily disabled while setting up authentication
-// if (!PUBLISHABLE_KEY) {
-//   throw new Error('Missing Publishable Key');
-// }
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key');
+}
 
 
 // Reusable placeholder
@@ -177,7 +176,13 @@ function App() {
 
   // Conditional wrapper for Clerk authentication
   const AppContent = () => (
-    <ThemeProvider>
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY}
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
+      afterSignOutUrl="/"
+    >
+      <ThemeProvider>
         <TenantProvider>
           <AIToolsProvider>
             <ModalsProvider>
@@ -194,12 +199,13 @@ function App() {
 
 
 
-                        {/* All other routes with navbar */}
+                        {/* All other routes with navbar - Protected by Clerk */}
                         <Route path="/*" element={
-                              <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-                                <Navbar />
-                                <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
-                                  <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                          <SignedIn>
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                                     <Routes>
                                       {/* App routes redirect to dashboard */}
                                       <Route path="/app" element={<Navigate to="/dashboard" replace />} />
@@ -564,6 +570,14 @@ function App() {
                               </Suspense>
                             </div>
                           </div>
+                          </SignedIn>
+                        } />
+                        
+                        {/* Fallback for signed out users accessing protected routes */}
+                        <Route path="/dashboard" element={
+                          <SignedOut>
+                            <RedirectToSignIn />
+                          </SignedOut>
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
@@ -576,6 +590,7 @@ function App() {
           </AIToolsProvider>
         </TenantProvider>
       </ThemeProvider>
+    </ClerkProvider>
   );
 
   return <AppContent />;
