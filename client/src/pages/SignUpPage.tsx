@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { AlertCircle, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
+  const { signUp } = useAuth();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,12 +17,49 @@ const SignUpPage: React.FC = () => {
     firstName: '',
     lastName: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, redirect directly to dashboard
-    // Will be replaced with Supabase auth logic
-    navigate('/dashboard');
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await signUp(formData.email, formData.password, {
+      data: {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        full_name: `${formData.firstName} ${formData.lastName}`.trim()
+      }
+    });
+    
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      setSuccess('Check your email for the confirmation link!');
+      setLoading(false);
+      // Optionally redirect to signin page after a delay
+      setTimeout(() => {
+        navigate('/signin');
+      }, 3000);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +74,7 @@ const SignUpPage: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
-            Smart CRM
+            Smart<span className="text-green-400">CRM</span>
           </h1>
           <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Create your account
@@ -41,6 +82,20 @@ const SignUpPage: React.FC = () => {
         </div>
         
         <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-8 shadow-lg`}>
+          {error && (
+            <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border flex items-center space-x-2`}>
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <span className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'} border flex items-center space-x-2`}>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className={`text-sm ${isDark ? 'text-green-400' : 'text-green-600'}`}>{success}</span>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -58,6 +113,7 @@ const SignUpPage: React.FC = () => {
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="First name"
+                  disabled={loading}
                 />
               </div>
               <div>
@@ -75,6 +131,7 @@ const SignUpPage: React.FC = () => {
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="Last name"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -95,6 +152,7 @@ const SignUpPage: React.FC = () => {
                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="Enter your email"
                 required
+                disabled={loading}
               />
             </div>
             
@@ -102,57 +160,84 @@ const SignUpPage: React.FC = () => {
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'} mb-2`}>
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDark 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Create a password"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  placeholder="Create a password"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
+                    isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                  }`}
+                  disabled={loading}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'} mb-2`}>
                 Confirm Password
               </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDark 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Confirm your password"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  placeholder="Confirm your password"
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
+                    isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'
+                  }`}
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
           
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Already have an account?{' '}
-              <button
-                onClick={() => navigate('/signin')}
+              <Link
+                to="/signin"
                 className="text-blue-600 hover:text-blue-500"
               >
                 Sign In
-              </button>
+              </Link>
             </p>
           </div>
         </div>

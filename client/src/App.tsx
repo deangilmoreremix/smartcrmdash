@@ -11,6 +11,7 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
+import { AuthProvider } from './contexts/AuthContext'; // Added import for AuthProvider
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
@@ -49,6 +50,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 import SalesLandingPage from './pages/SalesLandingPage';
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage')); // Added ForgotPasswordPage import
 
 // New comprehensive implementations
 const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
@@ -183,6 +185,7 @@ function App() {
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
                         <Route path="/demo" element={<LandingPage />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* Added ForgotPasswordPage route */}
 
                         {/* All other routes with navbar */}
                         <Route path="/*" element={
@@ -794,7 +797,8 @@ function App() {
             </ModalsProvider>
           </AIToolsProvider>
         </TenantProvider>
-      </ThemeProvider>
+      </AuthProvider> {/* Close AuthProvider wrapper */}
+    </ThemeProvider>
   );
 }
 

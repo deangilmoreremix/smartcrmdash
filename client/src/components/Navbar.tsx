@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useAuth } from '../contexts/AuthContext';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -33,6 +34,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
+  const { signOut, user } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -237,6 +239,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
   }, [navigate, openAITool]);
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate('/');
+  }, [signOut, navigate]);
 
   // Active tab based on route
   useEffect(() => {
@@ -750,9 +757,32 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               >
                 {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
               </button>
-              <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
+                  className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                >
+                  <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
+                </button>
+                
+                {activeDropdown === 'user' && (
+                  <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      <div className="px-3 py-2 border-b border-gray-200/30">
+                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {user?.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleSignOut}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
