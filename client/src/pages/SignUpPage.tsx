@@ -50,7 +50,8 @@ const SignUpPage: React.FC = () => {
       
       if (result.status === 'complete') {
         console.log('Sign up successful, redirecting...');
-        // Let Clerk handle the redirect based on dashboard configuration
+        // Redirect to dashboard since we can't modify Clerk settings
+        window.location.href = '/dashboard';
       } else {
         // Handle email verification or other requirements
         console.log('Sign up requires verification');

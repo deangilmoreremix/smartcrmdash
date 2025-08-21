@@ -138,7 +138,7 @@ import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } 
 
 // Environment-based Clerk key selection
 const isDevelopment = window.location.hostname.includes('replit.app');
-const PUBLISHABLE_KEY = isDevelopment 
+const PUBLISHABLE_KEY = isDevelopment
   ? import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
   : import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -183,7 +183,7 @@ function App() {
 
   // Conditional wrapper for Clerk authentication
   const AppContent = () => (
-    <ClerkProvider 
+    <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
     >
       <ThemeProvider>
@@ -201,7 +201,9 @@ function App() {
                         <Route path="/sales" element={<SalesLandingPage />} />
                         <Route path="/demo" element={<LandingPage />} />
 
-
+                        {/* Auth routes - no protection needed */}
+                        <Route path="/signin" element={<SignInPage />} />
+                        <Route path="/signup" element={<SignUpPage />} />
 
                         {/* All other routes with navbar - Protected by Clerk */}
                         <Route path="/*" element={
@@ -580,12 +582,9 @@ function App() {
                         {/* Fallback for signed out users accessing protected routes */}
                         <Route path="/dashboard" element={
                           <SignedOut>
-                            <RedirectToSignIn />
+                            <RedirectToSignIn redirectUrl="/signin" />
                           </SignedOut>
                         } />
-                        {/* Add routes for SignIn and SignUp pages directly */}
-                        <Route path="/sign-in" element={<SignIn />} />
-                        <Route path="/sign-up" element={<SignUp />} />
                       </Routes>
                       <RemoteAppRefreshManager />
                     </AIProvider>
