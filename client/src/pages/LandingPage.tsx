@@ -281,7 +281,7 @@ const LandingPage = () => {
           </div>
           
           <div className="text-center mt-12">
-            <Link to="/ai-tools" className="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
+            <Link to="/features/ai-tools" className="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
               Explore AI Tools <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
           </div>

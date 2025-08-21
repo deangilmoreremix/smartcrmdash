@@ -758,14 +758,25 @@ function App() {
                               }
                             />
 
-                            {/* Feature showcase routes (optional) */}
-                            <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
-                            <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
-                            <Route path="/features/pipeline" element={<PipelineWithRemote />} />
+                            {/* Additional feature pages that may be referenced */}
+                            <Route path="/features/speech-to-text" element={<PlaceholderPage title="Speech to Text" description="Advanced speech recognition for sales calls and meetings" />} />
+                            <Route path="/features/automation" element={<PlaceholderPage title="Sales Automation" description="Automated workflows and sales processes" />} />
+                            <Route path="/features/appointments" element={<Appointments />} />
 
                                   <Route path="/iframe-overlap-checker" element={<Suspense fallback={<LoadingSpinner />}><IframeOverlapChecker /></Suspense>} />
 
                             {/* Feature pages */}
+                            <Route path="/features/ai-assistant" element={<AiAssistantFeaturePage />} />
+                            <Route path="/features/ai-tools" element={<AiToolsFeaturePage />} />
+                            <Route path="/features/communications" element={<CommunicationsFeaturePage />} />
+                            <Route path="/features/contacts" element={<ContactsFeaturePage />} />
+                            <Route path="/features/function-assistant" element={<FunctionAssistantFeaturePage />} />
+                            <Route path="/features/image-generator" element={<ImageGeneratorFeaturePage />} />
+                            <Route path="/features/pipeline" element={<PipelineFeaturePage />} />
+                            <Route path="/features/semantic-search" element={<SemanticSearchFeaturePage />} />
+                            <Route path="/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
+                            
+                            {/* Legacy feature page routes for backward compatibility */}
                             <Route path="/landing/features/ai-assistant" element={<AiAssistantFeaturePage />} />
                             <Route path="/landing/features/ai-tools" element={<AiToolsFeaturePage />} />
                             <Route path="/landing/features/communications" element={<CommunicationsFeaturePage />} />
