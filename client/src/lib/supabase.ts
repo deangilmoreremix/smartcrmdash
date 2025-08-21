@@ -75,7 +75,12 @@ export const auth = {
       password,
       options: {
         ...options,
-        emailRedirectTo: undefined // Disable email verification redirect
+        emailRedirectTo: undefined, // Disable email verification redirect
+        data: {
+          app_context: 'smartcrm',
+          email_template_set: 'smartcrm',
+          ...options?.data
+        }
       }
     })
   },

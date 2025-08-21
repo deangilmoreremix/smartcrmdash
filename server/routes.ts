@@ -290,6 +290,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multi-tenant email routing webhook for Supabase
+  app.post('/api/auth-webhook', (req, res) => {
+    try {
+      const { type, record } = req.body;
+      
+      if (type === 'INSERT' && record) {
+        // Get app context from user metadata
+        const appContext = record.raw_user_meta_data?.app_context || 
+                          record.user_metadata?.app_context || 
+                          'smartcrm';
+        
+        console.log(`New user signup for app: ${appContext}`, {
+          userId: record.id,
+          email: record.email,
+          appContext,
+          metadata: record.raw_user_meta_data || record.user_metadata
+        });
+        
+        // Log successful routing for monitoring
+        res.json({ 
+          success: true, 
+          appContext,
+          message: `User routed to ${appContext} email templates`
+        });
+      } else {
+        res.json({ success: true, message: 'Event processed' });
+      }
+    } catch (error) {
+      console.error('Auth webhook error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to process auth webhook' 
+      });
+    }
+  });
+
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
     res.json({ message: 'CRM API is working', supabase: 'Edge Functions will handle AI operations' });

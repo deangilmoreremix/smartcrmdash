@@ -12,6 +12,8 @@ export const profiles = pgTable("profiles", {
   lastName: text("last_name"),
   role: text("role").default("user"),
   avatar: text("avatar_url"),
+  appContext: text("app_context").default("smartcrm"), // Track which app the user came from
+  emailTemplateSet: text("email_template_set").default("smartcrm"), // Control which email templates to use
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

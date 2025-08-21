@@ -10,6 +10,10 @@ const SignUpPage: React.FC = () => {
   const { isDark } = useTheme();
   const { signUp } = useAuth();
   
+  // Get app context from URL parameters for multi-tenant email routing
+  const urlParams = new URLSearchParams(window.location.search);
+  const appContext = urlParams.get('app') || 'smartcrm';
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -45,7 +49,9 @@ const SignUpPage: React.FC = () => {
       data: {
         first_name: formData.firstName,
         last_name: formData.lastName,
-        full_name: `${formData.firstName} ${formData.lastName}`.trim()
+        full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+        app_context: appContext,
+        email_template_set: appContext
       }
     });
     
