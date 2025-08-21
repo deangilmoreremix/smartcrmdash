@@ -103,7 +103,6 @@ const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 // Placeholder imports for routes that might not be implemented yet
 import Login from './pages/Auth/Login';
 import TaskCalendarView from './pages/TaskCalendarView'; // Assuming this path
-import SalesLandingPage from './pages/SalesLandingPage'; // Already imported above, but ensuring it's here for clarity if needed
 import BusinessAnalyzer from './pages/BusinessAnalyzer'; // Assuming this path
 import DocumentCenter from './pages/DocumentCenter'; // Assuming this path
 import FAQ from './pages/FAQ'; // Assuming this path
@@ -112,8 +111,6 @@ import FormPublic from './pages/FormPublic'; // Assuming this path
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import UserManagement from './pages/UserManagement';
 import PartnerManagementPage from './pages/PartnerManagementPage';
-import PartnerOnboardingPage from './pages/PartnerOnboardingPage';
-import RevenueSharingPage from './pages/RevenueSharingPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import LeadCapture from './pages/LeadCapture';
 import AIGoalsPage from './pages/AIGoals/AIGoalsPage'; // Assuming this path
@@ -121,26 +118,6 @@ import GoalCardDemo from './pages/GoalCardDemo'; // Assuming this path
 import ContactDetail from './pages/ContactDetail'; // Assuming this path
 import Settings from './pages/Settings'; // Assuming this path
 import Pipeline from './pages/PipelinePage'; // Assuming this path
-import PipelineIntelligence from './pages/PipelineIntelligence'; // Already imported above
-import DealRiskMonitor from './pages/DealRiskMonitor'; // Already imported above
-import SmartConversionInsights from './pages/SmartConversionInsights'; // Already imported above
-import SalesCycleAnalytics from './pages/SalesCycleAnalytics'; // Already imported above
-import PipelineHealthDashboard from './pages/PipelineHealthDashboard'; // Already imported above
-import LeadAutomation from './pages/LeadAutomation'; // Already imported above
-import CircleProspecting from './pages/CircleProspecting'; // Already imported above
-import PhoneSystem from './pages/PhoneSystem'; // Already imported above
-import Invoicing from './pages/Invoicing'; // Already imported above
-import WinRateIntelligence from './pages/WinRateIntelligence'; // Already imported above
-import AISalesForecast from './pages/AISalesForecast'; // Already imported above
-import LiveDealAnalysis from './pages/LiveDealAnalysis'; // Already imported above
-import CompetitorInsights from './pages/CompetitorInsights'; // Already imported above
-import RevenueIntelligence from './pages/RevenueIntelligence'; // Already imported above
-import ActivityAnalytics from './pages/ActivityAnalytics'; // Already imported above
-import ResponseIntelligence from './pages/ResponseIntelligence'; // Already imported above
-import ChannelSyncHub from './pages/ChannelSyncHub'; // Already imported above
-import SmartEmailOptimizer from './pages/SmartEmailOptimizer'; // Already imported above
-import SentimentMonitor from './pages/SentimentMonitor'; // Already imported above
-import CommPerformance from './pages/CommPerformance'; // Already imported above
 
 // Feature pages
 import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
