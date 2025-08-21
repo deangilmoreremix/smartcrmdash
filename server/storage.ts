@@ -33,7 +33,12 @@ export class MemStorage implements IStorage {
 
   async createProfile(insertProfile: InsertProfile & { id: string }): Promise<Profile> {
     const profile: Profile = { 
-      ...insertProfile, 
+      id: insertProfile.id,
+      username: insertProfile.username || null,
+      firstName: insertProfile.firstName || null,
+      lastName: insertProfile.lastName || null,
+      role: insertProfile.role || null,
+      avatar: insertProfile.avatar || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
