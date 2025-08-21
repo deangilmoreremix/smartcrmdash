@@ -136,11 +136,18 @@ import './styles/design-system.css';
 // Clerk Provider Setup
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } from '@clerk/clerk-react';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Environment-based Clerk key selection
+const isDevelopment = window.location.hostname.includes('replit.app');
+const PUBLISHABLE_KEY = isDevelopment 
+  ? import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  : import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key');
+  throw new Error("Missing Publishable Key");
 }
+
+console.log('Environment:', isDevelopment ? 'Development (Replit)' : 'Production');
+console.log('Using Clerk key:', PUBLISHABLE_KEY?.substring(0, 20) + '...');
 
 
 // Reusable placeholder
@@ -569,13 +576,16 @@ function App() {
                           </div>
                           </SignedIn>
                         } />
-                        
+
                         {/* Fallback for signed out users accessing protected routes */}
                         <Route path="/dashboard" element={
                           <SignedOut>
                             <RedirectToSignIn />
                           </SignedOut>
                         } />
+                        {/* Add routes for SignIn and SignUp pages directly */}
+                        <Route path="/sign-in" element={<SignIn />} />
+                        <Route path="/sign-up" element={<SignUp />} />
                       </Routes>
                       <RemoteAppRefreshManager />
                     </AIProvider>
