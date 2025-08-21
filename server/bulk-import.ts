@@ -82,9 +82,11 @@ export async function bulkImportUsers(users: BulkUser[]): Promise<ImportResult> 
 async function sendWelcomeEmail(email: string, firstName: string, tempPassword: string) {
   try {
     // Use confirm reauthentication link for bulk import users
-    const redirectUrl = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}/dashboard?welcome=true`
-      : 'https://smart-crm-platform.replit.dev/dashboard?welcome=true';
+    const redirectUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://smartcrm-videoremix.replit.app/dashboard?welcome=true'
+      : process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}/dashboard?welcome=true`
+        : 'https://smartcrm-videoremix.replit.app/dashboard?welcome=true';
     
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
