@@ -133,20 +133,28 @@ import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyze
 
 import './styles/design-system.css';
 
+// Environment utilities
+import { checkEnvironment, forceDevMode } from './utils/envChecker';
+
 // Clerk Provider Setup
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, SignIn, SignUp } from '@clerk/clerk-react';
 import ClerkRedirectHandler from './components/ClerkRedirectHandler';
 
-// Force development environment - disable production
-const isDevelopment = true; // Always use development in Replit
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Force development environment - disable production completely
+const isDevelopment = import.meta.env.VITE_FORCE_DEVELOPMENT !== 'false';
+const DEVELOPMENT_KEY = 'pk_test_Y2VudHJhbC10b3J0b2lzZS0yMS5jbGVyay5hY2NvdW50cy5kZXYk';
+
+// Always use development key in Replit environment
+const PUBLISHABLE_KEY = DEVELOPMENT_KEY;
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key");
+  console.error("Environment variables:", import.meta.env);
+  throw new Error("Missing Publishable Key - Check environment variables");
 }
 
-console.log('Environment:', isDevelopment ? 'Development (Replit)' : 'Production');
-console.log('Using Clerk key:', PUBLISHABLE_KEY?.substring(0, 20) + '...');
+console.log('🔧 Environment: Development (Forced)');
+console.log('🔑 Using Clerk key:', PUBLISHABLE_KEY?.substring(0, 30) + '...');
+console.log('🌐 Current domain:', window.location.origin);
 
 
 // Reusable placeholder
@@ -170,8 +178,12 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
 
-  // Initialize universal data sync
+  // Initialize universal data sync and environment check
   useEffect(() => {
+    // Check environment first
+    checkEnvironment();
+    forceDevMode();
+    
     console.log('🚀 Starting Universal Data Sync System');
     universalDataSync.initialize();
 
@@ -188,7 +200,12 @@ function App() {
       signUpUrl="/signup"
       afterSignInUrl="/dashboard"
       afterSignUpUrl="/dashboard"
-      navigate={(to) => window.location.href = to}
+      navigate={(to) => {
+        const currentDomain = window.location.origin;
+        const fullUrl = to.startsWith('/') ? `${currentDomain}${to}` : to;
+        console.log('🚀 Clerk navigation:', to, '->', fullUrl);
+        window.location.href = fullUrl;
+      }}
     >
       <ThemeProvider>
         <TenantProvider>
