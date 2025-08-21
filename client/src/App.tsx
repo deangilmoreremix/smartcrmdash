@@ -191,273 +191,154 @@ function App() {
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/sales" element={<SalesLandingPage />} />
                         <Route path="/demo" element={<LandingPage />} />
-                        
-                        
+
+
 
                         {/* All other routes with navbar */}
                         <Route path="/*" element={
-                          <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-                            <Navbar />
-                            <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
-                              <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
-                                <Routes>
-                                  {/* App routes redirect to dashboard */}
-                                  <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+                          <SignedIn>
+                              <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                                <Navbar />
+                                <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                  <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                    <Routes>
+                                      {/* App routes redirect to dashboard */}
+                                      <Route path="/app" element={<Navigate to="/dashboard" replace />} />
 
-                                  {/* Core pages */}
-                            <Route
-                              path="/system-overview"
-                              element={
-                                <ProtectedRoute>
-                                  <SystemOverview />
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/dashboard"
-                              element={
-                                <ProtectedRoute>
-                                  <Dashboard />
-                                </ProtectedRoute>
-                              }
-                            />
+                                      {/* Core pages */}
+                                <Route
+                                  path="/system-overview"
+                                  element={<SystemOverview />}
+                                />
+                                <Route
+                                  path="/dashboard"
+                                  element={<Dashboard />}
+                                />
                             <Route
                               path="/analytics"
-                              element={
-                                <ProtectedRoute>
-                                  <Analytics />
-                                </ProtectedRoute>
-                              }
+                              element={<Analytics />}
                             />
                             <Route
                               path="/ai-integration"
-                              element={
-                                <ProtectedRoute>
-                                  <AIIntegration />
-                                </ProtectedRoute>
-                              }
+                              element={<AIIntegration />}
                             />
                             <Route
                               path="/ai-tools"
-                              element={
-                                <ProtectedRoute>
-                                  <AITools />
-                                </ProtectedRoute>
-                              }
+                              element={<AITools />}
                             />
                             <Route
                               path="/pipeline"
-                              element={
-                                <ProtectedRoute>
-                                  <PipelineWithRemote />
-                                </ProtectedRoute>
-                              }
+                              element={<PipelineWithRemote />}
                             />
                             <Route
                               path="/remote-pipeline"
-                              element={
-                                <ProtectedRoute>
-                                  <RemotePipeline />
-                                </ProtectedRoute>
-                              }
+                              element={<RemotePipeline />}
                             />
                             <Route
                               path="/mobile"
-                              element={
-                                <ProtectedRoute>
-                                  <MobileResponsiveness />
-                                </ProtectedRoute>
-                              }
+                              element={<MobileResponsiveness />}
                             />
 
                             {/* Test route for debugging buttons */}
                             <Route
                               path="/test-buttons"
-                              element={
-                                <ProtectedRoute>
-                                  <SimpleContactsTest />
-                                </ProtectedRoute>
-                              }
+                              element={<SimpleContactsTest />}
                             />
 
                             {/* Contacts page - Using Remote Module Federation */}
                             <Route
                               path="/contacts"
-                              element={
-                                <ProtectedRoute>
-                                  <ContactsWithRemote />
-                                </ProtectedRoute>
-                              }
+                              element={<ContactsWithRemote />}
                             />
                             {/* Deep-link: /contacts/:id opens same page and the page handles auto-opening modal */}
                             <Route
                               path="/contacts/:id"
-                              element={
-                                <ProtectedRoute>
-                                  <ContactsWithRemote />
-                                </ProtectedRoute>
-                              }
+                              element={<ContactsWithRemote />}
                             />
                             {/* Legacy contacts route for fallback */}
                             <Route
                               path="/contacts-legacy"
-                              element={
-                                <ProtectedRoute>
-                                  <Contacts />
-                                </ProtectedRoute>
-                              }
+                              element={<Contacts />}
                             />
 
                             {/* Tasks & Calendar */}
                             <Route
                               path="/tasks"
-                              element={
-                                <ProtectedRoute>
-                                  <TasksNew />
-                                </ProtectedRoute>
-                              }
+                              element={<TasksNew />}
                             />
                             {/* Calendar from navbar points here */}
                             <Route
                               path="/appointments"
-                              element={
-                                <ProtectedRoute>
-                                  <Appointments />
-                                </ProtectedRoute>
-                              }
+                              element={<Appointments />}
                             />
                             {/* (If you still use the older Tasks page elsewhere) */}
                             <Route
                               path="/tasks-legacy"
-                              element={
-                                <ProtectedRoute>
-                                  <Tasks />
-                                </ProtectedRoute>
-                              }
+                              element={<Tasks />}
                             />
 
                             {/* ===== Dropdown: Sales ===== */}
                             <Route
                               path="/sales-tools"
-                              element={
-                                <ProtectedRoute>
-                                  <SalesTools />
-                                </ProtectedRoute>
-                              }
+                              element={<SalesTools />}
                             />
                             <Route
                               path="/pipeline-intelligence"
-                              element={
-                                <ProtectedRoute>
-                                  <PipelineIntelligence />
-                                </ProtectedRoute>
-                              }
+                              element={<PipelineIntelligence />}
                             />
                             <Route
                               path="/deal-risk-monitor"
-                              element={
-                                <ProtectedRoute>
-                                  <DealRiskMonitor />
-                                </ProtectedRoute>
-                              }
+                              element={<DealRiskMonitor />}
                             />
                             <Route
                               path="/smart-conversion-insights"
-                              element={
-                                <ProtectedRoute>
-                                  <SmartConversionInsights />
-                                </ProtectedRoute>
-                              }
+                              element={<SmartConversionInsights />}
                             />
                             <Route
                               path="/pipeline-health-dashboard"
-                              element={
-                                <ProtectedRoute>
-                                  <PipelineHealthDashboard />
-                                </ProtectedRoute>
-                              }
+                              element={<PipelineHealthDashboard />}
                             />
                             <Route
                               path="/sales-cycle-analytics"
-                              element={
-                                <ProtectedRoute>
-                                  <SalesCycleAnalytics />
-                                </ProtectedRoute>
-                              }
+                              element={<SalesCycleAnalytics />}
                             />
                             <Route
                               path="/lead-automation"
-                              element={
-                                <ProtectedRoute>
-                                  <LeadAutomation />
-                                </ProtectedRoute>
-                              }
+                              element={<LeadAutomation />}
                             />
                             <Route
                               path="/circle-prospecting"
-                              element={
-                                <ProtectedRoute>
-                                  <CircleProspecting />
-                                </ProtectedRoute>
-                              }
+                              element={<CircleProspecting />}
                             />
                             {/* Appointments already routed to /appointments above */}
                             <Route
                               path="/phone-system"
-                              element={
-                                <ProtectedRoute>
-                                  <PhoneSystem />
-                                </ProtectedRoute>
-                              }
+                              element={<PhoneSystem />}
                             />
                             <Route
                               path="/invoicing"
-                              element={
-                                <ProtectedRoute>
-                                  <Invoicing />
-                                </ProtectedRoute>
-                              }
+                              element={<Invoicing />}
                             />
                             {/* Newly added sales pages */}
                             <Route
                               path="/win-rate-intelligence"
-                              element={
-                                <ProtectedRoute>
-                                  <WinRateIntelligence />
-                                </ProtectedRoute>
-                              }
+                              element={<WinRateIntelligence />}
                             />
                             <Route
                               path="/ai-sales-forecast"
-                              element={
-                                <ProtectedRoute>
-                                  <AISalesForecast />
-                                </ProtectedRoute>
-                              }
+                              element={<AISalesForecast />}
                             />
                             <Route
                               path="/live-deal-analysis"
-                              element={
-                                <ProtectedRoute>
-                                  <LiveDealAnalysis />
-                                </ProtectedRoute>
-                              }
+                              element={<LiveDealAnalysis />}
                             />
                             <Route
                               path="/competitor-insights"
-                              element={
-                                <ProtectedRoute>
-                                  <CompetitorInsights />
-                                </ProtectedRoute>
-                              }
+                              element={<CompetitorInsights />}
                             />
                             <Route
                               path="/revenue-intelligence"
-                              element={
-                                <ProtectedRoute>
-                                  <RevenueIntelligence />
-                                </ProtectedRoute>
-                              }
+                              element={<RevenueIntelligence />}
                             />
 
                             {/* ===== Dropdown: Tasks ===== */}
@@ -485,85 +366,45 @@ function App() {
                             {/* ===== Dropdown: Communication ===== */}
                             <Route
                               path="/video-email"
-                              element={
-                                <ProtectedRoute>
-                                  <VideoEmail />
-                                </ProtectedRoute>
-                              }
+                              element={<VideoEmail />}
                             />
                             <Route
                               path="/text-messages"
-                              element={
-                                <ProtectedRoute>
-                                  <TextMessages />
-                                </ProtectedRoute>
-                              }
+                              element={<TextMessages />}
                             />
                             {/* Email Composer goes to Communication page you already have */}
                             <Route
                               path="/email-composer"
-                              element={
-                                <ProtectedRoute>
-                                  <Communication />
-                                </ProtectedRoute>
-                              }
+                              element={<Communication />}
                             />
                             <Route
                               path="/communication"
-                              element={
-                                <ProtectedRoute>
-                                  <CommunicationHub />
-                                </ProtectedRoute>
-                              }
+                              element={<CommunicationHub />}
                             />
                             {/* New Communication Routes */}
                             <Route
                               path="/activity-analytics"
-                              element={
-                                <ProtectedRoute>
-                                  <ActivityAnalytics />
-                                </ProtectedRoute>
-                              }
+                              element={<ActivityAnalytics />}
                             />
                             <Route
                               path="/response-intelligence"
-                              element={
-                                <ProtectedRoute>
-                                  <ResponseIntelligence />
-                                </ProtectedRoute>
-                              }
+                              element={<ResponseIntelligence />}
                             />
                             <Route
                               path="/channel-sync-hub"
-                              element={
-                                <ProtectedRoute>
-                                  <ChannelSyncHub />
-                                </ProtectedRoute>
-                              }
+                              element={<ChannelSyncHub />}
                             />
                             <Route
                               path="/smart-email-optimizer"
-                              element={
-                                <ProtectedRoute>
-                                  <SmartEmailOptimizer />
-                                </ProtectedRoute>
-                              }
+                              element={<SmartEmailOptimizer />}
                             />
                             <Route
                               path="/sentiment-monitor"
-                              element={
-                                <ProtectedRoute>
-                                  <SentimentMonitor />
-                                </ProtectedRoute>
-                              }
+                              element={<SentimentMonitor />}
                             />
                             <Route
                               path="/comm-performance"
-                              element={
-                                <ProtectedRoute>
-                                  <CommPerformance />
-                                </ProtectedRoute>
-                              }
+                              element={<CommPerformance />}
                             />
 
                             <Route
@@ -594,87 +435,47 @@ function App() {
                             {/* ===== Dropdown: Content ===== */}
                             <Route
                               path="/content-library"
-                              element={
-                                <ProtectedRoute>
-                                  <ContentLibrary />
-                                </ProtectedRoute>
-                              }
+                              element={<ContentLibrary />}
                             />
                             <Route
                               path="/voice-profiles"
-                              element={
-                                <ProtectedRoute>
-                                  <VoiceProfiles />
-                                </ProtectedRoute>
-                              }
+                              element={<VoiceProfiles />}
                             />
                             <Route
                               path="/business-analysis"
-                              element={
-                                <ProtectedRoute>
-                                  <BusinessAnalysis />
-                                </ProtectedRoute>
-                              }
+                              element={<BusinessAnalysis />}
                             />
 
                             {/* Remote Embed Pages */}
                             <Route
                               path="/business-intel"
-                              element={
-                                <ProtectedRoute>
-                                  <BusinessIntelPage />
-                                </ProtectedRoute>
-                              }
+                              element={<BusinessIntelPage />}
                             />
                             <Route
                               path="/wl"
-                              element={
-                                <ProtectedRoute>
-                                  <WLPage />
-                                </ProtectedRoute>
-                              }
+                              element={<WLPage />}
                             />
                             <Route
                               path="/intel"
-                              element={
-                                <ProtectedRoute>
-                                  <IntelPage />
-                                </ProtectedRoute>
-                              }
+                              element={<IntelPage />}
                             />
 
                             {/* Connected Apps Remote Pages */}
                             <Route
                               path="/funnelcraft-ai"
-                              element={
-                                <ProtectedRoute>
-                                  <FunnelCraftPage />
-                                </ProtectedRoute>
-                              }
+                              element={<FunnelCraftPage />}
                             />
                             <Route
                               path="/smartcrm-closer"
-                              element={
-                                <ProtectedRoute>
-                                  <SmartCRMPage />
-                                </ProtectedRoute>
-                              }
+                              element={<SmartCRMPage />}
                             />
                             <Route
                               path="/content-ai"
-                              element={
-                                <ProtectedRoute>
-                                  <ContentAIPage />
-                                </ProtectedRoute>
-                              }
+                              element={<ContentAIPage />}
                             />
                             <Route
                               path="/analytics-remote"
-                              element={
-                                <ProtectedRoute>
-                                  <AnalyticsRemotePage />
-                                </ProtectedRoute>
-                              }
+                              element={<AnalyticsRemotePage />}
                             />
                             <Route
                               path="/image-generator"
@@ -682,11 +483,7 @@ function App() {
                             />
                             <Route
                               path="/forms"
-                              element={
-                                <ProtectedRoute>
-                                  <FormsAndSurveys />
-                                </ProtectedRoute>
-                              }
+                              element={<FormsAndSurveys />}
                             />
                             <Route
                               path="/ai-model-demo"
@@ -696,51 +493,27 @@ function App() {
                             {/* ===== Apps dropdown internal links ===== */}
                             <Route
                               path="/white-label"
-                              element={
-                                <ProtectedRoute>
-                                  <WhiteLabelCustomization />
-                                </ProtectedRoute>
-                              }
+                              element={<WhiteLabelCustomization />}
                             />
                             <Route
                               path="/white-label-management"
-                              element={
-                                <ProtectedRoute>
-                                  <WhiteLabelManagementDashboard />
-                                </ProtectedRoute>
-                              }
+                              element={<WhiteLabelManagementDashboard />}
                             />
                             <Route
                               path="/revenue-sharing"
-                              element={
-                                <ProtectedRoute>
-                                  <RevenueSharingPage />
-                                </ProtectedRoute>
-                              }
+                              element={<RevenueSharingPage />}
                             />
                             <Route
                               path="/package-builder"
-                              element={
-                                <ProtectedRoute>
-                                  <WhiteLabelPackageBuilder />
-                                </ProtectedRoute>
-                              }
+                              element={<WhiteLabelPackageBuilder />}
                             />
                             <Route
                               path="/partner-dashboard"
-                              element={
-                                <ProtectedRoute>
-                                  <PartnerDashboard />
-                                </ProtectedRoute>
-                              }
+                              element={<PartnerDashboard />}
                             />
                             <Route
                               path="/partner-onboarding"
-                              element={
-                                <ProtectedRoute>
-                                  <PartnerOnboardingPage />
-                                </ProtectedRoute>
-                              }
+                              element={<PartnerOnboardingPage />}
                             />
 
                             {/* Misc / Settings */}
@@ -750,11 +523,7 @@ function App() {
                             />
                             <Route
                               path="/ai-goals"
-                              element={
-                                <ProtectedRoute>
-                                  <AIGoalsWithRemote />
-                                </ProtectedRoute>
-                              }
+                              element={<AIGoalsWithRemote />}
                             />
 
                             {/* Additional feature pages that may be referenced */}
@@ -777,7 +546,7 @@ function App() {
                             <Route path="/features/pipeline" element={<PipelineFeaturePage />} />
                             <Route path="/features/semantic-search" element={<SemanticSearchFeaturePage />} />
                             <Route path="/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
-                            
+
                             {/* Legacy feature page routes for backward compatibility */}
                             <Route path="/landing/features/ai-assistant" element={<AiAssistantFeaturePage />} />
                             <Route path="/landing/features/ai-tools" element={<AiToolsFeaturePage />} />
@@ -796,6 +565,7 @@ function App() {
                               </Suspense>
                             </div>
                           </div>
+                          </SignedIn>
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
@@ -827,13 +597,13 @@ function App() {
                           <Route path="/" element={<LandingPage />} />
                           <Route path="/sales" element={<SalesLandingPage />} />
                           <Route path="/demo" element={<LandingPage />} />
-                          
+
                           {/* Custom Auth Pages - inside ClerkProvider */}
                           <Route path="/signin" element={<SignInPage />} />
                           <Route path="/signup" element={<SignUpPage />} />
                           <Route path="/login" element={<SignInPage />} />
                           <Route path="/register" element={<SignUpPage />} />
-                          
+
                           {/* Clerk Auth Routes with Custom Styling */}
                           <Route path="/auth/login" element={
                             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -863,7 +633,7 @@ function App() {
                               </div>
                             </div>
                           } />
-                          
+
                           <Route path="/auth/register" element={
                             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
                               <div className="w-full max-w-md">
