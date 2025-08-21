@@ -16,6 +16,7 @@ import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
+import { Toaster } from './components/ui/toaster';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
@@ -821,6 +822,7 @@ function App() {
           </AIToolsProvider>
         </TenantProvider>
       </ThemeProvider>
+      <Toaster />
     </AuthProvider>
   );
 }
