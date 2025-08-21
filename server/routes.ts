@@ -20,6 +20,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Test Supabase connection
+  app.get('/api/supabase/test', async (req, res) => {
+    try {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        return res.json({
+          status: 'error',
+          message: 'Supabase credentials not configured'
+        });
+      }
+
+      // Test basic connection by making a simple request to Supabase
+      const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        }
+      });
+
+      if (response.ok) {
+        res.json({
+          status: 'success',
+          message: 'Supabase connection successful',
+          url: supabaseUrl.replace(/\/+$/, '') // Remove trailing slashes
+        });
+      } else {
+        res.json({
+          status: 'error',
+          message: 'Failed to connect to Supabase',
+          statusCode: response.status
+        });
+      }
+    } catch (error: any) {
+      res.json({
+        status: 'error',
+        message: 'Error testing Supabase connection',
+        error: error.message
+      });
+    }
+  });
+
   // OpenAI API status check with model availability
   app.get('/api/openai/status', async (req, res) => {
     const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;
