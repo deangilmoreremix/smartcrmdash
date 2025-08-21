@@ -99,6 +99,7 @@ const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
 // Added lazy import for IframeOverlapChecker
 const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
+const AuthTestPage = lazy(() => import('./pages/AuthTestPage'));
 
 // Placeholder imports for routes that might not be implemented yet
 import Login from './pages/Auth/Login';
@@ -825,7 +826,7 @@ function App() {
                                   <Route path="/iframe-overlap-checker" element={<Suspense fallback={<LoadingSpinner />}><IframeOverlapChecker /></Suspense>} />
 
                             {/* Auth test route */}
-                            <Route path="/auth-test" element={<Suspense fallback={<LoadingSpinner />}><lazy(() => import('./pages/AuthTestPage'))></lazy></Suspense>} />
+                            <Route path="/auth-test" element={<Suspense fallback={<LoadingSpinner />}><AuthTestPage /></Suspense>} />
 
                             {/* Feature pages */}
                             <Route path="/features/ai-assistant" element={<AiAssistantFeaturePage />} />
