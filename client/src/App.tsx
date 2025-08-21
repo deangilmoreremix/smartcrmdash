@@ -746,6 +746,14 @@ function App() {
                               element={<PlaceholderPage title="Settings" description="Settings page coming soon" />}
                             />
                             <Route
+                              path="/bulk-import"
+                              element={
+                                <ProtectedRoute>
+                                  <BulkImportPage />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
                               path="/ai-goals"
                               element={
                                 <ProtectedRoute>
