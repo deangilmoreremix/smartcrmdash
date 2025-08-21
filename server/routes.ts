@@ -10,8 +10,9 @@ import { db } from './db';
 import { entitlements } from '@shared/schema';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize OpenAI client
-  const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+  // Initialize OpenAI client with GPT-5 access
+  const apiKey = process.env.OPENAI_API_KEY || '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';
+  const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
@@ -134,12 +135,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Test with GPT-5 using new responses API
+      // Test with GPT-5 using responses API
       const testResponse = await openai.responses.create({
         model: "gpt-5",
         input: "Test GPT-5 connection",
-        reasoning: { "effort": "low" },
-        text: { "verbosity": "low" }
+        reasoning: { effort: "minimal" }
       });
 
       res.json({
@@ -150,10 +150,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gpt4Available: true,
         capabilities: [
           'GPT-5 with advanced reasoning',
+          'GPT-5-mini and GPT-5-nano models',
           'Configurable reasoning effort levels',
           'Unified reasoning system',
           'Expert-level business intelligence',
-          '94.6% AIME mathematical accuracy',
           'Advanced strategic analysis'
         ]
       });
@@ -192,7 +192,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Advanced AI Smart Greeting Generation (using GPT-4o)
+  // GPT-5 Direct Test Endpoint (with hardcoded working key)
+  app.post('/api/openai/test-gpt5-direct', async (req, res) => {
+    try {
+      const testClient = new OpenAI({ 
+        apiKey: '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'
+      });
+      
+      const response = await testClient.responses.create({
+        model: "gpt-5",
+        input: "Generate a business insight about CRM efficiency in exactly 1 sentence.",
+        reasoning: { effort: "minimal" }
+      });
+      
+      res.json({
+        success: true,
+        model: 'gpt-5',
+        output: response.output_text,
+        message: 'GPT-5 working perfectly!'
+      });
+      
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Unknown error'
+      });
+    }
+  });
+
+  // Advanced AI Smart Greeting Generation (using GPT-5)
   app.post('/api/openai/smart-greeting', async (req, res) => {
     if (!openai) {
       return res.json({ 
@@ -209,9 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use GPT-5 with reasoning for expert-level insights
       const response = await openai.responses.create({
         model: "gpt-5",
-        input: `You are an expert business strategist. Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`,
-        reasoning: { "effort": "medium" },
-        text: { "verbosity": "medium" }
+        input: `You are an expert business strategist. Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics.totalDeals} deals worth $${userMetrics.totalValue}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`
       });
 
       const result = JSON.parse(response.output_text || '{}');
