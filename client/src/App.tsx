@@ -824,6 +824,9 @@ function App() {
 
                                   <Route path="/iframe-overlap-checker" element={<Suspense fallback={<LoadingSpinner />}><IframeOverlapChecker /></Suspense>} />
 
+                            {/* Auth test route */}
+                            <Route path="/auth-test" element={<Suspense fallback={<LoadingSpinner />}><lazy(() => import('./pages/AuthTestPage'))></lazy></Suspense>} />
+
                             {/* Feature pages */}
                             <Route path="/features/ai-assistant" element={<AiAssistantFeaturePage />} />
                             <Route path="/features/ai-tools" element={<AiToolsFeaturePage />} />

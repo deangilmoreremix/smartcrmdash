@@ -12,10 +12,18 @@ const SignInPage: React.FC = () => {
 
   const { signIn, isLoaded, setActive } = useSignIn(); // Use Clerk's useSignIn hook
 
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     if (!signIn || !isLoaded) {
-      return; // Clerk is not ready yet
+      setError('Authentication system is not ready. Please try again.');
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -26,16 +34,18 @@ const SignInPage: React.FC = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        // Redirect to dashboard or relevant page after successful sign-in
-        window.location.href = '/dashboard'; // Example redirect
+        console.log('Sign-in successful, redirecting to dashboard...');
+        window.location.href = '/dashboard';
       } else {
-        // Handle cases like missing requirements or phone verification
         console.log('Sign-in status:', result.status);
-        // You might want to display an error message to the user
+        setError(`Sign-in incomplete. Status: ${result.status}. Please check your credentials or complete any required verification.`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign-in error:', error);
-      // Display a user-friendly error message
+      const errorMessage = error?.errors?.[0]?.message || error?.message || 'An unexpected error occurred during sign-in.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,6 +76,12 @@ const SignInPage: React.FC = () => {
 
         {/* Sign In Form */}
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -145,9 +161,10 @@ const SignInPage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              disabled={isLoading || !isLoaded}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 

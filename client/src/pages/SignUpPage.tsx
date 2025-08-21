@@ -18,38 +18,50 @@ const SignUpPage: React.FC = () => {
 
   const { signUp, isLoaded } = useSignUp();
 
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     if (!isLoaded) {
+      setError('Authentication system is not ready. Please try again.');
+      setIsLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
+      setIsLoading(false);
       return;
     }
 
     try {
-      await signUp.create({
+      const result = await signUp.create({
         firstName: formData.firstName,
         lastName: formData.lastName,
         emailAddress: formData.email,
         password: formData.password,
-        // Add company if you have a field for it in Clerk
-        // company: formData.company,
       });
 
-      // You might want to redirect to a verification page or handle the next step
-      // For example:
-      // await signUp.prepareVerification({ strategy: 'email_code' });
-      // navigate('/verify-email');
-
-      console.log('Sign up successful (pending verification):', formData);
-      alert('Sign up successful! Please check your email for verification.');
-      // In a real app, you'd redirect to a verification page or similar
+      console.log('Sign up result:', result);
+      
+      if (result.status === 'complete') {
+        console.log('Sign up successful, redirecting...');
+        window.location.href = '/dashboard';
+      } else {
+        // Handle email verification or other requirements
+        console.log('Sign up requires verification');
+        setError('Please check your email to verify your account before signing in.');
+      }
     } catch (error: any) {
       console.error('Sign up error:', error);
-      alert(`Sign up failed: ${error.errors[0].message}`);
+      const errorMessage = error?.errors?.[0]?.message || error?.message || 'An unexpected error occurred during sign-up.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
