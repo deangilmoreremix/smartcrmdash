@@ -1,17 +1,17 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, varchar, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
-// Users table
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email"),
+// Profiles table (links to Supabase auth.users)
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey(),
+  username: text("username").unique(),
   firstName: text("first_name"),
   lastName: text("last_name"),
   role: text("role").default("user"),
+  avatar: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -37,7 +37,7 @@ export const contacts = pgTable("contacts", {
   status: text("status").default("active"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Deals table
@@ -54,7 +54,7 @@ export const deals = pgTable("deals", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Tasks table
@@ -70,7 +70,7 @@ export const tasks = pgTable("tasks", {
   updatedAt: timestamp("updated_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
   dealId: integer("deal_id").references(() => deals.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Appointments table
@@ -86,7 +86,7 @@ export const appointments = pgTable("appointments", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Communications table (emails, calls, etc.)
@@ -100,7 +100,7 @@ export const communications = pgTable("communications", {
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Notes table
@@ -112,7 +112,7 @@ export const notes = pgTable("notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
   dealId: integer("deal_id").references(() => deals.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Documents table
@@ -126,7 +126,7 @@ export const documents = pgTable("documents", {
   createdAt: timestamp("created_at").defaultNow(),
   contactId: integer("contact_id").references(() => contacts.id),
   dealId: integer("deal_id").references(() => deals.id),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Lead automation rules table
@@ -139,7 +139,7 @@ export const automationRules = pgTable("automation_rules", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // AI query history table
@@ -150,11 +150,11 @@ export const aiQueries = pgTable("ai_queries", {
   type: text("type").notNull(), // natural_language, sentiment, sales_pitch, email_draft
   model: text("model"),
   createdAt: timestamp("created_at").defaultNow(),
-  userId: integer("user_id").references(() => users.id),
+  profileId: uuid("profile_id").references(() => profiles.id),
 });
 
 // Define relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const profilesRelations = relations(profiles, ({ many }) => ({
   contacts: many(contacts),
   deals: many(deals),
   tasks: many(tasks),
@@ -167,9 +167,9 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const contactsRelations = relations(contacts, ({ one, many }) => ({
-  user: one(users, {
-    fields: [contacts.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [contacts.profileId],
+    references: [profiles.id],
   }),
   deals: many(deals),
   tasks: many(tasks),
@@ -184,9 +184,9 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
     fields: [deals.contactId],
     references: [contacts.id],
   }),
-  user: one(users, {
-    fields: [deals.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [deals.profileId],
+    references: [profiles.id],
   }),
   tasks: many(tasks),
   notes: many(notes),
@@ -202,9 +202,9 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
     fields: [tasks.dealId],
     references: [deals.id],
   }),
-  user: one(users, {
-    fields: [tasks.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [tasks.profileId],
+    references: [profiles.id],
   }),
 }));
 
@@ -213,9 +213,9 @@ export const appointmentsRelations = relations(appointments, ({ one }) => ({
     fields: [appointments.contactId],
     references: [contacts.id],
   }),
-  user: one(users, {
-    fields: [appointments.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [appointments.profileId],
+    references: [profiles.id],
   }),
 }));
 
@@ -224,9 +224,9 @@ export const communicationsRelations = relations(communications, ({ one }) => ({
     fields: [communications.contactId],
     references: [contacts.id],
   }),
-  user: one(users, {
-    fields: [communications.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [communications.profileId],
+    references: [profiles.id],
   }),
 }));
 
@@ -239,9 +239,9 @@ export const notesRelations = relations(notes, ({ one }) => ({
     fields: [notes.dealId],
     references: [deals.id],
   }),
-  user: one(users, {
-    fields: [notes.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [notes.profileId],
+    references: [profiles.id],
   }),
 }));
 
@@ -254,34 +254,33 @@ export const documentsRelations = relations(documents, ({ one }) => ({
     fields: [documents.dealId],
     references: [deals.id],
   }),
-  user: one(users, {
-    fields: [documents.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [documents.profileId],
+    references: [profiles.id],
   }),
 }));
 
 export const automationRulesRelations = relations(automationRules, ({ one }) => ({
-  user: one(users, {
-    fields: [automationRules.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [automationRules.profileId],
+    references: [profiles.id],
   }),
 }));
 
 export const aiQueriesRelations = relations(aiQueries, ({ one }) => ({
-  user: one(users, {
-    fields: [aiQueries.userId],
-    references: [users.id],
+  profile: one(profiles, {
+    fields: [aiQueries.profileId],
+    references: [profiles.id],
   }),
 }));
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
+export const insertProfileSchema = createInsertSchema(profiles).pick({
   username: true,
-  password: true,
-  email: true,
   firstName: true,
   lastName: true,
   role: true,
+  avatar: true,
 });
 
 export const insertContactSchema = createInsertSchema(contacts).omit({
@@ -337,8 +336,8 @@ export const insertAiQuerySchema = createInsertSchema(aiQueries).omit({
 });
 
 // Export types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type Deal = typeof deals.$inferSelect;
@@ -357,3 +356,7 @@ export type AutomationRule = typeof automationRules.$inferSelect;
 export type InsertAutomationRule = z.infer<typeof insertAutomationRuleSchema>;
 export type AiQuery = typeof aiQueries.$inferSelect;
 export type InsertAiQuery = z.infer<typeof insertAiQuerySchema>;
+
+// Backward compatibility - keep User types but make them reference Profile
+export type User = Profile;
+export type InsertUser = InsertProfile;

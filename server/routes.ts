@@ -63,6 +63,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile management endpoints
+  app.post('/api/profiles', async (req, res) => {
+    try {
+      const { id, username, firstName, lastName } = req.body;
+      
+      if (!id) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      // Insert profile into database
+      const profile = await storage.createProfile({
+        id,
+        username,
+        firstName,
+        lastName,
+        role: 'user'
+      });
+
+      res.json(profile);
+    } catch (error: any) {
+      console.error('Profile creation error:', error);
+      res.status(500).json({ error: 'Failed to create profile' });
+    }
+  });
+
+  app.get('/api/profiles/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const profile = await storage.getProfile(id);
+      
+      if (!profile) {
+        return res.status(404).json({ error: 'Profile not found' });
+      }
+
+      res.json(profile);
+    } catch (error: any) {
+      console.error('Profile fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+  });
+
   // OpenAI API status check with model availability
   app.get('/api/openai/status', async (req, res) => {
     const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;

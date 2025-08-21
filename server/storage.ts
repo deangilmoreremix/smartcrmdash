@@ -1,38 +1,57 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+import { profiles, type Profile, type InsertProfile } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getProfile(id: string): Promise<Profile | undefined>;
+  getProfileByUsername(username: string): Promise<Profile | undefined>;
+  createProfile(profile: InsertProfile & { id: string }): Promise<Profile>;
+  
+  // Backward compatibility - alias Profile methods as User methods
+  getUser(id: string): Promise<Profile | undefined>;
+  getUserByUsername(username: string): Promise<Profile | undefined>;
+  createUser(user: InsertProfile & { id: string }): Promise<Profile>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  currentId: number;
+  private profiles: Map<string, Profile>;
 
   constructor() {
-    this.users = new Map();
-    this.currentId = 1;
+    this.profiles = new Map();
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getProfile(id: string): Promise<Profile | undefined> {
+    return this.profiles.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+  async getProfileByUsername(username: string): Promise<Profile | undefined> {
+    return Array.from(this.profiles.values()).find(
+      (profile) => profile.username === username,
     );
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async createProfile(insertProfile: InsertProfile & { id: string }): Promise<Profile> {
+    const profile: Profile = { 
+      ...insertProfile, 
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.profiles.set(insertProfile.id, profile);
+    return profile;
+  }
+
+  // Backward compatibility methods
+  async getUser(id: string): Promise<Profile | undefined> {
+    return this.getProfile(id);
+  }
+
+  async getUserByUsername(username: string): Promise<Profile | undefined> {
+    return this.getProfileByUsername(username);
+  }
+
+  async createUser(user: InsertProfile & { id: string }): Promise<Profile> {
+    return this.createProfile(user);
   }
 }
 
