@@ -121,6 +121,9 @@ import ContactDetail from './pages/ContactDetail'; // Assuming this path
 import Settings from './pages/Settings'; // Assuming this path
 import Pipeline from './pages/PipelinePage'; // Assuming this path
 
+// Bulk import page
+const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
+
 // Feature pages
 import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
 import AiToolsFeaturePage from './pages/landing/FeaturePage/AiToolsFeaturePage';

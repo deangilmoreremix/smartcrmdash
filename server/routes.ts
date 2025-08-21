@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import OpenAI from 'openai';
+import { registerBulkImportRoutes } from './bulk-import';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize OpenAI client
@@ -338,6 +339,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Register bulk import routes
+  registerBulkImportRoutes(app);
 
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
