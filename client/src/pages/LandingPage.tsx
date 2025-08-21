@@ -203,7 +203,7 @@ const LandingPage = () => {
                 icon={<Brain className="h-8 w-8 text-blue-600" />}
                 title="AI Sales Tools"
                 description="Access 20+ AI tools to automate tasks, get insights, and personalize your sales approach."
-                link="/features/ai-tools"
+                link="/landing/features/ai-tools"
               />
             </ScrollAnimationWrapper>
             
@@ -212,7 +212,7 @@ const LandingPage = () => {
                 icon={<Users className="h-8 w-8 text-indigo-600" />}
                 title="Contact Management"
                 description="Organize and track all your contacts, leads, and accounts in one unified database."
-                link="/features/contacts"
+                link="/landing/features/contacts"
               />
             </ScrollAnimationWrapper>
             
@@ -221,7 +221,7 @@ const LandingPage = () => {
                 icon={<Briefcase className="h-8 w-8 text-violet-600" />}
                 title="Deal Pipeline"
                 description="Visualize and optimize your sales pipeline with drag-and-drop simplicity and AI insights."
-                link="/features/pipeline"
+                link="/landing/features/pipeline"
               />
             </ScrollAnimationWrapper>
             
@@ -230,7 +230,7 @@ const LandingPage = () => {
                 icon={<Brain className="h-8 w-8 text-fuchsia-600" />}
                 title="AI Assistant"
                 description="Work with a context-aware AI assistant that remembers conversations and takes actions for you."
-                link="/features/ai-assistant"
+                link="/landing/features/ai-assistant"
               />
             </ScrollAnimationWrapper>
             
@@ -239,7 +239,7 @@ const LandingPage = () => {
                 icon={<Eye className="h-8 w-8 text-cyan-600" />}
                 title="Vision Analyzer"
                 description="Extract insights from images, documents, competitor materials, and visual content."
-                link="/features/vision-analyzer"
+                link="/landing/features/vision-analyzer"
               />
             </ScrollAnimationWrapper>
             
@@ -248,16 +248,16 @@ const LandingPage = () => {
                 icon={<Image className="h-8 w-8 text-emerald-600" />}
                 title="Image Generator"
                 description="Create professional images for presentations, proposals, and marketing materials instantly."
-                link="/features/image-generator"
+                link="/landing/features/image-generator"
               />
             </ScrollAnimationWrapper>
             
             <ScrollAnimationWrapper animation="fade-up" delay={150}>
               <FeatureCard
-                icon={<Mic className="h-8 w-8 text-indigo-600" />}
-                title="Voice Features"
-                description="Voice profiles and audio management for your sales content."
-                link="/voice-profiles"
+                icon={<MessageSquare className="h-8 w-8 text-indigo-600" />}
+                title="Communications"
+                description="Unified communication hub for email, calls, messages, and meetings all in one place."
+                link="/landing/features/communications"
               />
             </ScrollAnimationWrapper>
             
@@ -266,7 +266,7 @@ const LandingPage = () => {
                 icon={<Search className="h-8 w-8 text-blue-600" />}
                 title="Semantic Search"
                 description="Find anything in your CRM with natural language queries and contextual understanding."
-                link="/features/semantic-search"
+                link="/landing/features/semantic-search"
               />
             </ScrollAnimationWrapper>
             
@@ -275,7 +275,7 @@ const LandingPage = () => {
                 icon={<Zap className="h-8 w-8 text-yellow-600" />}
                 title="Function Assistant"
                 description="Let AI perform real actions in your CRM through natural conversation."
-                link="/features/function-assistant"
+                link="/landing/features/function-assistant"
               />
             </ScrollAnimationWrapper>
           </div>
