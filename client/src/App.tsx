@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoadingSpinner from './components/ui/LoadingSpinner';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Core providers
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -56,7 +56,6 @@ function App() {
                 <NavigationProvider>
                   <DashboardLayoutProvider>
                     <AIProvider>
-                      <Router>
                         <Routes>
                           {/* Landing page routes (no navbar) */}
                           <Route path="/" element={<LandingPage />} />
@@ -73,37 +72,105 @@ function App() {
                           <Route path="/features/semantic-search" element={<SemanticSearchFeaturePage />} />
                           <Route path="/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
 
-                          {/* All app routes with navbar - No authentication required */}
-                          <Route path="/*" element={
+                          {/* App routes redirect to dashboard */}
+                          <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+
+                          {/* Main application routes with navbar */}
+                          <Route path="/dashboard" element={
                             <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
                               <Navbar />
                               <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
                                 <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
-                                  <Routes>
-                                    {/* App routes redirect to dashboard */}
-                                    <Route path="/app" element={<Navigate to="/dashboard" replace />} />
-
-                                    {/* Main application routes */}
-                                    <Route path="/dashboard" element={<Dashboard />} />
-                                    <Route path="/contacts" element={<Contacts />} />
-                                    <Route path="/pipeline" element={<Pipeline />} />
-                                    <Route path="/tasks" element={<Tasks />} />
-                                    <Route path="/appointments" element={<Appointments />} />
-                                    <Route path="/ai-tools" element={<AITools />} />
-                                    <Route path="/analytics" element={<Analytics />} />
-                                    <Route path="/settings" element={<Settings />} />
-                                    <Route path="/communications" element={<CommunicationHub />} />
-
-                                    {/* Fallback */}
-                                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                                  </Routes>
+                                  <Dashboard />
                                 </Suspense>
                               </div>
                             </div>
                           } />
+                          <Route path="/contacts" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Contacts />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/pipeline" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Pipeline />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/tasks" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Tasks />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/appointments" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Appointments />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/ai-tools" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <AITools />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/analytics" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Analytics />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/settings" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <Settings />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+                          <Route path="/communications" element={
+                            <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+                              <Navbar />
+                              <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+                                <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
+                                  <CommunicationHub />
+                                </Suspense>
+                              </div>
+                            </div>
+                          } />
+
+                          {/* Fallback */}
+                          <Route path="*" element={<Navigate to="/dashboard" replace />} />
                         </Routes>
                         <RemoteAppRefreshManager />
-                      </Router>
                     </AIProvider>
                   </DashboardLayoutProvider>
                 </NavigationProvider>
