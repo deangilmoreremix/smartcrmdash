@@ -178,7 +178,6 @@ function App() {
   const AppContent = () => (
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY}
-      signInFallbackRedirectUrl="/dashboard"
     >
       <ThemeProvider>
         <TenantProvider>

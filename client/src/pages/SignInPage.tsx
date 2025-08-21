@@ -34,8 +34,8 @@ const SignInPage: React.FC = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        console.log('Sign-in successful, redirecting to dashboard...');
-        window.location.href = '/dashboard';
+        console.log('Sign-in successful, redirecting...');
+        // Let Clerk handle the redirect based on dashboard configuration
       } else {
         console.log('Sign-in status:', result.status);
         setError(`Sign-in incomplete. Status: ${result.status}. Please check your credentials or complete any required verification.`);
