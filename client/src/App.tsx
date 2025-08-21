@@ -11,7 +11,7 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
-import { AuthProvider } from './contexts/AuthContext'; // Added import for AuthProvider
+import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
@@ -167,8 +167,8 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <TenantProvider>
           <AIToolsProvider>
             <ModalsProvider>
@@ -798,8 +798,8 @@ function App() {
             </ModalsProvider>
           </AIToolsProvider>
         </TenantProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

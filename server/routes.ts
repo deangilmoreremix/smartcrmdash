@@ -12,6 +12,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Supabase configuration endpoint
+  app.get('/api/supabase/config', (req, res) => {
+    res.json({
+      url: process.env.SUPABASE_URL || '',
+      anonKey: process.env.SUPABASE_ANON_KEY || ''
+    });
+  });
+
   // OpenAI API status check with model availability
   app.get('/api/openai/status', async (req, res) => {
     const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;

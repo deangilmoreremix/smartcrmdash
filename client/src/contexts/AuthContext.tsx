@@ -1,16 +1,13 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, AuthError } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { User } from '@supabase/supabase-js'
+import { auth } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
-  session: Session | null
   loading: boolean
-  signUp: (email: string, password: string, options?: { data?: Record<string, any> }) => Promise<{ error: AuthError | null }>
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
-  signOut: () => Promise<{ error: AuthError | null }>
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>
+  signIn: (email: string, password: string) => Promise<any>
+  signUp: (email: string, password: string) => Promise<any>
+  signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -25,65 +22,70 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    let subscription: any = null;
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    const initializeAuth = async () => {
+      // Get initial user
+      try {
+        const { data: { user } } = await auth.getUser();
+        setUser(user);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to get user:', error);
+        setLoading(false);
+      }
 
-    return () => subscription.unsubscribe()
+      // Listen for auth changes
+      try {
+        const { data: { subscription: authSubscription } } = await auth.onAuthStateChange(
+          (event, session) => {
+            setUser(session?.user ?? null);
+            setLoading(false);
+          }
+        );
+        subscription = authSubscription;
+      } catch (error) {
+        console.error('Failed to setup auth state change listener:', error);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [])
 
-  const signUp = async (email: string, password: string, options?: { data?: Record<string, any> }) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options
-    })
-    return { error }
+  const signIn = async (email: string, password: string) => {
+    const result = await auth.signIn(email, password)
+    return result
   }
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { error }
+  const signUp = async (email: string, password: string) => {
+    const result = await auth.signUp(email, password)
+    return result
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
-  }
-
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email)
-    return { error }
+    await auth.signOut()
   }
 
   const value = {
     user,
-    session,
     loading,
-    signUp,
     signIn,
-    signOut,
-    resetPassword,
+    signUp,
+    signOut
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
