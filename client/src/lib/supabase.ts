@@ -73,7 +73,10 @@ export const auth = {
     return await client.auth.signUp({ 
       email, 
       password,
-      options: options || {}
+      options: {
+        ...options,
+        emailRedirectTo: undefined // Disable email verification redirect
+      }
     })
   },
   

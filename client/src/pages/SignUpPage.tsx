@@ -53,9 +53,12 @@ const SignUpPage: React.FC = () => {
       setError(error.message);
       setLoading(false);
     } else {
-      setSuccess('Account created! Please check your email and click the confirmation link to verify your account. You can then sign in.');
+      setSuccess('Account created successfully! Redirecting to your dashboard...');
       setLoading(false);
-      // Don't auto-redirect, let user click the email verification first
+      // Redirect directly to dashboard since email verification is disabled
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     }
   };
 
