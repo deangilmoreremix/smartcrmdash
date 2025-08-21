@@ -50,8 +50,9 @@ const SignUpPage: React.FC = () => {
       
       if (result.status === 'complete') {
         console.log('Sign up successful, redirecting...');
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
+        // Force redirect to current domain's dashboard
+        const currentDomain = window.location.origin;
+        window.location.href = `${currentDomain}/dashboard`;
       } else {
         // Handle email verification or other requirements
         console.log('Sign up requires verification');

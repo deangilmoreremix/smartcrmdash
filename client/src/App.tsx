@@ -188,6 +188,7 @@ function App() {
       signUpUrl="/signup"
       afterSignInUrl="/dashboard"
       afterSignUpUrl="/dashboard"
+      navigate={(to) => window.location.href = to}
     >
       <ThemeProvider>
         <TenantProvider>

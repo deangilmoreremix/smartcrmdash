@@ -35,8 +35,9 @@ const SignInPage: React.FC = () => {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         console.log('Sign-in successful, redirecting to development dashboard...');
-        // Force redirect to local dashboard
-        window.location.href = '/dashboard';
+        // Force redirect to current domain's dashboard
+        const currentDomain = window.location.origin;
+        window.location.href = `${currentDomain}/dashboard`;
       } else {
         console.log('Sign-in status:', result.status);
         setError(`Sign-in incomplete. Status: ${result.status}. Please check your credentials or complete any required verification.`);
