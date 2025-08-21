@@ -53,7 +53,7 @@ class RemoteAppManager {
       return this.shouldRefreshByTime(url);
       
     } catch (error) {
-      console.log('Update check failed, using time-based refresh:', error instanceof Error ? error.message : 'Unknown error');
+      console.log('Update check failed, using time-based refresh:', error.message);
       // Fall back to time-based refresh instead of always returning true
       return this.shouldRefreshByTime(url);
     }
@@ -88,7 +88,7 @@ class RemoteAppManager {
           this.refreshIframe(iframeId);
         }
       } catch (error) {
-        console.log(`Auto-refresh check failed for ${iframeId}:`, error instanceof Error ? error.message : 'Unknown error');
+        console.log(`Auto-refresh check failed for ${iframeId}:`, error.message);
         // Continue the interval but don't refresh on error
       }
     }, intervalMs);

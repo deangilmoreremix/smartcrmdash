@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Brain, Mail, Lock, User, Building, Check } from 'lucide-react';
+import { Eye, EyeOff, Brain, Mail, Lock } from 'lucide-react';
+import { useSignIn } from '@clerk/clerk-react';
 
 const SignInPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,21 +10,33 @@ const SignInPage: React.FC = () => {
     password: ''
   });
 
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isLoaded, setActive } = useSignIn(); // Use Clerk's useSignIn hook
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    if (!signIn || !isLoaded) {
+      return; // Clerk is not ready yet
+    }
 
-    // Since we're bypassing authentication, directly redirect to dashboard
-    setTimeout(() => {
-      console.log('Redirecting directly to dashboard...');
-      window.location.href = '/dashboard';
-    }, 500);
+    try {
+      const result = await signIn.create({
+        identifier: formData.email,
+        password: formData.password,
+      });
 
-    setIsLoading(false);
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        // Redirect to dashboard or relevant page after successful sign-in
+        window.location.href = '/dashboard'; // Example redirect
+      } else {
+        // Handle cases like missing requirements or phone verification
+        console.log('Sign-in status:', result.status);
+        // You might want to display an error message to the user
+      }
+    } catch (error) {
+      console.error('Sign-in error:', error);
+      // Display a user-friendly error message
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +45,11 @@ const SignInPage: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
+
+  if (!isLoaded) {
+    // Optionally show a loading state while Clerk is initializing
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -48,12 +66,6 @@ const SignInPage: React.FC = () => {
 
         {/* Sign In Form */}
         <div className="bg-white rounded-lg shadow-lg p-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              <p className="text-sm">{error}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -133,10 +145,9 @@ const SignInPage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              Sign In
             </button>
           </form>
 
@@ -151,7 +162,7 @@ const SignInPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Social Sign In Buttons - These would need to be adapted to your backend authentication methods */}
+            {/* Social Sign In Buttons - These would need to be adapted to use Clerk's social sign-in methods */}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <svg className="h-5 w-5" viewBox="0 0 24 24">

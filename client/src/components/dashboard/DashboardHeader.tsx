@@ -115,12 +115,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <p className="text-sm">Generating personalized insights...</p>
             </div>
           ) : (
-            <div>
-              <p className={`mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{subtitle}</p>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                Your sales dashboard is ready to help you manage contacts, deals, and pipeline.
-              </p>
-            </div>
+            <p className={`mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{subtitle}</p>
           )}
           
 

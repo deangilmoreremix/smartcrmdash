@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Brain, Mail, Lock, User, Building, Check } from 'lucide-react';
+import { useSignUp } from '@clerk/clerk-react';
 
 const SignUpPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,20 +16,41 @@ const SignUpPage: React.FC = () => {
     agreeToTerms: false
   });
 
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { signUp, isLoaded } = useSignUp();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    if (!isLoaded) {
+      return;
+    }
 
-    // Since we're not using authentication, just redirect to dashboard
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 500);
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
-    setIsLoading(false);
+    try {
+      await signUp.create({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        emailAddress: formData.email,
+        password: formData.password,
+        // Add company if you have a field for it in Clerk
+        // company: formData.company,
+      });
+
+      // You might want to redirect to a verification page or handle the next step
+      // For example:
+      // await signUp.prepareVerification({ strategy: 'email_code' });
+      // navigate('/verify-email');
+
+      console.log('Sign up successful (pending verification):', formData);
+      alert('Sign up successful! Please check your email for verification.');
+      // In a real app, you'd redirect to a verification page or similar
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      alert(`Sign up failed: ${error.errors[0].message}`);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +60,14 @@ const SignUpPage: React.FC = () => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <p>Loading Clerk...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
