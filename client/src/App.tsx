@@ -187,73 +187,12 @@ function App() {
                     <DashboardLayoutProvider>
                       <AIProvider>
                       <Routes>
-                        {/* Landing page routes (no navbar) */}
+                        {/* Landing page routes (no navbar) - outside Clerk */}
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/sales" element={<SalesLandingPage />} />
-                        <Route path="/signin" element={<SignInPage />} />
-                        <Route path="/signup" element={<SignUpPage />} />
-                        <Route path="/login" element={<SignInPage />} />
-                        <Route path="/register" element={<SignUpPage />} />
-                        
-                        {/* Clerk Auth Routes with Custom Styling */}
-                        <Route path="/auth/login" element={
-                          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-                            <div className="w-full max-w-md">
-                              <div className="text-center mb-8">
-                                <h1 className="text-4xl font-bold text-white mb-2">Smart CRM</h1>
-                                <p className="text-slate-300">Sign in to your account</p>
-                              </div>
-                              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
-                                <SignIn 
-                                  appearance={{
-                                    elements: {
-                                      rootBox: "w-full",
-                                      card: "bg-transparent shadow-none",
-                                      headerTitle: "text-white text-2xl font-bold",
-                                      headerSubtitle: "text-slate-300",
-                                      socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20",
-                                      formFieldInput: "bg-white/10 border-white/20 text-white placeholder:text-slate-400",
-                                      formButtonPrimary: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700",
-                                      footerActionLink: "text-purple-400 hover:text-purple-300"
-                                    }
-                                  }}
-                                  signUpUrl="/auth/register"
-                                  afterSignInUrl="/dashboard"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        } />
-                        
-                        <Route path="/auth/register" element={
-                          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-                            <div className="w-full max-w-md">
-                              <div className="text-center mb-8">
-                                <h1 className="text-4xl font-bold text-white mb-2">Smart CRM</h1>
-                                <p className="text-slate-300">Create your account</p>
-                              </div>
-                              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
-                                <SignUp 
-                                  appearance={{
-                                    elements: {
-                                      rootBox: "w-full",
-                                      card: "bg-transparent shadow-none",
-                                      headerTitle: "text-white text-2xl font-bold",
-                                      headerSubtitle: "text-slate-300",
-                                      socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20",
-                                      formFieldInput: "bg-white/10 border-white/20 text-white placeholder:text-slate-400",
-                                      formButtonPrimary: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700",
-                                      footerActionLink: "text-purple-400 hover:text-purple-300"
-                                    }
-                                  }}
-                                  signInUrl="/auth/login"
-                                  afterSignUpUrl="/dashboard"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        } />
                         <Route path="/demo" element={<LandingPage />} />
+                        
+                        
 
                         {/* All other routes with navbar */}
                         <Route path="/*" element={
@@ -874,7 +813,99 @@ function App() {
   return (
     PUBLISHABLE_KEY ? (
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <AppContent />
+        <ThemeProvider>
+          <TenantProvider>
+            <AIToolsProvider>
+              <ModalsProvider>
+                <EnhancedHelpProvider>
+                  <VideoCallProvider>
+                    <NavigationProvider>
+                      <DashboardLayoutProvider>
+                        <AIProvider>
+                        <Routes>
+                          {/* Landing page routes (no navbar) - outside main app */}
+                          <Route path="/" element={<LandingPage />} />
+                          <Route path="/sales" element={<SalesLandingPage />} />
+                          <Route path="/demo" element={<LandingPage />} />
+                          
+                          {/* Custom Auth Pages - inside ClerkProvider */}
+                          <Route path="/signin" element={<SignInPage />} />
+                          <Route path="/signup" element={<SignUpPage />} />
+                          <Route path="/login" element={<SignInPage />} />
+                          <Route path="/register" element={<SignUpPage />} />
+                          
+                          {/* Clerk Auth Routes with Custom Styling */}
+                          <Route path="/auth/login" element={
+                            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+                              <div className="w-full max-w-md">
+                                <div className="text-center mb-8">
+                                  <h1 className="text-4xl font-bold text-white mb-2">Smart CRM</h1>
+                                  <p className="text-slate-300">Sign in to your account</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+                                  <SignIn 
+                                    appearance={{
+                                      elements: {
+                                        rootBox: "w-full",
+                                        card: "bg-transparent shadow-none",
+                                        headerTitle: "text-white text-2xl font-bold",
+                                        headerSubtitle: "text-slate-300",
+                                        socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20",
+                                        formFieldInput: "bg-white/10 border-white/20 text-white placeholder:text-slate-400",
+                                        formButtonPrimary: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700",
+                                        footerActionLink: "text-purple-400 hover:text-purple-300"
+                                      }
+                                    }}
+                                    signUpUrl="/auth/register"
+                                    afterSignInUrl="/dashboard"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          } />
+                          
+                          <Route path="/auth/register" element={
+                            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+                              <div className="w-full max-w-md">
+                                <div className="text-center mb-8">
+                                  <h1 className="text-4xl font-bold text-white mb-2">Smart CRM</h1>
+                                  <p className="text-slate-300">Create your account</p>
+                                </div>
+                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+                                  <SignUp 
+                                    appearance={{
+                                      elements: {
+                                        rootBox: "w-full",
+                                        card: "bg-transparent shadow-none",
+                                        headerTitle: "text-white text-2xl font-bold",
+                                        headerSubtitle: "text-slate-300",
+                                        socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20",
+                                        formFieldInput: "bg-white/10 border-white/20 text-white placeholder:text-slate-400",
+                                        formButtonPrimary: "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700",
+                                        footerActionLink: "text-purple-400 hover:text-purple-300"
+                                      }
+                                    }}
+                                    signInUrl="/auth/login"
+                                    afterSignUpUrl="/dashboard"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          } />
+
+                          {/* All other routes with navbar */}
+                          <Route path="/*" element={<AppContent />} />
+                        </Routes>
+                        <RemoteAppRefreshManager />
+                      </AIProvider>
+                      </DashboardLayoutProvider>
+                    </NavigationProvider>
+                  </VideoCallProvider>
+                </EnhancedHelpProvider>
+              </ModalsProvider>
+            </AIToolsProvider>
+          </TenantProvider>
+        </ThemeProvider>
       </ClerkProvider>
     ) : (
       <AppContent />
