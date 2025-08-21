@@ -179,8 +179,6 @@ function App() {
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY}
       signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
-      signOutRedirectUrl="/"
     >
       <ThemeProvider>
         <TenantProvider>
