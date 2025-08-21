@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, Link, Wifi, WifiOff } from 'lucide-react';
 import { useContactStore } from '../hooks/useContactStore';
 import { RemoteContactsBridge, CRMContact } from '../services/remoteContactsBridge';
+import { remoteAppManager } from '../utils/remoteAppManager';
+import { universalDataSync } from '../services/universalDataSync';
 
 const ContactsWithRemote: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);

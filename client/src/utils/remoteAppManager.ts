@@ -52,7 +52,7 @@ class RemoteAppManager {
       // Force refresh every 2 minutes regardless
       return this.shouldRefreshByTime(url);
       
-    } catch (error) {
+    } catch (error: any) {
       console.log('Update check failed, using time-based refresh:', error.message);
       // Fall back to time-based refresh instead of always returning true
       return this.shouldRefreshByTime(url);
@@ -87,7 +87,7 @@ class RemoteAppManager {
           console.log(`Refreshing ${iframeId} due to detected updates`);
           this.refreshIframe(iframeId);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log(`Auto-refresh check failed for ${iframeId}:`, error.message);
         // Continue the interval but don't refresh on error
       }
