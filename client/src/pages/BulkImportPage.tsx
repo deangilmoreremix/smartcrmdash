@@ -296,10 +296,10 @@ jane.smith@business.com,Jane,Smith,Tech Solutions,(555) 987-6543,Director`;
                 <div>
                   <strong className="text-green-800">What happens next:</strong>
                   <ul className="mt-2 space-y-1 text-sm text-green-700">
-                    <li>• Users receive password reset emails to set up their accounts</li>
-                    <li>• All emails use SmartCRM branding and design</li>
-                    <li>• Users can sign in immediately after setting their password</li>
-                    <li>• Support requests go to support@videoremix.io</li>
+                    <li>• Users receive welcome emails with account access links</li>
+                    <li>• Emails use the "Confirm Reauthentication" template with SmartCRM branding</li>
+                    <li>• Users set their password and access their dashboard immediately</li>
+                    <li>• All support requests go to support@videoremix.io</li>
                   </ul>
                 </div>
               </div>

@@ -81,16 +81,19 @@ export async function bulkImportUsers(users: BulkUser[]): Promise<ImportResult> 
 
 async function sendWelcomeEmail(email: string, firstName: string, tempPassword: string) {
   try {
-    // Send password reset email instead of temp password
-    const { error } = await supabase.auth.admin.generateLink({
+    // Use confirm reauthentication link for bulk import users
+    const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: email,
+      options: {
+        redirectTo: `${process.env.REPLIT_DEV_DOMAIN}/dashboard?welcome=true`
+      }
     });
 
     if (error) {
       console.error(`Failed to send welcome email to ${email}:`, error);
     } else {
-      console.log(`Welcome email sent to ${email}`);
+      console.log(`Bulk import welcome email sent to ${email}`);
     }
   } catch (error) {
     console.error(`Error sending welcome email to ${email}:`, error);
