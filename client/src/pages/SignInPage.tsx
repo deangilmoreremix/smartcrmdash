@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Brain, Mail, Lock } from 'lucide-react';
+import { useSignIn } from '@clerk/clerk-react';
 
 const SignInPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,10 +10,33 @@ const SignInPage: React.FC = () => {
     password: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signIn, isLoaded, setActive } = useSignIn(); // Use Clerk's useSignIn hook
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // No auth functionality - just form handling
-    console.log('Sign in form submitted:', formData);
+    if (!signIn || !isLoaded) {
+      return; // Clerk is not ready yet
+    }
+
+    try {
+      const result = await signIn.create({
+        identifier: formData.email,
+        password: formData.password,
+      });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        // Redirect to dashboard or relevant page after successful sign-in
+        window.location.href = '/dashboard'; // Example redirect
+      } else {
+        // Handle cases like missing requirements or phone verification
+        console.log('Sign-in status:', result.status);
+        // You might want to display an error message to the user
+      }
+    } catch (error) {
+      console.error('Sign-in error:', error);
+      // Display a user-friendly error message
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,6 +45,11 @@ const SignInPage: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
+
+  if (!isLoaded) {
+    // Optionally show a loading state while Clerk is initializing
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -107,7 +136,7 @@ const SignInPage: React.FC = () => {
                 </label>
               </div>
               <div className="text-sm">
-                <a href="#" className="text-blue-600 hover:text-blue-500">
+                <a href="/forgot-password" className="text-blue-600 hover:text-blue-500">
                   Forgot your password?
                 </a>
               </div>
@@ -133,7 +162,7 @@ const SignInPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Social Sign In Buttons */}
+            {/* Social Sign In Buttons - These would need to be adapted to use Clerk's social sign-in methods */}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -168,9 +197,9 @@ const SignInPage: React.FC = () => {
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
             By signing in, you agree to our{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">Terms of Service</a>{' '}
+            <a href="/terms" className="text-blue-600 hover:text-blue-500">Terms of Service</a>{' '}
             and{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+            <a href="/privacy" className="text-blue-600 hover:text-blue-500">Privacy Policy</a>
           </p>
         </div>
       </div>
