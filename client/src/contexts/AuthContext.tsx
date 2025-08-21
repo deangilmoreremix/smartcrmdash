@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<any>
-  signUp: (email: string, password: string) => Promise<any>
+  signUp: (email: string, password: string, options?: any) => Promise<any>
   signOut: () => Promise<void>
 }
 
@@ -66,8 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return result
   }
 
-  const signUp = async (email: string, password: string) => {
-    const result = await auth.signUp(email, password)
+  const signUp = async (email: string, password: string, options?: any) => {
+    const result = await auth.signUp(email, password, options)
     return result
   }
 

@@ -29,7 +29,12 @@ const SignInPage: React.FC = () => {
     const { error } = await signIn(formData.email, formData.password);
     
     if (error) {
-      setError(error.message);
+      // Provide helpful message for unverified email
+      if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+        setError('Please check your email and click the confirmation link to verify your account before signing in. If you haven\'t received the email, try signing up again.');
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       navigate(from, { replace: true });

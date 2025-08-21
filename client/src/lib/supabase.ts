@@ -68,9 +68,13 @@ export { supabase }
 
 // Auth helpers
 export const auth = {
-  signUp: async (email: string, password: string) => {
+  signUp: async (email: string, password: string, options?: any) => {
     const client = await getSupabaseClient()
-    return await client.auth.signUp({ email, password })
+    return await client.auth.signUp({ 
+      email, 
+      password,
+      options: options || {}
+    })
   },
   
   signIn: async (email: string, password: string) => {

@@ -53,12 +53,9 @@ const SignUpPage: React.FC = () => {
       setError(error.message);
       setLoading(false);
     } else {
-      setSuccess('Check your email for the confirmation link!');
+      setSuccess('Account created! Please check your email and click the confirmation link to verify your account. You can then sign in.');
       setLoading(false);
-      // Optionally redirect to signin page after a delay
-      setTimeout(() => {
-        navigate('/signin');
-      }, 3000);
+      // Don't auto-redirect, let user click the email verification first
     }
   };
 
