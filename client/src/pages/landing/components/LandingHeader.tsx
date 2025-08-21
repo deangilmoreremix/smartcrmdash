@@ -89,18 +89,18 @@ const LandingHeader = () => {
             <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors">
               FAQ
             </HashLink>
-            <a 
-                href="https://accounts.smart-crm.videoremix.io/sign-in"
+            <Link 
+                to="/dashboard"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
               >
                 Sign In
-              </a>
-            <a 
-                href="https://accounts.smart-crm.videoremix.io/sign-up"
+              </Link>
+            <Link 
+                to="/dashboard"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Get Started Free
-              </a>
+              </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -131,18 +131,18 @@ const LandingHeader = () => {
               <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
                 FAQ
               </HashLink>
-              <a 
-                href="https://accounts.smart-crm.videoremix.io/sign-in"
+              <Link 
+                to="/dashboard"
                 className="text-gray-700 hover:text-blue-600 transition-colors py-2"
               >
                 Sign In
-              </a>
-              <a 
-                href="https://accounts.smart-crm.videoremix.io/sign-up"
+              </Link>
+              <Link 
+                to="/dashboard"
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
               >
                 Get Started
-              </a>
+              </Link>
             </nav>
           </div>
         )}

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+// Authentication removed - direct access to all features
 import { HashLink } from 'react-router-hash-link';
 import { 
   Brain, 
@@ -484,18 +484,18 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               <Link 
-                to="/signup"
+                to="/dashboard"
                 className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-200 flex items-center"
               >
                 Start Free Trial
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
-              <button 
-                onClick={() => navigate('/demo')}
+              <Link 
+                to="/dashboard"
                 className="text-white border-2 border-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-200"
               >
                 Schedule Demo
-              </button>
+              </Link>
             </div>
             <p className="text-blue-100 text-sm mt-4">
               No credit card required • 14-day free trial • Cancel anytime
