@@ -48,7 +48,9 @@ const RecentActivity: React.FC = () => {
       title: 'Deal moved to negotiation',
       description: 'TechCorp Solutions - $85,000',
       time: '2 hours ago',
-      color: 'text-blue-600'
+      color: 'text-blue-600',
+      assistantInsight: 'Pipeline Bot: Deal velocity 23% above average. Recommend priority follow-up.',
+      assistantThreadId: 'thread_deal_techcorp_001'
     },
     {
       type: 'task',

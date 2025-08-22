@@ -55,8 +55,31 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
     }
   };
 
-  const handleCompleteTask = (e: React.MouseEvent) => {
+  const handleCompleteTask = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Notify the persistent task automation agent
+    if (task.assistantThreadId) {
+      try {
+        await aiOrchestrator.submitRequest({
+          type: 'task_completion_analysis',
+          priority: 'medium',
+          data: {
+            taskId: task.id,
+            assistantThreadId: task.assistantThreadId,
+            completionStatus: !task.completed,
+            context: {
+              contactId: task.contactId,
+              dealId: task.dealId,
+              completedAt: new Date()
+            }
+          }
+        });
+      } catch (error) {
+        console.warn('Assistant thread update failed:', error);
+      }
+    }
+    
     updateTask(task.id, { completed: !task.completed });
   };
 

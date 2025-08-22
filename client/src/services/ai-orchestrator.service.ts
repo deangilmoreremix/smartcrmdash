@@ -262,6 +262,11 @@ class AIOrchestrator {
       throw new Error('Supabase configuration missing');
     }
 
+    // Check if this request should use a persistent assistant thread
+    if (request.context?.assistantThreadId || request.options?.usePersistentThread) {
+      return this.callAssistantThread(provider, request);
+    }
+
     // Map request types to edge function endpoints
     const endpointMap: Record<string, string> = {
       'contact_scoring': 'smart-score',
