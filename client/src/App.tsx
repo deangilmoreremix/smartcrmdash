@@ -844,7 +844,6 @@ const AppContent = () => {
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
-                    </AIProvider>
                   </DashboardLayoutProvider>
                   </NavigationProvider>
                 </VideoCallProvider>

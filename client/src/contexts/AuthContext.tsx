@@ -96,10 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false)
   }
 
-  const login = (user: User, session?: any) => {
-    setUser(user)
-  }
-
   const value = {
     user,
     loading,
