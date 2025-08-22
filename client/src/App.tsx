@@ -51,6 +51,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 import SalesLandingPage from './pages/SalesLandingPage';
 const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+const DevBypassPage = lazy(() => import('./pages/DevBypassPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage')); // Added ForgotPasswordPage import
 import ResetPasswordPage from './pages/ResetPasswordPage'; // Added ResetPasswordPage import
 
@@ -194,6 +195,7 @@ function App() {
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
                         <Route path="/demo" element={<LandingPage />} />
+                        <Route path="/dev" element={<DevBypassPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* Added ForgotPasswordPage route */}
                         <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Added ResetPasswordPage route */}
 

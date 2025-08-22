@@ -93,6 +93,12 @@ const LandingHeader = () => {
               Sign In
             </Link>
             <Link 
+              to="/dev" 
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center"
+            >
+              🚀 Dashboard
+            </Link>
+            <Link 
               to="/register" 
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
             >
