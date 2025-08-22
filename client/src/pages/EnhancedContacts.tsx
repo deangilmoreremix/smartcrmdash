@@ -14,7 +14,9 @@ import {
   ArrowUp,
   ArrowDown,
   CheckCheck,
-  Zap
+  Zap,
+  Mail,
+  Users
 } from 'lucide-react';
 import { useOpenAI } from '../services/openaiService';
 import { useForm } from 'react-hook-form';
@@ -52,7 +54,7 @@ const Contacts: React.FC = () => {
     selectContact,
     importContacts
   } = useContactStore();
-  
+
   // Local state for UI
   const [contacts, setContacts] = useState<Contact[]>([]);
   const openai = useOpenAI();
@@ -73,15 +75,15 @@ const Contacts: React.FC = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-  
+
   // Extract unique industries for filtering
   const industries = useMemo(() => 
     [...new Set(contacts.map(contact => contact.industry))].filter(Boolean) as string[],
     [contacts]
   );
-  
+
   const statuses = ['lead', 'prospect', 'customer', 'churned'];
-  
+
   // Filters state
   const [activeFilters, setActiveFilters] = useState<{
     status: string | null,
@@ -92,19 +94,19 @@ const Contacts: React.FC = () => {
     industry: null,
     score: null
   });
-  
+
   // Load contacts from store on component mount
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
-  
+
   // Update local contacts from store
   useEffect(() => {
     if (Object.keys(storeContacts).length > 0) {
       setContacts(Object.values(storeContacts));
     }
   }, [storeContacts]);
-  
+
   // Set up fuzzy search with fuse.js
   const fuse = useMemo(() => 
     new Fuse(contacts, {
@@ -112,26 +114,26 @@ const Contacts: React.FC = () => {
       threshold: 0.3
     }),
   [contacts]);
-  
+
   // Filter contacts based on search and active filters
   const filteredContacts = useMemo(() => {
     let result = contacts;
-    
+
     // Apply search filter
     if (searchTerm) {
       result = fuse.search(searchTerm).map(res => res.item);
     }
-    
+
     // Apply status filter
     if (activeFilters.status) {
       result = result.filter(contact => contact.status === activeFilters.status);
     }
-    
+
     // Apply industry filter
     if (activeFilters.industry) {
       result = result.filter(contact => contact.industry === activeFilters.industry);
     }
-    
+
     // Apply score filter
     if (activeFilters.score) {
       const [min, max] = activeFilters.score;
@@ -139,10 +141,10 @@ const Contacts: React.FC = () => {
         (contact.score || 0) >= min && (contact.score || 0) <= max
       );
     }
-    
+
     return result;
   }, [contacts, searchTerm, activeFilters, fuse]);
-  
+
   const toggleContactSelection = (id: string) => {
     if (selectedContacts.includes(id)) {
       setSelectedContacts(selectedContacts.filter(contactId => contactId !== id));
@@ -158,14 +160,14 @@ const Contacts: React.FC = () => {
       setSelectedContacts(filteredContacts.map(contact => contact.id));
     }
   };
-  
+
   const statusColors = {
     lead: 'bg-yellow-100 text-yellow-800',
     prospect: 'bg-purple-100 text-purple-800',
     customer: 'bg-green-100 text-green-800',
     churned: 'bg-red-100 text-red-800'
   };
-  
+
   // Import contacts feature
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -184,18 +186,18 @@ const Contacts: React.FC = () => {
               setImportValidation({ error: 'Failed to read file' });
               return;
             }
-            
+
             const workbook = read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             const jsonData = utils.sheet_to_json(worksheet);
-            
+
             // Validate data has required fields
             if (jsonData.length === 0) {
               setImportValidation({ error: 'No data found in file' });
               return;
             }
-            
+
             // Check for required fields
             const requiredFields = ['name', 'email'];
             const firstRow = jsonData[0] as any;
@@ -204,14 +206,14 @@ const Contacts: React.FC = () => {
                 key.toLowerCase() === field.toLowerCase()
               )
             );
-            
+
             if (missingFields.length > 0) {
               setImportValidation({ 
                 error: `Missing required fields: ${missingFields.join(', ')}` 
               });
               return;
             }
-            
+
             setImportedData(jsonData);
             setImportValidation({ 
               success: `Found ${jsonData.length} contacts ready to import` 
@@ -224,12 +226,12 @@ const Contacts: React.FC = () => {
       }
     }
   });
-  
+
   const handleImportContacts = () => {
     if (importedData.length === 0) {
       return;
     }
-    
+
     // Convert imported data to Contact format
     const newContacts: Partial<Contact>[] = importedData.map((row: any) => {
       // Map the imported data to our Contact type
@@ -245,12 +247,12 @@ const Contacts: React.FC = () => {
         notes: row.notes || row.Notes || '',
       };
     });
-    
+
     // Import to Supabase through store
     importContacts(newContacts)
       .then(() => {
         setImportValidation({ success: `Successfully imported ${newContacts.length} contacts` });
-        
+
         // Reset import state
         setTimeout(() => {
           setImportedData([]);
@@ -262,10 +264,10 @@ const Contacts: React.FC = () => {
         setImportValidation({ error: 'Failed to import contacts: ' + error.message });
       });
   };
-  
+
   // Submit form for creating a new contact
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Contact>();
-  
+
   const onSubmit = (data: any) => {
     // Add new contact through Supabase
     createContact({
@@ -281,30 +283,30 @@ const Contacts: React.FC = () => {
         console.error('Failed to create contact:', error);
       });
   };
-  
+
   // Handle AI analysis of all contacts
   const handleAnalyzeAllContacts = async () => {
     setIsAnalyzing(true);
-    
+
     try {
       // In a real app, we would process all leads in batches
       // For demo purposes, just wait a moment and update scores
       await new Promise(r => setTimeout(r, 1500));
-      
+
       const updatedContacts = contacts.map(contact => {
         // Simple mock logic to simulate AI scoring
         const randomAdjustment = Math.floor(Math.random() * 10) - 5;
         const newScore = Math.max(0, Math.min(100, (contact.score || 50) + randomAdjustment));
-        
+
         // Update contact in supabase
         updateContact(contact.id, { ...contact, score: newScore });
-        
+
         return {
           ...contact,
           score: newScore
         };
       });
-      
+
       setContacts(updatedContacts);
     } catch (err) {
       console.error("Error analyzing contacts:", err);
@@ -312,10 +314,10 @@ const Contacts: React.FC = () => {
       setIsAnalyzing(false);
     }
   };
-  
+
   // Table setup using @tanstack/react-table
   const columnHelper = createColumnHelper<Contact>();
-  
+
   const columns = useMemo(() => [
     columnHelper.accessor('name', {
       header: 'Name',
@@ -448,23 +450,23 @@ const Contacts: React.FC = () => {
     { label: "Location", key: "Location" },
     { label: "Notes", key: "Notes" }
   ];
-  
+
   // Handle bulk AI analysis for selected contacts
   const handleAnalyzeSelectedContacts = async () => {
     if (selectedContacts.length === 0) return;
-    
+
     setIsAnalyzing(true);
-    
+
     try {
       // Simple mock logic to simulate AI scoring
       const updatedContacts = contacts.map(contact => {
         if (selectedContacts.includes(contact.id)) {
           const randomAdjustment = Math.floor(Math.random() * 10) - 5;
           const newScore = Math.max(0, Math.min(100, (contact.score || 50) + randomAdjustment));
-          
+
           // Update contact in store
           updateContact(contact.id, { score: newScore });
-          
+
           return {
             ...contact,
             score: newScore
@@ -472,9 +474,9 @@ const Contacts: React.FC = () => {
         }
         return contact;
       });
-      
+
       setContacts(updatedContacts);
-      
+
       // Clear selected contacts after bulk operation
       setSelectedContacts([]);
       setShowBulkActions(false);
@@ -484,7 +486,7 @@ const Contacts: React.FC = () => {
       setIsAnalyzing(false);
     }
   };
-  
+
   // Watch for selections to show/hide bulk actions
   useEffect(() => {
     if (selectedContacts.length > 0) {
@@ -551,7 +553,7 @@ const Contacts: React.FC = () => {
               {selectedContacts.length === filteredContacts.length ? 'Deselect All' : 'Select All'}
             </button>
           </div>
-          
+
           <div className="flex space-x-2">
             <button
               onClick={handleAnalyzeSelectedContacts}
@@ -561,9 +563,11 @@ const Contacts: React.FC = () => {
               Analyze Selected
             </button>
             <button className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50">
+              <Mail size={16} className="mr-1" />
               Add to Sequence
             </button>
             <button className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50">
+              <Users size={16} className="mr-1" />
               Export Selected
             </button>
             <button 
@@ -591,7 +595,7 @@ const Contacts: React.FC = () => {
                 className="pl-10 pr-4 py-2 w-full border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
-            
+
             <div className="flex flex-wrap gap-2">
               <div>
                 <Select
@@ -741,7 +745,7 @@ const Contacts: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
@@ -773,7 +777,7 @@ const Contacts: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Add Contact Modal */}
       {showAddContactModal && (
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -783,7 +787,7 @@ const Contacts: React.FC = () => {
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
+
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-4">
@@ -809,7 +813,7 @@ const Contacts: React.FC = () => {
                         <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email *</label>
                       <input
@@ -828,7 +832,7 @@ const Contacts: React.FC = () => {
                         <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
                       <input
@@ -838,7 +842,7 @@ const Contacts: React.FC = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="company" className="block text-sm font-medium text-gray-700">Company</label>
                       <input
@@ -848,7 +852,7 @@ const Contacts: React.FC = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="position" className="block text-sm font-medium text-gray-700">Position</label>
                       <input
@@ -858,7 +862,7 @@ const Contacts: React.FC = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="industry" className="block text-sm font-medium text-gray-700">Industry</label>
                       <select
@@ -879,7 +883,7 @@ const Contacts: React.FC = () => {
                         <option value="Other">Other</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
                       <select
@@ -892,7 +896,7 @@ const Contacts: React.FC = () => {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
                       <input
@@ -902,7 +906,7 @@ const Contacts: React.FC = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
                       <textarea
@@ -913,7 +917,7 @@ const Contacts: React.FC = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="pt-4 flex justify-end">
                     <button
                       type="button"
@@ -935,7 +939,7 @@ const Contacts: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Import Contacts Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -945,7 +949,7 @@ const Contacts: React.FC = () => {
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
+
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="bg-white p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -957,14 +961,14 @@ const Contacts: React.FC = () => {
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 <ContactImport />
               </div>
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Export Contacts Modal */}
       {showExportModal && (
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -974,7 +978,7 @@ const Contacts: React.FC = () => {
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
+
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="bg-white p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -986,7 +990,7 @@ const Contacts: React.FC = () => {
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 <ContactExport />
               </div>
             </div>

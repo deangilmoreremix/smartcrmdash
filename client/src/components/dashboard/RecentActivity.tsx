@@ -41,7 +41,29 @@ const RecentActivity: React.FC = () => {
     }
   ];
 
+  const [batchJobs, setBatchJobs] = React.useState([]);
+
+  React.useEffect(() => {
+    const checkBatchJobs = async () => {
+      const { batchAPIService } = await import('../../services/openai-batch-api.service');
+      const jobs = batchAPIService.getAllBatchJobs();
+      setBatchJobs(jobs.slice(0, 2)); // Show latest 2 batch jobs
+    };
+    checkBatchJobs();
+    const interval = setInterval(checkBatchJobs, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const recentActivities = [
+    ...batchJobs.map(job => ({
+      type: 'batch_job',
+      icon: job.status === 'completed' ? CheckCircle : job.status === 'processing' ? TrendingUp : AlertCircle,
+      title: `Batch ${job.type.replace('_', ' ')}`,
+      description: `${job.itemCount} items - ${job.status}`,
+      time: new Date(job.createdAt).toLocaleTimeString(),
+      color: job.status === 'completed' ? 'text-green-600' : job.status === 'processing' ? 'text-blue-600' : 'text-yellow-600',
+      assistantInsight: `Cost: $${job.estimatedCost.toFixed(4)} - 50% savings with overnight processing`
+    })),
     {
       type: 'deal',
       icon: TrendingUp,

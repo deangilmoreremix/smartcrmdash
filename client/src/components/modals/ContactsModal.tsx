@@ -35,7 +35,9 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
-  Info
+  Info,
+  Mail,
+  Share2
 } from 'lucide-react';
 
 interface ContactsModalProps {
@@ -85,7 +87,7 @@ const statusOptions = [
 
 export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose }) => {
   const { contacts, isLoading, updateContact, addContact, analyzeContact, enrichContact } = useContactStore();
-  
+
   // UI State
   const [activeFilter, setActiveFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -102,7 +104,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null);
   const [aiResults, setAiResults] = useState<{success: number, failed: number} | null>(null);
   const [analyzingContactIds, setAnalyzingContactIds] = useState<string[]>([]);
-  
+
   // Modal States
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isNewContactModalOpen, setIsNewContactModalOpen] = useState(false);
@@ -128,12 +130,12 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
         }
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
       document.body.style.overflow = 'hidden';
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'visible';
@@ -143,28 +145,28 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
   // Filter and search contacts
   const filteredContacts = useMemo(() => {
     let filtered = contactsArray;
-    
+
     // Apply search filter
     if (searchTerm.trim()) {
       const results = fuse.search(searchTerm);
       filtered = results.map(result => result.item);
     }
-    
+
     // Apply interest filter
     if (activeFilter !== 'all') {
       filtered = filtered.filter(contact => contact.interestLevel === activeFilter);
     }
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(contact => contact.status === statusFilter);
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) => {
       let aVal: any = a[sortBy];
       let bVal: any = b[sortBy];
-      
+
       if (sortBy === 'score') {
         aVal = a.aiScore || a.score || 0;
         bVal = b.aiScore || b.score || 0;
@@ -175,14 +177,14 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
         aVal = aVal.toLowerCase();
         bVal = bVal?.toLowerCase() || '';
       }
-      
+
       if (sortOrder === 'asc') {
         return aVal > bVal ? 1 : -1;
       } else {
         return aVal < bVal ? 1 : -1;
       }
     });
-    
+
     return filtered;
   }, [contactsArray, fuse, searchTerm, activeFilter, statusFilter, sortBy, sortOrder]);
 
@@ -191,21 +193,21 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
     const contactsToAnalyze = selectedContacts.length > 0 
       ? selectedContacts.map(id => contacts[id]).filter(Boolean)
       : filteredContacts.slice(0, 10);
-    
+
     if (contactsToAnalyze.length === 0) return;
-    
+
     setIsAnalyzing(true);
     setAnalysisProgress({ current: 0, total: contactsToAnalyze.length });
     setAnalyzingContactIds(contactsToAnalyze.map(c => c.id));
-    
+
     let successCount = 0;
     let failedCount = 0;
-    
+
     try {
       for (let i = 0; i < contactsToAnalyze.length; i++) {
         const contact = contactsToAnalyze[i];
         setAnalysisProgress({ current: i + 1, total: contactsToAnalyze.length });
-        
+
         try {
           await analyzeContact(contact.id);
           successCount++;
@@ -214,7 +216,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
           console.error(`Failed to analyze contact ${contact.name}:`, error);
         }
       }
-      
+
       setAiResults({ success: successCount, failed: failedCount });
     } finally {
       setIsAnalyzing(false);
@@ -247,7 +249,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
     const contactsToExport = selectedContacts.length > 0 
       ? selectedContacts.map(id => contacts[id]).filter(Boolean)
       : filteredContacts;
-    
+
     const csvContent = "data:text/csv;charset=utf-8," 
       + "Name,Email,Company,Position,Industry,Status,Interest Level,Score\n"
       + contactsToExport.map(contact => 
@@ -282,7 +284,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <DarkModeToggle />
             <ModernButton 
@@ -327,7 +329,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                   <span>{filterOptions.find(f => f.value === activeFilter)?.label}</span>
                   <ChevronDown className="w-4 h-4" />
                 </ModernButton>
-                
+
                 {isFilterDropdownOpen && (
                   <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
                     {filterOptions.map((option) => (
@@ -359,7 +361,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                   <span>{statusOptions.find(s => s.value === statusFilter)?.label}</span>
                   <ChevronDown className="w-4 h-4" />
                 </ModernButton>
-                
+
                 {isStatusDropdownOpen && (
                   <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
                     {statusOptions.map((option) => (
@@ -447,7 +449,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                     <span>Bulk Actions</span>
                     <ChevronDown className="w-4 h-4" />
                   </ModernButton>
-                  
+
                   {bulkActionDropdown && (
                     <div className="absolute top-full mt-1 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-48">
                       <button
@@ -486,7 +488,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                 <Upload className="w-4 h-4 mr-1" />
                 Import
               </ModernButton>
-              
+
               <ModernButton
                 onClick={handleExport}
                 variant="outline"
@@ -495,7 +497,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                 <Download className="w-4 h-4 mr-1" />
                 Export
               </ModernButton>
-              
+
               <ModernButton
                 onClick={() => setIsNewContactModalOpen(true)}
                 variant="primary"
@@ -702,7 +704,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                               variant="ghost"
                               size="sm"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Info className="w-4 h-4" />
                             </ModernButton>
                           </td>
                         </tr>
