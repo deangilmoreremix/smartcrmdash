@@ -19,14 +19,30 @@ const DevBypassPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          // Set the user in auth context
-          // Note: In a real bypass, you might need to handle this differently
-          // For now, we'll just proceed to dashboard
           
-          // Redirect to dashboard
-          setTimeout(() => {
-            navigate('/dashboard', { replace: true });
-          }, 1000);
+          if (data.success) {
+            // Store dev session in localStorage
+            localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token,
+              expires_at: data.session.expires_at,
+              user: data.user
+            }));
+            
+            localStorage.setItem('dev-user-session', JSON.stringify(data.user));
+            
+            // Update auth context if available
+            if (signIn) {
+              await signIn(data.user.email, 'dev-bypass-password');
+            }
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+              navigate('/dashboard', { replace: true });
+            }, 1000);
+          } else {
+            navigate('/signin', { replace: true });
+          }
         } else {
           // If dev bypass fails, redirect to signin
           navigate('/signin', { replace: true });

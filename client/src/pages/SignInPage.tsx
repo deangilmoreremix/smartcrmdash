@@ -51,7 +51,7 @@ const SignInPage: React.FC = () => {
       
       const data = await response.json();
       
-      if (data.success) {
+      if (response.ok && data.success) {
         // Store dev session in localStorage for the auth context
         localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
           access_token: data.session.access_token,
@@ -60,13 +60,25 @@ const SignInPage: React.FC = () => {
           user: data.user
         }));
         
-        // Navigate to dashboard
-        navigate('/dashboard', { replace: true });
+        // Store additional dev user data
+        localStorage.setItem('dev-user-session', JSON.stringify(data.user));
+        
+        // Trigger auth state change if using auth context
+        if (signIn) {
+          await signIn(data.user.email, 'dev-bypass-password');
+        }
+        
+        // Small delay to ensure state updates
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+          window.location.reload(); // Force refresh to update auth state
+        }, 100);
       } else {
-        setError('Development bypass failed');
+        setError(data.message || 'Development bypass failed');
         setLoading(false);
       }
     } catch (error) {
+      console.error('Dev bypass error:', error);
       setError('Development bypass not available');
       setLoading(false);
     }
