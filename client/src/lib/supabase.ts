@@ -32,20 +32,36 @@ let supabase: any = null
 
 // Function to initialize Supabase client
 const initializeSupabase = async () => {
-  const config = await getSupabaseConfig()
-  
-  if (config.url && config.anonKey) {
-    supabase = createClient(config.url, config.anonKey)
-    return supabase
-  } else {
-    console.warn('Supabase environment variables not found, authentication may not work properly')
-    // Create a dummy client that will throw meaningful errors
+  try {
+    const config = await getSupabaseConfig()
+    
+    if (config.url && config.anonKey) {
+      supabase = createClient(config.url, config.anonKey)
+      console.log('✅ Supabase client initialized successfully')
+      return supabase
+    } else {
+      console.warn('⚠️ Supabase environment variables not found, using fallback mode')
+      // Create a fallback client for development
+      supabase = {
+        auth: {
+          signUp: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase not configured - Please add your credentials to Secrets') }),
+          signInWithPassword: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase not configured - Please add your credentials to Secrets') }),
+          signOut: () => Promise.resolve({ error: null }),
+          getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+          onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+        }
+      }
+      return supabase
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize Supabase:', error)
+    // Create a safe fallback
     supabase = {
       auth: {
-        signUp: () => Promise.resolve({ error: new Error('Supabase not configured') }),
-        signInWithPassword: () => Promise.resolve({ error: new Error('Supabase not configured') }),
-        signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
-        getUser: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase not configured') }),
+        signUp: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase initialization failed') }),
+        signInWithPassword: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase initialization failed') }),
+        signOut: () => Promise.resolve({ error: null }),
+        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
       }
     }

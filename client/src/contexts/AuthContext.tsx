@@ -26,22 +26,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let subscription: any = null;
+    let timeoutId: NodeJS.Timeout;
 
     const initializeAuth = async () => {
-      // Get initial user
+      // Set a timeout to prevent indefinite loading
+      timeoutId = setTimeout(() => {
+        console.log('Auth initialization timeout, setting loading to false');
+        setLoading(false);
+      }, 5000);
+
       try {
+        // Get initial user
         const { data: { user } } = await auth.getUser();
         setUser(user);
         setLoading(false);
+        clearTimeout(timeoutId);
       } catch (error) {
         console.error('Failed to get user:', error);
+        setUser(null);
         setLoading(false);
+        clearTimeout(timeoutId);
       }
 
       // Listen for auth changes
       try {
         const { data: { subscription: authSubscription } } = await auth.onAuthStateChange(
           (event, session) => {
+            console.log('Auth state change:', event, session?.user?.id);
             setUser(session?.user ?? null);
             setLoading(false);
           }
@@ -49,12 +60,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         subscription = authSubscription;
       } catch (error) {
         console.error('Failed to setup auth state change listener:', error);
+        setLoading(false);
       }
     };
 
     initializeAuth();
 
     return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       if (subscription) {
         subscription.unsubscribe();
       }

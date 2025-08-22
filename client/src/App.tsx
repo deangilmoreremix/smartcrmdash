@@ -11,7 +11,7 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
@@ -156,6 +156,17 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
   </div>
 );
 
+// Loading screen component
+const AuthLoadingScreen = () => (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Smart CRM</h2>
+      <p className="text-gray-600">Please wait while we initialize your session...</p>
+    </div>
+  </div>
+);
+
 // Simple protected wrapper if/when you add auth
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
@@ -177,16 +188,31 @@ function App() {
 
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <TenantProvider>
-          <AIToolsProvider>
-            <ModalsProvider>
-              <EnhancedHelpProvider>
-                <VideoCallProvider>
-                  <NavigationProvider>
-                    <DashboardLayoutProvider>
-                      <AIProvider>
-                        <Routes>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+// Separate component to use auth context
+const AppContent = () => {
+  const { loading } = useAuth();
+
+  // Show loading screen while auth is initializing
+  if (loading) {
+    return <AuthLoadingScreen />;
+  }
+
+  return (
+    <ThemeProvider>
+      <TenantProvider>
+        <AIToolsProvider>
+          <ModalsProvider>
+            <EnhancedHelpProvider>
+              <VideoCallProvider>
+                <NavigationProvider>
+                  <DashboardLayoutProvider>
+                    <AIProvider>
+                      <Routes>
                         {/* Landing page routes (no navbar) */}
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/sales" element={<SalesLandingPage />} />
@@ -827,8 +853,8 @@ function App() {
         </TenantProvider>
       </ThemeProvider>
       <Toaster />
-    </AuthProvider>
+    </AIProvider>
   );
-}
+};
 
 export default App;
