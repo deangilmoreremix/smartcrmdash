@@ -267,6 +267,12 @@ class AIOrchestrator {
       return this.callAssistantThread(provider, request);
     }
 
+    // Check if request type should use persistent assistant
+    const persistentTypes = ['contact_scoring', 'contact_enrichment', 'insights_generation', 'predictive_analytics'];
+    if (persistentTypes.includes(request.type) && request.context?.entityId) {
+      return this.callPersistentAssistant(request);
+    }
+
     // Map request types to edge function endpoints
     const endpointMap: Record<string, string> = {
       'contact_scoring': 'smart-score',
@@ -286,6 +292,45 @@ class AIOrchestrator {
     }
 
     const response = await httpClient.post(
+
+  private async callPersistentAssistant(request: AIRequest): Promise<any> {
+    const { persistentAssistantService } = await import('./persistentAssistantService');
+    
+    await persistentAssistantService.initialize();
+    
+    const assistantTypeMap: Record<string, 'contact' | 'deal' | 'task' | 'pipeline'> = {
+      'contact_scoring': 'contact',
+      'contact_enrichment': 'contact', 
+      'insights_generation': 'deal',
+      'predictive_analytics': 'pipeline'
+    };
+    
+    const assistantType = assistantTypeMap[request.type] || 'contact';
+    const entityId = request.context?.entityId || 'default';
+    
+    try {
+      const result = await persistentAssistantService.chatWithPersistentAssistant(
+        assistantType,
+        entityId,
+        JSON.stringify(request.data),
+        request.context
+      );
+
+      return {
+        result: result.response,
+        model: 'gpt-4o-assistant-persistent',
+        confidence: 95,
+        cost: 0.003, // Slightly higher cost for persistent memory
+        threadId: result.threadId,
+        assistantId: result.assistantId,
+        persistentMemory: result.persistentMemory
+      };
+    } catch (error) {
+      console.error('Persistent assistant call failed:', error);
+      throw error;
+    }
+  }
+
       `${supabaseUrl}/functions/v1/${endpoint}`,
       {
         ...request.data,
