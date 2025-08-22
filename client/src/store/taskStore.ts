@@ -6,21 +6,23 @@ import {
   TaskAttachment, 
   TaskReminder, 
   TaskTemplate, 
-  TaskActivity, 
-  TaskAnalytics, 
+  Activity, 
+  TaskMetrics, 
   CalendarEvent, 
-  ActivityFilter, 
-  TaskPriority, 
-  TaskStatus 
+  TaskFilter
 } from '../types/task';
+
+type TaskPriority = Task['priority'];
+type TaskStatus = Task['status'];
+type ActivityFilter = TaskFilter;
 
 interface TaskStore {
   // State
   tasks: Task[];
   templates: TaskTemplate[];
-  activities: TaskActivity[];
+  activities: Activity[];
   calendarEvents: CalendarEvent[];
-  analytics: TaskAnalytics;
+  analytics: TaskMetrics;
 
   // Filter states
   statusFilter: TaskStatus | 'all';
