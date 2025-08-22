@@ -381,26 +381,51 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
             </div>
           </div>
 
-          <ModernButton
-            onClick={async () => {
-              setIsProcessing(true);
-              const { batchAPIService } = await import('../../services/openai-batch-api.service');
-              await batchAPIService.enrichContactsBulk(
-                contacts.map(c => c.id), 
-                [bulkSettings.analysisType]
-              );
-              setIsProcessing(false);
-            }}
-            loading={isProcessing}
-            className="w-full mt-6 flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600"
-          >
-            <Layers className="w-4 h-4" />
-            <span>
-              {isProcessing 
-                ? `Processing ${contacts.length} contacts...` 
-                : `Batch Analyze ${contacts.length} Contacts (50% off)`}
-            </span>
-          </ModernButton>
+          <div className="flex flex-col space-y-3 mt-6">
+            <ModernButton
+              onClick={async () => {
+                setIsProcessing(true);
+                const { batchAPIService } = await import('../../services/openai-batch-api.service');
+                await batchAPIService.enrichContactsBulk(
+                  contacts.map(c => c.id), 
+                  [bulkSettings.analysisType],
+                  { processingMode: 'immediate' }
+                );
+                setIsProcessing(false);
+              }}
+              loading={isProcessing}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600"
+            >
+              <Zap className="w-4 h-4" />
+              <span>
+                {isProcessing 
+                  ? `Processing ${contacts.length} contacts...` 
+                  : `Immediate Bulk Analysis (${contacts.length} contacts)`}
+              </span>
+            </ModernButton>
+
+            <ModernButton
+              onClick={async () => {
+                setIsProcessing(true);
+                const { batchAPIService } = await import('../../services/openai-batch-api.service');
+                await batchAPIService.enrichContactsBulk(
+                  contacts.map(c => c.id), 
+                  [bulkSettings.analysisType],
+                  { processingMode: 'overnight' }
+                );
+                setIsProcessing(false);
+              }}
+              loading={isProcessing}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600"
+            >
+              <Layers className="w-4 h-4" />
+              <span>
+                {isProcessing 
+                  ? `Queueing ${contacts.length} contacts...` 
+                  : `Overnight Batch Analysis (50% off - ${contacts.length} contacts)`}
+              </span>
+            </ModernButton>
+          </div>
         </GlassCard>
       )}
 

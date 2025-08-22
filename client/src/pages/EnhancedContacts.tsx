@@ -555,13 +555,50 @@ const Contacts: React.FC = () => {
           </div>
 
           <div className="flex space-x-2">
-            <button
-              onClick={handleAnalyzeSelectedContacts}
-              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-            >
-              <Zap size={16} className="mr-1" />
-              Analyze Selected
-            </button>
+            <div className="flex space-x-1">
+              <button
+                onClick={async () => {
+                  if (selectedContacts.length === 0) return;
+                  setIsAnalyzing(true);
+                  
+                  try {
+                    const { batchAPIService } = await import('../services/openai-batch-api.service');
+                    await batchAPIService.enrichContactsBulk(selectedContacts, ['contact_scoring'], { processingMode: 'immediate' });
+                    setSelectedContacts([]);
+                    setShowBulkActions(false);
+                  } catch (error) {
+                    console.error('Immediate analysis failed:', error);
+                  } finally {
+                    setIsAnalyzing(false);
+                  }
+                }}
+                className="inline-flex items-center px-2 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700"
+              >
+                <Zap size={14} className="mr-1" />
+                Immediate
+              </button>
+              <button
+                onClick={async () => {
+                  if (selectedContacts.length === 0) return;
+                  setIsAnalyzing(true);
+                  
+                  try {
+                    const { batchAPIService } = await import('../services/openai-batch-api.service');
+                    await batchAPIService.enrichContactsBulk(selectedContacts, ['contact_scoring'], { processingMode: 'overnight' });
+                    setSelectedContacts([]);
+                    setShowBulkActions(false);
+                  } catch (error) {
+                    console.error('Overnight analysis failed:', error);
+                  } finally {
+                    setIsAnalyzing(false);
+                  }
+                }}
+                className="inline-flex items-center px-2 py-1.5 bg-green-600 text-white text-xs rounded-md hover:bg-green-700"
+              >
+                <Layers size={14} className="mr-1" />
+                Overnight (50% off)
+              </button>
+            </div>
             <button className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50">
               <Mail size={16} className="mr-1" />
               Add to Sequence

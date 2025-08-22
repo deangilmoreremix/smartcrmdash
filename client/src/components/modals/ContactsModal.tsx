@@ -37,7 +37,8 @@ import {
   Loader2,
   Info,
   Mail,
-  Share2
+  Share2,
+  Layers // Import Layers icon
 } from 'lucide-react';
 
 interface ContactsModalProps {
