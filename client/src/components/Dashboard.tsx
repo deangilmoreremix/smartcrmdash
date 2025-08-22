@@ -75,38 +75,108 @@ const Dashboard: React.FC = React.memo(() => {
   
   // Prevent repeated data fetching by using a ref to track initialization
   const initializedRef = useRef(false);
+  const [dashboardError, setDashboardError] = React.useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = React.useState(false);
   
   useEffect(() => {
     // Only fetch data once
     if (initializedRef.current) return;
     initializedRef.current = true;
     
-    // Fetch deals immediately - they're fast
-    fetchDeals();
+    const initializeDashboard = async () => {
+      try {
+        console.log('Initializing dashboard...');
+        
+        // Fetch deals immediately - they're fast
+        await fetchDeals();
+        
+        // Fetch contacts in background without blocking dashboard
+        setTimeout(async () => {
+          try {
+            await fetchContacts();
+          } catch (error) {
+            console.warn('Failed to fetch contacts:', error);
+          }
+        }, 100);
+        
+        // Wrap in try/catch to prevent errors from breaking the app
+        setTimeout(async () => {
+          try {
+            await fetchAppointments();
+          } catch (error) {
+            console.warn('Failed to fetch appointments:', error);
+          }
+        }, 200);
+        
+        setIsInitialized(true);
+        console.log('Dashboard initialized successfully');
+        
+      } catch (error) {
+        console.error('Dashboard initialization error:', error);
+        setDashboardError('Failed to load dashboard data');
+        setIsInitialized(true); // Still show dashboard with error
+      }
+    };
     
-    // Fetch contacts in background without blocking dashboard
-    setTimeout(() => {
-      fetchContacts();
-    }, 100);
-    
-    // Wrap in try/catch to prevent errors from breaking the app
-    try {
-      setTimeout(() => {
-        fetchAppointments();
-      }, 200);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-    }
+    initializeDashboard();
     
     // Set up timer to refresh data periodically
     const intervalId = window.setInterval(() => {
-      fetchDeals();
-      fetchContacts();
+      try {
+        fetchDeals();
+        fetchContacts();
+      } catch (error) {
+        console.warn('Periodic data refresh failed:', error);
+      }
     }, 300000); // Refresh every 5 minutes
 
     // Proper cleanup
     return () => window.clearInterval(intervalId);
   }, []);
+  
+  // Show loading state while initializing
+  if (!isInitialized) {
+    return (
+      <main className="w-full h-full flex items-center justify-center px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+            Loading Dashboard
+          </h2>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Initializing your CRM...
+          </p>
+        </div>
+      </main>
+    );
+  }
+  
+  // Show error state if there was a critical error
+  if (dashboardError) {
+    return (
+      <main className="w-full h-full flex items-center justify-center px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+            Dashboard Error
+          </h2>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+            {dashboardError}
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </main>
+    );
+  }
   
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {

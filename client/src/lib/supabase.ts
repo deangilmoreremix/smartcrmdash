@@ -1,93 +1,58 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-// Fetch Supabase configuration from the server
-const getSupabaseConfig = async () => {
+// Get environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Check if credentials are available
+const hasValidCredentials = supabaseUrl && supabaseAnonKey &&
+  supabaseUrl !== 'your-supabase-url' &&
+  supabaseAnonKey !== 'your-supabase-anon-key';
+
+if (!hasValidCredentials) {
+  console.warn('Supabase credentials not configured. Using development mode.');
+}
+
+// Create client with proper configuration
+export const supabase = hasValidCredentials
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      },
+      global: {
+        headers: {
+          'apikey': supabaseAnonKey,
+        },
+      },
+    })
+  : null;
+
+// Export a flag to check if Supabase is available
+export const isSupabaseConfigured = hasValidCredentials;
+
+// Helper function to check connection
+export const checkSupabaseConnection = async () => {
+  if (!supabase) {
+    return { connected: false, error: 'Supabase not configured' };
+  }
+
   try {
-    const response = await fetch('/api/supabase/config');
-    const config = await response.json();
-    return config;
+    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    return { connected: !error, error: error?.message };
   } catch (error) {
-    console.warn('Failed to fetch Supabase config from server:', error);
-    return {
-      url: import.meta.env.VITE_SUPABASE_URL || '',
-      anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-    };
+    return { connected: false, error: 'Connection failed' };
   }
 };
-
-// Initialize with default values, will be updated when config is fetched
-let supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-let supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-
-// Try to get server config
-getSupabaseConfig().then(config => {
-  if (config.url && config.anonKey) {
-    supabaseUrl = config.url;
-    supabaseAnonKey = config.anonKey;
-  }
-});
-
-// Create a placeholder client initially
-let supabase: any = null
-
-// Function to initialize Supabase client
-const initializeSupabase = async () => {
-  try {
-    const config = await getSupabaseConfig()
-    
-    if (config.url && config.anonKey) {
-      supabase = createClient(config.url, config.anonKey)
-      console.log('✅ Supabase client initialized successfully')
-      return supabase
-    } else {
-      console.warn('⚠️ Supabase environment variables not found, using fallback mode')
-      // Create a fallback client for development
-      supabase = {
-        auth: {
-          signUp: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase not configured - Please add your credentials to Secrets') }),
-          signInWithPassword: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase not configured - Please add your credentials to Secrets') }),
-          signOut: () => Promise.resolve({ error: null }),
-          getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-          onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
-        }
-      }
-      return supabase
-    }
-  } catch (error) {
-    console.error('❌ Failed to initialize Supabase:', error)
-    // Create a safe fallback
-    supabase = {
-      auth: {
-        signUp: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase initialization failed') }),
-        signInWithPassword: () => Promise.resolve({ data: { user: null }, error: new Error('Supabase initialization failed') }),
-        signOut: () => Promise.resolve({ error: null }),
-        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
-      }
-    }
-    return supabase
-  }
-}
-
-// Initialize on first import
-initializeSupabase()
-
-// Export function to get the initialized client
-export const getSupabaseClient = async () => {
-  if (!supabase) {
-    await initializeSupabase()
-  }
-  return supabase
-}
-
-export { supabase }
 
 // Auth helpers
 export const auth = {
   signUp: async (email: string, password: string, options?: any) => {
-    const client = await getSupabaseClient()
-    return await client.auth.signUp({ 
-      email, 
+    if (!supabase) throw new Error('Supabase client is not initialized.');
+    return await supabase.auth.signUp({
+      email,
       password,
       options: {
         ...options,
@@ -98,26 +63,26 @@ export const auth = {
           ...options?.data
         }
       }
-    })
+    });
   },
-  
+
   signIn: async (email: string, password: string) => {
-    const client = await getSupabaseClient()
-    return await client.auth.signInWithPassword({ email, password })
+    if (!supabase) throw new Error('Supabase client is not initialized.');
+    return await supabase.auth.signInWithPassword({ email, password });
   },
-  
+
   signOut: async () => {
-    const client = await getSupabaseClient()
-    return await client.auth.signOut()
+    if (!supabase) throw new Error('Supabase client is not initialized.');
+    return await supabase.auth.signOut();
   },
-  
+
   getUser: async () => {
-    const client = await getSupabaseClient()
-    return client.auth.getUser()
+    if (!supabase) throw new Error('Supabase client is not initialized.');
+    return supabase.auth.getUser();
   },
-  
+
   onAuthStateChange: async (callback: (event: string, session: any) => void) => {
-    const client = await getSupabaseClient()
-    return client.auth.onAuthStateChange(callback)
+    if (!supabase) throw new Error('Supabase client is not initialized.');
+    return supabase.auth.onAuthStateChange(callback);
   }
-}
+};
