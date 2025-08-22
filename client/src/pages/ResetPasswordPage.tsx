@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { auth } from '../lib/supabase';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -44,7 +44,8 @@ const ResetPasswordPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.updateUser({
+      const client = await import('../lib/supabase').then(m => m.getSupabaseClient());
+      const { error } = await client.auth.updateUser({
         password: password
       });
       
