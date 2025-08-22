@@ -17,6 +17,8 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
 import { Toaster } from './components/ui/toaster';
+import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
@@ -216,7 +218,6 @@ const AppContent = () => {
                       <Routes>
                         {/* Landing page routes (no navbar) */}
                         <Route path="/" element={<LandingPage />} />
-                        <Route path="/sales" element={<SalesLandingPage />} />
                         <Route path="/signin" element={<SignInPage />} />
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/login" element={<SignInPage />} />
@@ -248,9 +249,11 @@ const AppContent = () => {
                             <Route
                               path="/dashboard"
                               element={
-                                <ProtectedRoute>
-                                  <Dashboard />
-                                </ProtectedRoute>
+                                <ErrorBoundary>
+                                  <ProtectedRoute>
+                                    <Dashboard />
+                                  </ProtectedRoute>
+                                </ErrorBoundary>
                               }
                             />
                             <Route
