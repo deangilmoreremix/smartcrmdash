@@ -153,6 +153,17 @@ const RecentActivity: React.FC = () => {
                 <div className="flex-1">
                   <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{activity.title}</h4>
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{activity.description}</p>
+                  {activity.assistantInsight && (
+                    <div className={`mt-2 p-2 rounded-md text-xs ${
+                      isDark ? 'bg-blue-400/10 border border-blue-400/20 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-700'
+                    }`}>
+                      <div className="flex items-center space-x-1 mb-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                        <span className="font-medium">Assistant Insight</span>
+                      </div>
+                      {activity.assistantInsight}
+                    </div>
+                  )}
                   <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} mt-1`}>{activity.time}</p>
                 </div>
               </div>

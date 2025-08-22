@@ -61,6 +61,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
     // Notify the persistent task automation agent
     if (task.assistantThreadId) {
       try {
+        const { aiOrchestrator } = await import('../services/ai-orchestrator.service');
         await aiOrchestrator.submitRequest({
           type: 'task_completion_analysis',
           priority: 'medium',
