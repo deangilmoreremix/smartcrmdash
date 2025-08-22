@@ -8,6 +8,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string, options?: any) => Promise<any>
   signOut: () => Promise<void>
+  login: (user: User, session?: any) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -90,12 +91,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await auth.signOut()
   }
 
+  const login = (user: User, session?: any) => {
+    setUser(user)
+  }
+
   const value = {
     user,
     loading,
     signIn,
     signUp,
-    signOut
+    signOut,
+    login
   }
 
   return (
