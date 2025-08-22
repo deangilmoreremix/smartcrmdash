@@ -150,6 +150,73 @@ export function parseCSV(csvContent: string): BulkUser[] {
 }
 
 export function registerBulkImportRoutes(app: Express) {
+  // Admin account status check endpoint
+  app.get('/api/admin/accounts/status', async (req, res) => {
+    try {
+      const adminEmails = ['dean@videoremix.io', 'samuel@videoremix.io', 'victor@videoremix.io'];
+      const results = [];
+
+      for (const email of adminEmails) {
+        try {
+          // Get user details from Supabase Auth
+          const { data, error } = await supabase.auth.admin.getUserById(email);
+          
+          if (error && error.message.includes('User not found')) {
+            // Try to get by email instead
+            const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
+            const user = listData?.users?.find(u => u.email === email);
+            
+            results.push({
+              email,
+              status: user ? 'found' : 'not_found',
+              user_id: user?.id || null,
+              email_confirmed: user?.email_confirmed_at ? true : false,
+              last_sign_in: user?.last_sign_in_at || null,
+              created_at: user?.created_at || null,
+              role: user?.user_metadata?.role || 'user'
+            });
+          } else if (data?.user) {
+            results.push({
+              email,
+              status: 'found',
+              user_id: data.user.id,
+              email_confirmed: data.user.email_confirmed_at ? true : false,
+              last_sign_in: data.user.last_sign_in_at,
+              created_at: data.user.created_at,
+              role: data.user.user_metadata?.role || 'user'
+            });
+          } else {
+            results.push({
+              email,
+              status: 'error',
+              error: error?.message || 'Unknown error'
+            });
+          }
+        } catch (userError: any) {
+          results.push({
+            email,
+            status: 'error',
+            error: userError.message
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        admin_accounts: results,
+        total_admins: results.length,
+        confirmed_admins: results.filter(r => r.email_confirmed).length
+      });
+
+    } catch (error: any) {
+      console.error('Admin status check error:', error);
+      res.status(500).json({
+        error: 'Failed to check admin accounts',
+        details: error.message
+      });
+    }
+  });
+
   // Resend confirmation email endpoint
   app.post('/api/bulk-import/resend-confirmation', async (req, res) => {
     try {
