@@ -103,6 +103,8 @@ const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
 const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
 const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
+// Import AssistantsDashboard component
+const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
 
 // Added lazy import for IframeOverlapChecker
 const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
@@ -275,6 +277,15 @@ const AppContent = () => {
                               element={
                                 <ProtectedRoute>
                                   <AITools />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route path="/assistants" element={<AssistantsDashboard />} />
+                            <Route
+                              path="/tasks"
+                              element={
+                                <ProtectedRoute>
+                                  <Tasks />
                                 </ProtectedRoute>
                               }
                             />

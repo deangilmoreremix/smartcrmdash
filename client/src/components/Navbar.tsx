@@ -253,6 +253,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else if (path === '/pipeline') setActiveTab('pipeline');
     else if (path === '/tasks' || path === '/appointments') setActiveTab('appointments');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
+    else if (path === '/assistants') setActiveTab('assistants'); // Add this line for the new route
     else if (path === '/analytics') setActiveTab('analytics');
     else if (path === '/ai-goals') setActiveTab('ai-goals');
     else setActiveTab('');
@@ -307,6 +308,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       action: () => toggleDropdown('ai-tools'),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
+    },
+    {
+      id: 'assistants', // New tab for AI Assistants
+      label: 'AI Assistants',
+      icon: Bot,
+      action: () => handleNavigation('/assistants', 'assistants'),
+      badge: 0, // Placeholder for assistant count
+      color: 'from-emerald-500 to-lime-500'
     },
     {
       id: 'appointments',
@@ -366,16 +375,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 return (
                   <div key={tab.id} className="relative">
                     <button
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        console.log('Tab clicked:', tab.id, tab.label);
-                        tab.action(); 
+                      onClick={(e) => {
+                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action();
                       }}
                       className={`
-                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
+                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full
                         transition-all duration-300 transform hover:scale-105 text-xs
-                        ${isActive 
-                          ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20` 
+                        ${isActive
+                          ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20`
                           : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
                         }
                         group
@@ -392,6 +399,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'ai-tools' ? 'bg-pink-500' :
                         tab.id === 'appointments' ? 'bg-cyan-500' :
                         tab.id === 'analytics' ? 'bg-blue-500' :
+                        tab.id === 'assistants' ? 'bg-emerald-500' : // Color for new assistants tab
                         'bg-blue-500'
                       )}
                       {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
@@ -455,8 +463,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               {dropdownMenus.map(menu => (
                 <div key={menu.id} className="relative">
                   <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (menu.id === 'business-intel') {
                         handleNavigation('/business-intel', 'business-intel');
                       } else if (menu.id === 'intel') {
@@ -467,10 +475,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     }}
                     data-dropdown-toggle="true"
                     className={`
-                      relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
+                      relative flex items-center space-x-1 px-2 py-1.5 rounded-full
                       transition-all duration-300 transform hover:scale-105
-                      ${activeDropdown === menu.id 
-                        ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20` 
+                      ${activeDropdown === menu.id
+                        ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20`
                         : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
                       }
                       group
@@ -547,9 +555,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <button
                             key={index}
                             onClick={() => {
-                              navigate(`/${tool.tool}`); 
-                              setActiveDropdown(null); 
-                              setIsMobileMenuOpen(false); 
+                              navigate(`/${tool.tool}`);
+                              setActiveDropdown(null);
+                              setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
@@ -568,14 +576,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
                             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Business Intelligence Dashboard - Full Screen</h3>
                             <div className="flex items-center space-x-2">
-                              <button 
+                              <button
                                 onClick={() => window.open('https://ai-powered-analytics-fibd.bolt.host', '_blank')}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Open in new tab"
                               >
                                 <ExternalLink size={16} />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => setActiveDropdown(null)}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Close"
@@ -653,14 +661,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
                             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard - Full Screen</h3>
                             <div className="flex items-center space-x-2">
-                              <button 
+                              <button
                                 onClick={() => window.open('https://product-research-mod-uay0.bolt.host/', '_blank')}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Open in new tab"
                               >
                                 <ExternalLink size={16} />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => setActiveDropdown(null)}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Close"
@@ -758,13 +766,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
               </button>
               <div className="relative">
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
                   className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 >
                   <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 </button>
-                
+
                 {activeDropdown === 'user' && (
                   <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
                     <div className="p-3">

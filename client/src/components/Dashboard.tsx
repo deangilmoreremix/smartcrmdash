@@ -15,6 +15,7 @@ import RemoteWhiteLabelLoader from './RemoteWhiteLabelLoader';
 import RemoteProductResearchLoader from './RemoteProductResearchLoader';
 import RemoteAIAnalyticsLoader from './RemoteAIAnalyticsLoader';
 import RemoteAIGoalsLoader from './RemoteAIGoalsLoader';
+import AssistantStatusWidget from './ui/AssistantStatusWidget';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -56,40 +57,40 @@ const Dashboard: React.FC = React.memo(() => {
     fetchDeals, 
     isLoading 
   } = useDealStore();
-  
+
   const { 
     contacts, 
     fetchContacts, 
     isLoading: contactsLoading 
   } = useContactStore();
-  
+
   const { tasks } = useTaskStore();
   const { appointments, fetchAppointments } = useAppointmentStore();
   const { openTool } = useAITools();
   const { isDark } = useTheme();
   const { sectionOrder } = useDashboardLayout();
-  
 
-  
+
+
   const gemini = useGemini();
-  
+
   // Prevent repeated data fetching by using a ref to track initialization
   const initializedRef = useRef(false);
   const [dashboardError, setDashboardError] = React.useState<string | null>(null);
   const [isInitialized, setIsInitialized] = React.useState(false);
-  
+
   useEffect(() => {
     // Only fetch data once
     if (initializedRef.current) return;
     initializedRef.current = true;
-    
+
     const initializeDashboard = async () => {
       try {
         console.log('Initializing dashboard...');
-        
+
         // Fetch deals immediately - they're fast
         await fetchDeals();
-        
+
         // Fetch contacts in background without blocking dashboard
         setTimeout(async () => {
           try {
@@ -98,7 +99,7 @@ const Dashboard: React.FC = React.memo(() => {
             console.warn('Failed to fetch contacts:', error);
           }
         }, 100);
-        
+
         // Wrap in try/catch to prevent errors from breaking the app
         setTimeout(async () => {
           try {
@@ -107,19 +108,19 @@ const Dashboard: React.FC = React.memo(() => {
             console.warn('Failed to fetch appointments:', error);
           }
         }, 200);
-        
+
         setIsInitialized(true);
         console.log('Dashboard initialized successfully');
-        
+
       } catch (error) {
         console.error('Dashboard initialization error:', error);
         setDashboardError('Failed to load dashboard data');
         setIsInitialized(true); // Still show dashboard with error
       }
     };
-    
+
     initializeDashboard();
-    
+
     // Set up timer to refresh data periodically
     const intervalId = window.setInterval(() => {
       try {
@@ -133,7 +134,7 @@ const Dashboard: React.FC = React.memo(() => {
     // Proper cleanup
     return () => window.clearInterval(intervalId);
   }, []);
-  
+
   // Show loading state while initializing
   if (!isInitialized) {
     return (
@@ -150,13 +151,13 @@ const Dashboard: React.FC = React.memo(() => {
       </main>
     );
   }
-  
+
   // Log error but don't block the dashboard
   if (dashboardError) {
     console.warn('Dashboard warning:', dashboardError);
     // Continue rendering the dashboard instead of blocking it
   }
-  
+
   // Render section content based on section ID
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
@@ -201,7 +202,7 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'quick-actions-section':
         return <QuickActions />;
-        
+
       case 'ai-insights-section':
         return <AIInsightsPanel />;
 
@@ -322,7 +323,7 @@ const Dashboard: React.FC = React.memo(() => {
   };
 
   return (
-    <main className="w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pt-4">
+    <main className="w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       {/* Dashboard Header - Always visible */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
