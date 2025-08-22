@@ -38,6 +38,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        // Check for dev bypass session first
+        const devSession = localStorage.getItem('dev-user-session');
+        const devToken = localStorage.getItem('sb-supabase-auth-token');
+        
+        if (devSession && devToken) {
+          try {
+            const devUser = JSON.parse(devSession);
+            console.log('Using dev bypass session:', devUser.email);
+            setUser(devUser as any);
+            setSession({ user: devUser, access_token: 'dev-bypass-token' } as any);
+            setLoading(false);
+            return;
+          } catch (e) {
+            console.warn('Invalid dev session, clearing...');
+            localStorage.removeItem('dev-user-session');
+            localStorage.removeItem('sb-supabase-auth-token');
+          }
+        }
+
         // Check if Supabase is properly configured
         if (!supabase) {
           console.warn('Supabase client not initialized, using fallback authentication');
@@ -105,6 +124,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      
+      // Handle dev bypass special case
+      if (password === 'dev-bypass-password') {
+        const devSession = localStorage.getItem('dev-user-session');
+        if (devSession) {
+          const devUser = JSON.parse(devSession);
+          setUser(devUser as any);
+          setSession({ user: devUser, access_token: 'dev-bypass-token' } as any);
+          return { error: null };
+        }
+      }
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -137,6 +168,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
+      
+      // Clear dev session data
+      localStorage.removeItem('dev-user-session');
+      localStorage.removeItem('sb-supabase-auth-token');
+      
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
