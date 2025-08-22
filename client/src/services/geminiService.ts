@@ -401,6 +401,54 @@ export const useGemini = () => {
         name: 'Gemini 1.5 Flash',
         provider: 'gemini'
       };
+    },
+
+    validateFormField: async (fieldLabel: string, fieldValue: string, context: string) => {
+      try {
+        const content = await enhancedGeminiService.generateContent({
+          prompt: `Validate this ${fieldLabel} field value: "${fieldValue}" in the context of a ${context} form. 
+          
+          Check for:
+          - Appropriateness for the field type
+          - Professional tone if applicable
+          - Completeness and clarity
+          - Any suggestions for improvement
+          
+          Return a JSON object with:
+          {
+            "valid": boolean,
+            "message": "validation message or suggestion"
+          }`,
+          temperature: 0.3,
+          maxTokens: 200
+        });
+
+        // Try to parse the JSON response
+        try {
+          const jsonMatch = content.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            return {
+              valid: result.valid !== false, // Default to true if not explicitly false
+              message: result.message || (result.valid ? 'Valid input' : 'Please check your input')
+            };
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, fall back to simple validation
+        }
+
+        // Fallback validation
+        return {
+          valid: fieldValue.trim().length > 0,
+          message: fieldValue.trim().length > 0 ? 'Valid input' : 'This field is required'
+        };
+      } catch (error) {
+        console.error("Error in validateFormField:", error);
+        return {
+          valid: fieldValue.trim().length > 0,
+          message: fieldValue.trim().length > 0 ? 'Valid input' : 'This field is required'
+        };
+      }
     }
   };
 };
