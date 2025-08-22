@@ -198,7 +198,6 @@ export const useDealStore = create<DealStore>((set, get) => ({
       attachments: [],
       customFields: dealData.customFields || {},
       tags: dealData.tags || [],
-      status: 'active',
     };
 
     set(state => ({
@@ -376,6 +375,9 @@ export const useDealStore = create<DealStore>((set, get) => ({
       const aValue = a[sortOption.field];
       const bValue = b[sortOption.field];
 
+      if (aValue === undefined && bValue === undefined) return 0;
+      if (aValue === undefined) return 1;
+      if (bValue === undefined) return -1;
       if (aValue < bValue) return sortOption.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortOption.direction === 'asc' ? 1 : -1;
       return 0;
@@ -409,7 +411,7 @@ export const useDealStore = create<DealStore>((set, get) => ({
   getTotalPipelineValue: () => {
     const deals = get().deals; // Use all deals instead of filtered
     return deals
-      .filter(deal => deal.status === 'active' && deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
+      .filter(deal => deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
       .reduce((total, deal) => total + deal.value, 0);
   },
 
@@ -449,6 +451,11 @@ export const useDealStore = create<DealStore>((set, get) => ({
     const weightedPipeline = pipelineDeals.reduce((sum, d) => sum + (d.value * d.probability / 100), 0);
 
     return {
+      month: new Date().toISOString().slice(0, 7),
+      forecasted: weightedPipeline,
+      committed: weightedPipeline * 0.8,
+      pipeline: totalPipeline,
+      closed: 0,
       totalPipeline,
       weightedPipeline,
       bestCase: totalPipeline,

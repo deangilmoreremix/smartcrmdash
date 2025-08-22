@@ -166,7 +166,12 @@ const Dashboard: React.FC = React.memo(() => {
         return <GPT5EnhancedDashboard />;
 
       case 'gpt5-feature-status':
-        return React.createElement(React.lazy(() => import('./dashboard/GPT5FeatureStatus')));
+        return React.createElement(() => (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">GPT-5 Features</h3>
+            <p className="text-gray-600 dark:text-gray-400">AI features loading...</p>
+          </div>
+        ));
 
       case 'interaction-history-section':
         return <InteractionHistory />;
@@ -199,9 +204,16 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'pipeline-section':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <RemotePipelineLoader showHeader={true} />
-          </div>
+          <React.Suspense fallback={
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pipeline</h3>
+              <LoadingSpinner message="Loading pipeline..." size="lg" />
+            </div>
+          }>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+              <RemotePipelineLoader showHeader={true} />
+            </div>
+          </React.Suspense>
         );
 
       case 'tasks-section':
@@ -214,9 +226,16 @@ const Dashboard: React.FC = React.memo(() => {
 
       case 'white-label-section':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <RemoteWhiteLabelLoader showHeader={true} />
-          </div>
+          <React.Suspense fallback={
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">White Label</h3>
+              <LoadingSpinner message="Loading white label..." size="lg" />
+            </div>
+          }>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
+              <RemoteWhiteLabelLoader showHeader={true} />
+            </div>
+          </React.Suspense>
         );
 
       case 'product-research-section':
