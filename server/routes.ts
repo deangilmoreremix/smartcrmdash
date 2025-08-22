@@ -59,6 +59,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Development bypass endpoint - Skip authentication in dev mode
+  app.post('/api/auth/dev-bypass', (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({
+        error: 'Dev bypass only available in development mode'
+      });
+    }
+
+    // Create a temporary dev user session
+    const devUser = {
+      id: 'dev-user-12345',
+      email: 'dev@smartcrm.local',
+      username: 'developer',
+      firstName: 'Development',
+      lastName: 'User',
+      role: 'super_admin',
+      app_context: 'smartcrm',
+      avatar_url: null,
+      created_at: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      user: devUser,
+      session: {
+        access_token: 'dev-bypass-token-12345',
+        refresh_token: 'dev-bypass-refresh-12345',
+        expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+        user: devUser
+      },
+      message: 'Development bypass authentication successful'
+    });
+  });
+
+  // Quick dev access route - Direct redirect to dashboard in dev mode
+  app.get('/dev', (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(404).send('Not found');
+    }
+    
+    // Redirect to app with dev bypass token in URL
+    res.redirect('/?dev=true');
+  });
+
   // Supabase configuration endpoint
   app.get('/api/supabase/config', (req, res) => {
     res.json({

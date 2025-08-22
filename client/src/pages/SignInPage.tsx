@@ -37,6 +37,41 @@ const SignInPage: React.FC = () => {
     }
   };
 
+  const handleDevBypass = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/auth/dev-bypass', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Store dev session in localStorage for the auth context
+        localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at,
+          user: data.user
+        }));
+        
+        // Navigate to dashboard
+        navigate('/dashboard', { replace: true });
+      } else {
+        setError('Development bypass failed');
+        setLoading(false);
+      }
+    } catch (error) {
+      setError('Development bypass not available');
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -144,6 +179,22 @@ const SignInPage: React.FC = () => {
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
+
+          {/* Development Bypass Button - Only shows in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4">
+              <button
+                onClick={handleDevBypass}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+              >
+                🚀 Dev Bypass - Skip Authentication
+              </button>
+              <p className="text-xs text-center mt-2 text-gray-500">
+                Development mode only - bypasses authentication
+              </p>
+            </div>
+          )}
           
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
