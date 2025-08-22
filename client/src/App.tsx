@@ -203,6 +203,7 @@ const AppContent = () => {
   }
 
   return (
+    <>
     <ThemeProvider>
       <TenantProvider>
         <AIToolsProvider>
@@ -843,8 +844,7 @@ const AppContent = () => {
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
-                      </AIProvider>
-                    </DashboardLayoutProvider>
+                  </DashboardLayoutProvider>
                   </NavigationProvider>
                 </VideoCallProvider>
               </EnhancedHelpProvider>
@@ -853,7 +853,7 @@ const AppContent = () => {
         </TenantProvider>
       </ThemeProvider>
       <Toaster />
-    </AIProvider>
+    </>
   );
 };
 
