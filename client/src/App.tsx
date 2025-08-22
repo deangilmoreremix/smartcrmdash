@@ -169,8 +169,6 @@ const AuthLoadingScreen = () => (
   </div>
 );
 
-// Simple protected wrapper if/when you add auth
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 function App() {
   const [isDark, setIsDark] = useState(() => {

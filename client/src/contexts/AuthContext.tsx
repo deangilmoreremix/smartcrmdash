@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Set up auth state listener with error handling
         const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
+          async (event: any, session: any) => {
             try {
               console.log('Auth state changed:', event, session?.user?.id);
               setSession(session);
