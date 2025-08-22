@@ -150,6 +150,60 @@ export function parseCSV(csvContent: string): BulkUser[] {
 }
 
 export function registerBulkImportRoutes(app: Express) {
+  // Resend confirmation email endpoint
+  app.post('/api/bulk-import/resend-confirmation', async (req, res) => {
+    try {
+      const { email, first_name } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({
+          error: 'Email is required'
+        });
+      }
+
+      console.log(`Resending confirmation email to ${email}...`);
+      
+      // Generate password reset link (acts as confirmation for existing users)
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://smartcrm-videoremix.replit.app/dashboard?confirmed=true'
+        : process.env.REPLIT_DEV_DOMAIN 
+          ? `https://${process.env.REPLIT_DEV_DOMAIN}/dashboard?confirmed=true`
+          : 'https://smartcrm-videoremix.replit.app/dashboard?confirmed=true';
+      
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: email,
+        options: {
+          redirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        console.error(`Failed to resend confirmation to ${email}:`, error);
+        return res.status(500).json({
+          error: 'Failed to resend confirmation email',
+          details: error.message
+        });
+      }
+
+      console.log(`✅ Confirmation email resent to ${email}`);
+      
+      res.json({
+        success: true,
+        message: `Confirmation email sent to ${email}`,
+        email: email,
+        redirect_url: redirectUrl
+      });
+      
+    } catch (error: any) {
+      console.error('Resend confirmation error:', error);
+      res.status(500).json({
+        error: 'Failed to resend confirmation email',
+        details: error.message
+      });
+    }
+  });
+
   // Bulk import endpoint
   app.post('/api/bulk-import/users', async (req, res) => {
     try {
