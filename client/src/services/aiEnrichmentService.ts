@@ -93,8 +93,8 @@ class AIEnrichmentService {
     };
   }
 
-  async enrichContactByEmail(email: string): Promise<ContactEnrichmentData> {
-    console.log(`Enriching contact by email: ${email}`);
+  async enrichContactByEmail(email: string, includeSocialResearch: boolean = false): Promise<ContactEnrichmentData> {
+    console.log(`Enriching contact by email: ${email} ${includeSocialResearch ? 'with social research' : ''}`);
     
     // Check if any providers are configured before making the request
     if (!this.hasConfiguredProviders()) {
@@ -108,11 +108,15 @@ class AIEnrichmentService {
         { 
           authorization: 'anon-key',
           contactId: 'client-enrichment-request',
-          enrichmentRequest: { email },
+          enrichmentRequest: { 
+            email,
+            includeSocialResearch,
+            socialResearchDepth: 'comprehensive'
+          },
           type: 'email'
         },
         {
-          timeout: 30000,
+          timeout: includeSocialResearch ? 60000 : 30000,
           retries: 2,
           headers: {
             'Authorization': `Bearer ${this.isMockMode ? '' : import.meta.env.VITE_SUPABASE_ANON_KEY}`
@@ -237,12 +241,83 @@ class AIEnrichmentService {
     }
   }
 
+  async enrichContactWithSocialResearch(
+    contact: any,
+    options: {
+      platforms?: string[];
+      depth?: 'basic' | 'comprehensive' | 'deep';
+      includePersonalityAnalysis?: boolean;
+      includeEngagementMetrics?: boolean;
+    } = {}
+  ): Promise<ContactEnrichmentData & {
+    socialResearch?: any;
+    personalityInsights?: any;
+    engagementMetrics?: any;
+  }> {
+    console.log(`Starting comprehensive social research enrichment for: ${contact.name}`);
+    
+    if (!this.hasConfiguredProviders()) {
+      console.warn(`No AI providers configured for social research enrichment`);
+      return this.generateMockData(contact);
+    }
+
+    try {
+      const response = await httpClient.post<any>(
+        this.apiUrl,
+        {
+          contactId: contact.id,
+          enrichmentRequest: {
+            contact: {
+              name: contact.name,
+              email: contact.email,
+              company: contact.company,
+              title: contact.title,
+              existingSocialProfiles: contact.socialProfiles
+            },
+            socialResearchOptions: {
+              platforms: options.platforms || [
+                'LinkedIn', 'Twitter', 'Instagram', 'TikTok', 'YouTube', 'GitHub',
+                'Medium', 'Facebook', 'Discord', 'Reddit', 'Pinterest'
+              ],
+              depth: options.depth || 'comprehensive',
+              includePersonalityAnalysis: options.includePersonalityAnalysis !== false,
+              includeEngagementMetrics: options.includeEngagementMetrics !== false,
+              verifyProfiles: true
+            }
+          },
+          type: 'comprehensive-social'
+        },
+        {
+          timeout: 90000,
+          retries: 1,
+          headers: {
+            'Authorization': `Bearer ${this.isMockMode ? '' : import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          }
+        }
+      );
+      
+      console.log(`Comprehensive social research completed for ${contact.name}`);
+      return response.data;
+    } catch (error) {
+      console.error('Comprehensive social research failed', error);
+      return this.generateMockData(contact);
+    }
+  }
+
   getAvailableProviders(): AIProvider[] {
     return this.providers.filter(provider => provider.enabled);
   }
 
   isServiceAvailable(): boolean {
     return this.hasConfiguredProviders();
+  }
+
+  getSupportedSocialPlatforms(): string[] {
+    return [
+      'LinkedIn', 'Twitter', 'Instagram', 'TikTok', 'YouTube', 'GitHub',
+      'Medium', 'Facebook', 'Snapchat', 'Discord', 'Reddit', 'Pinterest',
+      'Behance', 'Dribbble', 'AngelList', 'Clubhouse', 'Telegram', 'WhatsApp'
+    ];
   }
 }
 

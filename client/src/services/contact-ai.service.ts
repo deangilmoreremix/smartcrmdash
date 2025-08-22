@@ -234,14 +234,22 @@ class ContactAIService {
 
   async enrichContact(
     contact: Contact,
-    enrichmentType: 'basic' | 'comprehensive' | 'social' = 'basic'
+    enrichmentType: 'basic' | 'comprehensive' | 'social' | 'social_intelligence' = 'basic'
   ): Promise<any> {
     const request: Omit<AIRequest, 'id'> = {
       type: 'contact_enrichment',
-      priority: enrichmentType === 'comprehensive' ? 'high' : 'medium',
+      priority: enrichmentType === 'comprehensive' || enrichmentType === 'social_intelligence' ? 'high' : 'medium',
       data: {
         contact,
-        enrichmentLevel: enrichmentType
+        enrichmentLevel: enrichmentType,
+        includeSocialResearch: enrichmentType === 'social' || enrichmentType === 'social_intelligence',
+        socialResearchOptions: enrichmentType === 'social_intelligence' ? {
+          platforms: ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub', 'Medium'],
+          depth: 'comprehensive',
+          includePersonalityAnalysis: true,
+          includeEngagementMetrics: true,
+          includeProfessionalUpdates: true
+        } : undefined
       },
       context: {
         contactId: contact.id
@@ -254,6 +262,67 @@ class ContactAIService {
     } catch (error) {
       logger.error('Contact enrichment failed', error as Error, { contactId: contact.id });
       throw error;
+    }
+  }
+
+  async getSocialIntelligenceScore(
+    contact: Contact,
+    socialProfiles?: any[]
+  ): Promise<{
+    socialScore: number;
+    platformBreakdown: Record<string, number>;
+    engagementMetrics: {
+      averageEngagement: number;
+      influenceScore: number;
+      contentQuality: number;
+      professionalPresence: number;
+    };
+    personalityInsights: {
+      communicationStyle: string;
+      professionalDemeanor: string;
+      decisionMakingStyle: string;
+      riskTolerance: string;
+    };
+    actionableInsights: string[];
+    recommendedApproach: string;
+  }> {
+    const request: Omit<AIRequest, 'id'> = {
+      type: 'social_intelligence_scoring',
+      priority: 'medium',
+      data: {
+        contact,
+        socialProfiles: socialProfiles || contact.socialProfiles || []
+      },
+      context: {
+        contactId: contact.id
+      }
+    };
+
+    try {
+      const response = await aiOrchestrator.executeImmediate(request);
+      return response.result;
+    } catch (error) {
+      logger.error('Social intelligence scoring failed', error as Error, { contactId: contact.id });
+      
+      // Return default intelligence data
+      return {
+        socialScore: 50,
+        platformBreakdown: {},
+        engagementMetrics: {
+          averageEngagement: 0,
+          influenceScore: 0,
+          contentQuality: 0,
+          professionalPresence: 0
+        },
+        personalityInsights: {
+          communicationStyle: 'Unknown',
+          professionalDemeanor: 'Unknown',
+          decisionMakingStyle: 'Unknown',
+          riskTolerance: 'Unknown'
+        },
+        actionableInsights: ['Gather more social media data for better insights'],
+        recommendedApproach: 'Standard professional outreach approach'
+      };
     }
   }
 
