@@ -1,15 +1,18 @@
 // Remote Contacts Page - Embedded Module with CRM Integration
 import React, { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Link, Wifi, WifiOff } from 'lucide-react';
+import { ExternalLink, Link, Wifi, WifiOff, Search, Users, Brain } from 'lucide-react';
 import { useContactStore } from '../hooks/useContactStore';
 import { RemoteContactsBridge, CRMContact } from '../services/remoteContactsBridge';
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';
+import { gpt5SocialResearchService } from '../services/gpt5SocialResearchService';
 
 const ContactsWithRemote: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<RemoteContactsBridge | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isResearchingAll, setIsResearchingAll] = useState(false);
+  const [showResearchPanel, setShowResearchPanel] = useState(false);
   const { contacts, addContact, updateContact, deleteContact, fetchContacts } = useContactStore();
 
   // Convert Contact to CRMContact format
@@ -95,6 +98,37 @@ const ContactsWithRemote: React.FC = () => {
       bridge.disconnect();
     };
   }, [addContact, updateContact, deleteContact, fetchContacts]);
+
+  // Social research functionality
+  const handleBulkSocialResearch = async () => {
+    setIsResearchingAll(true);
+    setShowResearchPanel(true);
+    try {
+      const contactsList = Object.values(contacts);
+      console.log('🔍 Starting bulk social research for', contactsList.length, 'contacts');
+      
+      for (const contact of contactsList.slice(0, 5)) { // Limit to first 5 for demo
+        try {
+          const contactForResearch = {
+            ...contact,
+            lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+          };
+          const research = await gpt5SocialResearchService.researchContactSocialMedia(
+            contactForResearch,
+            ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+            'basic'
+          );
+          console.log('✅ Social research completed for:', contact.name, research);
+        } catch (error) {
+          console.error('❌ Social research failed for:', contact.name, error);
+        }
+      }
+    } catch (error) {
+      console.error('Bulk social research failed:', error);
+    } finally {
+      setIsResearchingAll(false);
+    }
+  };
 
   // Handle iframe load and initialize CRM connection
   const handleIframeLoad = () => {
@@ -341,6 +375,14 @@ const ContactsWithRemote: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <button
+              onClick={handleBulkSocialResearch}
+              disabled={isResearchingAll}
+              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <Search className="h-4 w-4" />
+              <span>{isResearchingAll ? 'Researching...' : 'Social Research All'}</span>
+            </button>
             <div className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
               ✓ Remote Module
             </div>
