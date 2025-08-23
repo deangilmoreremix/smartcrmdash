@@ -385,7 +385,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 800
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -430,7 +457,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 600
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -467,7 +521,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 1000
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -502,7 +583,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 700
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -592,7 +700,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 800
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -626,7 +761,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 900
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -661,7 +823,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         max_tokens: 1200
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      let result;
+      try {
+        const content = response.choices[0].message.content || '{}';
+        result = JSON.parse(content);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw content:', response.choices[0].message.content);
+        // Extract JSON-like content using regex if direct parsing fails
+        const jsonMatch = response.choices[0].message.content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            result = JSON.parse(jsonMatch[0]);
+          } catch (fallbackError) {
+            result = {
+              error: 'Failed to parse AI response',
+              summary: 'Analysis completed but response parsing failed',
+              recommendations: ['Review data format', 'Check API response'],
+              parsed_content: response.choices[0].message.content
+            };
+          }
+        } else {
+          result = {
+            error: 'Invalid response format',
+            summary: 'Unable to extract structured data from AI response',
+            recommendations: ['Retry analysis', 'Check API configuration']
+          };
+        }
+      }
       res.json(result);
 
     } catch (error) {
@@ -674,6 +863,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
         risk_mitigation: ['Regular progress reviews', 'Contingency planning', 'Market monitoring'],
         success_metrics: ['Market share growth', 'Efficiency improvements', 'Customer satisfaction scores']
       });
+    }
+  });
+
+  // AI Assistants API Endpoints
+  app.post('/api/assistants/create', async (req, res) => {
+    try {
+      const { name, instructions, model, tools } = req.body;
+
+      const assistant = await openai.beta.assistants.create({
+        name,
+        instructions,
+        model: model || "gpt-4o-mini",
+        tools: tools || []
+      });
+
+      res.json({ success: true, assistant });
+    } catch (error) {
+      console.error('Assistant creation error:', error);
+      res.status(500).json({ error: 'Failed to create assistant' });
+    }
+  });
+
+  app.get('/api/assistants/:assistantId', async (req, res) => {
+    try {
+      const { assistantId } = req.params;
+      const assistant = await openai.beta.assistants.retrieve(assistantId);
+      res.json(assistant);
+    } catch (error) {
+      console.error('Assistant retrieval error:', error);
+      res.status(500).json({ error: 'Failed to retrieve assistant' });
+    }
+  });
+
+  app.delete('/api/assistants/:assistantId', async (req, res) => {
+    try {
+      const { assistantId } = req.params;
+      await openai.beta.assistants.delete(assistantId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Assistant deletion error:', error);
+      res.status(500).json({ error: 'Failed to delete assistant' });
+    }
+  });
+
+  app.post('/api/assistants/chat', async (req, res) => {
+    try {
+      const { message, assistantId, threadId } = req.body;
+
+      // Create thread if not provided
+      let currentThreadId = threadId;
+      if (!currentThreadId) {
+        const thread = await openai.beta.threads.create();
+        currentThreadId = thread.id;
+      }
+
+      // Add user message
+      await openai.beta.threads.messages.create(currentThreadId, {
+        role: 'user',
+        content: message
+      });
+
+      // Create and run
+      const run = await openai.beta.threads.runs.create(currentThreadId, {
+        assistant_id: assistantId
+      });
+
+      // Wait for completion with polling
+      let runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+      while (runStatus.status === 'in_progress' || runStatus.status === 'queued') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+      }
+
+      if (runStatus.status === 'completed') {
+        const messages = await openai.beta.threads.messages.list(currentThreadId, { limit: 1 });
+        const lastMessage = messages.data[0];
+        const content = Array.isArray(lastMessage.content) && lastMessage.content[0]?.type === 'text'
+          ? lastMessage.content[0].text.value 
+          : 'No response available';
+
+        res.json({
+          response: content,
+          threadId: currentThreadId,
+          runId: run.id
+        });
+      } else {
+        res.status(500).json({ error: `Run failed with status: ${runStatus.status}` });
+      }
+
+    } catch (error) {
+      console.error('Assistant chat error:', error);
+      res.status(500).json({ error: 'Failed to process chat message' });
     }
   });
 

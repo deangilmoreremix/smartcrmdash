@@ -5,14 +5,7 @@ export interface AssistantConfig {
   name: string;
   instructions: string;
   model?: string;
-  tools?: Array<{
-    type: 'code_interpreter' | 'retrieval' | 'function';
-    function?: {
-      name: string;
-      description: string;
-      parameters: Record<string, any>;
-    };
-  }>;
+  tools?: any[];
   file_ids?: string[];
 }
 
@@ -57,7 +50,6 @@ export const useOpenAIAssistants = () => {
       instructions: config.instructions,
       model: config.model || "gpt-4o",
       tools: config.tools || [],
-      file_ids: config.file_ids || [],
     });
     
     return assistant;
@@ -75,7 +67,7 @@ export const useOpenAIAssistants = () => {
 
   const deleteAssistant = async (assistantId: string) => {
     const client = getClient();
-    return await client.beta.assistants.del(assistantId);
+    return await client.beta.assistants.delete(assistantId);
   };
 
   const listAssistants = async (limit = 20) => {
@@ -101,7 +93,7 @@ export const useOpenAIAssistants = () => {
 
   const deleteThread = async (threadId: string) => {
     const client = getClient();
-    return await client.beta.threads.del(threadId);
+    return await client.beta.threads.delete(threadId);
   };
 
   // Message Management
@@ -192,8 +184,8 @@ export const useOpenAIAssistants = () => {
       const messages = await getMessages(currentThreadId, 1);
       const lastMessage = messages.data[0];
       const content = Array.isArray(lastMessage.content) 
-        ? lastMessage.content[0]?.text?.value || 'No response'
-        : lastMessage.content;
+        ? (lastMessage.content[0]?.type === 'text' ? lastMessage.content[0].text.value : 'No response')
+        : 'No response';
 
       return {
         response: content,
@@ -233,7 +225,7 @@ export const useOpenAIAssistants = () => {
     for await (const chunk of stream) {
       if (chunk.event === 'thread.message.delta') {
         const delta = chunk.data.delta;
-        if (delta.content && delta.content[0]?.text?.value) {
+        if (delta.content && delta.content[0]?.type === 'text' && delta.content[0].text?.value) {
           yield {
             content: delta.content[0].text.value,
             threadId: currentThreadId,
@@ -261,7 +253,7 @@ export const useOpenAIAssistants = () => {
 
   const deleteFile = async (fileId: string) => {
     const client = getClient();
-    return await client.files.del(fileId);
+    return await client.files.delete(fileId);
   };
 
   // Utility Functions
@@ -272,28 +264,28 @@ export const useOpenAIAssistants = () => {
         instructions: `You are a specialized AI assistant for contact management and relationship intelligence. 
         You help analyze contacts, predict engagement, generate personalized communication, and track relationship health.
         Always provide actionable insights based on contact data, interaction history, and communication patterns.`,
-        tools: [{ type: 'code_interpreter' as const }]
+        tools: [{ type: 'code_interpreter' }]
       },
       deal: {
         name: 'Deal Assistant Agent', 
         instructions: `You are a specialized AI assistant for deal management and sales intelligence.
         You help analyze deal progression, identify risks, suggest next steps, and optimize closing strategies.
         Always provide data-driven insights and specific recommendations for deal advancement.`,
-        tools: [{ type: 'code_interpreter' as const }]
+        tools: [{ type: 'code_interpreter' }]
       },
       task: {
         name: 'Task Automation Agent',
         instructions: `You are a specialized AI assistant for task management and workflow automation.
         You help prioritize tasks, automate routine activities, and optimize productivity workflows.
         Always provide clear action items and automation suggestions.`,
-        tools: [{ type: 'code_interpreter' as const }]
+        tools: [{ type: 'code_interpreter' }]
       },
       pipeline: {
         name: 'Pipeline Management Bot',
         instructions: `You are a specialized AI assistant for sales pipeline management and forecasting.
         You help analyze pipeline health, predict outcomes, and optimize sales processes.
         Always provide strategic insights and actionable pipeline improvements.`,
-        tools: [{ type: 'code_interpreter' as const }]
+        tools: [{ type: 'code_interpreter' }]
       }
     };
 
