@@ -1,16 +1,12 @@
 // Remote Pipeline Page - Exact same pattern as ContactsWithRemote.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Wifi, WifiOff, Search, Target } from 'lucide-react';
+import { ExternalLink, Wifi, WifiOff } from 'lucide-react';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../store/contactStore';
-import { gpt5SocialResearchService } from '../services/gpt5SocialResearchService';
 
 const PipelineWithRemote: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isResearchingDeals, setIsResearchingDeals] = useState(false);
   const { deals, addDeal, updateDeal, deleteDeal, fetchDeals } = useDealStore();
-  const { getContactById } = useContactStore();
 
   // Initialize pipeline data when component mounts
   useEffect(() => {
@@ -24,39 +20,6 @@ const PipelineWithRemote: React.FC = () => {
     setTimeout(() => {
       setIsConnected(true);
     }, 1000);
-  };
-
-  // Social research for deals
-  const handleDealsSocialResearch = async () => {
-    setIsResearchingDeals(true);
-    try {
-      const dealsList = Object.values(deals);
-      console.log('🔍 Starting social research for', dealsList.length, 'deals');
-      
-      for (const deal of dealsList.slice(0, 3)) { // Limit to first 3 for demo
-        try {
-          const contact = getContactById(deal.contactId);
-          if (contact) {
-            const contactForResearch = {
-              ...contact,
-              lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
-            };
-            const research = await gpt5SocialResearchService.researchContactSocialMedia(
-              contactForResearch,
-              ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
-              'basic'
-            );
-            console.log('✅ Deal social research completed for:', deal.name, research);
-          }
-        } catch (error) {
-          console.error('❌ Deal social research failed for:', deal.name, error);
-        }
-      }
-    } catch (error) {
-      console.error('Deal social research failed:', error);
-    } finally {
-      setIsResearchingDeals(false);
-    }
   };
 
   return (
@@ -75,14 +38,6 @@ const PipelineWithRemote: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <button
-              onClick={handleDealsSocialResearch}
-              disabled={isResearchingDeals}
-              className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-            >
-              <Target className="h-4 w-4" />
-              <span>{isResearchingDeals ? 'Researching...' : 'Research Deal Contacts'}</span>
-            </button>
             <div className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
               ✓ Remote Module
             </div>
@@ -91,7 +46,7 @@ const PipelineWithRemote: React.FC = () => {
                 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
                 : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200'
             }`}>
-              {isConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-3 w-3" />}
+              {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
               {isConnected ? 'CRM Connected' : 'Connecting...'}
             </div>
           </div>
