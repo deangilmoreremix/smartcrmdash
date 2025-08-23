@@ -137,7 +137,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
       const insights: AnalyticsInsight[] = [
         {
           title: 'Pipeline Health Analysis',
-          insight: kpiResult?.summary || 'Your pipeline shows strong momentum with balanced deal stages.',
+          insight: typeof kpiResult?.summary === 'string' ? kpiResult.summary : 'Your pipeline shows strong momentum with balanced deal stages.',
           confidence: 0.92,
           priority: 'high',
           actionable: true,
