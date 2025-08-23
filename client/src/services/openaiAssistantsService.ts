@@ -47,6 +47,55 @@ export class OpenAIAssistantsService {
     return await response.json();
   }
 
+  async listAssistants(limit = 20) {
+    // For now, return a simulated response since we're using server-side API
+    // In production, this would call an actual backend endpoint
+    return {
+      data: [
+        {
+          id: 'contact-assistant',
+          name: 'Contact Intelligence Agent',
+          created_at: Date.now() / 1000,
+          instructions: 'Contact management specialist'
+        },
+        {
+          id: 'deal-assistant', 
+          name: 'Deal Assistant Agent',
+          created_at: Date.now() / 1000,
+          instructions: 'Deal progression specialist'
+        },
+        {
+          id: 'task-assistant',
+          name: 'Task Automation Agent', 
+          created_at: Date.now() / 1000,
+          instructions: 'Task workflow specialist'
+        },
+        {
+          id: 'pipeline-assistant',
+          name: 'Pipeline Management Bot',
+          created_at: Date.now() / 1000,
+          instructions: 'Pipeline forecasting specialist'
+        }
+      ]
+    };
+  }
+
+  async getMessages(threadId: string, limit = 20) {
+    // Simulated response for now
+    return {
+      data: []
+    };
+  }
+
+  async streamChatWithAssistant(
+    message: string,
+    assistantId: string, 
+    threadId?: string,
+    metadata?: Record<string, string>
+  ) {
+    return this.chatWithAssistant(message, assistantId, threadId, metadata);
+  }
+
   // Enhanced Chat with Full Assistants API
   async chatWithAssistant(
     message: string, 
