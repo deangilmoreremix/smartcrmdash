@@ -103,7 +103,17 @@ const AiEnhancedDealCard: React.FC<AiEnhancedDealCardProps> = ({ deal }) => {
 
           {insights && (
             <div className={`p-3 rounded-md ${isDark ? 'bg-gray-700' : 'bg-gray-100'} mb-4`}>
-              <h4 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Insights</h4>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Insights</h4>
+                <button
+                  onClick={loadSocialProfilesCount}
+                  disabled={isLoadingSocial}
+                  className={`px-2 py-1 rounded text-xs ${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors disabled:opacity-50`}
+                >
+                  <Search className="h-3 w-3 inline mr-1" />
+                  {isLoadingSocial ? 'Researching...' : 'Social Research'}
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <p className={`font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>SCORE</p>

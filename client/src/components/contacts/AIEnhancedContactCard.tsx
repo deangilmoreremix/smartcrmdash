@@ -25,8 +25,10 @@ import {
   Target,
   Zap,
   Camera,
-  MessageSquare
+  MessageSquare,
+  Search
 } from 'lucide-react';
+import { gpt5SocialResearchService } from '../../services/gpt5SocialResearchService';
 
 interface AIEnhancedContactCardProps {
   contact: Contact;
@@ -79,6 +81,7 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
   const [showAIInsights, setShowAIInsights] = useState(false);
   const [localAnalyzing, setLocalAnalyzing] = useState(false);
   const [isMultimodalEnriching, setIsMultimodalEnriching] = useState(false);
+  const [isLoadingSocial, setIsLoadingSocial] = useState(false);
   // State for AI Score Explanation Tooltip
   const [showScoreExplanation, setShowScoreExplanation] = useState(false);
   const [scoreExplanation, setScoreExplanation] = useState<string | null>(null);
@@ -184,6 +187,27 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
     }
   };
 
+  const handleSocialResearch = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLoadingSocial(true);
+    try {
+      const contactForResearch = {
+        ...contact,
+        lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+      };
+      const research = await gpt5SocialResearchService.researchContactSocialMedia(
+        contactForResearch,
+        ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+        'comprehensive'
+      );
+      console.log('Social research completed:', research);
+    } catch (error) {
+      console.error('Social research failed:', error);
+    } finally {
+      setIsLoadingSocial(false);
+    }
+  };
+
   const analyzing = isAnalyzing || localAnalyzing;
 
   // Check if multimodal data is present
@@ -231,6 +255,20 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
             )}
           </button>
         )}
+        
+        {/* Social Research Button */}
+        <button
+          onClick={handleSocialResearch}
+          disabled={isLoadingSocial}
+          className="p-2 rounded-lg transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
+          title="Social Media Research"
+        >
+          {isLoadingSocial ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Search className="w-4 h-4" />
+          )}
+        </button>
         
         {/* Multimodal Enrichment Button */}
         {contact.avatarSrc && (

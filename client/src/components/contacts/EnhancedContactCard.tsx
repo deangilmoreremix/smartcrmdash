@@ -20,8 +20,10 @@ import {
   Target,
   Clock,
   Tag,
-  ExternalLink
+  ExternalLink,
+  Search
 } from 'lucide-react';
+import { gpt5SocialResearchService } from '../../services/gpt5SocialResearchService';
 import { Contact } from '../../types/contact';
 import { useContactStore } from '../../store/contactStore'; // Added useContactStore import
 import { formatDistanceToNow } from 'date-fns';
@@ -48,6 +50,7 @@ const EnhancedContactCard: React.FC<EnhancedContactCardProps> = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
+  const [isLoadingSocial, setIsLoadingSocial] = useState(false);
   
   const { analyzeContact, enrichContact, updateContact } = useContactStore(); // Destructure updateContact
 
@@ -105,6 +108,26 @@ const EnhancedContactCard: React.FC<EnhancedContactCardProps> = ({
 
   const handleToggleFavorite = () => {
     updateContact(contact.id, { isFavorite: !contact.isFavorite });
+  };
+
+  const handleSocialResearch = async () => {
+    setIsLoadingSocial(true);
+    try {
+      const contactForResearch = {
+        ...contact,
+        lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+      };
+      const research = await gpt5SocialResearchService.researchContactSocialMedia(
+        contactForResearch,
+        ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+        'comprehensive'
+      );
+      console.log('Social research completed:', research);
+    } catch (error) {
+      console.error('Social research failed:', error);
+    } finally {
+      setIsLoadingSocial(false);
+    }
   };
 
   const handleVideoCall = () => {
@@ -203,6 +226,17 @@ const EnhancedContactCard: React.FC<EnhancedContactCardProps> = ({
                   >
                     <TrendingUp size={14} className="mr-2" />
                     {isEnriching ? 'Enriching...' : 'Enrich Data'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleSocialResearch();
+                      setShowDropdown(false);
+                    }}
+                    disabled={isLoadingSocial}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <Search size={14} className="mr-2" />
+                    {isLoadingSocial ? 'Researching...' : 'Social Research'}
                   </button>
                   {onDelete && (
                     <>
