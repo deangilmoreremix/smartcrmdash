@@ -76,7 +76,7 @@ const AssistantsDashboard: React.FC = () => {
   const loadConversationHistory = async (assistant: PersistentAssistant, entityId: string) => {
     try {
       const history = await persistentAssistantService.getAssistantMemory(
-        assistant.type,
+        assistant.type as 'contact' | 'deal' | 'task' | 'pipeline',
         entityId,
         50
       );

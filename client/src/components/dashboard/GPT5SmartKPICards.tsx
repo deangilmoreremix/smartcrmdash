@@ -77,7 +77,7 @@ const GPT5SmartKPICards: React.FC = () => {
           changeType: 'increase',
           icon: DollarSign,
           description: 'Total pipeline value (AI analyzed)',
-          aiInsight: (kpiAnalysis as any)?.summary?.includes('pipeline') ? 
+          aiInsight: typeof (kpiAnalysis as any)?.summary === 'string' && (kpiAnalysis as any)?.summary?.includes('pipeline') ? 
             (kpiAnalysis as any).summary : 'Strong pipeline momentum detected',
           confidence: 0.92,
           prediction: `Projected: $${(totalPipelineValue * 1.25).toLocaleString()}`
