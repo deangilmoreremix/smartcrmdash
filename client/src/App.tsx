@@ -105,7 +105,6 @@ const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
 // Import AssistantsDashboard component
 const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
-const SocialResearch = lazy(() => import('./pages/SocialResearch'));
 
 // Added lazy import for IframeOverlapChecker
 const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
@@ -282,7 +281,6 @@ const AppContent = () => {
                               }
                             />
                             <Route path="/assistants" element={<AssistantsDashboard />} />
-                            <Route path="/social-research" element={<SocialResearch />} />
                             <Route
                               path="/tasks"
                               element={

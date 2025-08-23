@@ -120,8 +120,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Forms & Surveys', tool: 'forms', icon: FileCheck },
     { name: 'Business Analyzer', tool: 'business-analysis', icon: BarChart3 },
     { name: 'Content Library', tool: 'content-library', icon: BookOpen },
-    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
-    { name: 'Social Research', tool: 'social-research', icon: Search }
+    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic }
   ];
 
   const contentTools = [
