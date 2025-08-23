@@ -1,5 +1,5 @@
 
-import { useOpenAIAssistants, AssistantConfig } from './openaiAssistantsService';
+import { openaiAssistantsService, AssistantConfig } from './openaiAssistantsService';
 import { assistantThreadManager, AssistantThread } from './assistantThreadManager';
 
 export interface PersistentAssistant {
@@ -18,7 +18,7 @@ export interface PersistentAssistant {
 }
 
 class PersistentAssistantService {
-  private assistants = useOpenAIAssistants();
+  private assistants = openaiAssistantsService;
   private activeAssistants: Map<string, PersistentAssistant> = new Map();
   private initialized = false;
 
