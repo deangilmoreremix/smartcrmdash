@@ -50,6 +50,9 @@ import FeatureDemo from '../components/landing/FeatureDemo';
 import InteractiveFeaturesGrid from '../components/landing/InteractiveFeaturesGrid';
 import ParticleBackground from '../components/landing/ParticleBackground';
 
+// Import the embedded dashboard demo
+import EmbeddedDashboardDemo from '../components/landing/EmbeddedDashboardDemo';
+
 const LandingPage = () => {
   const navigate = useNavigate();
 
@@ -144,19 +147,19 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Product Demo Section */}
+      {/* Interactive Dashboard Demo Section */}
       <section className="py-16 bg-white overflow-hidden relative z-10">
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">See Smart CRM in Action</h2>
+              <h2 className="text-3xl font-bold mb-4">Experience Your CRM Dashboard</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover how our AI-powered CRM transforms your sales process
+                Try our fully interactive dashboard demo with real-time data and AI-powered insights
               </p>
             </div>
             
             <div className="max-w-6xl mx-auto">
-              <ProductDemo />
+              <EmbeddedDashboardDemo />
             </div>
           </ScrollAnimationWrapper>
         </div>
@@ -177,6 +180,24 @@ const LandingPage = () => {
             delay={1}
             size="lg"
           />
+        </div>
+      </section>
+      
+      {/* Additional Product Demo Section */}
+      <section className="py-16 bg-gray-50 overflow-hidden relative z-10">
+        <div className="container mx-auto px-4">
+          <ScrollAnimationWrapper animation="fade-up">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">More Features to Explore</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Discover additional capabilities of our AI-powered CRM platform
+              </p>
+            </div>
+            
+            <div className="max-w-6xl mx-auto">
+              <ProductDemo />
+            </div>
+          </ScrollAnimationWrapper>
         </div>
       </section>
       
