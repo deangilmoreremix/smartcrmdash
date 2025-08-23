@@ -20,7 +20,8 @@ import {
   RefreshCw,
   MessageCircle,
   Star,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { persistentAssistantService, PersistentAssistant } from '../services/persistentAssistantService';
 import { assistantThreadManager } from '../services/assistantThreadManager';
