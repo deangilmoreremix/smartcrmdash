@@ -144,13 +144,9 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
             <button
               onClick={loadSocialResearch}
               disabled={isLoadingSocial}
-              className={`px-3 py-2 rounded-lg text-sm ${
-                isDark 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              } transition-colors disabled:opacity-50`}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors disabled:opacity-50"
             >
-              <Search className="h-3 w-3 mr-1 inline" />
+              <Search size={16} className="mr-1" />
               {isLoadingSocial ? 'Researching...' : 'Social Intel'}
             </button>
             {isEditing ? (

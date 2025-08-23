@@ -44,7 +44,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
   const { deals, updateDeal, deleteDeal } = useDealStore();
   const gemini = useGemini();
   const { contacts } = useContactStore();
-  const deal = deals[dealId];
+  const deal = deals[dealId] || null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -202,8 +202,13 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
 
     setIsLoadingSocial(true);
     try {
+      // Convert contact to match expected type
+      const contactForResearch = {
+        ...contact,
+        lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+      };
       const research = await gpt5SocialResearchService.researchContactSocialMedia(
-        contact,
+        contactForResearch,
         ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
         'comprehensive'
       );
@@ -233,13 +238,9 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                   <button 
                     onClick={loadSocialResearch}
                     disabled={isLoadingSocial}
-                    className={`px-3 py-1.5 rounded-md ${
-                      isDark 
-                        ? 'bg-green-600 hover:bg-green-700 text-white' 
-                        : 'bg-green-600 hover:bg-green-700 text-white'
-                    } transition-colors disabled:opacity-50 text-xs`}
+                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors disabled:opacity-50 text-sm"
                   >
-                    <Search className="h-3 w-3 mr-1 inline" />
+                    <Search size={14} className="mr-1" />
                     {isLoadingSocial ? 'Researching...' : 'Social Research'}
                   </button>
 
