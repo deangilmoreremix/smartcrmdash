@@ -346,7 +346,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
                       {insight.insight}
                     </p>
                     
-                    {insight.recommendations && (
+                    {insight.recommendations && Array.isArray(insight.recommendations) && insight.recommendations.length > 0 && (
                       <div className="space-y-2">
                         <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                           Recommendations:
