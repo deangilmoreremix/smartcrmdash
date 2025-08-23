@@ -58,24 +58,48 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index }) => {
   const handleCompleteTask = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Notify the persistent task automation agent
+    // Auto-trigger AI insights and next actions without user intervention
     if (task.assistantThreadId) {
       try {
         const { aiOrchestrator } = await import('../services/ai-orchestrator.service');
-        await aiOrchestrator.submitRequest({
-          type: 'task_completion_analysis',
-          priority: 'medium',
-          data: {
-            taskId: task.id,
-            assistantThreadId: task.assistantThreadId,
-            completionStatus: !task.completed,
-            context: {
-              contactId: task.contactId,
-              dealId: task.dealId,
-              completedAt: new Date()
+        
+        // Submit multiple AI requests in background
+        await Promise.all([
+          // Task completion analysis
+          aiOrchestrator.submitRequest({
+            type: 'task_completion_analysis',
+            priority: 'medium',
+            data: {
+              taskId: task.id,
+              assistantThreadId: task.assistantThreadId,
+              completionStatus: !task.completed,
+              context: {
+                contactId: task.contactId,
+                dealId: task.dealId,
+                completedAt: new Date()
+              }
             }
-          }
-        });
+          }),
+          
+          // Auto-generate follow-up recommendations
+          aiOrchestrator.submitRequest({
+            type: 'automation_suggestions',
+            priority: 'low',
+            data: {
+              entityType: 'task',
+              entityId: task.id,
+              action: 'completion',
+              context: { contactId: task.contactId, dealId: task.dealId }
+            }
+          }),
+          
+          // Update contact engagement score
+          task.contactId && aiOrchestrator.submitRequest({
+            type: 'contact_scoring',
+            priority: 'low',
+            data: { contactId: task.contactId, activityType: 'task_completion' }
+          })
+        ]);
       } catch (error) {
         console.warn('Assistant thread update failed:', error);
       }
