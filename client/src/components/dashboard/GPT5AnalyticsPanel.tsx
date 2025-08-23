@@ -48,15 +48,15 @@ const GPT5AnalyticsPanel: React.FC = () => {
     return {
       // Deal Metrics
       totalDeals: dealsArray.length,
-      activeDeals: dealsArray.filter(d => d.stage !== 'Won' && d.stage !== 'Lost').length,
-      wonDeals: dealsArray.filter(d => d.stage === 'Won').length,
+      activeDeals: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && !['Won', 'Lost', 'won', 'lost', 'closed-won', 'closed-lost'].includes(d.stage)).length,
+      wonDeals: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage)).length,
       totalValue: dealsArray.reduce((sum, deal) => sum + Number(deal.value || 0), 0),
       avgDealSize: dealsArray.length > 0 ? dealsArray.reduce((sum, deal) => sum + Number(deal.value || 0), 0) / dealsArray.length : 0,
-      winRate: dealsArray.length > 0 ? (dealsArray.filter(d => d.stage === 'Won').length / dealsArray.length) * 100 : 0,
+      winRate: dealsArray.length > 0 ? (dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage)).length / dealsArray.length) * 100 : 0,
 
       // Contact Metrics
       totalContacts: contactsArray.length,
-      activeContacts: contactsArray.filter(c => c.status === 'hot').length,
+      activeContacts: contactsArray.filter(c => c.status && typeof c.status === 'string' && ['hot', 'warm', 'active'].includes(c.status)).length,
       topIndustries: contactsArray.reduce((acc: any, contact) => {
         const industry = contact.industry || 'Unknown';
         acc[industry] = (acc[industry] || 0) + 1;
@@ -73,7 +73,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
 
       // Time-based Analytics
       recentDeals: dealsArray.filter(d => d.createdAt && new Date(d.createdAt) > thirtyDaysAgo),
-      salesVelocity: dealsArray.filter(d => d.stage === 'Won' && d.actualCloseDate && new Date(d.actualCloseDate) > thirtyDaysAgo).length
+      salesVelocity: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage) && d.actualCloseDate && new Date(d.actualCloseDate) > thirtyDaysAgo).length
     };
   };
 
