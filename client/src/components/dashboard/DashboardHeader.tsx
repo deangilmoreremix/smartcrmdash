@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { BarChart3, TrendingUp, Calendar, Search, Bell, User, Sparkles, Brain, Zap } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
@@ -15,6 +16,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   subtitle = 'Welcome back! Here\'s an overview of your sales performance'
 }) => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
   
@@ -184,9 +186,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </div>
           </div>
           
-          <div className={`px-4 py-2 rounded-lg ${
-            isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-white hover:bg-gray-50'
-          } flex items-center space-x-2 cursor-pointer transition-colors`}>
+          <div 
+            onClick={() => navigate('/analytics-dashboard')}
+            className={`px-4 py-2 rounded-lg ${
+              isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-white hover:bg-gray-50'
+            } flex items-center space-x-2 cursor-pointer transition-colors`}
+          >
             <Search size={16} className={isDark ? 'text-gray-400' : 'text-gray-600'} />
             <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Search analytics...
