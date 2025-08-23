@@ -86,6 +86,33 @@ const SalesLandingPage: React.FC = () => {
               Watch Demo
             </button>
           </div>
+          
+          {/* Interactive Demo Buttons */}
+          <div className="mt-8 text-center">
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Or try our interactive demos:
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => navigate('/demo/dashboard')}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all"
+              >
+                📊 Dashboard Demo
+              </button>
+              <button
+                onClick={() => navigate('/demo/contacts')}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all"
+              >
+                👥 Contacts Demo
+              </button>
+              <button
+                onClick={() => navigate('/demo/pipeline')}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all"
+              >
+                🎯 Pipeline Demo
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

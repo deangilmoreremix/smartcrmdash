@@ -103,6 +103,11 @@ const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
 const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
 const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
+// Demo Pages for Sales
+const DashboardDemo = lazy(() => import('./pages/demos/DashboardDemo'));
+const ContactsDemo = lazy(() => import('./pages/demos/ContactsDemo'));
+const PipelineDemo = lazy(() => import('./pages/demos/PipelineDemo'));
+
 // Import AssistantsDashboard component
 const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
 
@@ -223,6 +228,11 @@ const AppContent = () => {
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
                         <Route path="/demo" element={<LandingPage />} />
+                        
+                        {/* Interactive Demos for Sales */}
+                        <Route path="/demo/dashboard" element={<DashboardDemo />} />
+                        <Route path="/demo/contacts" element={<ContactsDemo />} />
+                        <Route path="/demo/pipeline" element={<PipelineDemo />} />
                         <Route path="/dev" element={<DevBypassPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* Added ForgotPasswordPage route */}
                         <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Added ResetPasswordPage route */}
