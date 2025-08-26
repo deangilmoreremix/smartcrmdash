@@ -109,7 +109,7 @@ const AdminDashboard: React.FC = () => {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Admin Tools</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            onClick={() => window.location.href = '/admin/bulk-import'}
+            onClick={() => window.location.href = '/bulk-import'}
             className="flex items-center space-x-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
           >
             <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
