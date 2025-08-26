@@ -1074,6 +1074,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin management endpoints
+  app.post('/api/admin/resend-confirmations', async (req, res) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = process.env.SUPABASE_URL!;
+      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+      
+      const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      });
+      
+      const adminEmails = [
+        'dean@videoremix.io',
+        'samuel@videoremix.io',
+        'victor@videoremix.io'
+      ];
+      
+      const results = [];
+      
+      for (const email of adminEmails) {
+        try {
+          // Check if user exists
+          const { data: users } = await supabase.auth.admin.listUsers();
+          const user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          
+          if (user) {
+            if (!user.email_confirmed_at) {
+              // Resend confirmation
+              const { error } = await supabase.auth.admin.generateLink({
+                type: 'signup',
+                email: email,
+                options: {
+                  data: {
+                    app_context: 'smartcrm',
+                    role: 'admin',
+                    first_name: email.split('@')[0],
+                    last_name: 'Admin'
+                  }
+                }
+              });
+              
+              results.push({
+                email,
+                status: error ? 'failed' : 'confirmation_sent',
+                message: error ? error.message : 'Confirmation email sent',
+                user_id: user.id,
+                confirmed: false
+              });
+            } else {
+              results.push({
+                email,
+                status: 'already_confirmed',
+                message: 'Account already confirmed',
+                user_id: user.id,
+                confirmed: true
+              });
+            }
+          } else {
+            // Create new admin account
+            const { data: newUser, error } = await supabase.auth.admin.createUser({
+              email: email,
+              email_confirm: false,
+              user_metadata: {
+                app_context: 'smartcrm',
+                role: 'admin',
+                first_name: email.split('@')[0],
+                last_name: 'Admin'
+              }
+            });
+            
+            results.push({
+              email,
+              status: error ? 'creation_failed' : 'created_and_confirmation_sent',
+              message: error ? error.message : 'Admin account created, confirmation email sent',
+              user_id: newUser?.user?.id || null
+            });
+          }
+        } catch (error: any) {
+          results.push({
+            email,
+            status: 'error',
+            message: error.message
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: 'Admin confirmation process completed',
+        results,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error: any) {
+      console.error('Admin confirmation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to process admin confirmations',
+        message: error.message
+      });
+    }
+  });
+
   // Webhook endpoints
   app.post('/api/webhooks/stripe', handleStripeWebhook);
   app.post('/api/webhooks/zaxaa', handleZaxaaWebhook);
