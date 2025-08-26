@@ -12,6 +12,7 @@ import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { RoleProvider } from './components/RoleBasedAccess';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
@@ -215,13 +216,14 @@ const AppContent = () => {
     <>
     <ThemeProvider>
       <TenantProvider>
-        <AIToolsProvider>
-          <ModalsProvider>
-            <EnhancedHelpProvider>
-              <VideoCallProvider>
-                <NavigationProvider>
-                  <DashboardLayoutProvider>
-                    <AIProvider>
+        <RoleProvider>
+          <AIToolsProvider>
+            <ModalsProvider>
+              <EnhancedHelpProvider>
+                <VideoCallProvider>
+                  <NavigationProvider>
+                    <DashboardLayoutProvider>
+                      <AIProvider>
                       <Routes>
                         {/* Landing page routes (no navbar) */}
                         <Route path="/" element={<LandingPage />} />
@@ -876,14 +878,15 @@ const AppContent = () => {
                       </Routes>
                       <RemoteAppRefreshManager />
                     </AIProvider>
-                  </DashboardLayoutProvider>
+                    </DashboardLayoutProvider>
                   </NavigationProvider>
                 </VideoCallProvider>
               </EnhancedHelpProvider>
             </ModalsProvider>
           </AIToolsProvider>
-        </TenantProvider>
-      </ThemeProvider>
+        </RoleProvider>
+      </TenantProvider>
+    </ThemeProvider>
       <Toaster />
     </>
   );
