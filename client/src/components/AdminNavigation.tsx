@@ -32,7 +32,7 @@ const AdminNavigation: React.FC = () => {
   const adminMenuItems = [
     {
       title: 'Bulk Import Users',
-      href: '/admin/bulk-import',
+      href: '/bulk-import',
       icon: Users,
       description: 'Import multiple users via CSV'
     },
