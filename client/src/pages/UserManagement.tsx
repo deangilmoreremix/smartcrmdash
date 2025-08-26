@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Trash2, Shield, Mail, Calendar, Search, Filter, UserCheck, UserX } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuthStore } from '../store/authStore';
+import { useRole } from '../components/RoleBasedAccess';
 
 interface User {
   id: string;
@@ -30,6 +31,7 @@ interface InviteUserData {
 export default function UserManagement() {
   const { isDark } = useTheme();
   const { user: currentUser } = useAuthStore();
+  const { canAccess, isSuperAdmin } = useRole();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,20 +47,9 @@ export default function UserManagement() {
     permissions: [],
   });
 
-  // Admin emails list - must match server admin list
-  const adminEmails = [
-    'dean@videoremix.io',
-    'samuel@videoremix.io',  
-    'victor@videoremix.io'
-  ];
-
-  // Check if user is admin (including dev bypass)
-  const isAdmin = currentUser?.email && (
-    adminEmails.includes(currentUser.email.toLowerCase()) || 
-    currentUser.role === 'admin' || 
-    currentUser.role === 'super_admin' ||
-    currentUser.email === 'dev@smartcrm.local' // Dev bypass user
-  );
+  // Check if user has admin access (using role-based access system)
+  const isAdmin = canAccess('user_management') || isSuperAdmin() || 
+                  (currentUser?.email === 'dev@smartcrm.local');
 
   useEffect(() => {
     fetchUsers();

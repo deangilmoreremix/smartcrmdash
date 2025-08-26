@@ -99,6 +99,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // User role check endpoint for development
+  app.get('/api/auth/user-role', (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({
+        error: 'Dev endpoint only available in development mode'
+      });
+    }
+
+    // Return dev user with full permissions
+    const devUser = {
+      id: 'dev-user-12345',
+      email: 'dev@smartcrm.local',
+      username: 'developer',
+      firstName: 'Development',
+      lastName: 'User',
+      role: 'super_admin',
+      permissions: ['all'],
+      tenantId: 'development',
+      status: 'active',
+      lastActive: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+
+    res.json({
+      user: devUser,
+      hasAccess: true,
+      permissions: ['all']
+    });
+  });
+
   // Quick dev access route - Direct redirect to dashboard in dev mode
   app.get('/dev', (req, res) => {
     if (process.env.NODE_ENV !== 'development') {
@@ -1014,7 +1044,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin middleware for protecting admin routes
   const requireAdmin = (req: any, res: any, next: any) => {
-    const adminEmails = ['dean@videoremix.io', 'samuel@videoremix.io', 'victor@videoremix.io'];
+    const adminEmails = [
+      'dean@videoremix.io', 
+      'samuel@videoremix.io', 
+      'victor@videoremix.io',
+      'dev@smartcrm.local' // Dev bypass user
+    ];
 
     // In development, allow bypass
     if (process.env.NODE_ENV === 'development') {
