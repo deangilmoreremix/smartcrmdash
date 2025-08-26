@@ -39,6 +39,20 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Admin emails list - must match server admin list
+  const adminEmails = [
+    'dean@videoremix.io',
+    'samuel@videoremix.io',  
+    'victor@videoremix.io'
+  ];
+
+  // Check if user is admin
+  const isAdmin = user?.email && (
+    adminEmails.includes(user.email.toLowerCase()) || 
+    user.role === 'admin' || 
+    user.role === 'super_admin'
+  );
+
   // Data sources
   const { deals } = useDealStore();
   const { contacts } = useContactStore();
