@@ -965,10 +965,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Wait for completion with polling
-      let runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+      let runStatus = await openai.beta.threads.runs.retrieve({
+        thread_id: currentThreadId,
+        run_id: run.id
+      });
       while (runStatus.status === 'in_progress' || runStatus.status === 'queued') {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
+        runStatus = await openai.beta.threads.runs.retrieve({
+          thread_id: currentThreadId,
+          run_id: run.id
+        });
       }
 
       if (runStatus.status === 'completed') {
@@ -1181,6 +1187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const { error } = await supabase.auth.admin.generateLink({
                 type: 'signup',
                 email: email,
+                password: 'temporary_password_123!',
                 options: {
                   data: {
                     app_context: 'smartcrm',
