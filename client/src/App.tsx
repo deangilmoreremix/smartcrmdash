@@ -861,7 +861,7 @@ const AppContent = () => {
                             {/* Admin Routes - Protected */}
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/bulk-import" element={<BulkImportPage />} />
-                            <Route path="/admin/users" element={<PlaceholderPage title="User Management" description="Manage user accounts and permissions" />} />
+                            <Route path="/admin/users" element={<UserManagement />} />
                             <Route path="/admin/analytics" element={<PlaceholderPage title="System Analytics" description="View system usage and metrics" />} />
                             <Route path="/admin/settings" element={<PlaceholderPage title="Admin Settings" description="Configure system settings" />} />
 

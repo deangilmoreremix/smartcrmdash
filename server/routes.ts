@@ -8,6 +8,12 @@ import { handleZaxaaWebhook } from './zaxaa-webhook';
 import { getUserEntitlement, isUserActive, handleSuccessfulPurchase } from './entitlements-utils';
 import { db } from './db';
 import { entitlements } from '@shared/schema';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Google AI integration
 interface GoogleAIResponse {
@@ -23,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const userOpenAIKey = process.env.OPENAI_API_KEY;
   const workingOpenAIKey = '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';
   const googleAIKey = process.env.GOOGLE_AI_API_KEY;
-  
+
   // Use working key as fallback for production reliability
   const openaiApiKey = userOpenAIKey || workingOpenAIKey;
   const openai = new OpenAI({ apiKey: openaiApiKey });
@@ -98,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (process.env.NODE_ENV !== 'development') {
       return res.status(404).send('Not found');
     }
-    
+
     // Redirect to app with dev bypass token in URL
     res.redirect('/?dev=true');
   });
@@ -116,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY;
-      
+
       if (!supabaseUrl || !supabaseKey) {
         return res.json({
           status: 'error',
@@ -158,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profiles', async (req, res) => {
     try {
       const { id, username, firstName, lastName } = req.body;
-      
+
       if (!id) {
         return res.status(400).json({ error: 'User ID is required' });
       }
@@ -183,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const profile = await storage.getProfile(id);
-      
+
       if (!profile) {
         return res.status(404).json({ error: 'Profile not found' });
       }
@@ -209,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         input: "Test connection",
         reasoning: { effort: "minimal" }
       });
-      
+
       results.openai = {
         available: true,
         model: 'gpt-5',
@@ -222,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           messages: [{ role: "user", content: "Test" }],
           max_tokens: 10
         });
-        
+
         results.openai = {
           available: true,
           model: 'gpt-4o-mini',
@@ -277,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const prompt = req.body.prompt || "Generate a business insight in one sentence.";
       const response = await callGoogleAI(prompt);
-      
+
       res.json({
         success: true,
         model: 'gemini-1.5-flash',
@@ -298,20 +304,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testClient = new OpenAI({ 
         apiKey: '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'
       });
-      
+
       const response = await testClient.responses.create({
         model: "gpt-5",
         input: "Generate a business insight about CRM efficiency in exactly 1 sentence.",
         reasoning: { effort: "minimal" }
       });
-      
+
       res.json({
         success: true,
         model: 'gpt-5',
         output: response.output_text,
         message: 'GPT-5 working perfectly!'
       });
-      
+
     } catch (error: any) {
       res.status(500).json({
         success: false,
@@ -345,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Smart greeting error:', error);
-      
+
       // Intelligent fallback with dynamic data
       res.json({ 
         greeting: `Good ${timeOfDay}! You have ${userMetrics?.totalDeals || 0} deals worth $${(userMetrics?.totalValue || 0).toLocaleString()}.`,
@@ -525,7 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const content = response.choices[0].message.content || '{}';
         result = JSON.parse(content);
-        
+
         // Ensure all required arrays exist
         result = {
           market_insights: Array.isArray(result.market_insights) ? result.market_insights : [],
@@ -963,20 +969,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Optional webhook signature verification
       const signature = req.headers['x-webhook-signature'] as string;
       const expectedSignature = process.env.SUPABASE_WEBHOOK_SECRET;
-      
+
       if (expectedSignature && signature && signature !== expectedSignature) {
         console.warn('⚠️ Invalid webhook signature');
         return res.status(401).json({ error: 'Invalid signature' });
       }
-      
+
       const { type, record } = req.body;
-      
+
       if (type === 'INSERT' && record) {
         // Get app context from user metadata
         const appContext = record.raw_user_meta_data?.app_context || 
                           record.user_metadata?.app_context || 
                           'smartcrm';
-        
+
         // Enhanced logging for monitoring
         console.log(`🎯 Email routing: ${record.email} → ${appContext} templates`, {
           userId: record.id,
@@ -985,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString(),
           metadata: record.raw_user_meta_data || record.user_metadata
         });
-        
+
         // Log successful routing for monitoring
         res.json({ 
           success: true, 
@@ -1009,31 +1015,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin middleware for protecting admin routes
   const requireAdmin = (req: any, res: any, next: any) => {
     const adminEmails = ['dean@videoremix.io', 'samuel@videoremix.io', 'victor@videoremix.io'];
-    
+
     // In development, allow bypass
     if (process.env.NODE_ENV === 'development') {
       return next();
     }
-    
+
     // Check user from session/auth
     const userEmail = req.user?.email || req.headers['x-user-email'];
     const userRole = req.user?.role || req.headers['x-user-role'];
-    
+
     if (!userEmail) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    
+
     const isAdmin = adminEmails.includes(userEmail.toLowerCase()) || 
                    userRole === 'admin' || 
                    userRole === 'super_admin';
-    
+
     if (!isAdmin) {
       return res.status(403).json({ 
         error: 'Admin access required',
         message: 'This endpoint is restricted to system administrators'
       });
     }
-    
+
     next();
   };
 
@@ -1049,7 +1055,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get user ID from session or authentication
       const userId = (req as any).user?.id; // Implement proper auth middleware
-      
+
       if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
@@ -1072,7 +1078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // For admin access - in production, add proper admin authentication
       const entitlementsList = await db.select().from(entitlements).limit(100);
-      
+
       res.json({
         entitlements: entitlementsList || [],
         total: entitlementsList?.length || 0
@@ -1086,7 +1092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/entitlements/create', async (req, res) => {
     try {
       const { userId, productType, planName, planAmount, currency } = req.body;
-      
+
       if (!userId || !productType || !planName) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
@@ -1115,25 +1121,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { createClient } = await import('@supabase/supabase-js');
       const supabaseUrl = process.env.SUPABASE_URL!;
       const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-      
+
       const supabase = createClient(supabaseUrl, supabaseServiceKey, {
         auth: { autoRefreshToken: false, persistSession: false }
       });
-      
+
       const adminEmails = [
         'dean@videoremix.io',
         'samuel@videoremix.io',
         'victor@videoremix.io'
       ];
-      
+
       const results = [];
-      
+
       for (const email of adminEmails) {
         try {
           // Check if user exists
           const { data: users } = await supabase.auth.admin.listUsers();
           const user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-          
+
           if (user) {
             if (!user.email_confirmed_at) {
               // Resend confirmation
@@ -1149,7 +1155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   }
                 }
               });
-              
+
               results.push({
                 email,
                 status: error ? 'failed' : 'confirmation_sent',
@@ -1178,7 +1184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 last_name: 'Admin'
               }
             });
-            
+
             results.push({
               email,
               status: error ? 'creation_failed' : 'created_and_confirmation_sent',
@@ -1194,14 +1200,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       res.json({
         success: true,
         message: 'Admin confirmation process completed',
         results,
         timestamp: new Date().toISOString()
       });
-      
+
     } catch (error: any) {
       console.error('Admin confirmation error:', error);
       res.status(500).json({
@@ -1215,6 +1221,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook endpoints
   app.post('/api/webhooks/stripe', handleStripeWebhook);
   app.post('/api/webhooks/zaxaa', handleZaxaaWebhook);
+
+  // User Management API Endpoints
+  app.get('/api/users', async (req, res) => {
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      res.json(users || []);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  app.post('/api/users/invite', async (req, res) => {
+    try {
+      const { email, role, firstName, lastName, permissions } = req.body;
+
+      // Create user invitation in Supabase Auth
+      const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          role: role,
+          permissions: permissions
+        },
+        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`
+      });
+
+      if (error) throw error;
+
+      res.json({ success: true, user: data.user });
+    } catch (error) {
+      console.error('Failed to invite user:', error);
+      res.status(500).json({ error: 'Failed to send invitation' });
+    }
+  });
+
+  app.patch('/api/users/:userId/role', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ role })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to update user role:', error);
+      res.status(500).json({ error: 'Failed to update user role' });
+    }
+  });
+
+  app.patch('/api/users/:userId/status', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { status } = req.body;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ status })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to update user status:', error);
+      res.status(500).json({ error: 'Failed to update user status' });
+    }
+  });
+
+  app.delete('/api/users/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      // Delete from auth
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
+
+      // Delete from profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) throw profileError;
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  });
 
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
