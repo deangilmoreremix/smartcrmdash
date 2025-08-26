@@ -135,6 +135,8 @@ import Pipeline from './pages/PipelinePage'; // Assuming this path
 
 // Bulk import page
 const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
+// Admin Dashboard page
+import AdminDashboard from './pages/AdminDashboard';
 
 // Entitlements management page
 const EntitlementsPage = lazy(() => import('./pages/EntitlementsPage'));
@@ -228,7 +230,7 @@ const AppContent = () => {
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
                         <Route path="/demo" element={<LandingPage />} />
-                        
+
                         {/* Interactive Demos for Sales */}
                         <Route path="/demo/dashboard" element={<DashboardDemo />} />
                         <Route path="/demo/contacts" element={<ContactsDemo />} />
@@ -855,6 +857,13 @@ const AppContent = () => {
                             <Route path="/landing/features/pipeline" element={<PipelineFeaturePage />} />
                             <Route path="/landing/features/semantic-search" element={<SemanticSearchFeaturePage />} />
                             <Route path="/landing/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
+
+                            {/* Admin Routes - Protected */}
+                            <Route path="/admin" element={<AdminDashboard />} />
+                            <Route path="/admin/bulk-import" element={<BulkImportPage />} />
+
+                            {/* Legacy route - redirect to admin */}
+                            <Route path="/bulk-import" element={<Navigate to="/admin/bulk-import" replace />} />
 
                 {/* System and Analytics Routes */}
                                   {/* Fallback */}

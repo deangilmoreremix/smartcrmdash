@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Users, Mail, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Upload, Users, Mail, CheckCircle, XCircle, AlertCircle, Shield } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 interface BulkUser {
   email: string;
@@ -28,7 +30,64 @@ export default function BulkImportPage() {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<'upload' | 'preview' | 'import' | 'complete'>('upload');
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+
+  // Admin emails list - must match server admin list
+  const adminEmails = [
+    'dean@videoremix.io',
+    'samuel@videoremix.io',
+    'victor@videoremix.io'
+  ];
+
+  useEffect(() => {
+    // Check if user is admin
+    const checkAdminAccess = () => {
+      if (!user?.email) {
+        toast({
+          title: "Access Denied",
+          description: "You must be logged in to access this page",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      const userEmail = user.email.toLowerCase();
+      const isAdmin = adminEmails.includes(userEmail) || user.role === 'admin' || user.role === 'super_admin';
+
+      if (!isAdmin) {
+        toast({
+          title: "Admin Access Required",
+          description: "This page is restricted to system administrators only",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      setIsAuthorized(true);
+    };
+
+    checkAdminAccess();
+  }, [user, navigate, toast]);
+
+  // Show loading while checking authorization
+  if (!isAuthorized) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Shield className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Verifying Admin Access...</h2>
+            <p className="text-gray-500">Please wait while we verify your permissions.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const sampleCsv = `email,first_name,last_name,company,phone,role
 john.doe@company.com,John,Doe,Acme Corp,(555) 123-4567,Manager
@@ -122,8 +181,17 @@ jane.smith@business.com,Jane,Smith,Tech Solutions,(555) 987-6543,Director`;
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Bulk User Import</h1>
-        <p className="text-gray-600 mt-2">Import users for SmartCRM. All users get access to the complete suite of apps and features.</p>
+        <div className="flex items-center space-x-3 mb-4">
+          <Shield className="w-8 h-8 text-red-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin: Bulk User Import</h1>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">ADMIN ONLY</span>
+              <span className="text-gray-500 text-sm">Logged in as: {user?.email}</span>
+            </div>
+          </div>
+        </div>
+        <p className="text-gray-600">Import users for SmartCRM. All users get access to the complete suite of apps and features.</p>
       </div>
 
       {/* Progress Steps */}

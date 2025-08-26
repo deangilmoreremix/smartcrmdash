@@ -1006,6 +1006,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin middleware for protecting admin routes
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const adminEmails = ['dean@videoremix.io', 'samuel@videoremix.io', 'victor@videoremix.io'];
+    
+    // In development, allow bypass
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+    
+    // Check user from session/auth
+    const userEmail = req.user?.email || req.headers['x-user-email'];
+    const userRole = req.user?.role || req.headers['x-user-role'];
+    
+    if (!userEmail) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const isAdmin = adminEmails.includes(userEmail.toLowerCase()) || 
+                   userRole === 'admin' || 
+                   userRole === 'super_admin';
+    
+    if (!isAdmin) {
+      return res.status(403).json({ 
+        error: 'Admin access required',
+        message: 'This endpoint is restricted to system administrators'
+      });
+    }
+    
+    next();
+  };
+
+  // Apply admin middleware to bulk import routes
+  app.use('/api/bulk-import*', requireAdmin);
+  app.use('/api/admin*', requireAdmin);
+
   // Register bulk import routes
   registerBulkImportRoutes(app);
 

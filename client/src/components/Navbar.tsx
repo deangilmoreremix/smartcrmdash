@@ -327,6 +327,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     }
   ];
 
+  // Add admin panel link to navigation if user is admin
+  if (isAdmin) {
+    mainTabs.push({
+      id: 'admin',
+      label: 'Admin Panel',
+      icon: Shield,
+      action: () => handleNavigation('/admin', 'admin'),
+      badge: 0,
+      color: 'from-red-500 to-orange-500'
+    });
+  }
+
+
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
@@ -400,6 +413,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'appointments' ? 'bg-cyan-500' :
                         tab.id === 'analytics' ? 'bg-blue-500' :
                         tab.id === 'assistants' ? 'bg-emerald-500' : // Color for new assistants tab
+                        tab.id === 'admin' ? 'bg-red-500' : // Color for admin tab
                         'bg-blue-500'
                       )}
                       {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
