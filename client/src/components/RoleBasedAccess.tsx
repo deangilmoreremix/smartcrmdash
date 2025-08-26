@@ -85,8 +85,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const canAccess = (resource: string): boolean => {
     if (!user) return false;
 
-    // Super admin can access everything
-    if (user.role === 'super_admin') return true;
+    // Super admin can access everything (including dev bypass)
+    if (user.role === 'super_admin' || user.email === 'dev@smartcrm.local') return true;
 
     // Resource-specific access control
     const resourcePermissions: Record<string, string[]> = {
@@ -103,7 +103,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     return allowedRoles.includes(user.role);
   };
 
-  const isSuperAdmin = (): boolean => user?.role === 'super_admin';
+  const isSuperAdmin = (): boolean => user?.role === 'super_admin' || user?.email === 'dev@smartcrm.local';
   const isPartnerAdmin = (): boolean => user?.role === 'partner_admin';
   const isCustomerAdmin = (): boolean => user?.role === 'customer_admin';
   const isEndUser = (): boolean => user?.role === 'end_user';

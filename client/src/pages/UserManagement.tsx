@@ -52,11 +52,12 @@ export default function UserManagement() {
     'victor@videoremix.io'
   ];
 
-  // Check if user is admin
+  // Check if user is admin (including dev bypass)
   const isAdmin = currentUser?.email && (
     adminEmails.includes(currentUser.email.toLowerCase()) || 
     currentUser.role === 'admin' || 
-    currentUser.role === 'super_admin'
+    currentUser.role === 'super_admin' ||
+    currentUser.email === 'dev@smartcrm.local' // Dev bypass user
   );
 
   useEffect(() => {

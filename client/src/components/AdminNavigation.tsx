@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Shield, Users, Database, Settings, BarChart3 } from 'lucide-react';
@@ -13,8 +12,9 @@ const AdminNavigation: React.FC = () => {
   // Admin emails list - must match server admin list
   const adminEmails = [
     'dean@videoremix.io',
-    'samuel@videoremix.io',  
-    'victor@videoremix.io'
+    'samuel@videoremix.io',
+    'victor@videoremix.io',
+    'dev@smartcrm.local' // Dev bypass user
   ];
 
   // Check if user is admin
@@ -76,7 +76,7 @@ const AdminNavigation: React.FC = () => {
         {adminMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = isActivePath(item.href);
-          
+
           return (
             <Link
               key={item.href}
