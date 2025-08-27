@@ -1283,20 +1283,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, role, firstName, lastName, permissions } = req.body;
 
-      // Create user invitation in Supabase Auth
+      // Validate role against new role system
+      const validRoles = ['super_admin', 'wl_user', 'regular_user'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ 
+          error: 'Invalid role', 
+          validRoles,
+          message: 'Role must be one of: super_admin, wl_user, regular_user' 
+        });
+      }
+
+      // Create user invitation in Supabase Auth with enhanced metadata
       const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
         data: {
           first_name: firstName,
           last_name: lastName,
           role: role,
-          permissions: permissions
+          permissions: permissions,
+          app_context: 'smartcrm',
+          email_template_set: 'smartcrm',
+          invited_at: new Date().toISOString(),
+          invited_by: 'admin' // Could be made dynamic based on current user
         },
         redirectTo: 'https://smart-crm.videoremix.io/auth/callback'
       });
 
       if (error) throw error;
 
-      res.json({ success: true, user: data.user });
+      console.log(`✅ User invitation sent: ${email} as ${role}`);
+      res.json({ success: true, user: data.user, role });
     } catch (error) {
       console.error('Failed to invite user:', error);
       res.status(500).json({ error: 'Failed to send invitation' });
@@ -1308,14 +1323,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const { role } = req.body;
 
-      const { data, error } = await supabase
+      // Validate role against new role system
+      const validRoles = ['super_admin', 'wl_user', 'regular_user'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ 
+          error: 'Invalid role', 
+          validRoles,
+          message: 'Role must be one of: super_admin, wl_user, regular_user' 
+        });
+      }
+
+      // Update role in profiles table
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .update({ role })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      res.json({ success: true });
+      // Also update Supabase Auth metadata for consistency
+      const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          role: role,
+          role_updated_at: new Date().toISOString()
+        }
+      });
+
+      if (authError) {
+        console.warn(`Warning: Failed to update auth metadata for ${userId}:`, authError.message);
+        // Don't fail the request, just log the warning
+      }
+
+      console.log(`✅ User role updated: ${userId} → ${role}`);
+      res.json({ success: true, role });
     } catch (error) {
       console.error('Failed to update user role:', error);
       res.status(500).json({ error: 'Failed to update user role' });
@@ -1338,6 +1378,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Failed to update user status:', error);
       res.status(500).json({ error: 'Failed to update user status' });
+    }
+  });
+
+  // Role migration endpoint (admin only)
+  app.post('/api/admin/migrate-roles', async (req, res) => {
+    try {
+      const { migrateUserRoles } = await import('./migrate-user-roles');
+      await migrateUserRoles();
+      res.json({ success: true, message: 'User roles migrated successfully' });
+    } catch (error) {
+      console.error('Role migration failed:', error);
+      res.status(500).json({ error: 'Failed to migrate user roles' });
+    }
+  });
+
+  // Sync Supabase metadata endpoint (admin only)  
+  app.post('/api/admin/sync-metadata', async (req, res) => {
+    try {
+      const { syncSupabaseAuthMetadata } = await import('./update-supabase-users');
+      await syncSupabaseAuthMetadata();
+      res.json({ success: true, message: 'Supabase metadata synced successfully' });
+    } catch (error) {
+      console.error('Metadata sync failed:', error);
+      res.status(500).json({ error: 'Failed to sync metadata' });
     }
   });
 

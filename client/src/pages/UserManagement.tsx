@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Shield, Mail, Calendar, Search, Filter, UserCheck, UserX } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Shield, Mail, Calendar, Search, Filter, UserCheck, UserX, Settings } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuthStore } from '../store/authStore';
 import { useRole } from '../components/RoleBasedAccess';
+import { RoleMigrationPanel } from '../components/RoleMigrationPanel';
 
 interface User {
   id: string;
@@ -46,6 +47,7 @@ export default function UserManagement() {
     lastName: '',
     permissions: [],
   });
+  const [showMigrationPanel, setShowMigrationPanel] = useState(false);
 
   // Check if user has admin access - only super admins can manage users
   const isAdmin = isSuperAdmin() || (currentUser?.email === 'dev@smartcrm.local');
@@ -250,18 +252,39 @@ export default function UserManagement() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowInviteModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Invite User
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowMigrationPanel(!showMigrationPanel)}
+                className={`px-4 py-2 ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-current rounded-lg transition-colors flex items-center gap-2`}
+                data-testid="button-toggle-migration"
+              >
+                <Settings className="h-4 w-4" />
+                Role Migration
+              </button>
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                data-testid="button-invite-user"
+              >
+                <Plus className="h-4 w-4" />
+                Invite User
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Migration Panel */}
+        {showMigrationPanel && (
+          <div className="mb-8">
+            <RoleMigrationPanel onComplete={() => {
+              fetchUsers();
+              setShowMigrationPanel(false);
+            }} />
+          </div>
+        )}
+
         {/* Filters and Search */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
