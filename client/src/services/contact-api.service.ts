@@ -45,35 +45,41 @@ export interface ContactStats {
 
 class ContactAPIService {
   private baseURL: string;
-  private supabaseKey: string | null = null;
+  private supabaseUrl: string;
+  private supabaseKey: string;
   private isBackendAvailable = true;
-  private isMockMode = import.meta.env.DEV || import.meta.env.VITE_ENV === 'development';
+  private isMockMode = false; // Use Supabase by default
   
   constructor() {
-    // For contact operations, use direct database access instead of Edge Functions
-    // Edge Functions are more suitable for complex operations like AI enrichment
-    this.baseURL = apiConfig.contactsAPI.baseURL;
-    this.isMockMode = true; // Always use local storage for now
+    // Check for Supabase configuration
+    this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    this.supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    this.baseURL = `${this.supabaseUrl}/rest/v1`;
     
-    console.log('Using local storage for contact management');
+    // Only fall back to mock mode if Supabase is not configured
+    if (!this.supabaseUrl || !this.supabaseKey) {
+      this.isMockMode = true;
+      console.warn('Supabase not configured - falling back to local storage');
+    } else {
+      console.log('Using Supabase for contact management');
+    }
   }
   
   // Get headers for Supabase requests
   private getSupabaseHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'apikey': this.supabaseKey,
+      'Authorization': `Bearer ${this.supabaseKey}`,
+      'Prefer': 'return=representation'
     };
-    
-    if (this.supabaseKey) {
-      headers['Authorization'] = `Bearer ${this.supabaseKey}`;
-    }
     
     return headers;
   }
   
   // Check if we should use fallback mode
   private shouldUseFallback(): boolean {
-    return true; // Always use fallback (local storage) for now
+    return this.isMockMode || !this.supabaseUrl || !this.supabaseKey;
   }
   
   // Initialize local storage with sample data if needed
@@ -262,23 +268,100 @@ class ContactAPIService {
       throw error;
     }
     
-    // Local storage fallback
-    logger.info('Using local storage for contact creation');
-    const contacts = this.getLocalContacts();
-    const newContact: Contact = {
-      ...sanitized as any,
-      id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact creation');
+      const contacts = this.getLocalContacts();
+      const newContact: Contact = {
+        ...sanitized as any,
+        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts.push(newContact);
+      this.saveLocalContacts(contacts);
+      cacheService.setContact(newContact.id, newContact);
+      return newContact;
+    }
     
-    contacts.push(newContact);
-    this.saveLocalContacts(contacts);
-    
-    // Cache the new contact
-    cacheService.setContact(newContact.id, newContact);
-    
-    return newContact;
+    try {
+      // Use Supabase for contact creation
+      logger.info('Creating contact via Supabase');
+      // Map camelCase to snake_case for Supabase
+      const supabaseData = {
+        first_name: sanitized.firstName,
+        last_name: sanitized.lastName,
+        email: sanitized.email,
+        phone: sanitized.phone,
+        company: sanitized.company,
+        position: sanitized.title,
+        status: sanitized.status,
+        source: sanitized.sources?.[0] || 'Website',
+        lead_score: sanitized.aiScore || null,
+        engagement_score: sanitized.aiScore || null,
+        tags: sanitized.tags || [],
+        notes: '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const response = await fetch(`${this.baseURL}/contacts`, {
+        method: 'POST',
+        headers: this.getSupabaseHeaders(),
+        body: JSON.stringify(supabaseData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const supabaseContact = Array.isArray(result) ? result[0] : result;
+      
+      // Map snake_case to camelCase for our Contact interface
+      const newContact: Contact = {
+        id: supabaseContact.id,
+        firstName: supabaseContact.first_name || '',
+        lastName: supabaseContact.last_name || '',
+        name: `${supabaseContact.first_name || ''} ${supabaseContact.last_name || ''}`.trim(),
+        email: supabaseContact.email,
+        phone: supabaseContact.phone,
+        title: supabaseContact.position,
+        company: supabaseContact.company,
+        industry: '', // Not in Supabase schema, use empty string
+        avatarSrc: '', // Not in Supabase schema
+        sources: [supabaseContact.source].filter(Boolean),
+        interestLevel: 'medium', // Default value
+        status: supabaseContact.status,
+        lastConnected: supabaseContact.last_contacted,
+        aiScore: supabaseContact.lead_score,
+        tags: supabaseContact.tags || [],
+        createdAt: supabaseContact.created_at,
+        updatedAt: supabaseContact.updated_at
+      };
+      
+      // Cache with generic cache method since setContact doesn't exist
+      cacheService.set('contact', newContact.id, newContact, 300, ['contact']);
+      
+      return newContact;
+    } catch (error) {
+      logger.error('Failed to create contact via Supabase, falling back to local storage', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const newContact: Contact = {
+        ...sanitized as any,
+        id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts.push(newContact);
+      this.saveLocalContacts(contacts);
+      cacheService.setContact(newContact.id, newContact);
+      return newContact;
+    }
   }
   
   async getContact(contactId: string): Promise<Contact> {
@@ -288,19 +371,78 @@ class ContactAPIService {
       return cached;
     }
     
-    // Local storage fallback
-    logger.info('Using local storage for contact retrieval');
-    const contacts = this.getLocalContacts();
-    const contact = contacts.find(c => c.id === contactId);
-    
-    if (!contact) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact retrieval');
+      const contacts = this.getLocalContacts();
+      const contact = contacts.find(c => c.id === contactId);
+      
+      if (!contact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      cacheService.setContact(contactId, contact);
+      return contact;
     }
     
-    // Cache the contact
-    cacheService.setContact(contactId, contact);
-    
-    return contact;
+    try {
+      // Use Supabase for contact retrieval
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'GET',
+        headers: this.getSupabaseHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const supabaseContact = Array.isArray(result) ? result[0] : result;
+      
+      if (!supabaseContact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      // Map snake_case to camelCase for our Contact interface
+      const contact: Contact = {
+        id: supabaseContact.id,
+        firstName: supabaseContact.first_name || '',
+        lastName: supabaseContact.last_name || '',
+        name: `${supabaseContact.first_name || ''} ${supabaseContact.last_name || ''}`.trim(),
+        email: supabaseContact.email,
+        phone: supabaseContact.phone,
+        title: supabaseContact.position,
+        company: supabaseContact.company,
+        industry: '', // Not in Supabase schema
+        avatarSrc: '', // Not in Supabase schema
+        sources: [supabaseContact.source].filter(Boolean),
+        interestLevel: 'medium', // Default value
+        status: supabaseContact.status,
+        lastConnected: supabaseContact.last_contacted,
+        aiScore: supabaseContact.lead_score,
+        tags: supabaseContact.tags || [],
+        createdAt: supabaseContact.created_at,
+        updatedAt: supabaseContact.updated_at
+      };
+      
+      // Cache the contact
+      cacheService.set('contact', contactId, contact, 300, ['contact']);
+      
+      return contact;
+    } catch (error) {
+      logger.error('Failed to get contact via Supabase, falling back to local storage', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const contact = contacts.find(c => c.id === contactId);
+      
+      if (!contact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      cacheService.setContact(contactId, contact);
+      return contact;
+    }
   }
   
   async updateContact(contactId: string, updates: Partial<Contact>): Promise<Contact> {
@@ -311,52 +453,131 @@ class ContactAPIService {
     
     const sanitized = validationService.sanitizeContact(updates);
     
-    // Local storage fallback
-    logger.info('Using local storage for contact update');
-    const contacts = this.getLocalContacts();
-    const contactIndex = contacts.findIndex(c => c.id === contactId);
-    
-    if (contactIndex === -1) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact update');
+      const contacts = this.getLocalContacts();
+      const contactIndex = contacts.findIndex(c => c.id === contactId);
+      
+      if (contactIndex === -1) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const updatedContact: Contact = {
+        ...contacts[contactIndex],
+        ...sanitized as any,
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts[contactIndex] = updatedContact;
+      this.saveLocalContacts(contacts);
+      cacheService.setContact(contactId, updatedContact);
+      cacheService.deleteByTag('list');
+      
+      return updatedContact;
     }
     
-    // Apply updates
-    const updatedContact: Contact = {
-      ...contacts[contactIndex],
-      ...sanitized as any,
-      updatedAt: new Date().toISOString()
-    };
-    
-    contacts[contactIndex] = updatedContact;
-    this.saveLocalContacts(contacts);
-    
-    // Update cache
-    cacheService.setContact(contactId, updatedContact);
-    
-    // Invalidate lists
-    cacheService.deleteByTag('list');
-    
-    logger.info('Contact updated successfully', { contactId, updates: Object.keys(updates) });
-    
-    return updatedContact;
+    try {
+      // Use Supabase for contact update
+      logger.info('Updating contact via Supabase');
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'PATCH',
+        headers: this.getSupabaseHeaders(),
+        body: JSON.stringify({
+          ...sanitized,
+          updated_at: new Date().toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const updatedContact = Array.isArray(result) ? result[0] : result;
+      
+      if (!updatedContact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      // Update cache
+      cacheService.setContact(contactId, updatedContact);
+      cacheService.deleteByTag('list');
+      
+      return updatedContact;
+    } catch (error) {
+      logger.error('Failed to update contact via Supabase, falling back to local storage', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const contactIndex = contacts.findIndex(c => c.id === contactId);
+      
+      if (contactIndex === -1) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const updatedContact: Contact = {
+        ...contacts[contactIndex],
+        ...sanitized as any,
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts[contactIndex] = updatedContact;
+      this.saveLocalContacts(contacts);
+      cacheService.setContact(contactId, updatedContact);
+      cacheService.deleteByTag('list');
+      
+      return updatedContact;
+    }
   }
   
   async deleteContact(contactId: string): Promise<void> {
-    // Local storage fallback
-    logger.info('Using local storage for contact deletion');
-    const contacts = this.getLocalContacts();
-    const filteredContacts = contacts.filter(c => c.id !== contactId);
-    
-    if (filteredContacts.length === contacts.length) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact deletion');
+      const contacts = this.getLocalContacts();
+      const filteredContacts = contacts.filter(c => c.id !== contactId);
+      
+      if (filteredContacts.length === contacts.length) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      this.saveLocalContacts(filteredContacts);
+      cacheService.invalidateContact(contactId);
+      return;
     }
     
-    this.saveLocalContacts(filteredContacts);
-    
-    // Remove from cache
-    cacheService.invalidateContact(contactId);
-    
-    logger.info('Contact deleted successfully', { contactId });
+    try {
+      // Use Supabase for contact deletion
+      logger.info('Deleting contact via Supabase');
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'DELETE',
+        headers: this.getSupabaseHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
+      }
+      
+      // Remove from cache
+      cacheService.invalidateContact(contactId);
+      cacheService.deleteByTag('list');
+      
+      logger.info('Contact deleted successfully via Supabase', { contactId });
+    } catch (error) {
+      logger.error('Failed to delete contact via Supabase, falling back to local storage', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const filteredContacts = contacts.filter(c => c.id !== contactId);
+      
+      if (filteredContacts.length === contacts.length) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      this.saveLocalContacts(filteredContacts);
+      cacheService.invalidateContact(contactId);
+    }
   }
   
   // List and Search Operations
