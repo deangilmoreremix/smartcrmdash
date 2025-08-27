@@ -117,6 +117,7 @@ const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 
 // Placeholder imports for routes that might not be implemented yet
 import Login from './pages/Auth/Login';
+const CallbackPage = lazy(() => import('./pages/Auth/CallbackPage'));
 import TaskCalendarView from './pages/TaskCalendarView'; // Assuming this path
 import BusinessAnalyzer from './pages/BusinessAnalyzer'; // Assuming this path
 import DocumentCenter from './pages/DocumentCenter'; // Assuming this path
@@ -231,6 +232,7 @@ const AppContent = () => {
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
+                        <Route path="/auth/callback" element={<CallbackPage />} />
                         <Route path="/demo" element={<LandingPage />} />
 
                         {/* Interactive Demos for Sales */}

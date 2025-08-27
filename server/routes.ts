@@ -1291,7 +1291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: role,
           permissions: permissions
         },
-        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`
+        redirectTo: 'https://smart-crm.videoremix.io/auth/callback'
       });
 
       if (error) throw error;
