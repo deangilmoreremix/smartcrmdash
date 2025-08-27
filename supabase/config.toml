@@ -45,3 +45,6 @@ enable_confirmations = false
 [auth.jwt]
 default_group_name = "authenticated"
 admin_group_name = "service_role"
+
+[functions]
+# Configuration for Supabase Edge Functions
