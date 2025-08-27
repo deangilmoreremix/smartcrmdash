@@ -42,10 +42,10 @@ class DealService {
   private isMockMode = false; // Use Supabase by default
   
   constructor() {
-    // Configure to use Supabase REST API for persistent deal management
+    // Configure to use Supabase Edge Functions as required by remote apps
     this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
     this.supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-    this.baseURL = `${this.supabaseUrl}/rest/v1`;
+    this.baseURL = `${this.supabaseUrl}/functions/v1/deals`;
     
     // Only fall back to mock mode if Supabase is not configured
     if (!this.supabaseUrl || !this.supabaseKey) {
@@ -54,17 +54,15 @@ class DealService {
     } else {
       this.isMockMode = false;
       this.isBackendAvailable = true;
-      console.log('Using Supabase REST API for persistent deal management');
+      console.log('Using Supabase Edge Functions for deal management (required by remote apps)');
     }
   }
   
-  // Get headers for Supabase REST API requests
+  // Get headers for Supabase Edge Function requests
   private getSupabaseHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'apikey': this.supabaseKey,
-      'Authorization': `Bearer ${this.supabaseKey}`,
-      'Prefer': 'return=representation'
+      'Authorization': `Bearer ${this.supabaseKey}`
     };
     
     return headers;

@@ -10,6 +10,7 @@ This project is a modern CRM (Customer Relationship Management) application desi
 - **Email Templates**: Professional templates optimized for spam filter avoidance using "Confirm Reauthentication" approach
 - **Bulk Import System**: CSV-based user creation with automated email notifications and Supabase integration
 - **New Role System (2025-01-27)**: Implemented 3-tier role structure with email-based super admin assignment and granular feature access control
+- **Edge Function Integration (2025-01-27)**: Fixed Contact and Deal services to use Supabase Edge Functions with localStorage fallback for remote app compatibility. Maintains all Edge Function endpoints required by remote apps while providing robust fallback for development.
 
 # User Preferences
 
