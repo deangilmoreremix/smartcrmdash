@@ -1384,9 +1384,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Role migration endpoint (admin only)
   app.post('/api/admin/migrate-roles', async (req, res) => {
     try {
-      const { migrateUserRoles } = await import('./migrate-user-roles');
-      await migrateUserRoles();
-      res.json({ success: true, message: 'User roles migrated successfully' });
+      // Inline migration logic
+      console.log('🔄 Starting user role migration...');
+      
+      const SUPER_ADMIN_EMAILS = [
+        'dean@videoremix.io',
+        'victor@videoremix.io', 
+        'samuel@videoremix.io'
+      ];
+
+      // Get all existing users from profiles table
+      let users, fetchError;
+      
+      if (process.env.NODE_ENV === 'development') {
+        // Use local database via storage layer for development
+        try {
+          const profiles = await storage.getAllProfiles();
+          users = profiles.map(p => ({
+            id: p.id,
+            username: p.username,
+            first_name: p.firstName,
+            last_name: p.lastName,
+            role: p.role
+          }));
+          fetchError = null;
+        } catch (error: any) {
+          fetchError = { message: error.message };
+        }
+      } else {
+        // Use Supabase for production
+        const result = await supabase
+          .from('profiles')
+          .select('id, username, first_name, last_name, role')
+          .order('created_at');
+        users = result.data;
+        fetchError = result.error;
+      }
+
+      if (fetchError) {
+        throw new Error(`Failed to fetch users: ${fetchError.message}`);
+      }
+
+      if (!users || users.length === 0) {
+        return res.json({ success: true, message: 'No users found to migrate' });
+      }
+
+      console.log(`📊 Found ${users.length} users to process`);
+
+      const updates = [];
+      let superAdmins = 0;
+      let wlUsers = 0;
+
+      for (const user of users) {
+        const email = user.username ? `${user.username}@videoremix.io` : null;
+        let newRole: string;
+
+        // Determine correct role
+        if (email && SUPER_ADMIN_EMAILS.includes(email.toLowerCase())) {
+          newRole = 'super_admin';
+          superAdmins++;
+        } else {
+          // All existing users (except super admins) become WL users
+          newRole = 'wl_user';
+          wlUsers++;
+        }
+
+        // Only update if role is different
+        if (user.role !== newRole) {
+          updates.push({
+            id: user.id,
+            oldRole: user.role,
+            newRole: newRole,
+            name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+            username: user.username
+          });
+        }
+      }
+
+      console.log(`Migration Summary - Super Admins: ${superAdmins}, WL Users: ${wlUsers}, Updates needed: ${updates.length}`);
+
+      if (updates.length === 0) {
+        return res.json({ success: true, message: 'All users already have correct roles!' });
+      }
+
+      // Perform the updates
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const update of updates) {
+        try {
+          let updateError = null;
+          
+          if (process.env.NODE_ENV === 'development') {
+            // Use storage layer for development
+            try {
+              await storage.updateProfile(update.id, { role: update.newRole });
+            } catch (error: any) {
+              updateError = { message: error.message };
+            }
+          } else {
+            // Use Supabase for production
+            const result = await supabase
+              .from('profiles')
+              .update({ role: update.newRole })
+              .eq('id', update.id);
+            updateError = result.error;
+          }
+
+          if (updateError) {
+            console.error(`Failed to update ${update.username}: ${updateError.message}`);
+            errorCount++;
+          } else {
+            console.log(`Updated ${update.username}: ${update.oldRole} → ${update.newRole}`);
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error updating ${update.username}:`, error);
+          errorCount++;
+        }
+      }
+
+      const message = `Migration complete! Successful: ${successCount}, Failed: ${errorCount}`;
+      console.log(`🎉 ${message}`);
+      
+      res.json({ 
+        success: true, 
+        message,
+        stats: { successCount, errorCount, totalProcessed: users.length }
+      });
+      
     } catch (error) {
       console.error('Role migration failed:', error);
       res.status(500).json({ error: 'Failed to migrate user roles' });
@@ -1396,9 +1522,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync Supabase metadata endpoint (admin only)  
   app.post('/api/admin/sync-metadata', async (req, res) => {
     try {
-      const { syncSupabaseAuthMetadata } = await import('./update-supabase-users');
-      await syncSupabaseAuthMetadata();
-      res.json({ success: true, message: 'Supabase metadata synced successfully' });
+      console.log('🔄 Syncing Supabase Auth metadata with profile roles...');
+      
+      // Get all profiles with their roles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, first_name, last_name, role')
+        .order('created_at');
+
+      if (profilesError) {
+        throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
+      }
+
+      if (!profiles || profiles.length === 0) {
+        return res.json({ success: true, message: 'No profiles found' });
+      }
+
+      console.log(`📊 Found ${profiles.length} profiles to sync`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const profile of profiles) {
+        try {
+          // Update the auth user's metadata to match profile role
+          const { error: updateError } = await supabase.auth.admin.updateUserById(
+            profile.id,
+            {
+              user_metadata: {
+                first_name: profile.first_name,
+                last_name: profile.last_name,
+                role: profile.role,
+                app_context: 'smartcrm',
+                email_template_set: 'smartcrm',
+                synced_at: new Date().toISOString()
+              }
+            }
+          );
+
+          if (updateError) {
+            console.error(`Failed to sync ${profile.username}: ${updateError.message}`);
+            errorCount++;
+          } else {
+            console.log(`Synced ${profile.username || profile.id}: role=${profile.role}`);
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error syncing ${profile.username}:`, error);
+          errorCount++;
+        }
+      }
+
+      const message = `Metadata sync complete! Successful: ${successCount}, Failed: ${errorCount}`;
+      console.log(`🎉 ${message}`);
+      
+      res.json({ 
+        success: true, 
+        message,
+        stats: { successCount, errorCount, totalProcessed: profiles.length }
+      });
+      
     } catch (error) {
       console.error('Metadata sync failed:', error);
       res.status(500).json({ error: 'Failed to sync metadata' });

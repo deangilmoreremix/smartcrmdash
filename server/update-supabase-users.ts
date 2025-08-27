@@ -79,7 +79,7 @@ export async function syncSupabaseAuthMetadata() {
 }
 
 // Run sync if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   syncSupabaseAuthMetadata()
     .then(() => {
       console.log('✅ Metadata sync completed');
