@@ -9,6 +9,7 @@ This project is a modern CRM (Customer Relationship Management) application desi
 - **Webhook Configuration**: Automated user routing system for multi-app email isolation
 - **Email Templates**: Professional templates optimized for spam filter avoidance using "Confirm Reauthentication" approach
 - **Bulk Import System**: CSV-based user creation with automated email notifications and Supabase integration
+- **New Role System (2025-01-27)**: Implemented 3-tier role structure with email-based super admin assignment and granular feature access control
 
 # User Preferences
 
@@ -40,7 +41,11 @@ Design Implementation: Always use the exact design, styling, and structure from 
 ## Authentication and Authorization
 - **Session Management**: PostgreSQL-backed session storage.
 - **Multi-tenancy**: Built-in support for tenant-based access control.
-- **User Roles**: Hierarchical permission system (super admin, partner admin, customer admin, end user).
+- **New Role System (2025-01-27)**: Three-tier role structure with specific access patterns:
+  - **Super Admin**: dean@videoremix.io, victor@videoremix.io, samuel@videoremix.io (full system access)
+  - **WL Users**: All CRM features + AI tools + advanced features (no user management/admin dashboard)
+  - **Regular Users**: Core CRM only (Dashboard, Contacts, Pipeline, Calendar, Communication + CSV imports)
+- **Email-Based Assignment**: Super admin roles automatically assigned based on specific email addresses
 - **Entitlements System**: Product-type based access control (lifetime, monthly, yearly, payment_plan) with automated enforcement and timezone-aware revocation.
 
 ## AI Integration Architecture

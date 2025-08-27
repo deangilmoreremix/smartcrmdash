@@ -11,6 +11,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useRole } from './RoleBasedAccess';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -35,23 +36,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
+  const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Admin emails list - must match server admin list
-  const adminEmails = [
-    'dean@videoremix.io',
-    'samuel@videoremix.io',  
-    'victor@videoremix.io'
-  ];
-
-  // Check if user is admin
-  const isAdmin = user?.email && (
-    adminEmails.includes(user.email.toLowerCase()) || 
-    user.role === 'admin' || 
-    user.role === 'super_admin'
-  );
+  // Check access levels using new role system
+  const isAdmin = isSuperAdmin();
+  const hasAITools = canAccess('ai_tools');
+  const hasAdvancedFeatures = canAccess('advanced_features');
 
   // Data sources
   const { deals } = useDealStore();

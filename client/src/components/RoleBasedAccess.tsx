@@ -6,7 +6,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'super_admin' | 'partner_admin' | 'customer_admin' | 'end_user';
+  role: 'super_admin' | 'wl_user' | 'regular_user';
   tenantId: string;
   permissions: string[];
   lastActive: string;
@@ -20,9 +20,8 @@ interface RoleContextType {
   hasRole: (role: string) => boolean;
   canAccess: (resource: string) => boolean;
   isSuperAdmin: () => boolean;
-  isPartnerAdmin: () => boolean;
-  isCustomerAdmin: () => boolean;
-  isEndUser: () => boolean;
+  isWLUser: () => boolean;
+  isRegularUser: () => boolean;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -88,15 +87,30 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     // Super admin can access everything (including dev bypass)
     if (user.role === 'super_admin' || user.email === 'dev@smartcrm.local') return true;
 
-    // Resource-specific access control
+    // Resource-specific access control for new role structure
     const resourcePermissions: Record<string, string[]> = {
-      'tenant_management': ['super_admin'],
-      'partner_management': ['super_admin', 'partner_admin'],
-      'user_management': ['super_admin', 'partner_admin', 'customer_admin'],
-      'billing_management': ['super_admin', 'partner_admin'],
-      'advanced_analytics': ['super_admin', 'partner_admin', 'customer_admin'],
-      'custom_branding': ['super_admin', 'partner_admin'],
-      'api_access': ['super_admin', 'partner_admin', 'customer_admin'],
+      // Super Admin only
+      'admin_dashboard': ['super_admin'],
+      'user_management': ['super_admin'], 
+      'bulk_import_users': ['super_admin'],
+      'system_settings': ['super_admin'],
+      'billing_management': ['super_admin'],
+      
+      // WL Users and Super Admin
+      'ai_tools': ['super_admin', 'wl_user'],
+      'advanced_analytics': ['super_admin', 'wl_user'],
+      'custom_branding': ['super_admin', 'wl_user'],
+      'api_access': ['super_admin', 'wl_user'],
+      'advanced_features': ['super_admin', 'wl_user'],
+      
+      // Core CRM features - All users (including CSV imports within modules)
+      'dashboard': ['super_admin', 'wl_user', 'regular_user'],
+      'contacts': ['super_admin', 'wl_user', 'regular_user'],
+      'contacts_csv': ['super_admin', 'wl_user', 'regular_user'],
+      'pipeline': ['super_admin', 'wl_user', 'regular_user'],
+      'pipeline_csv': ['super_admin', 'wl_user', 'regular_user'],
+      'calendar': ['super_admin', 'wl_user', 'regular_user'],
+      'communication': ['super_admin', 'wl_user', 'regular_user'],
     };
 
     const allowedRoles = resourcePermissions[resource] || [];
@@ -104,9 +118,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   };
 
   const isSuperAdmin = (): boolean => user?.role === 'super_admin' || user?.email === 'dev@smartcrm.local';
-  const isPartnerAdmin = (): boolean => user?.role === 'partner_admin';
-  const isCustomerAdmin = (): boolean => user?.role === 'customer_admin';
-  const isEndUser = (): boolean => user?.role === 'end_user';
+  const isWLUser = (): boolean => user?.role === 'wl_user';
+  const isRegularUser = (): boolean => user?.role === 'regular_user';
 
   return (
     <RoleContext.Provider
@@ -117,9 +130,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         hasRole,
         canAccess,
         isSuperAdmin,
-        isPartnerAdmin,
-        isCustomerAdmin,
-        isEndUser,
+        isWLUser,
+        isRegularUser,
       }}
     >
       {children}

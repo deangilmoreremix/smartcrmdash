@@ -36,6 +36,23 @@ export default function CallbackPage() {
 
           // If no profile exists, create one
           if (!profile) {
+            // Super Admin emails get super_admin role automatically
+            const superAdminEmails = [
+              'dean@videoremix.io',
+              'victor@videoremix.io', 
+              'samuel@videoremix.io'
+            ];
+            
+            const userEmail = session.user.email?.toLowerCase();
+            let assignedRole = 'regular_user'; // Default role
+            
+            if (userEmail && superAdminEmails.includes(userEmail)) {
+              assignedRole = 'super_admin';
+            } else if (session.user.user_metadata?.role) {
+              // Use role from invitation if provided
+              assignedRole = session.user.user_metadata.role;
+            }
+
             const { error: insertError } = await supabase
               .from('profiles')
               .insert([
@@ -44,7 +61,7 @@ export default function CallbackPage() {
                   username: session.user.email?.split('@')[0],
                   firstName: session.user.user_metadata?.first_name,
                   lastName: session.user.user_metadata?.last_name,
-                  role: session.user.user_metadata?.role || 'end_user',
+                  role: assignedRole,
                   appContext: 'smartcrm',
                   emailTemplateSet: 'smartcrm',
                 }

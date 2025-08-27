@@ -4,13 +4,17 @@ import { z } from "zod";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
+// User role enum
+export const userRoles = ['super_admin', 'wl_user', 'regular_user'] as const;
+export type UserRole = typeof userRoles[number];
+
 // Profiles table (links to Supabase auth.users)
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
   username: text("username").unique(),
   firstName: text("first_name"),
   lastName: text("last_name"),
-  role: text("role").default("user"),
+  role: text("role").default("regular_user"),
   avatar: text("avatar_url"),
   appContext: text("app_context").default("smartcrm"), // Track which app the user came from
   emailTemplateSet: text("email_template_set").default("smartcrm"), // Control which email templates to use

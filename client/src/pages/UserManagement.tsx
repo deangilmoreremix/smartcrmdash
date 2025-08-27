@@ -10,7 +10,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'super_admin' | 'partner_admin' | 'customer_admin' | 'end_user';
+  role: 'super_admin' | 'wl_user' | 'regular_user';
   tenantId: string;
   status: 'active' | 'inactive' | 'suspended';
   lastActive: string;
@@ -41,15 +41,14 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [inviteData, setInviteData] = useState<InviteUserData>({
     email: '',
-    role: 'end_user',
+    role: 'regular_user',
     firstName: '',
     lastName: '',
     permissions: [],
   });
 
-  // Check if user has admin access (using role-based access system)
-  const isAdmin = canAccess('user_management') || isSuperAdmin() || 
-                  (currentUser?.email === 'dev@smartcrm.local');
+  // Check if user has admin access - only super admins can manage users
+  const isAdmin = isSuperAdmin() || (currentUser?.email === 'dev@smartcrm.local');
 
   useEffect(() => {
     fetchUsers();
@@ -126,7 +125,7 @@ export default function UserManagement() {
       if (response.ok) {
         alert('User invitation sent successfully!');
         setShowInviteModal(false);
-        setInviteData({ email: '', role: 'end_user', firstName: '', lastName: '', permissions: [] });
+        setInviteData({ email: '', role: 'regular_user', firstName: '', lastName: '', permissions: [] });
         fetchUsers();
       } else {
         alert('Failed to send invitation');
@@ -197,9 +196,8 @@ export default function UserManagement() {
   });
 
   const availableRoles = [
-    { value: 'end_user', label: 'End User', description: 'Basic CRM access' },
-    { value: 'customer_admin', label: 'Customer Admin', description: 'Manage customer tenant' },
-    { value: 'partner_admin', label: 'Partner Admin', description: 'Manage partner and customers' },
+    { value: 'regular_user', label: 'Regular User', description: 'Core CRM features only' },
+    { value: 'wl_user', label: 'WL User', description: 'Full CRM + AI tools' },
     { value: 'super_admin', label: 'Super Admin', description: 'Full platform access' },
   ];
 
@@ -287,9 +285,8 @@ export default function UserManagement() {
           >
             <option value="all">All Roles</option>
             <option value="super_admin">Super Admin</option>
-            <option value="partner_admin">Partner Admin</option>
-            <option value="customer_admin">Customer Admin</option>
-            <option value="end_user">End User</option>
+            <option value="wl_user">WL User</option>
+            <option value="regular_user">Regular User</option>
           </select>
           <select
             value={statusFilter}
@@ -352,8 +349,8 @@ export default function UserManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         user.role === 'super_admin' ? 'bg-red-100 text-red-800' :
-                        user.role === 'partner_admin' ? 'bg-purple-100 text-purple-800' :
-                        user.role === 'customer_admin' ? 'bg-blue-100 text-blue-800' :
+                        user.role === 'wl_user' ? 'bg-purple-100 text-purple-800' :
+                        user.role === 'regular_user' ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {user.role.replace('_', ' ')}
