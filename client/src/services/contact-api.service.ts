@@ -51,10 +51,10 @@ class ContactAPIService {
   private isMockMode = false; // Use Supabase by default
   
   constructor() {
-    // Configure to use Supabase Edge Functions for contact management
+    // Configure to use Supabase REST API for persistent contact management
     this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
     this.supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-    this.baseURL = `${this.supabaseUrl}/functions/v1/contacts`;
+    this.baseURL = `${this.supabaseUrl}/rest/v1`;
     
     // Only fall back to mock mode if Supabase is not configured
     if (!this.supabaseUrl || !this.supabaseKey) {
@@ -63,19 +63,18 @@ class ContactAPIService {
     } else {
       this.isMockMode = false;
       this.isBackendAvailable = true;
-      console.log('Using Supabase Edge Functions for contact management');
+      console.log('Using Supabase REST API for persistent contact management');
     }
   }
   
-  // Get headers for Supabase Edge Function requests
+  // Get headers for Supabase REST API requests
   private getSupabaseHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'apikey': this.supabaseKey,
+      'Authorization': `Bearer ${this.supabaseKey}`,
+      'Prefer': 'return=representation'
     };
-    
-    if (this.supabaseKey) {
-      headers['Authorization'] = `Bearer ${this.supabaseKey}`;
-    }
     
     return headers;
   }
@@ -289,28 +288,30 @@ class ContactAPIService {
     }
     
     try {
-      // Use Supabase Edge Function for contact creation
-      logger.info('Creating contact via Supabase Edge Function');
-      const edgeFunctionPayload = {
-        action: 'create',
-        contact: {
-          firstName: sanitized.firstName,
-          lastName: sanitized.lastName,
-          email: sanitized.email,
-          phone: sanitized.phone,
-          company: sanitized.company,
-          title: sanitized.title,
-          status: sanitized.status,
-          sources: sanitized.sources || ['Website'],
-          aiScore: sanitized.aiScore || null,
-          tags: sanitized.tags || []
-        }
+      // Use Supabase REST API for persistent contact creation
+      logger.info('Creating contact via Supabase REST API');
+      // Map camelCase to snake_case for Supabase
+      const supabaseData = {
+        first_name: sanitized.firstName,
+        last_name: sanitized.lastName,
+        email: sanitized.email,
+        phone: sanitized.phone,
+        company: sanitized.company,
+        position: sanitized.title,
+        status: sanitized.status,
+        source: sanitized.sources?.[0] || 'Website',
+        lead_score: sanitized.aiScore || null,
+        engagement_score: sanitized.aiScore || null,
+        tags: sanitized.tags || [],
+        notes: '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
-      const response = await fetch(this.baseURL, {
+      const response = await fetch(`${this.baseURL}/contacts`, {
         method: 'POST',
         headers: this.getSupabaseHeaders(),
-        body: JSON.stringify(edgeFunctionPayload)
+        body: JSON.stringify(supabaseData)
       });
       
       if (!response.ok) {
@@ -318,21 +319,33 @@ class ContactAPIService {
       }
       
       const result = await response.json();
+      const supabaseContact = Array.isArray(result) ? result[0] : result;
       
-      if (!response.ok || result.error) {
-        throw new Error(`Edge Function error: ${result.error || response.statusText}`);
-      }
-      
+      // Map snake_case to camelCase for our Contact interface
       const newContact: Contact = {
-        ...result.contact,
-        name: `${result.contact.firstName || ''} ${result.contact.lastName || ''}`.trim(),
-        tags: result.contact.tags || []
+        id: supabaseContact.id,
+        firstName: supabaseContact.first_name || '',
+        lastName: supabaseContact.last_name || '',
+        name: `${supabaseContact.first_name || ''} ${supabaseContact.last_name || ''}`.trim(),
+        email: supabaseContact.email,
+        phone: supabaseContact.phone,
+        title: supabaseContact.position,
+        company: supabaseContact.company,
+        industry: '', // Not in Supabase schema, use empty string
+        avatarSrc: '', // Not in Supabase schema
+        sources: [supabaseContact.source].filter(Boolean),
+        interestLevel: 'medium', // Default value
+        status: supabaseContact.status,
+        lastConnected: supabaseContact.last_contacted,
+        aiScore: supabaseContact.lead_score,
+        tags: supabaseContact.tags || [],
+        createdAt: supabaseContact.created_at,
+        updatedAt: supabaseContact.updated_at
       };
       
-      // Cache the contact
+      // Cache with generic cache method since setContact doesn't exist
       cacheService.set('contact', newContact.id, newContact, 300, ['contact']);
       
-      logger.info('Contact created successfully via Edge Function', { contactId: newContact.id });
       return newContact;
     } catch (error) {
       logger.error('Failed to create contact via Supabase, falling back to local storage', error as Error);
@@ -375,33 +388,43 @@ class ContactAPIService {
     }
     
     try {
-      // Use Supabase Edge Function for contact retrieval
-      logger.info('Getting contact via Supabase Edge Function', { contactId });
-      const edgeFunctionPayload = {
-        action: 'get',
-        contactId: contactId
-      };
-      
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getSupabaseHeaders(),
-        body: JSON.stringify(edgeFunctionPayload)
+      // Use Supabase REST API for contact retrieval
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'GET',
+        headers: this.getSupabaseHeaders()
       });
       
       if (!response.ok) {
-        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
       }
       
       const result = await response.json();
+      const supabaseContact = Array.isArray(result) ? result[0] : result;
       
-      if (result.error || !result.contact) {
+      if (!supabaseContact) {
         throw new Error(`Contact with ID ${contactId} not found`);
       }
       
+      // Map snake_case to camelCase for our Contact interface
       const contact: Contact = {
-        ...result.contact,
-        name: `${result.contact.firstName || ''} ${result.contact.lastName || ''}`.trim(),
-        tags: result.contact.tags || []
+        id: supabaseContact.id,
+        firstName: supabaseContact.first_name || '',
+        lastName: supabaseContact.last_name || '',
+        name: `${supabaseContact.first_name || ''} ${supabaseContact.last_name || ''}`.trim(),
+        email: supabaseContact.email,
+        phone: supabaseContact.phone,
+        title: supabaseContact.position,
+        company: supabaseContact.company,
+        industry: '', // Not in Supabase schema
+        avatarSrc: '', // Not in Supabase schema
+        sources: [supabaseContact.source].filter(Boolean),
+        interestLevel: 'medium', // Default value
+        status: supabaseContact.status,
+        lastConnected: supabaseContact.last_contacted,
+        aiScore: supabaseContact.lead_score,
+        tags: supabaseContact.tags || [],
+        createdAt: supabaseContact.created_at,
+        updatedAt: supabaseContact.updated_at
       };
       
       // Cache the contact
@@ -457,35 +480,27 @@ class ContactAPIService {
     }
     
     try {
-      // Use Supabase Edge Function for contact update
-      logger.info('Updating contact via Supabase Edge Function');
-      const edgeFunctionPayload = {
-        action: 'update',
-        contactId: contactId,
-        updates: sanitized
-      };
-      
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
+      // Use Supabase REST API for contact update
+      logger.info('Updating contact via Supabase REST API');
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'PATCH',
         headers: this.getSupabaseHeaders(),
-        body: JSON.stringify(edgeFunctionPayload)
+        body: JSON.stringify({
+          ...sanitized,
+          updated_at: new Date().toISOString()
+        })
       });
       
       if (!response.ok) {
-        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
       }
       
       const result = await response.json();
+      const updatedContact = Array.isArray(result) ? result[0] : result;
       
-      if (result.error || !result.contact) {
-        throw new Error(`Contact with ID ${contactId} not found or update failed`);
+      if (!updatedContact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
       }
-      
-      const updatedContact: Contact = {
-        ...result.contact,
-        name: `${result.contact.firstName || ''} ${result.contact.lastName || ''}`.trim(),
-        tags: result.contact.tags || []
-      };
       
       // Update cache
       cacheService.set('contact', contactId, updatedContact, 300, ['contact']);
@@ -535,34 +550,22 @@ class ContactAPIService {
     }
     
     try {
-      // Use Supabase Edge Function for contact deletion
-      logger.info('Deleting contact via Supabase Edge Function');
-      const edgeFunctionPayload = {
-        action: 'delete',
-        contactId: contactId
-      };
-      
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getSupabaseHeaders(),
-        body: JSON.stringify(edgeFunctionPayload)
+      // Use Supabase REST API for contact deletion
+      logger.info('Deleting contact via Supabase REST API');
+      const response = await fetch(`${this.baseURL}/contacts?id=eq.${contactId}`, {
+        method: 'DELETE',
+        headers: this.getSupabaseHeaders()
       });
       
       if (!response.ok) {
-        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
-      }
-      
-      const result = await response.json();
-      
-      if (result.error) {
-        throw new Error(`Delete failed: ${result.error}`);
+        throw new Error(`Supabase API error: ${response.status} ${response.statusText}`);
       }
       
       // Remove from cache
       cacheService.set('contactDelete', contactId, null, 0, ['contact']);
       cacheService.set('contactList', 'invalidate', null, 0, ['list']);
       
-      logger.info('Contact deleted successfully via Edge Function', { contactId });
+      logger.info('Contact deleted successfully via Supabase REST API', { contactId });
     } catch (error) {
       logger.error('Failed to delete contact via Supabase, falling back to local storage', error as Error);
       

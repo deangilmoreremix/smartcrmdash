@@ -187,7 +187,7 @@ class DealService {
       probability: deal.probability,
       ai_score: deal.aiScore,
       tags: deal.tags,
-      // Note: activities stored separately or as JSON if supported
+      activities: deal.activities,
       updated_at: new Date().toISOString()
     };
   }
