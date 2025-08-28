@@ -39,6 +39,18 @@ iframe[src*="replit"] {
   height: 0 !important;
 }
 
+/* Landing page specific fixes */
+.content-stable {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Dropdown scroll fixes */
+.dropdown-open {
+  overflow: visible !important;
+}
+
 /* Custom scrollbar for dark mode */
 .dark {
   color-scheme: dark;

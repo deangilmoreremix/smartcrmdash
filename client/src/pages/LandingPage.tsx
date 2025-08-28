@@ -77,17 +77,23 @@ const LandingPage = () => {
   }, []);  // Empty dependency array ensures this only runs once
   
   return (
-    <div className="bg-white content-stable">
+    <div className="bg-white content-stable relative z-0">
       <LandingHeader />
       
       {/* Hero Section */}
-      <ParallaxHero />
+      <div className="relative z-10">
+        <ParallaxHero />
+      </div>
       
       {/* Client logos */}
-      <ClientLogos />
+      <div className="relative z-10">
+        <ClientLogos />
+      </div>
       
       {/* Feature Demo Section with interactive components */}
-      <FeatureDemo />
+      <div className="relative z-10">
+        <FeatureDemo />
+      </div>
       
       {/* Interactive Features Grid */}
       <ScrollAnimationWrapper animation="fade-up">
