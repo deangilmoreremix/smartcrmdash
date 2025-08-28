@@ -126,7 +126,8 @@ export default function FeaturePackageManagementPage() {
   };
 
   return (
-    <div className="p-6 space-y-6" data-testid="feature-package-management">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6 space-y-6 pb-20" data-testid="feature-package-management">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -348,6 +349,7 @@ export default function FeaturePackageManagementPage() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
