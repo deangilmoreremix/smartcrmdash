@@ -241,6 +241,90 @@ export class DatabaseStorage implements IStorage {
       }
     };
   }
+
+  // White Label Storage Methods for DatabaseStorage
+  async getTenantConfig(tenantId: string): Promise<TenantConfig | undefined> {
+    const [config] = await this.db
+      .select()
+      .from(tenantConfigs)
+      .where(eq(tenantConfigs.tenantId, tenantId));
+    return config || undefined;
+  }
+
+  async createTenantConfig(config: InsertTenantConfig): Promise<TenantConfig> {
+    const [tenantConfig] = await this.db
+      .insert(tenantConfigs)
+      .values(config)
+      .returning();
+    return tenantConfig;
+  }
+
+  async updateTenantConfig(tenantId: string, updates: Partial<TenantConfig>): Promise<TenantConfig | undefined> {
+    const [config] = await this.db
+      .update(tenantConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tenantConfigs.tenantId, tenantId))
+      .returning();
+    return config || undefined;
+  }
+
+  async getUserWLSettings(userId: string): Promise<UserWLSettings | undefined> {
+    const [settings] = await this.db
+      .select()
+      .from(userWLSettings)
+      .where(eq(userWLSettings.userId, userId));
+    return settings || undefined;
+  }
+
+  async createUserWLSettings(settings: InsertUserWLSettings): Promise<UserWLSettings> {
+    const [userSettings] = await this.db
+      .insert(userWLSettings)
+      .values(settings)
+      .returning();
+    return userSettings;
+  }
+
+  async updateUserWLSettings(userId: string, updates: Partial<UserWLSettings>): Promise<UserWLSettings | undefined> {
+    const [settings] = await this.db
+      .update(userWLSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userWLSettings.userId, userId))
+      .returning();
+    return settings || undefined;
+  }
+
+  async getPartnerWLConfig(partnerId: string): Promise<PartnerWLConfig | undefined> {
+    const [config] = await this.db
+      .select()
+      .from(partnerWLConfigs)
+      .where(eq(partnerWLConfigs.partnerId, partnerId));
+    return config || undefined;
+  }
+
+  async createPartnerWLConfig(config: InsertPartnerWLConfig): Promise<PartnerWLConfig> {
+    const [partnerConfig] = await this.db
+      .insert(partnerWLConfigs)
+      .values(config)
+      .returning();
+    return partnerConfig;
+  }
+
+  async updatePartnerWLConfig(partnerId: string, updates: Partial<PartnerWLConfig>): Promise<PartnerWLConfig | undefined> {
+    const [config] = await this.db
+      .update(partnerWLConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(partnerWLConfigs.partnerId, partnerId))
+      .returning();
+    return config || undefined;
+  }
+
+  async getWhiteLabelPackages(): Promise<WhiteLabelPackage[]> {
+    return await this.db
+      .select()
+      .from(whiteLabelPackages)
+      .where(eq(whiteLabelPackages.isActive, true))
+      .orderBy(whiteLabelPackages.createdAt);
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -249,6 +333,10 @@ export class MemStorage implements IStorage {
   private partnerTiers: Map<string, PartnerTier>;
   private commissions: Map<string, Commission>;
   private featurePackages: Map<string, FeaturePackage>;
+  private tenantConfigs: Map<string, TenantConfig>;
+  private userWLSettings: Map<string, UserWLSettings>;
+  private partnerWLConfigs: Map<string, PartnerWLConfig>;
+  private whiteLabelPackages: Map<string, WhiteLabelPackage>;
 
   constructor() {
     this.profiles = new Map();
@@ -256,6 +344,10 @@ export class MemStorage implements IStorage {
     this.partnerTiers = new Map();
     this.commissions = new Map();
     this.featurePackages = new Map();
+    this.tenantConfigs = new Map();
+    this.userWLSettings = new Map();
+    this.partnerWLConfigs = new Map();
+    this.whiteLabelPackages = new Map();
     
     // Initialize with test data for role migration testing
     this.initializeTestData();
@@ -646,88 +738,124 @@ export class MemStorage implements IStorage {
     };
   }
 
-  // White Label Storage Methods
+  // White Label Storage Methods for MemStorage
   async getTenantConfig(tenantId: string): Promise<TenantConfig | undefined> {
-    const [config] = await this.db
-      .select()
-      .from(tenantConfigs)
-      .where(eq(tenantConfigs.tenantId, tenantId));
-    return config || undefined;
+    return this.tenantConfigs.get(tenantId);
   }
 
   async createTenantConfig(config: InsertTenantConfig): Promise<TenantConfig> {
-    const [tenantConfig] = await this.db
-      .insert(tenantConfigs)
-      .values(config)
-      .returning();
+    const id = config.tenantId || 'tenant-' + Date.now();
+    const tenantConfig: TenantConfig = {
+      id: 'tc-' + Date.now(),
+      tenantId: id,
+      companyName: config.companyName || '',
+      logo: config.logo || null,
+      favicon: config.favicon || null,
+      primaryColor: config.primaryColor || '#3B82F6',
+      secondaryColor: config.secondaryColor || '#1E40AF',
+      accentColor: config.accentColor || '#10B981',
+      backgroundColor: config.backgroundColor || '#FFFFFF',
+      textColor: config.textColor || '#1F2937',
+      customDomain: config.customDomain || null,
+      customCSS: config.customCSS || null,
+      emailFromName: config.emailFromName || null,
+      emailReplyTo: config.emailReplyTo || null,
+      emailSignature: config.emailSignature || null,
+      brandingConfig: config.brandingConfig || null,
+      features: config.features || null,
+      profileId: config.profileId || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.tenantConfigs.set(id, tenantConfig);
     return tenantConfig;
   }
 
   async updateTenantConfig(tenantId: string, updates: Partial<TenantConfig>): Promise<TenantConfig | undefined> {
-    const [config] = await this.db
-      .update(tenantConfigs)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(tenantConfigs.tenantId, tenantId))
-      .returning();
-    return config || undefined;
+    const existing = this.tenantConfigs.get(tenantId);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.tenantConfigs.set(tenantId, updated);
+    return updated;
   }
 
   async getUserWLSettings(userId: string): Promise<UserWLSettings | undefined> {
-    const [settings] = await this.db
-      .select()
-      .from(userWLSettings)
-      .where(eq(userWLSettings.userId, userId));
-    return settings || undefined;
+    return this.userWLSettings.get(userId);
   }
 
   async createUserWLSettings(settings: InsertUserWLSettings): Promise<UserWLSettings> {
-    const [userSettings] = await this.db
-      .insert(userWLSettings)
-      .values(settings)
-      .returning();
+    const userSettings: UserWLSettings = {
+      id: 'wl-' + Date.now(),
+      userId: settings.userId,
+      customBranding: settings.customBranding || null,
+      enabledFeatures: settings.enabledFeatures || [],
+      preferences: settings.preferences || null,
+      settings: settings.settings || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.userWLSettings.set(settings.userId, userSettings);
     return userSettings;
   }
 
   async updateUserWLSettings(userId: string, updates: Partial<UserWLSettings>): Promise<UserWLSettings | undefined> {
-    const [settings] = await this.db
-      .update(userWLSettings)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(userWLSettings.userId, userId))
-      .returning();
-    return settings || undefined;
+    const existing = this.userWLSettings.get(userId);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.userWLSettings.set(userId, updated);
+    return updated;
   }
 
   async getPartnerWLConfig(partnerId: string): Promise<PartnerWLConfig | undefined> {
-    const [config] = await this.db
-      .select()
-      .from(partnerWLConfigs)
-      .where(eq(partnerWLConfigs.partnerId, partnerId));
-    return config || undefined;
+    return this.partnerWLConfigs.get(partnerId);
   }
 
   async createPartnerWLConfig(config: InsertPartnerWLConfig): Promise<PartnerWLConfig> {
-    const [partnerConfig] = await this.db
-      .insert(partnerWLConfigs)
-      .values(config)
-      .returning();
+    const partnerConfig: PartnerWLConfig = {
+      id: 'pwl-' + Date.now(),
+      partnerId: config.partnerId,
+      companyName: config.companyName || '',
+      logo: config.logo || null,
+      primaryColor: config.primaryColor || '#3B82F6',
+      secondaryColor: config.secondaryColor || '#1E40AF',
+      customDomain: config.customDomain || null,
+      emailFromName: config.emailFromName || null,
+      emailReplyTo: config.emailReplyTo || null,
+      brandingConfig: config.brandingConfig || null,
+      features: config.features || null,
+      profileId: config.profileId || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.partnerWLConfigs.set(config.partnerId, partnerConfig);
     return partnerConfig;
   }
 
   async updatePartnerWLConfig(partnerId: string, updates: Partial<PartnerWLConfig>): Promise<PartnerWLConfig | undefined> {
-    const [config] = await this.db
-      .update(partnerWLConfigs)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(partnerWLConfigs.partnerId, partnerId))
-      .returning();
-    return config || undefined;
+    const existing = this.partnerWLConfigs.get(partnerId);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.partnerWLConfigs.set(partnerId, updated);
+    return updated;
   }
 
   async getWhiteLabelPackages(): Promise<WhiteLabelPackage[]> {
-    return await this.db
-      .select()
-      .from(whiteLabelPackages)
-      .where(eq(whiteLabelPackages.isActive, true))
-      .orderBy(whiteLabelPackages.createdAt);
+    return Array.from(this.whiteLabelPackages.values()).filter(pkg => pkg.isActive);
   }
 }
 
