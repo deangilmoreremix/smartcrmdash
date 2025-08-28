@@ -474,15 +474,20 @@ export default function RevenueSharingDashboard() {
 
       {/* Advanced Partner Creation Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 shadow-2xl">
+          <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+            <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-white">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
+                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
               Create New Partner
             </DialogTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Add a new revenue sharing partner to expand your network and grow your business together.
+            </p>
           </DialogHeader>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="companyName">Company Name *</Label>
@@ -589,9 +594,11 @@ export default function RevenueSharingDashboard() {
             </div>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Additional Information</h3>
+            
             <div>
-              <Label htmlFor="contractTerms">Contract Terms</Label>
+              <Label htmlFor="contractTerms" className="text-gray-700 dark:text-gray-300">Contract Terms</Label>
               <Textarea
                 id="contractTerms"
                 value={createFormData.contractTerms}
@@ -599,11 +606,12 @@ export default function RevenueSharingDashboard() {
                 placeholder="Additional contract terms and conditions..."
                 rows={3}
                 data-testid="textarea-contract-terms"
+                className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             
             <div>
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="text-gray-700 dark:text-gray-300">Internal Notes</Label>
               <Textarea
                 id="notes"
                 value={createFormData.notes}
@@ -611,18 +619,20 @@ export default function RevenueSharingDashboard() {
                 placeholder="Internal notes about this partner..."
                 rows={2}
                 data-testid="textarea-notes"
+                className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
           </div>
           
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)} data-testid="button-cancel">
+          <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+            <Button variant="outline" onClick={() => setShowCreateModal(false)} data-testid="button-cancel" className="min-w-[100px]">
               Cancel
             </Button>
             <Button 
               onClick={() => createNewPartner(createFormData)}
               disabled={!createFormData.companyName || !createFormData.contactName || !createFormData.contactEmail}
               data-testid="button-create-partner"
+              className="min-w-[140px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Save className="h-4 w-4 mr-2" />
               Create Partner
@@ -633,12 +643,17 @@ export default function RevenueSharingDashboard() {
 
       {/* Bulk Import Modal */}
       <Dialog open={showBulkImportModal} onOpenChange={setShowBulkImportModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+        <DialogContent className="max-w-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 shadow-2xl">
+          <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+            <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-white">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
+                <Upload className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
               Bulk Import Partners
             </DialogTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Import multiple partners at once using a CSV file to quickly expand your network.
+            </p>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
@@ -676,16 +691,16 @@ export default function RevenueSharingDashboard() {
               </div>
             </div>
             
-            <div className="flex justify-between">
-              <Button variant="outline" data-testid="button-download-template">
+            <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" data-testid="button-download-template" className="bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
                 <FileText className="h-4 w-4 mr-2" />
                 Download Template
               </Button>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setShowBulkImportModal(false)} data-testid="button-cancel-import">
+                <Button variant="outline" onClick={() => setShowBulkImportModal(false)} data-testid="button-cancel-import" className="min-w-[100px]">
                   Cancel
                 </Button>
-                <Button disabled data-testid="button-import-partners">
+                <Button disabled data-testid="button-import-partners" className="min-w-[140px] bg-green-600 hover:bg-green-700 text-white">
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Import Partners
                 </Button>
