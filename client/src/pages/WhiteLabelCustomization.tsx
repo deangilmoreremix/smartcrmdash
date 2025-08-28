@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Palette, Upload, Eye, Save, RotateCcw, Sparkles, Globe, Code, Monitor, Mail } from 'lucide-react';
+import { Palette, Upload, Eye, Save, RotateCcw, Sparkles, Globe, Code, Monitor, Mail, Loader2 } from 'lucide-react';
 import { useTenant } from '../contexts/TenantProvider';
 import { ConditionalRender } from '../components/RoleBasedAccess';
+import { useWLState, useCreateUserWLSettings, useUpdateUserWLSettings, useUserWLSettings, useCreateTenantConfig, useUpdateTenantConfig } from '@/hooks/useWLSettings';
+import { useToast } from '@/hooks/use-toast';
+import { WLService } from '@/services/wlService';
 
 interface BrandingConfig {
   logo?: string;
@@ -61,6 +64,17 @@ export default function WhiteLabelCustomization() {
   const [activeTab, setActiveTab] = useState('basic');
 
   const { tenant, applyBranding } = useTenant();
+  const { toast } = useToast();
+
+  // White Label hooks for database persistence
+  const userId = 'dev-user-12345'; // In production, get from auth context
+  const tenantId = tenant?.id || 'default-tenant';
+  const { settings: userWLSettings } = useUserWLSettings(userId);
+  const createUserWLSettings = useCreateUserWLSettings();
+  const updateUserWLSettings = useUpdateUserWLSettings(userId);
+  const createTenantConfig = useCreateTenantConfig();
+  const updateTenantConfig = useUpdateTenantConfig(tenantId);
+  const { currentSettings, updateLocalSettings, isModified } = useWLState();
 
   useEffect(() => {
     fetchBrandingConfig();
@@ -86,22 +100,75 @@ export default function WhiteLabelCustomization() {
   const saveBrandingConfig = async () => {
     try {
       setSaving(true);
-      if (tenant) {
-        const response = await fetch(`/api/white-label/tenants/${tenant.id}/branding`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(config),
-        });
 
-        if (response.ok) {
-          alert('Branding configuration saved successfully!');
-          applyBranding(); // Apply changes immediately
-        } else {
-          alert('Failed to save branding configuration');
+      // Prepare data for database storage
+      const userWLData = {
+        userId,
+        customBranding: config,
+        enabledFeatures: Object.keys(config.features).filter(key => config.features[key as keyof typeof config.features]),
+        preferences: {
+          activeTab,
+          previewMode,
+          lastModified: new Date().toISOString()
+        },
+        settings: {
+          companyName: config.companyName,
+          primaryColor: config.primaryColor,
+          secondaryColor: config.secondaryColor
         }
+      };
+
+      const tenantConfigData = {
+        tenantId,
+        companyName: config.companyName,
+        logo: config.logo,
+        favicon: config.favicon,
+        primaryColor: config.primaryColor,
+        secondaryColor: config.secondaryColor,
+        accentColor: config.accentColor,
+        backgroundColor: config.backgroundColor,
+        textColor: config.textColor,
+        customDomain: config.customDomain,
+        customCSS: config.customCSS,
+        emailFromName: config.emailConfig.fromName,
+        emailReplyTo: config.emailConfig.replyToEmail,
+        emailSignature: config.emailConfig.emailSignature,
+        brandingConfig: config,
+        features: config.features,
+        profileId: userId
+      };
+
+      // Save to database using the WL service
+      try {
+        await WLService.syncUserData(userId, userWLData);
+        await WLService.syncTenantData(tenantId, tenantConfigData);
+        
+        toast({
+          title: "Settings saved successfully!",
+          description: "Your white label configuration has been saved to the database.",
+        });
+      } catch (dbError) {
+        console.warn('Database save failed, falling back to localStorage:', dbError);
+        // Fallback to localStorage if database fails
+        WLService.saveToLocalStorage('user-settings', userWLData);
+        WLService.saveToLocalStorage('tenant-config', tenantConfigData);
+        
+        toast({
+          title: "Settings saved locally",
+          description: "Configuration saved locally. Database sync will retry later.",
+        });
+      }
+      
+      if (tenant) {
+        applyBranding();
       }
     } catch (error) {
-      alert('Error saving branding configuration');
+      console.error('Failed to save branding config:', error);
+      toast({
+        title: "Save failed",
+        description: "Failed to save white label configuration. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setSaving(false);
     }

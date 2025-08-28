@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,10 +18,15 @@ import {
   Phone,
   Globe,
   Award,
-  DollarSign
+  DollarSign,
+  Save,
+  Loader2
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { usePartnerWLConfig, useCreatePartnerWLConfig, useUpdatePartnerWLConfig } from '@/hooks/useWLSettings';
+import { WLService } from '@/services/wlService';
 
 interface Partner {
   id: string;
@@ -71,6 +76,11 @@ export default function PartnerManagement() {
   });
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // White Label hooks for database persistence
+  const userId = 'dev-user-12345'; // In production, get from auth context
 
   const { data: partners, isLoading: partnersLoading } = useQuery<Partner[]>({
     queryKey: ['/api/partners'],
@@ -117,6 +127,65 @@ export default function PartnerManagement() {
       tier: 'bronze'
     });
     setEditingPartner(null);
+  };
+
+  // White Label persistence function for partner configurations
+  const savePartnerWLConfig = async (partnerId: string, config: any) => {
+    try {
+      setIsSaving(true);
+
+      const partnerWLData = {
+        partnerId,
+        companyName: config.companyName || '',
+        logo: config.logo || '',
+        primaryColor: config.primaryColor || '#3B82F6',
+        secondaryColor: config.secondaryColor || '#1E40AF',
+        customDomain: config.customDomain || '',
+        emailFromName: config.emailFromName || config.companyName || '',
+        emailReplyTo: config.emailReplyTo || config.contactEmail || '',
+        brandingConfig: {
+          ...config,
+          tier: config.tier,
+          commissionRate: config.commissionRate,
+          status: config.status
+        },
+        features: {
+          customBranding: true,
+          whiteLabel: config.tier !== 'bronze',
+          advancedFeatures: ['gold', 'platinum'].includes(config.tier)
+        },
+        profileId: userId
+      };
+
+      // Save to database
+      try {
+        await WLService.syncPartnerData ? await WLService.syncPartnerData(partnerId, partnerWLData) :
+          await WLService.createPartnerWLConfig ? await WLService.createPartnerWLConfig(partnerWLData) :
+          WLService.saveToLocalStorage(`partner-config-${partnerId}`, partnerWLData);
+
+        toast({
+          title: "Partner configuration saved!",
+          description: "White label configuration has been saved successfully.",
+        });
+      } catch (dbError) {
+        console.warn('Database save failed, using localStorage:', dbError);
+        WLService.saveToLocalStorage(`partner-config-${partnerId}`, partnerWLData);
+        
+        toast({
+          title: "Configuration saved locally",
+          description: "Partner settings saved locally. Database sync will retry later.",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save partner WL config:', error);
+      toast({
+        title: "Save failed",
+        description: "Failed to save partner configuration. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {

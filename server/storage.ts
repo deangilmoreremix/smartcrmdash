@@ -1,4 +1,4 @@
-import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, partnerMetrics, partnerCustomers, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage, contacts } from "@shared/schema";
+import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, partnerMetrics, partnerCustomers, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage, contacts, tenantConfigs, type TenantConfig, type InsertTenantConfig, userWLSettings, type UserWLSettings, type InsertUserWLSettings, partnerWLConfigs, type PartnerWLConfig, type InsertPartnerWLConfig, whiteLabelPackages, type WhiteLabelPackage } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
@@ -29,6 +29,18 @@ export interface IStorage {
   getFeaturePackages(): Promise<FeaturePackage[]>;
   createFeaturePackage(pkg: any): Promise<FeaturePackage>;
   getRevenueAnalytics(): Promise<any>;
+
+  // White Label Storage Methods
+  getTenantConfig(tenantId: string): Promise<TenantConfig | undefined>;
+  createTenantConfig(config: InsertTenantConfig): Promise<TenantConfig>;
+  updateTenantConfig(tenantId: string, updates: Partial<TenantConfig>): Promise<TenantConfig | undefined>;
+  getUserWLSettings(userId: string): Promise<UserWLSettings | undefined>;
+  createUserWLSettings(settings: InsertUserWLSettings): Promise<UserWLSettings>;
+  updateUserWLSettings(userId: string, updates: Partial<UserWLSettings>): Promise<UserWLSettings | undefined>;
+  getPartnerWLConfig(partnerId: string): Promise<PartnerWLConfig | undefined>;
+  createPartnerWLConfig(config: InsertPartnerWLConfig): Promise<PartnerWLConfig>;
+  updatePartnerWLConfig(partnerId: string, updates: Partial<PartnerWLConfig>): Promise<PartnerWLConfig | undefined>;
+  getWhiteLabelPackages(): Promise<WhiteLabelPackage[]>;
 }
 
 // Database Storage Implementation using Supabase
@@ -632,6 +644,90 @@ export class MemStorage implements IStorage {
         }
       }
     };
+  }
+
+  // White Label Storage Methods
+  async getTenantConfig(tenantId: string): Promise<TenantConfig | undefined> {
+    const [config] = await this.db
+      .select()
+      .from(tenantConfigs)
+      .where(eq(tenantConfigs.tenantId, tenantId));
+    return config || undefined;
+  }
+
+  async createTenantConfig(config: InsertTenantConfig): Promise<TenantConfig> {
+    const [tenantConfig] = await this.db
+      .insert(tenantConfigs)
+      .values(config)
+      .returning();
+    return tenantConfig;
+  }
+
+  async updateTenantConfig(tenantId: string, updates: Partial<TenantConfig>): Promise<TenantConfig | undefined> {
+    const [config] = await this.db
+      .update(tenantConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tenantConfigs.tenantId, tenantId))
+      .returning();
+    return config || undefined;
+  }
+
+  async getUserWLSettings(userId: string): Promise<UserWLSettings | undefined> {
+    const [settings] = await this.db
+      .select()
+      .from(userWLSettings)
+      .where(eq(userWLSettings.userId, userId));
+    return settings || undefined;
+  }
+
+  async createUserWLSettings(settings: InsertUserWLSettings): Promise<UserWLSettings> {
+    const [userSettings] = await this.db
+      .insert(userWLSettings)
+      .values(settings)
+      .returning();
+    return userSettings;
+  }
+
+  async updateUserWLSettings(userId: string, updates: Partial<UserWLSettings>): Promise<UserWLSettings | undefined> {
+    const [settings] = await this.db
+      .update(userWLSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userWLSettings.userId, userId))
+      .returning();
+    return settings || undefined;
+  }
+
+  async getPartnerWLConfig(partnerId: string): Promise<PartnerWLConfig | undefined> {
+    const [config] = await this.db
+      .select()
+      .from(partnerWLConfigs)
+      .where(eq(partnerWLConfigs.partnerId, partnerId));
+    return config || undefined;
+  }
+
+  async createPartnerWLConfig(config: InsertPartnerWLConfig): Promise<PartnerWLConfig> {
+    const [partnerConfig] = await this.db
+      .insert(partnerWLConfigs)
+      .values(config)
+      .returning();
+    return partnerConfig;
+  }
+
+  async updatePartnerWLConfig(partnerId: string, updates: Partial<PartnerWLConfig>): Promise<PartnerWLConfig | undefined> {
+    const [config] = await this.db
+      .update(partnerWLConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(partnerWLConfigs.partnerId, partnerId))
+      .returning();
+    return config || undefined;
+  }
+
+  async getWhiteLabelPackages(): Promise<WhiteLabelPackage[]> {
+    return await this.db
+      .select()
+      .from(whiteLabelPackages)
+      .where(eq(whiteLabelPackages.isActive, true))
+      .orderBy(whiteLabelPackages.createdAt);
   }
 }
 

@@ -407,7 +407,7 @@ export type InsertEntitlement = z.infer<typeof insertEntitlementSchema>;
 export const partners = pgTable("partners", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   companyName: text("company_name").notNull(),
-  contactName: text("contact_name").notNull(),
+  contactName: text("contact_name"), // Made nullable to fix the constraint error
   contactEmail: text("contact_email").notNull().unique(),
   phone: text("phone"),
   website: text("website"),
@@ -641,9 +641,116 @@ export const insertPartnerMetricsSchema = createInsertSchema(partnerMetrics).omi
   updatedAt: true,
 });
 
+// White Label Configuration Tables
+
+// Tenant configurations (for multi-tenancy and white-labeling)
+export const tenantConfigs = pgTable("tenant_configs", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: text("tenant_id").notNull().unique(), // Unique identifier for tenant
+  companyName: text("company_name"),
+  logo: text("logo"), // Logo URL
+  favicon: text("favicon"), // Favicon URL
+  primaryColor: text("primary_color").default("#3B82F6"),
+  secondaryColor: text("secondary_color").default("#1E40AF"),
+  accentColor: text("accent_color").default("#10B981"),
+  backgroundColor: text("background_color").default("#FFFFFF"),
+  textColor: text("text_color").default("#1F2937"),
+  customDomain: text("custom_domain"),
+  customCSS: text("custom_css"),
+  emailFromName: text("email_from_name"),
+  emailReplyTo: text("email_reply_to"),
+  emailSignature: text("email_signature"),
+  features: json("features"), // Feature toggles and settings
+  brandingConfig: json("branding_config"), // Complete branding configuration
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  profileId: uuid("profile_id").references(() => profiles.id), // Tenant owner
+});
+
+// White Label Package Configurations
+export const whiteLabelPackages = pgTable("white_label_packages", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  features: text("features").array(), // Array of enabled features
+  pricing: json("pricing"), // Pricing configuration
+  customizations: json("customizations"), // Available customization options
+  restrictions: json("restrictions"), // Feature restrictions
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User White Label Settings (per user customizations)
+export const userWLSettings = pgTable("user_wl_settings", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => profiles.id).notNull(),
+  packageId: uuid("package_id").references(() => whiteLabelPackages.id),
+  customBranding: json("custom_branding"), // User's custom branding settings
+  enabledFeatures: text("enabled_features").array(), // User's enabled WL features
+  preferences: json("preferences"), // User interface preferences
+  settings: json("settings"), // Additional settings storage
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Partner White Label Configurations (extends partners table)
+export const partnerWLConfigs = pgTable("partner_wl_configs", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  partnerId: uuid("partner_id").references(() => partners.id).notNull().unique(),
+  brandingActive: boolean("branding_active").default(false),
+  logoUrl: text("logo_url"),
+  primaryColor: text("primary_color"),
+  secondaryColor: text("secondary_color"),
+  customDomain: text("custom_domain"),
+  emailBranding: json("email_branding"), // Email template customizations
+  uiCustomizations: json("ui_customizations"), // UI theme customizations
+  featureOverrides: json("feature_overrides"), // Feature availability overrides
+  apiSettings: json("api_settings"), // API configuration for partner
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// White Label insert schemas
+export const insertTenantConfigSchema = createInsertSchema(tenantConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWhiteLabelPackageSchema = createInsertSchema(whiteLabelPackages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserWLSettingsSchema = createInsertSchema(userWLSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPartnerWLConfigSchema = createInsertSchema(partnerWLConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Backward compatibility - keep User types but make them reference Profile
 export type User = Profile;
 export type InsertUser = InsertProfile;
+
+// White Label types
+export type TenantConfig = typeof tenantConfigs.$inferSelect;
+export type InsertTenantConfig = z.infer<typeof insertTenantConfigSchema>;
+export type WhiteLabelPackage = typeof whiteLabelPackages.$inferSelect;
+export type InsertWhiteLabelPackage = z.infer<typeof insertWhiteLabelPackageSchema>;
+export type UserWLSettings = typeof userWLSettings.$inferSelect;
+export type InsertUserWLSettings = z.infer<typeof insertUserWLSettingsSchema>;
+export type PartnerWLConfig = typeof partnerWLConfigs.$inferSelect;
+export type InsertPartnerWLConfig = z.infer<typeof insertPartnerWLConfigSchema>;
 
 // Export partner types
 export type Partner = typeof partners.$inferSelect;

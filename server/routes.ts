@@ -1755,6 +1755,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // White Label API Routes
+  
+  // Tenant Configuration Routes
+  app.get('/api/tenant/config/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+      const config = await storage.getTenantConfig(tenantId);
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to fetch tenant config:', error);
+      res.status(500).json({ error: 'Failed to fetch tenant config' });
+    }
+  });
+
+  app.post('/api/tenant/config', async (req, res) => {
+    try {
+      const config = await storage.createTenantConfig(req.body);
+      res.status(201).json(config);
+    } catch (error) {
+      console.error('Failed to create tenant config:', error);
+      res.status(500).json({ error: 'Failed to create tenant config' });
+    }
+  });
+
+  app.patch('/api/tenant/config/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+      const config = await storage.updateTenantConfig(tenantId, req.body);
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to update tenant config:', error);
+      res.status(500).json({ error: 'Failed to update tenant config' });
+    }
+  });
+
+  // User White Label Settings Routes
+  app.get('/api/user/wl-settings/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const settings = await storage.getUserWLSettings(userId);
+      res.json(settings);
+    } catch (error) {
+      console.error('Failed to fetch user WL settings:', error);
+      res.status(500).json({ error: 'Failed to fetch user WL settings' });
+    }
+  });
+
+  app.post('/api/user/wl-settings', async (req, res) => {
+    try {
+      const settings = await storage.createUserWLSettings(req.body);
+      res.status(201).json(settings);
+    } catch (error) {
+      console.error('Failed to create user WL settings:', error);
+      res.status(500).json({ error: 'Failed to create user WL settings' });
+    }
+  });
+
+  app.patch('/api/user/wl-settings/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const settings = await storage.updateUserWLSettings(userId, req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error('Failed to update user WL settings:', error);
+      res.status(500).json({ error: 'Failed to update user WL settings' });
+    }
+  });
+
+  // Partner White Label Configuration Routes
+  app.get('/api/partner/wl-config/:partnerId', async (req, res) => {
+    try {
+      const { partnerId } = req.params;
+      const config = await storage.getPartnerWLConfig(partnerId);
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to fetch partner WL config:', error);
+      res.status(500).json({ error: 'Failed to fetch partner WL config' });
+    }
+  });
+
+  app.post('/api/partner/wl-config', async (req, res) => {
+    try {
+      const config = await storage.createPartnerWLConfig(req.body);
+      res.status(201).json(config);
+    } catch (error) {
+      console.error('Failed to create partner WL config:', error);
+      res.status(500).json({ error: 'Failed to create partner WL config' });
+    }
+  });
+
+  app.patch('/api/partner/wl-config/:partnerId', async (req, res) => {
+    try {
+      const { partnerId } = req.params;
+      const config = await storage.updatePartnerWLConfig(partnerId, req.body);
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to update partner WL config:', error);
+      res.status(500).json({ error: 'Failed to update partner WL config' });
+    }
+  });
+
+  // White Label Packages Routes
+  app.get('/api/white-label-packages', async (req, res) => {
+    try {
+      const packages = await storage.getWhiteLabelPackages();
+      res.json(packages);
+    } catch (error) {
+      console.error('Failed to fetch white label packages:', error);
+      res.status(500).json({ error: 'Failed to fetch white label packages' });
+    }
+  });
+
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
     res.json({ message: 'CRM API is working', supabase: 'Edge Functions will handle AI operations' });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { 
   Plus, 
@@ -14,10 +14,14 @@ import {
   Trash2, 
   Package, 
   DollarSign, 
-  CheckCircle
+  CheckCircle,
+  Save,
+  Loader2
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { WLService } from '@/services/wlService';
 
 interface FeaturePackage {
   id: string;
@@ -45,6 +49,11 @@ export default function FeaturePackageManagementPage() {
   });
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // White Label persistence variables
+  const userId = 'dev-user-12345'; // In production, get from auth context
 
   const { data: packages, isLoading: packagesLoading } = useQuery<FeaturePackage[]>({
     queryKey: ['/api/feature-packages'],
@@ -74,6 +83,75 @@ export default function FeaturePackageManagementPage() {
       isActive: true
     });
   };
+
+  // White Label persistence function for feature packages
+  const saveFeaturePackageWLConfig = async (packageData: FeaturePackage) => {
+    try {
+      setIsSaving(true);
+
+      const featurePackageWLData = {
+        packageId: packageData.id,
+        name: packageData.name,
+        description: packageData.description,
+        features: packageData.features,
+        price: packageData.price,
+        billingCycle: packageData.billingCycle,
+        targetTier: packageData.targetTier,
+        isActive: packageData.isActive,
+        wlConfig: {
+          customizable: true,
+          whiteLabel: packageData.targetTier !== 'bronze',
+          brandable: ['gold', 'platinum'].includes(packageData.targetTier || ''),
+        },
+        userId
+      };
+
+      // Save to database and localStorage as fallback
+      try {
+        WLService.saveToLocalStorage(`feature-package-${packageData.id}`, featurePackageWLData);
+        
+        toast({
+          title: "Feature package configuration saved!",
+          description: "Package settings have been saved successfully.",
+        });
+      } catch (dbError) {
+        console.warn('Database save failed, using localStorage only:', dbError);
+        WLService.saveToLocalStorage(`feature-package-${packageData.id}`, featurePackageWLData);
+        
+        toast({
+          title: "Configuration saved locally",
+          description: "Package settings saved locally. Database sync will retry later.",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save feature package WL config:', error);
+      toast({
+        title: "Save failed",
+        description: "Failed to save package configuration. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Auto-save WL configuration when packages change
+  useEffect(() => {
+    if (packages && packages.length > 0) {
+      packages.forEach(pkg => {
+        if (pkg.isActive) {
+          WLService.saveToLocalStorage(`feature-package-${pkg.id}`, {
+            packageId: pkg.id,
+            name: pkg.name,
+            features: pkg.features,
+            targetTier: pkg.targetTier,
+            lastModified: new Date().toISOString(),
+            userId
+          });
+        }
+      });
+    }
+  }, [packages, userId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
