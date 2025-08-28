@@ -153,6 +153,12 @@ export default function WhiteLabelCustomization() {
         WLService.saveToLocalStorage('user-settings', userWLData);
         WLService.saveToLocalStorage('tenant-config', tenantConfigData);
         
+        // Show debug info in console
+        console.log('✓ WL Save Test - Data saved to localStorage:');
+        console.log('  User Settings:', userWLData);
+        console.log('  Tenant Config:', tenantConfigData);
+        console.log('  LocalStorage keys:', Object.keys(localStorage).filter(k => k.startsWith('wl_')));
+        
         toast({
           title: "Settings saved locally",
           description: "Configuration saved locally. Database sync will retry later.",
