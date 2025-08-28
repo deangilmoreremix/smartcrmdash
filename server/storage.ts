@@ -1,4 +1,6 @@
-import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage } from "@shared/schema";
+import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, partnerMetrics, partnerCustomers, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage, contacts } from "@shared/schema";
+import { eq, desc, sql } from "drizzle-orm";
+import { db } from "./db";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -27,6 +29,206 @@ export interface IStorage {
   getFeaturePackages(): Promise<FeaturePackage[]>;
   createFeaturePackage(pkg: any): Promise<FeaturePackage>;
   getRevenueAnalytics(): Promise<any>;
+}
+
+// Database Storage Implementation using Supabase
+export class DatabaseStorage implements IStorage {
+  private db: any;
+
+  constructor(dbConnection: any) {
+    this.db = dbConnection;
+  }
+
+  async getProfile(id: string): Promise<Profile | undefined> {
+    const [profile] = await this.db.select().from(profiles).where(eq(profiles.id, id));
+    return profile || undefined;
+  }
+
+  async getProfileByUsername(username: string): Promise<Profile | undefined> {
+    const [profile] = await this.db.select().from(profiles).where(eq(profiles.username, username));
+    return profile || undefined;
+  }
+
+  async createProfile(insertProfile: InsertProfile & { id: string }): Promise<Profile> {
+    const [profile] = await this.db
+      .insert(profiles)
+      .values(insertProfile)
+      .returning();
+    return profile;
+  }
+
+  async getAllProfiles(): Promise<Profile[]> {
+    return await this.db.select().from(profiles);
+  }
+
+  async updateProfile(id: string, updates: Partial<Profile>): Promise<Profile> {
+    const [profile] = await this.db
+      .update(profiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(profiles.id, id))
+      .returning();
+    
+    if (!profile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+    return profile;
+  }
+
+  // Backward compatibility methods
+  async getUser(id: string): Promise<Profile | undefined> {
+    return this.getProfile(id);
+  }
+
+  async getUserByUsername(username: string): Promise<Profile | undefined> {
+    return this.getProfileByUsername(username);
+  }
+
+  async createUser(user: InsertProfile & { id: string }): Promise<Profile> {
+    return this.createProfile(user);
+  }
+
+  // Partner Management Methods
+  async getPartners(): Promise<Partner[]> {
+    return await this.db.select().from(partners).orderBy(partners.createdAt);
+  }
+
+  async getPartner(id: string): Promise<Partner | undefined> {
+    const [partner] = await this.db.select().from(partners).where(eq(partners.id, id));
+    return partner || undefined;
+  }
+
+  async createPartner(partner: InsertPartner): Promise<Partner> {
+    const [newPartner] = await this.db
+      .insert(partners)
+      .values(partner)
+      .returning();
+    return newPartner;
+  }
+
+  async updatePartner(id: string, updates: Partial<Partner>): Promise<Partner | undefined> {
+    const [partner] = await this.db
+      .update(partners)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(partners.id, id))
+      .returning();
+    return partner || undefined;
+  }
+
+  async getPartnerStats(partnerId: string): Promise<any> {
+    const partner = await this.getPartner(partnerId);
+    if (!partner) return null;
+
+    // Get latest metrics for the partner
+    const [latestMetric] = await this.db
+      .select()
+      .from(partnerMetrics)
+      .where(eq(partnerMetrics.partnerId, partnerId))
+      .orderBy(desc(partnerMetrics.year), desc(partnerMetrics.month))
+      .limit(1);
+
+    return {
+      totalRevenue: partner.totalRevenue,
+      totalCommissions: partner.totalCommissions,
+      customerCount: partner.customerCount,
+      conversionRate: latestMetric?.conversionRate || 0.15,
+      monthlyGrowth: 0.08,
+      tier: partner.tier,
+      commissionRate: partner.commissionRate,
+      status: partner.status
+    };
+  }
+
+  async getPartnerCustomers(partnerId: string): Promise<any[]> {
+    const customers = await this.db
+      .select({
+        id: partnerCustomers.customerId,
+        name: sql`concat(${contacts.firstName}, ' ', ${contacts.lastName})`.as('name'),
+        email: contacts.email,
+        value: partnerCustomers.lifetime_value,
+        status: partnerCustomers.status,
+        acquisitionDate: partnerCustomers.acquisitionDate
+      })
+      .from(partnerCustomers)
+      .innerJoin(contacts, eq(partnerCustomers.customerId, contacts.id))
+      .where(eq(partnerCustomers.partnerId, partnerId));
+
+    return customers;
+  }
+
+  async getPartnerCommissions(partnerId: string): Promise<Commission[]> {
+    return await this.db
+      .select()
+      .from(commissions)
+      .where(eq(commissions.partnerId, partnerId))
+      .orderBy(desc(commissions.createdAt));
+  }
+
+  async getPartnerTiers(): Promise<PartnerTier[]> {
+    return await this.db
+      .select()
+      .from(partnerTiers)
+      .where(eq(partnerTiers.isActive, true))
+      .orderBy(partnerTiers.priority);
+  }
+
+  async getFeaturePackages(): Promise<FeaturePackage[]> {
+    return await this.db
+      .select()
+      .from(featurePackages)
+      .where(eq(featurePackages.isActive, true))
+      .orderBy(featurePackages.createdAt);
+  }
+
+  async createFeaturePackage(pkg: any): Promise<FeaturePackage> {
+    const [featurePackage] = await this.db
+      .insert(featurePackages)
+      .values({
+        name: pkg.name,
+        description: pkg.description || null,
+        features: pkg.features || [],
+        price: pkg.price || null,
+        billingCycle: pkg.billingCycle || 'monthly',
+        isActive: pkg.isActive !== undefined ? pkg.isActive : true,
+        targetTier: pkg.targetTier || null
+      })
+      .returning();
+    return featurePackage;
+  }
+
+  async getRevenueAnalytics(): Promise<any> {
+    const partners = await this.getPartners();
+    const totalRevenue = partners.reduce((sum, p) => sum + parseFloat(p.totalRevenue || '0'), 0);
+    const totalCommissions = partners.reduce((sum, p) => sum + parseFloat(p.totalCommissions || '0'), 0);
+    const totalCustomers = partners.reduce((sum, p) => sum + (p.customerCount || 0), 0);
+
+    return {
+      totalRevenue,
+      totalCommissions,
+      totalPartners: partners.length,
+      activePartners: partners.filter(p => p.status === 'active').length,
+      totalCustomers,
+      averageCommissionRate: 0.20,
+      monthlyGrowth: 0.12,
+      topPerformingTier: 'gold',
+      metrics: {
+        revenue: {
+          current: totalRevenue,
+          previousMonth: totalRevenue * 0.9,
+          growth: 0.10
+        },
+        commissions: {
+          current: totalCommissions,
+          previousMonth: totalCommissions * 0.9,
+          growth: 0.10
+        },
+        partners: {
+          current: partners.length,
+          previousMonth: Math.max(1, partners.length - 1),
+          growth: partners.length > 1 ? 0.05 : 0
+        }
+      }
+    };
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -243,8 +445,8 @@ export class MemStorage implements IStorage {
       lastName: insertProfile.lastName || null,
       role: insertProfile.role || null,
       avatar: insertProfile.avatar || null,
-      appContext: insertProfile.appContext || 'smartcrm',
-      emailTemplateSet: insertProfile.emailTemplateSet || 'smartcrm',
+      appContext: 'smartcrm',
+      emailTemplateSet: 'smartcrm',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -372,7 +574,7 @@ export class MemStorage implements IStorage {
   }
 
   async getPartnerTiers(): Promise<PartnerTier[]> {
-    return Array.from(this.partnerTiers.values()).sort((a, b) => a.priority - b.priority);
+    return Array.from(this.partnerTiers.values()).sort((a, b) => (a.priority || 0) - (b.priority || 0));
   }
 
   async getFeaturePackages(): Promise<FeaturePackage[]> {
@@ -399,9 +601,9 @@ export class MemStorage implements IStorage {
 
   async getRevenueAnalytics(): Promise<any> {
     const partners = Array.from(this.partners.values());
-    const totalRevenue = partners.reduce((sum, p) => sum + parseFloat(p.totalRevenue), 0);
-    const totalCommissions = partners.reduce((sum, p) => sum + parseFloat(p.totalCommissions), 0);
-    const totalCustomers = partners.reduce((sum, p) => sum + p.customerCount, 0);
+    const totalRevenue = partners.reduce((sum, p) => sum + parseFloat(p.totalRevenue || '0'), 0);
+    const totalCommissions = partners.reduce((sum, p) => sum + parseFloat(p.totalCommissions || '0'), 0);
+    const totalCustomers = partners.reduce((sum, p) => sum + (p.customerCount || 0), 0);
 
     return {
       totalRevenue,
@@ -433,4 +635,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Use DatabaseStorage if DATABASE_URL is available, otherwise fall back to MemStorage
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage(db)
+  : new MemStorage();
