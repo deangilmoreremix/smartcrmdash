@@ -9,6 +9,7 @@ import { getUserEntitlement, isUserActive, handleSuccessfulPurchase } from './en
 import { db } from './db';
 import { entitlements } from '@shared/schema';
 import { createClient } from '@supabase/supabase-js';
+import { handleAuthWebhook, createUserMetadata, determineUserRole } from './email-routing';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -1261,6 +1262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook endpoints
   app.post('/api/webhooks/stripe', handleStripeWebhook);
   app.post('/api/webhooks/zaxaa', handleZaxaaWebhook);
+  app.post('/api/auth-webhook', handleAuthWebhook);
 
   // User Management API Endpoints
   app.get('/api/users', async (req, res) => {
