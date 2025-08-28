@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit, Award } from 'lucide-react';
+import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit, Award, Upload, X, FileText, AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PartnerStats {
   totalCustomers: number;
@@ -67,28 +73,48 @@ export default function RevenueSharingDashboard() {
     refetchInterval: 30000,
   });
 
-  const createNewPartner = async () => {
-    const partnerData = {
-      companyName: prompt('Partner Company Name:'),
-      contactEmail: prompt('Partner Email:'),
-      tier: 'bronze'
-    };
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    companyName: '',
+    contactName: '',
+    contactEmail: '',
+    phone: '',
+    website: '',
+    businessType: '',
+    tier: 'bronze',
+    commissionRate: '15',
+    contractTerms: '',
+    notes: ''
+  });
 
-    if (partnerData.companyName && partnerData.contactEmail) {
-      try {
-        const response = await fetch('/api/partners', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(partnerData),
+  const createNewPartner = async (formData: any) => {
+    try {
+      const response = await fetch('/api/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setShowCreateModal(false);
+        setCreateFormData({
+          companyName: '',
+          contactName: '',
+          contactEmail: '',
+          phone: '',
+          website: '',
+          businessType: '',
+          tier: 'bronze',
+          commissionRate: '15',
+          contractTerms: '',
+          notes: ''
         });
-
-        if (response.ok) {
-          // Refresh data
-          window.location.reload();
-        }
-      } catch (error) {
-        alert('Failed to create partner');
+        // Refresh data
+        window.location.reload();
       }
+    } catch (error) {
+      alert('Failed to create partner');
     }
   };
 
@@ -153,13 +179,24 @@ export default function RevenueSharingDashboard() {
                 Manage partner network and track revenue performance
               </p>
             </div>
-            <button
-              onClick={createNewPartner}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Partner
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBulkImportModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                data-testid="button-bulk-import"
+              >
+                <Upload className="h-4 w-4" />
+                Bulk Import
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                data-testid="button-add-partner"
+              >
+                <Plus className="h-4 w-4" />
+                Add Partner
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -434,6 +471,229 @@ export default function RevenueSharingDashboard() {
           </div>
         )}
       </div>
+
+      {/* Advanced Partner Creation Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Create New Partner
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="companyName">Company Name *</Label>
+                <Input
+                  id="companyName"
+                  value={createFormData.companyName}
+                  onChange={(e) => setCreateFormData({...createFormData, companyName: e.target.value})}
+                  placeholder="Acme Corporation"
+                  data-testid="input-company-name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="contactName">Contact Name *</Label>
+                <Input
+                  id="contactName"
+                  value={createFormData.contactName}
+                  onChange={(e) => setCreateFormData({...createFormData, contactName: e.target.value})}
+                  placeholder="John Smith"
+                  data-testid="input-contact-name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="contactEmail">Email Address *</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  value={createFormData.contactEmail}
+                  onChange={(e) => setCreateFormData({...createFormData, contactEmail: e.target.value})}
+                  placeholder="john@acme.com"
+                  data-testid="input-contact-email"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={createFormData.phone}
+                  onChange={(e) => setCreateFormData({...createFormData, phone: e.target.value})}
+                  placeholder="+1 (555) 123-4567"
+                  data-testid="input-phone"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  value={createFormData.website}
+                  onChange={(e) => setCreateFormData({...createFormData, website: e.target.value})}
+                  placeholder="https://acme.com"
+                  data-testid="input-website"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="businessType">Business Type</Label>
+                <Select value={createFormData.businessType} onValueChange={(value) => setCreateFormData({...createFormData, businessType: value})}>
+                  <SelectTrigger data-testid="select-business-type">
+                    <SelectValue placeholder="Select business type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technology">Technology</SelectItem>
+                    <SelectItem value="consulting">Consulting</SelectItem>
+                    <SelectItem value="marketing">Marketing Agency</SelectItem>
+                    <SelectItem value="sales">Sales Organization</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="tier">Partner Tier</Label>
+                <Select value={createFormData.tier} onValueChange={(value) => setCreateFormData({...createFormData, tier: value})}>
+                  <SelectTrigger data-testid="select-tier">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bronze">Bronze (15%)</SelectItem>
+                    <SelectItem value="silver">Silver (20%)</SelectItem>
+                    <SelectItem value="gold">Gold (25%)</SelectItem>
+                    <SelectItem value="platinum">Platinum (30%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="commissionRate">Commission Rate (%)</Label>
+                <Input
+                  id="commissionRate"
+                  type="number"
+                  value={createFormData.commissionRate}
+                  onChange={(e) => setCreateFormData({...createFormData, commissionRate: e.target.value})}
+                  placeholder="15"
+                  min="0"
+                  max="100"
+                  data-testid="input-commission-rate"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="contractTerms">Contract Terms</Label>
+              <Textarea
+                id="contractTerms"
+                value={createFormData.contractTerms}
+                onChange={(e) => setCreateFormData({...createFormData, contractTerms: e.target.value})}
+                placeholder="Additional contract terms and conditions..."
+                rows={3}
+                data-testid="textarea-contract-terms"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={createFormData.notes}
+                onChange={(e) => setCreateFormData({...createFormData, notes: e.target.value})}
+                placeholder="Internal notes about this partner..."
+                rows={2}
+                data-testid="textarea-notes"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setShowCreateModal(false)} data-testid="button-cancel">
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => createNewPartner(createFormData)}
+              disabled={!createFormData.companyName || !createFormData.contactName || !createFormData.contactEmail}
+              data-testid="button-create-partner"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Create Partner
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Import Modal */}
+      <Dialog open={showBulkImportModal} onOpenChange={setShowBulkImportModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Bulk Import Partners
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Upload a CSV file with partner information
+              </p>
+              <Button variant="outline" data-testid="button-choose-file">
+                <Upload className="h-4 w-4 mr-2" />
+                Choose File
+              </Button>
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    CSV Format Requirements
+                  </h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-200 mb-3">
+                    Your CSV file should include these columns:
+                  </p>
+                  <ul className="text-xs text-blue-600 dark:text-blue-300 space-y-1">
+                    <li>• companyName (required)</li>
+                    <li>• contactName (required)</li>
+                    <li>• contactEmail (required)</li>
+                    <li>• phone (optional)</li>
+                    <li>• website (optional)</li>
+                    <li>• businessType (optional)</li>
+                    <li>• tier (bronze, silver, gold, platinum)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between">
+              <Button variant="outline" data-testid="button-download-template">
+                <FileText className="h-4 w-4 mr-2" />
+                Download Template
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowBulkImportModal(false)} data-testid="button-cancel-import">
+                  Cancel
+                </Button>
+                <Button disabled data-testid="button-import-partners">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Import Partners
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
