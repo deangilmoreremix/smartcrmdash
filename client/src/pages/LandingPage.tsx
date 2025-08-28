@@ -77,31 +77,35 @@ const LandingPage = () => {
   }, []);  // Empty dependency array ensures this only runs once
   
   return (
-    <div className="bg-white content-stable relative z-0">
+    <div className="bg-white content-stable">
       <LandingHeader />
       
-      {/* Hero Section */}
-      <div className="relative z-10">
-        <ParallaxHero />
-      </div>
-      
-      {/* Client logos */}
-      <div className="relative z-10">
-        <ClientLogos />
-      </div>
-      
-      {/* Feature Demo Section with interactive components */}
-      <div className="relative z-10">
-        <FeatureDemo />
-      </div>
-      
-      {/* Interactive Features Grid */}
-      <ScrollAnimationWrapper animation="fade-up">
-        <InteractiveFeaturesGrid />
-      </ScrollAnimationWrapper>
+      {/* Main Content Area */}
+      <main className="landing-content">
+        {/* Hero Section */}
+        <section className="landing-section">
+          <ParallaxHero />
+        </section>
+        
+        {/* Client logos */}
+        <section className="landing-section">
+          <ClientLogos />
+        </section>
+        
+        {/* Feature Demo Section with interactive components */}
+        <section className="landing-section">
+          <FeatureDemo />
+        </section>
+        
+        {/* Interactive Features Grid */}
+        <section className="landing-section">
+          <ScrollAnimationWrapper animation="fade-up">
+            <InteractiveFeaturesGrid />
+          </ScrollAnimationWrapper>
+        </section>
       
       {/* Stats Counter Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
+        <section className="landing-section py-16 bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
         <ParticleBackground particleCount={30} />
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-in">
@@ -154,7 +158,7 @@ const LandingPage = () => {
       </section>
       
       {/* Interactive Dashboard Demo Section */}
-      <section className="py-16 bg-white overflow-hidden relative z-10">
+        <section className="landing-section py-16 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
@@ -190,7 +194,7 @@ const LandingPage = () => {
       </section>
       
       {/* Additional Product Demo Section */}
-      <section className="py-16 bg-gray-50 overflow-hidden relative z-10">
+        <section className="landing-section py-16 bg-gray-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
@@ -530,6 +534,8 @@ const LandingPage = () => {
           </ScrollAnimationWrapper>
         </div>
       </section>
+      
+      </main>
       
       <LandingFooter />
     </div>

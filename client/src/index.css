@@ -44,11 +44,44 @@ iframe[src*="replit"] {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Ensure proper scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Dropdown scroll fixes */
 .dropdown-open {
   overflow: visible !important;
+}
+
+/* Fix for landing page sections */
+.landing-section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure header doesn't block content */
+.landing-content {
+  padding-top: 80px;
+}
+
+/* Fix parallax and animation performance */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.animation-fix {
+  transform: translateZ(0);
 }
 
 /* Custom scrollbar for dark mode */

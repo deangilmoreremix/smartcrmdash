@@ -25,7 +25,7 @@ const LandingHeader = () => {
   }, []);
 
   return (
-    <header className={`fixed w-full top-0 z-[9999] transition-all duration-300 ${
+    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
     }`}>
       <div className="container mx-auto px-4">
@@ -49,7 +49,7 @@ const LandingHeader = () => {
               </button>
               
               {featuresOpen && (
-                <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-[10000]">
+                <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-[100]">
                   <div className="grid grid-cols-2 gap-2">
                     <Link to="/features/ai-tools" className="p-2 hover:bg-gray-50 rounded-md text-gray-700 hover:text-blue-600 transition-colors flex items-center">
                       AI Sales Tools
@@ -117,7 +117,7 @@ const LandingHeader = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 relative z-[10001]">
+          <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 relative z-[60]">
             <nav className="flex flex-col space-y-2 pt-4">
               <Link to="/features/ai-tools" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
                 AI Sales Tools
