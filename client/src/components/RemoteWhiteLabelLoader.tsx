@@ -7,20 +7,20 @@ interface RemoteWhiteLabelLoaderProps {
   showHeader?: boolean;
 }
 
-const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({ 
-  showHeader = false 
+const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
+  showHeader = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const REMOTE_URL = 'https://moonlit-tarsier-239e70.netlify.app';
   const IFRAME_ID = 'wl-remote-iframe';
-  
+
   const { manualRefresh, checkForUpdates, isChecking } = useRemoteAppUpdates(
-    IFRAME_ID, 
-    REMOTE_URL, 
+    IFRAME_ID,
+    REMOTE_URL,
     true // Enable auto-refresh
   );
 
@@ -56,67 +56,123 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full overflow-auto">
       {showHeader && (
-        <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">White Label Suite</h3>
-            {isConnected ? (
-              <div className="flex items-center text-green-600 text-xs">
-                <Wifi className="w-3 h-3 mr-1" />
-                Connected
+        <div style={{ backgroundColor: '#f8f9fa', padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: isConnected ? '#10b981' : '#ef4444'
+              }}>
+                {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
               </div>
-            ) : (
-              <div className="flex items-center text-gray-500 text-xs">
-                <WifiOff className="w-3 h-3 mr-1" />
-                {isLoading ? 'Loading...' : 'Disconnected'}
-              </div>
-            )}
+
+              <button
+                onClick={handleRefresh}
+                disabled={isChecking}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  backgroundColor: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: isChecking ? 'not-allowed' : 'pointer',
+                  opacity: isChecking ? 0.6 : 1
+                }}
+              >
+                <RefreshCw size={12} style={{ animation: isChecking ? 'spin 1s linear infinite' : 'none' }} />
+                {isChecking ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
+
+            <a
+              href={REMOTE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                backgroundColor: 'transparent',
+                color: '#667eea',
+                border: '1px solid #667eea',
+                borderRadius: '6px',
+                fontSize: '12px',
+                textDecoration: 'none'
+              }}
+            >
+              <ExternalLink size={12} />
+              Open in New Tab
+            </a>
           </div>
-          
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3 h-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
         </div>
       )}
 
-      <div className="flex-1 relative">
-        {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-red-50 dark:bg-red-900/20">
-            <div className="text-center p-4">
-              <div className="text-red-600 mb-2">
-                <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">White Label Suite Unavailable</h4>
-              <p className="text-xs text-red-600 dark:text-red-300 mb-2">{error}</p>
-              <button
-                onClick={handleRefresh}
-                className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        )}
+      {error && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          color: '#dc2626',
+          padding: '12px',
+          textAlign: 'center',
+          fontSize: '14px',
+          borderBottom: '1px solid #fecaca'
+        }}>
+          {error}
+        </div>
+      )}
 
-        <iframe
-          id={IFRAME_ID}
-          ref={iframeRef}
-          src={REMOTE_URL}
-          className="w-full h-full border-0"
-          title="White Label Suite"
-          allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
-          loading="lazy"
-        />
-      </div>
+      {isLoading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+          backgroundColor: '#f9fafb'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid #e5e7eb',
+              borderTop: '4px solid #667eea',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 12px'
+            }}></div>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Loading White Label Suite...</p>
+          </div>
+        </div>
+      )}
+
+      <iframe
+        ref={iframeRef}
+        id={IFRAME_ID}
+        src={REMOTE_URL}
+        style={{
+          width: '100%',
+          height: showHeader ? 'calc(100vh - 60px)' : '100vh',
+          minHeight: '800px',
+          border: 'none',
+          display: isLoading ? 'none' : 'block',
+          overflow: 'auto'
+        }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        loading="lazy"
+        title="White Label Management Suite"
+        scrolling="yes"
+      />
     </div>
   );
 };

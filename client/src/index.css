@@ -73,6 +73,51 @@ body {
   padding-top: 80px;
 }
 
+/* WL Dropdown specific fixes */
+.wl-dropdown {
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+}
+
+.wl-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wl-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wl-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.wl-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Iframe scroll fixes */
+iframe {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iframe inside dropdowns */
+.dropdown-iframe-container {
+  position: relative;
+  height: 100%;
+  overflow: auto;
+}
+
+.dropdown-iframe-container iframe {
+  position: relative;
+  height: 100% !important;
+  min-height: 600px !important;
+  overflow: auto !important;
+}
+
 /* Fix parallax and animation performance */
 .gpu-accelerated {
   transform: translateZ(0);

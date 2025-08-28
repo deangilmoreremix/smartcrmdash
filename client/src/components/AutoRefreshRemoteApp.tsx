@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw, ExternalLink, X, Clock, Play, Pause } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -115,7 +114,7 @@ const AutoRefreshRemoteApp: React.FC<AutoRefreshRemoteAppProps> = ({
       <div className={`flex items-center justify-between p-3 border-b ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
         <div className="flex items-center space-x-4">
           <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
-          
+
           {/* Auto-refresh controls */}
           <div className="flex items-center space-x-2">
             <button
@@ -170,7 +169,7 @@ const AutoRefreshRemoteApp: React.FC<AutoRefreshRemoteAppProps> = ({
           >
             <RefreshCw size={16} />
           </button>
-          
+
           <button 
             onClick={() => window.open(src, '_blank')}
             className={`p-2 rounded-md transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-600'}`}
@@ -178,7 +177,7 @@ const AutoRefreshRemoteApp: React.FC<AutoRefreshRemoteAppProps> = ({
           >
             <ExternalLink size={16} />
           </button>
-          
+
           {onClose && (
             <button 
               onClick={onClose}
@@ -202,6 +201,11 @@ const AutoRefreshRemoteApp: React.FC<AutoRefreshRemoteAppProps> = ({
           allow={allow}
           sandbox={sandbox}
           allowFullScreen={allowFullscreen}
+          scrolling="yes" // Added to ensure scrolling is enabled
+          style={{
+            minHeight: '600px', // Added a minimum height to ensure content is visible and scrollable
+            overflow: 'auto' // Ensures that scrollbars appear if content exceeds the frame
+          }}
           onLoad={() => {
             setLastRefreshed(Date.now());
             try {
