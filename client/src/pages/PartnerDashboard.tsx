@@ -286,7 +286,7 @@ export default function PartnerDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <Badge className={getTierBadgeColor(partnerStats?.tier || 'bronze')} size="lg">
+                  <Badge className={getTierBadgeColor(partnerStats?.tier || 'bronze')}>
                     {(partnerStats?.tier || 'Bronze').toUpperCase()} PARTNER
                   </Badge>
                   <div className="text-2xl font-bold mt-2">
