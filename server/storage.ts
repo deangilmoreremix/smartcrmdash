@@ -1,4 +1,4 @@
-import { profiles, type Profile, type InsertProfile } from "@shared/schema";
+import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -14,16 +14,38 @@ export interface IStorage {
   getUser(id: string): Promise<Profile | undefined>;
   getUserByUsername(username: string): Promise<Profile | undefined>;
   createUser(user: InsertProfile & { id: string }): Promise<Profile>;
+
+  // Partner Management Methods
+  getPartners(): Promise<Partner[]>;
+  getPartner(id: string): Promise<Partner | undefined>;
+  createPartner(partner: InsertPartner): Promise<Partner>;
+  updatePartner(id: string, updates: Partial<Partner>): Promise<Partner | undefined>;
+  getPartnerStats(partnerId: string): Promise<any>;
+  getPartnerCustomers(partnerId: string): Promise<any[]>;
+  getPartnerCommissions(partnerId: string): Promise<Commission[]>;
+  getPartnerTiers(): Promise<PartnerTier[]>;
+  getFeaturePackages(): Promise<FeaturePackage[]>;
+  createFeaturePackage(pkg: any): Promise<FeaturePackage>;
+  getRevenueAnalytics(): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
   private profiles: Map<string, Profile>;
+  private partners: Map<string, Partner>;
+  private partnerTiers: Map<string, PartnerTier>;
+  private commissions: Map<string, Commission>;
+  private featurePackages: Map<string, FeaturePackage>;
 
   constructor() {
     this.profiles = new Map();
+    this.partners = new Map();
+    this.partnerTiers = new Map();
+    this.commissions = new Map();
+    this.featurePackages = new Map();
     
     // Initialize with test data for role migration testing
     this.initializeTestData();
+    this.initializePartnerTestData();
   }
 
   private initializeTestData() {
@@ -95,6 +117,114 @@ export class MemStorage implements IStorage {
     });
   }
 
+  private initializePartnerTestData() {
+    // Initialize Partner Tiers
+    const tiers: PartnerTier[] = [
+      {
+        id: 'tier-bronze',
+        name: 'Bronze Partner',
+        slug: 'bronze',
+        commissionRate: '15.00',
+        minimumRevenue: '0.00',
+        features: ['Basic CRM Access', 'Email Support', 'Partner Portal'],
+        benefits: ['15% commission', 'Basic marketing materials'],
+        color: '#CD7F32',
+        priority: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'tier-silver',
+        name: 'Silver Partner',
+        slug: 'silver',
+        commissionRate: '20.00',
+        minimumRevenue: '5000.00',
+        features: ['Advanced CRM Access', 'Priority Support', 'Custom Branding'],
+        benefits: ['20% commission', 'Co-marketing opportunities'],
+        color: '#C0C0C0',
+        priority: 2,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'tier-gold',
+        name: 'Gold Partner',
+        slug: 'gold',
+        commissionRate: '25.00',
+        minimumRevenue: '15000.00',
+        features: ['Premium CRM Access', 'Dedicated Support', 'White Label'],
+        benefits: ['25% commission', 'Joint sales opportunities'],
+        color: '#FFD700',
+        priority: 3,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    tiers.forEach(tier => this.partnerTiers.set(tier.id, tier));
+
+    // Initialize Test Partners
+    const testPartners: Partner[] = [
+      {
+        id: 'partner-001',
+        companyName: 'TechSolutions Inc.',
+        contactName: 'John Smith',
+        contactEmail: 'john@techsolutions.com',
+        phone: '+1-555-123-4567',
+        website: 'https://techsolutions.com',
+        businessType: 'Technology Consulting',
+        status: 'active',
+        tier: 'silver',
+        commissionRate: '20.00',
+        totalRevenue: '8500.00',
+        totalCommissions: '1700.00',
+        customerCount: 12,
+        brandingConfig: {
+          logo: '/assets/partners/techsolutions-logo.png',
+          primaryColor: '#3B82F6',
+          secondaryColor: '#1E40AF'
+        },
+        contractDetails: {
+          startDate: '2024-01-15',
+          contractDuration: '12 months',
+          autoRenewal: true
+        },
+        payoutSettings: {
+          method: 'bank_transfer',
+          frequency: 'monthly',
+          minimumPayout: 100
+        },
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date(),
+        profileId: '550e8400-e29b-41d4-a716-446655440000'
+      }
+    ];
+
+    testPartners.forEach(partner => this.partners.set(partner.id, partner));
+
+    // Initialize Feature Packages
+    const packages: FeaturePackage[] = [
+      {
+        id: 'pkg-basic',
+        name: 'Basic CRM Package',
+        description: 'Essential CRM features for small businesses',
+        features: ['Contact Management', 'Deal Tracking', 'Basic Reporting'],
+        price: '29.99',
+        billingCycle: 'monthly',
+        isActive: true,
+        targetTier: 'bronze',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    packages.forEach(pkg => this.featurePackages.set(pkg.id, pkg));
+    console.log(`Initialized ${this.partnerTiers.size} partner tiers, ${this.partners.size} partners, ${this.featurePackages.size} feature packages`);
+  }
+
   async getProfile(id: string): Promise<Profile | undefined> {
     return this.profiles.get(id);
   }
@@ -153,6 +283,153 @@ export class MemStorage implements IStorage {
     
     this.profiles.set(id, updated);
     return updated;
+  }
+
+  // Partner Management Methods Implementation
+  async getPartners(): Promise<Partner[]> {
+    return Array.from(this.partners.values());
+  }
+
+  async getPartner(id: string): Promise<Partner | undefined> {
+    return this.partners.get(id);
+  }
+
+  async createPartner(insertPartner: InsertPartner): Promise<Partner> {
+    const id = 'partner-' + Date.now();
+    const partner: Partner = {
+      id,
+      companyName: insertPartner.companyName,
+      contactName: insertPartner.contactName,
+      contactEmail: insertPartner.contactEmail,
+      phone: insertPartner.phone || null,
+      website: insertPartner.website || null,
+      businessType: insertPartner.businessType || null,
+      status: insertPartner.status || 'pending',
+      tier: insertPartner.tier || 'bronze',
+      commissionRate: insertPartner.commissionRate || '15.00',
+      totalRevenue: insertPartner.totalRevenue || '0.00',
+      totalCommissions: insertPartner.totalCommissions || '0.00',
+      customerCount: insertPartner.customerCount || 0,
+      brandingConfig: insertPartner.brandingConfig || null,
+      contractDetails: insertPartner.contractDetails || null,
+      payoutSettings: insertPartner.payoutSettings || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      profileId: insertPartner.profileId || null
+    };
+    this.partners.set(id, partner);
+    return partner;
+  }
+
+  async updatePartner(id: string, updates: Partial<Partner>): Promise<Partner | undefined> {
+    const existing = this.partners.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.partners.set(id, updated);
+    return updated;
+  }
+
+  async getPartnerStats(partnerId: string): Promise<any> {
+    const partner = this.partners.get(partnerId);
+    if (!partner) return null;
+
+    return {
+      partnerId,
+      totalRevenue: partner.totalRevenue,
+      totalCommissions: partner.totalCommissions,
+      customerCount: partner.customerCount,
+      conversionRate: 0.15,
+      monthlyGrowth: 0.08,
+      tier: partner.tier,
+      commissionRate: partner.commissionRate,
+      status: partner.status
+    };
+  }
+
+  async getPartnerCustomers(partnerId: string): Promise<any[]> {
+    // Mock customer data for development
+    return [
+      {
+        id: 'customer-001',
+        name: 'Acme Corp',
+        email: 'contact@acme.com',
+        value: 2500,
+        status: 'active',
+        acquisitionDate: '2024-01-15'
+      }
+    ];
+  }
+
+  async getPartnerCommissions(partnerId: string): Promise<Commission[]> {
+    return Array.from(this.commissions.values()).filter(
+      commission => commission.partnerId === partnerId
+    );
+  }
+
+  async getPartnerTiers(): Promise<PartnerTier[]> {
+    return Array.from(this.partnerTiers.values()).sort((a, b) => a.priority - b.priority);
+  }
+
+  async getFeaturePackages(): Promise<FeaturePackage[]> {
+    return Array.from(this.featurePackages.values());
+  }
+
+  async createFeaturePackage(pkg: any): Promise<FeaturePackage> {
+    const id = 'pkg-' + Date.now();
+    const featurePackage: FeaturePackage = {
+      id,
+      name: pkg.name,
+      description: pkg.description || null,
+      features: pkg.features || [],
+      price: pkg.price || null,
+      billingCycle: pkg.billingCycle || 'monthly',
+      isActive: pkg.isActive !== undefined ? pkg.isActive : true,
+      targetTier: pkg.targetTier || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.featurePackages.set(id, featurePackage);
+    return featurePackage;
+  }
+
+  async getRevenueAnalytics(): Promise<any> {
+    const partners = Array.from(this.partners.values());
+    const totalRevenue = partners.reduce((sum, p) => sum + parseFloat(p.totalRevenue), 0);
+    const totalCommissions = partners.reduce((sum, p) => sum + parseFloat(p.totalCommissions), 0);
+    const totalCustomers = partners.reduce((sum, p) => sum + p.customerCount, 0);
+
+    return {
+      totalRevenue,
+      totalCommissions,
+      totalPartners: partners.length,
+      activePartners: partners.filter(p => p.status === 'active').length,
+      totalCustomers,
+      averageCommissionRate: 0.20,
+      monthlyGrowth: 0.12,
+      topPerformingTier: 'gold',
+      metrics: {
+        revenue: {
+          current: totalRevenue,
+          previousMonth: totalRevenue * 0.9,
+          growth: 0.10
+        },
+        commissions: {
+          current: totalCommissions,
+          previousMonth: totalCommissions * 0.9,
+          growth: 0.10
+        },
+        partners: {
+          current: partners.length,
+          previousMonth: Math.max(1, partners.length - 1),
+          growth: partners.length > 1 ? 0.05 : 0
+        }
+      }
+    };
   }
 }
 

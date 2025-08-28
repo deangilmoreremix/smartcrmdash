@@ -405,7 +405,7 @@ export type InsertEntitlement = z.infer<typeof insertEntitlementSchema>;
 
 // Partners table
 export const partners = pgTable("partners", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   companyName: text("company_name").notNull(),
   contactName: text("contact_name").notNull(),
   contactEmail: text("contact_email").notNull().unique(),
@@ -428,7 +428,7 @@ export const partners = pgTable("partners", {
 
 // Partner Tiers configuration
 export const partnerTiers = pgTable("partner_tiers", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull().unique(), // Bronze Partner, Silver Partner, etc.
   slug: text("slug").notNull().unique(), // bronze, silver, gold, platinum
   commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
@@ -444,8 +444,8 @@ export const partnerTiers = pgTable("partner_tiers", {
 
 // Commission tracking
 export const commissions = pgTable("commissions", {
-  id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  partnerId: uuid("partner_id").references(() => partners.id).notNull(),
   dealId: integer("deal_id").references(() => deals.id),
   customerId: integer("customer_id").references(() => contacts.id),
   type: text("type").notNull(), // one_time, recurring, bonus
@@ -464,8 +464,8 @@ export const commissions = pgTable("commissions", {
 
 // Payout management
 export const payouts = pgTable("payouts", {
-  id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  partnerId: uuid("partner_id").references(() => partners.id).notNull(),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   commissionsCount: integer("commissions_count").default(0),
   paymentMethod: text("payment_method"), // stripe, paypal, bank_transfer, check
@@ -482,8 +482,8 @@ export const payouts = pgTable("payouts", {
 
 // Partner customers - tracks customer attribution
 export const partnerCustomers = pgTable("partner_customers", {
-  id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  partnerId: uuid("partner_id").references(() => partners.id).notNull(),
   customerId: integer("customer_id").references(() => contacts.id).notNull(),
   referralCode: text("referral_code"),
   acquisitionDate: timestamp("acquisition_date").defaultNow(),
@@ -497,7 +497,7 @@ export const partnerCustomers = pgTable("partner_customers", {
 
 // Feature packages for partner tiers
 export const featurePackages = pgTable("feature_packages", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description"),
   features: text("features").array(),
@@ -511,8 +511,8 @@ export const featurePackages = pgTable("feature_packages", {
 
 // Partner performance metrics
 export const partnerMetrics = pgTable("partner_metrics", {
-  id: serial("id").primaryKey(),
-  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  partnerId: uuid("partner_id").references(() => partners.id).notNull(),
   month: integer("month").notNull(),
   year: integer("year").notNull(),
   newCustomers: integer("new_customers").default(0),
@@ -533,6 +533,10 @@ export const partnersRelations = relations(partners, ({ one, many }) => ({
   profile: one(profiles, {
     fields: [partners.profileId],
     references: [profiles.id],
+  }),
+  tier: one(partnerTiers, {
+    fields: [partners.tier],
+    references: [partnerTiers.slug],
   }),
   commissions: many(commissions),
   payouts: many(payouts),

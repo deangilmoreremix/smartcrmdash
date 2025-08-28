@@ -1090,6 +1090,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register bulk import routes
   registerBulkImportRoutes(app);
 
+  // Partner Management API Endpoints
+  
+  // Get all partners
+  app.get('/api/partners', async (req, res) => {
+    try {
+      const partners = await storage.getPartners();
+      res.json(partners);
+    } catch (error) {
+      console.error('Failed to fetch partners:', error);
+      res.status(500).json({ error: 'Failed to fetch partners' });
+    }
+  });
+
+  // Get partner by ID
+  app.get('/api/partners/:id', async (req, res) => {
+    try {
+      const partner = await storage.getPartner(req.params.id);
+      if (!partner) {
+        return res.status(404).json({ error: 'Partner not found' });
+      }
+      res.json(partner);
+    } catch (error) {
+      console.error('Failed to fetch partner:', error);
+      res.status(500).json({ error: 'Failed to fetch partner' });
+    }
+  });
+
+  // Create new partner
+  app.post('/api/partners', async (req, res) => {
+    try {
+      const partner = await storage.createPartner(req.body);
+      res.status(201).json(partner);
+    } catch (error) {
+      console.error('Failed to create partner:', error);
+      res.status(500).json({ error: 'Failed to create partner' });
+    }
+  });
+
+  // Update partner
+  app.put('/api/partners/:id', async (req, res) => {
+    try {
+      const partner = await storage.updatePartner(req.params.id, req.body);
+      if (!partner) {
+        return res.status(404).json({ error: 'Partner not found' });
+      }
+      res.json(partner);
+    } catch (error) {
+      console.error('Failed to update partner:', error);
+      res.status(500).json({ error: 'Failed to update partner' });
+    }
+  });
+
+  // Partner onboarding
+  app.post('/api/partners/onboard', async (req, res) => {
+    try {
+      const { brandingConfig, ...partnerData } = req.body;
+      
+      const newPartner = await storage.createPartner({
+        ...partnerData,
+        brandingConfig,
+        status: 'pending',
+        tier: 'bronze',
+        profileId: 'dev-user-12345'
+      });
+
+      res.status(201).json({
+        success: true,
+        partner: newPartner,
+        message: 'Partner application submitted successfully'
+      });
+    } catch (error) {
+      console.error('Partner onboarding failed:', error);
+      res.status(500).json({ error: 'Failed to process partner application' });
+    }
+  });
+
+  // Get partner statistics
+  app.get('/api/partners/:id/stats', async (req, res) => {
+    try {
+      const stats = await storage.getPartnerStats(req.params.id);
+      res.json(stats);
+    } catch (error) {
+      console.error('Failed to fetch partner stats:', error);
+      res.status(500).json({ error: 'Failed to fetch partner statistics' });
+    }
+  });
+
+  // Get all feature packages
+  app.get('/api/feature-packages', async (req, res) => {
+    try {
+      const packages = await storage.getFeaturePackages();
+      res.json(packages);
+    } catch (error) {
+      console.error('Failed to fetch feature packages:', error);
+      res.status(500).json({ error: 'Failed to fetch feature packages' });
+    }
+  });
+
+  // Create feature package
+  app.post('/api/feature-packages', async (req, res) => {
+    try {
+      const package_ = await storage.createFeaturePackage(req.body);
+      res.status(201).json(package_);
+    } catch (error) {
+      console.error('Failed to create feature package:', error);
+      res.status(500).json({ error: 'Failed to create feature package' });
+    }
+  });
+
+  // Get partner commissions
+  app.get('/api/partners/:id/commissions', async (req, res) => {
+    try {
+      const commissions = await storage.getPartnerCommissions(req.params.id);
+      res.json(commissions);
+    } catch (error) {
+      console.error('Failed to fetch commissions:', error);
+      res.status(500).json({ error: 'Failed to fetch commissions' });
+    }
+  });
+
+  // Get all partner tiers
+  app.get('/api/partner-tiers', async (req, res) => {
+    try {
+      const tiers = await storage.getPartnerTiers();
+      res.json(tiers);
+    } catch (error) {
+      console.error('Failed to fetch partner tiers:', error);
+      res.status(500).json({ error: 'Failed to fetch partner tiers' });
+    }
+  });
+
+  // Get revenue analytics
+  app.get('/api/revenue/analytics', async (req, res) => {
+    try {
+      const analytics = await storage.getRevenueAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Failed to fetch revenue analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch revenue analytics' });
+    }
+  });
+
   // Entitlements API routes
   app.get('/api/entitlements/check', async (req, res) => {
     try {
