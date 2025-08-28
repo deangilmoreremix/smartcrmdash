@@ -401,6 +401,258 @@ export type InsertAiQuery = z.infer<typeof insertAiQuerySchema>;
 export type Entitlement = typeof entitlements.$inferSelect;
 export type InsertEntitlement = z.infer<typeof insertEntitlementSchema>;
 
+// Partner-related tables for Revenue Sharing & Partner Management
+
+// Partners table
+export const partners = pgTable("partners", {
+  id: serial("id").primaryKey(),
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name").notNull(),
+  contactEmail: text("contact_email").notNull().unique(),
+  phone: text("phone"),
+  website: text("website"),
+  businessType: text("business_type"),
+  status: text("status").default("pending"), // pending, active, suspended, terminated
+  tier: text("tier").default("bronze"), // bronze, silver, gold, platinum
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("15.00"),
+  totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).default("0.00"),
+  totalCommissions: decimal("total_commissions", { precision: 12, scale: 2 }).default("0.00"),
+  customerCount: integer("customer_count").default(0),
+  brandingConfig: json("branding_config"), // Logo, colors, custom domain
+  contractDetails: json("contract_details"), // Terms, conditions, etc.
+  payoutSettings: json("payout_settings"), // Payment method, schedule, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  profileId: uuid("profile_id").references(() => profiles.id), // Partner owner
+});
+
+// Partner Tiers configuration
+export const partnerTiers = pgTable("partner_tiers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // Bronze Partner, Silver Partner, etc.
+  slug: text("slug").notNull().unique(), // bronze, silver, gold, platinum
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
+  minimumRevenue: decimal("minimum_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  features: text("features").array(), // Array of feature names
+  benefits: text("benefits").array(), // Array of benefit descriptions
+  color: text("color"), // UI color scheme
+  priority: integer("priority").default(1), // For ordering
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Commission tracking
+export const commissions = pgTable("commissions", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  dealId: integer("deal_id").references(() => deals.id),
+  customerId: integer("customer_id").references(() => contacts.id),
+  type: text("type").notNull(), // one_time, recurring, bonus
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  rate: decimal("rate", { precision: 5, scale: 2 }), // Commission rate used
+  baseAmount: decimal("base_amount", { precision: 10, scale: 2 }), // Original amount before commission
+  status: text("status").default("pending"), // pending, approved, paid, cancelled
+  description: text("description"),
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  createdAt: timestamp("created_at").defaultNow(),
+  approvedAt: timestamp("approved_at"),
+  paidAt: timestamp("paid_at"),
+  profileId: uuid("profile_id").references(() => profiles.id), // System user who created
+});
+
+// Payout management
+export const payouts = pgTable("payouts", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  commissionsCount: integer("commissions_count").default(0),
+  paymentMethod: text("payment_method"), // stripe, paypal, bank_transfer, check
+  paymentDetails: json("payment_details"), // Payment-specific information
+  status: text("status").default("pending"), // pending, processing, completed, failed, cancelled
+  scheduledDate: timestamp("scheduled_date"),
+  processedAt: timestamp("processed_at"),
+  failureReason: text("failure_reason"),
+  externalTransactionId: text("external_transaction_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  processedBy: uuid("processed_by").references(() => profiles.id),
+});
+
+// Partner customers - tracks customer attribution
+export const partnerCustomers = pgTable("partner_customers", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  customerId: integer("customer_id").references(() => contacts.id).notNull(),
+  referralCode: text("referral_code"),
+  acquisitionDate: timestamp("acquisition_date").defaultNow(),
+  lifetime_value: decimal("lifetime_value", { precision: 10, scale: 2 }).default("0.00"),
+  status: text("status").default("active"), // active, churned, suspended
+  source: text("source"), // How customer was acquired
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Feature packages for partner tiers
+export const featurePackages = pgTable("feature_packages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  features: text("features").array(),
+  price: decimal("price", { precision: 8, scale: 2 }),
+  billingCycle: text("billing_cycle"), // monthly, yearly, one_time
+  isActive: boolean("is_active").default(true),
+  targetTier: text("target_tier"), // Which partner tier this is for
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Partner performance metrics
+export const partnerMetrics = pgTable("partner_metrics", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id).notNull(),
+  month: integer("month").notNull(),
+  year: integer("year").notNull(),
+  newCustomers: integer("new_customers").default(0),
+  totalCustomers: integer("total_customers").default(0),
+  monthlyRevenue: decimal("monthly_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).default("0.00"),
+  commissionsEarned: decimal("commissions_earned", { precision: 10, scale: 2 }).default("0.00"),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0.00"),
+  churnRate: decimal("churn_rate", { precision: 5, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  partnerMonthYearIdx: sql`CREATE UNIQUE INDEX IF NOT EXISTS partner_month_year_idx ON ${table} (partner_id, month, year)`,
+}));
+
+// Relations for partner tables
+export const partnersRelations = relations(partners, ({ one, many }) => ({
+  profile: one(profiles, {
+    fields: [partners.profileId],
+    references: [profiles.id],
+  }),
+  commissions: many(commissions),
+  payouts: many(payouts),
+  customers: many(partnerCustomers),
+  metrics: many(partnerMetrics),
+}));
+
+export const partnerTiersRelations = relations(partnerTiers, ({ many }) => ({
+  partners: many(partners),
+}));
+
+export const commissionsRelations = relations(commissions, ({ one }) => ({
+  partner: one(partners, {
+    fields: [commissions.partnerId],
+    references: [partners.id],
+  }),
+  deal: one(deals, {
+    fields: [commissions.dealId],
+    references: [deals.id],
+  }),
+  customer: one(contacts, {
+    fields: [commissions.customerId],
+    references: [contacts.id],
+  }),
+  profile: one(profiles, {
+    fields: [commissions.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+export const payoutsRelations = relations(payouts, ({ one, many }) => ({
+  partner: one(partners, {
+    fields: [payouts.partnerId],
+    references: [partners.id],
+  }),
+  processedBy: one(profiles, {
+    fields: [payouts.processedBy],
+    references: [profiles.id],
+  }),
+}));
+
+export const partnerCustomersRelations = relations(partnerCustomers, ({ one }) => ({
+  partner: one(partners, {
+    fields: [partnerCustomers.partnerId],
+    references: [partners.id],
+  }),
+  customer: one(contacts, {
+    fields: [partnerCustomers.customerId],
+    references: [contacts.id],
+  }),
+}));
+
+export const partnerMetricsRelations = relations(partnerMetrics, ({ one }) => ({
+  partner: one(partners, {
+    fields: [partnerMetrics.partnerId],
+    references: [partners.id],
+  }),
+}));
+
+// Insert schemas for partner tables
+export const insertPartnerSchema = createInsertSchema(partners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPartnerTierSchema = createInsertSchema(partnerTiers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommissionSchema = createInsertSchema(commissions).omit({
+  id: true,
+  createdAt: true,
+  approvedAt: true,
+  paidAt: true,
+});
+
+export const insertPayoutSchema = createInsertSchema(payouts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  processedAt: true,
+});
+
+export const insertPartnerCustomerSchema = createInsertSchema(partnerCustomers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFeaturePackageSchema = createInsertSchema(featurePackages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPartnerMetricsSchema = createInsertSchema(partnerMetrics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Backward compatibility - keep User types but make them reference Profile
 export type User = Profile;
 export type InsertUser = InsertProfile;
+
+// Export partner types
+export type Partner = typeof partners.$inferSelect;
+export type InsertPartner = z.infer<typeof insertPartnerSchema>;
+export type PartnerTier = typeof partnerTiers.$inferSelect;
+export type InsertPartnerTier = z.infer<typeof insertPartnerTierSchema>;
+export type Commission = typeof commissions.$inferSelect;
+export type InsertCommission = z.infer<typeof insertCommissionSchema>;
+export type Payout = typeof payouts.$inferSelect;
+export type InsertPayout = z.infer<typeof insertPayoutSchema>;
+export type PartnerCustomer = typeof partnerCustomers.$inferSelect;
+export type InsertPartnerCustomer = z.infer<typeof insertPartnerCustomerSchema>;
+export type FeaturePackage = typeof featurePackages.$inferSelect;
+export type InsertFeaturePackage = z.infer<typeof insertFeaturePackageSchema>;
+export type PartnerMetrics = typeof partnerMetrics.$inferSelect;
+export type InsertPartnerMetrics = z.infer<typeof insertPartnerMetricsSchema>;
