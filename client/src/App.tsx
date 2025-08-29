@@ -106,6 +106,9 @@ const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
 const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
 const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
+// User Account Management
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+
 // Demo Pages for Sales
 const DashboardDemo = lazy(() => import('./pages/demos/DashboardDemo'));
 const ContactsDemo = lazy(() => import('./pages/demos/ContactsDemo'));
@@ -813,6 +816,14 @@ const AppContent = () => {
                             <Route
                               path="/settings"
                               element={<PlaceholderPage title="Settings" description="Settings page coming soon" />}
+                            />
+                            <Route
+                              path="/profile"
+                              element={
+                                <ProtectedRoute>
+                                  <UserProfilePage />
+                                </ProtectedRoute>
+                              }
                             />
                             <Route
                               path="/bulk-import"
