@@ -43,7 +43,7 @@ export class DealService {
     // Configure to use Supabase Edge Functions as required by remote apps
     this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
     this.supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-    this.baseURL = `${this.supabaseUrl}/functions/v1/deals`;
+    this.baseURL = `${this.supabaseUrl}/functions/v1`;
 
     // Only fall back to mock mode if Supabase is not configured
     if (!this.supabaseUrl || !this.supabaseKey) {
@@ -147,7 +147,7 @@ export class DealService {
     }
   }
 
-  // Map Supabase deal to our Deal interface
+  // Map Supabase deal to our Deal interface  
   private mapSupabaseDeal(supabaseDeal: any): Deal {
     return {
       id: supabaseDeal.id,
