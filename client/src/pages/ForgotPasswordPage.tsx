@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
-
-// Create Supabase client directly
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const ForgotPasswordPage: React.FC = () => {
   const { isDark } = useTheme();
