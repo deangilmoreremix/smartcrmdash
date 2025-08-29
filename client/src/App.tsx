@@ -163,6 +163,7 @@ import SemanticSearchFeaturePage from './pages/landing/FeaturePage/SemanticSearc
 import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyzerFeaturePage';
 
 import './styles/design-system.css';
+import VoiceAgentWidget from './components/VoiceAgentWidget';
 
 
 // Reusable placeholder
@@ -899,6 +900,12 @@ const AppContent = () => {
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
+                      
+                      {/* Voice Agent Widget - Available on all pages */}
+                      <VoiceAgentWidget 
+                        position="bottom-right"
+                        minimizable={true}
+                      />
                     </AIProvider>
                     </DashboardLayoutProvider>
                   </NavigationProvider>

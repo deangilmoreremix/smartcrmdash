@@ -201,6 +201,38 @@ iframe {
   }
 }
 
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(156 163 175 / 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(156 163 175 / 0.7);
+}
+
+/* ElevenLabs Voice Agent Widget Styling */
+elevenlabs-convai {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Ensure widget respects dark mode */
+.dark elevenlabs-convai {
+  filter: brightness(0.9) contrast(1.1);
+}
+
 /* Light mode scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

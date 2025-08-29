@@ -18,3 +18,14 @@ declare global {
     originalWindowOpen?: typeof window.open;
   }
 }
+
+// ElevenLabs Conversational AI Widget Types
+declare namespace JSX {
+  interface IntrinsicElements {
+    'elevenlabs-convai': {
+      'agent-id': string;
+      style?: React.CSSProperties;
+      className?: string;
+    };
+  }
+}
