@@ -83,7 +83,7 @@ const Login: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <Link 
-                  to="/auth/forgot-password"
+                  to="/forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
                 >
                   Forgot Password?
@@ -103,7 +103,7 @@ const Login: React.FC = () => {
               }`}>
                 Don't have an account?{' '}
                 <Link 
-                  to="/auth/register"
+                  to="/signup"
                   className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
                 >
                   Sign Up

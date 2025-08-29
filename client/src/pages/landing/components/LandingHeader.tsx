@@ -89,7 +89,7 @@ const LandingHeader = () => {
             <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors">
               FAQ
             </HashLink>
-            <Link to="/login" className="text-gray-700 hover:text-blue-600 transition-colors">
+            <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors">
               Sign In
             </Link>
             <Link 
@@ -99,7 +99,7 @@ const LandingHeader = () => {
               🚀 Dashboard
             </Link>
             <Link 
-              to="/register" 
+              to="/signup" 
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Get Started
@@ -134,11 +134,11 @@ const LandingHeader = () => {
               <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
                 FAQ
               </HashLink>
-              <Link to="/login" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
                 Sign In
               </Link>
               <Link 
-                to="/register" 
+                to="/signup" 
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
               >
                 Get Started

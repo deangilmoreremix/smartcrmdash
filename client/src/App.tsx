@@ -249,7 +249,8 @@ const AppContent = () => {
                         <Route path="/demo/contacts" element={<ContactsDemo />} />
                         <Route path="/demo/pipeline" element={<PipelineDemo />} />
                         <Route path="/dev" element={<DevBypassPage />} />
-                        <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* Added ForgotPasswordPage route */}
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Added ResetPasswordPage route */}
 
                         {/* All other routes with navbar */}

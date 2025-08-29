@@ -26,7 +26,7 @@ const ForgotPasswordPage: React.FC = () => {
       const client = await getSupabaseClient();
       
       const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/auth/recovery`
       });
 
       if (error) {
