@@ -123,6 +123,7 @@ const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 // Authentication imports
 import Login from './pages/Auth/Login';
 const CallbackPage = lazy(() => import('./pages/Auth/CallbackPage'));
+const EmailChangePage = lazy(() => import('./pages/Auth/EmailChangePage'));
 const ConfirmPage = lazy(() => import('./pages/Auth/ConfirmPage'));
 const RecoveryPage = lazy(() => import('./pages/Auth/RecoveryPage'));
 import TaskCalendarView from './pages/TaskCalendarView'; // Assuming this path
@@ -242,6 +243,7 @@ const AppContent = () => {
                         <Route path="/auth/callback" element={<CallbackPage />} />
                         <Route path="/auth/confirm" element={<ConfirmPage />} />
                         <Route path="/auth/recovery" element={<RecoveryPage />} />
+                        <Route path="/auth/email-change" element={<EmailChangePage />} />
                         <Route path="/demo" element={<LandingPage />} />
 
                         {/* Interactive Demos for Sales */}

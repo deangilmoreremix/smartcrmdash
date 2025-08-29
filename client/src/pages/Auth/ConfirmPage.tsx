@@ -58,7 +58,7 @@ export default function ConfirmPage() {
           }
 
           // Redirect to reset password page
-          navigate('/auth/reset-password');
+          navigate('/reset-password');
 
         } else if (type === 'email_change') {
           // Email change confirmation

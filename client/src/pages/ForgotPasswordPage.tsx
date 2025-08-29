@@ -21,11 +21,15 @@ const ForgotPasswordPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      // Dynamically import Supabase client to avoid potential issues during initial render if not needed elsewhere
-      const { getSupabaseClient } = await import('../lib/supabase');
-      const client = await getSupabaseClient();
+      // Import the supabase client directly
+      const { supabase } = await import('../lib/supabase');
       
-      const { error } = await client.auth.resetPasswordForEmail(email, {
+      if (!supabase) {
+        setError('Authentication service is not configured.');
+        return;
+      }
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/recovery`
       });
 

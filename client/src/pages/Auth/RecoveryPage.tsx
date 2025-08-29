@@ -18,21 +18,22 @@ export default function RecoveryPage() {
   useEffect(() => {
     const validateRecoveryToken = async () => {
       try {
-        // Get the session from URL hash parameters
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session) {
-          // Try to handle hash-based tokens from email links
-          const hash = window.location.hash;
-          if (hash && hash.includes('access_token')) {
-            // Token is valid, show password reset form
+        // supabase-js v2 automatically detects the session in the URL by default.
+        // Check URL parameters for recovery token
+        const url = new URL(window.location.href);
+        const type = url.searchParams.get("type");
+        const accessToken = url.searchParams.get("access_token");
+
+        if (type === "recovery" && accessToken) {
+          // Optionally verify session:
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
             setIsValidToken(true);
           } else {
-            setError('Invalid or expired recovery link. Please request a new password reset.');
+            setIsValidToken(true); // still allow; supabase will accept updateUser after link click
           }
         } else {
-          // Valid session means we can proceed with password reset
-          setIsValidToken(true);
+          setError('Invalid or expired recovery link. Please request a new password reset.');
         }
       } catch (err) {
         console.error('Recovery validation error:', err);

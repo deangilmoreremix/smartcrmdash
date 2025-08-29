@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, options?: any) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 }
@@ -149,14 +149,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, options?: any) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: 'https://smart-crm.videoremix.io/auth/callback'
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          data: {
+            app_context: 'smartcrm',
+            email_template_set: 'smartcrm',
+            ...options?.data
+          }
         }
       });
       return { error };
@@ -189,7 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://smart-crm.videoremix.io/auth/callback',
+        redirectTo: `${window.location.origin}/auth/recovery`,
       });
       return { error };
     } catch (error) {
