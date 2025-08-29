@@ -1,4 +1,4 @@
-import { Deal } from '../types/deal';
+import { Deal, DealStage, DealActivity } from '../types/deal';
 import { cacheService } from './cache.service';
 import { logger } from './logger.service';
 import { validationService } from './validation.service';
@@ -6,10 +6,8 @@ import { validationService } from './validation.service';
 export interface DealFilters {
   search?: string;
   stage?: string;
-  status?: string;
   assignee?: string;
   priority?: string;
-  hasAIScore?: boolean;
   limit?: number;
   offset?: number;
   sortBy?: string;
@@ -27,7 +25,6 @@ export interface DealListResponse {
 export interface DealStats {
   total: number;
   byStage: Record<string, number>;
-  byStatus: Record<string, number>;
   byPriority: Record<string, number>;
   totalValue: number;
   averageValue: number;
@@ -91,31 +88,38 @@ class DealService {
         title: 'Enterprise Software License',
         description: 'Annual software license renewal for Microsoft Office Suite',
         value: 125000,
-        stage: 'proposal',
-        status: 'active',
+        stage: {
+          id: 'proposal',
+          name: 'Proposal',
+          order: 3,
+          color: '#FFA500',
+          probability: 75,
+          isActive: true
+        },
         priority: 'high',
         contactId: '1',
-        contactName: 'Jane Doe',
-        company: 'Microsoft',
-        assigneeId: 'user-1',
-        assigneeName: 'John Smith',
-        expectedCloseDate: '2024-02-15',
+        companyId: 'comp-1',
+        assignedUserId: 'user-1',
+        expectedCloseDate: new Date('2024-02-15'),
         probability: 75,
-        aiScore: 85,
+        source: 'referral',
+        currency: 'USD',
         tags: ['enterprise', 'software', 'renewal'],
+        customFields: {},
         activities: [
           {
             id: 'a1',
+            dealId: '1',
             type: 'meeting',
             title: 'Initial Discovery Call',
             description: 'Discussed requirements and budget',
-            date: '2024-01-15',
-            userId: 'user-1',
-            userName: 'John Smith'
+            createdAt: new Date('2024-01-15'),
+            createdBy: 'user-1'
           }
         ],
-        createdAt: '2024-01-10T10:00:00Z',
-        updatedAt: '2024-01-20T15:30:00Z'
+        attachments: [],
+        createdAt: new Date('2024-01-10T10:00:00Z'),
+        updatedAt: new Date('2024-01-20T15:30:00Z')
       }
     ];
     
@@ -149,21 +153,28 @@ class DealService {
       title: supabaseDeal.title || '',
       description: supabaseDeal.description || '',
       value: supabaseDeal.value || 0,
-      stage: supabaseDeal.stage || 'discovery',
-      status: supabaseDeal.status || 'active',
+      stage: supabaseDeal.stage || {
+        id: 'discovery',
+        name: 'Discovery',
+        order: 1,
+        color: '#3B82F6',
+        probability: 25,
+        isActive: true
+      },
       priority: supabaseDeal.priority || 'medium',
       contactId: supabaseDeal.contact_id || '',
-      contactName: supabaseDeal.contact_name || '',
-      company: supabaseDeal.company || '',
-      assigneeId: supabaseDeal.assignee_id || '',
-      assigneeName: supabaseDeal.assignee_name || '',
-      expectedCloseDate: supabaseDeal.expected_close_date,
+      companyId: supabaseDeal.company_id || '',
+      assignedUserId: supabaseDeal.assigned_user_id || '',
+      expectedCloseDate: supabaseDeal.expected_close_date ? new Date(supabaseDeal.expected_close_date) : undefined,
       probability: supabaseDeal.probability || 0,
-      aiScore: supabaseDeal.ai_score,
+      source: supabaseDeal.source || 'other',
+      currency: supabaseDeal.currency || 'USD',
       tags: supabaseDeal.tags || [],
+      customFields: supabaseDeal.custom_fields || {},
       activities: supabaseDeal.activities || [],
-      createdAt: supabaseDeal.created_at,
-      updatedAt: supabaseDeal.updated_at
+      attachments: supabaseDeal.attachments || [],
+      createdAt: new Date(supabaseDeal.created_at),
+      updatedAt: new Date(supabaseDeal.updated_at)
     };
   }
   
@@ -174,18 +185,16 @@ class DealService {
       description: deal.description,
       value: deal.value,
       stage: deal.stage,
-      status: deal.status,
       priority: deal.priority,
       contact_id: deal.contactId,
-      contact_name: deal.contactName,
-      company: deal.company,
-      assignee_id: deal.assigneeId,
-      assignee_name: deal.assigneeName,
-      expected_close_date: deal.expectedCloseDate,
+      company_id: deal.companyId,
+      assigned_user_id: deal.assignedUserId,
+      expected_close_date: deal.expectedCloseDate?.toISOString(),
       probability: deal.probability,
-      ai_score: deal.aiScore,
+      source: deal.source,
+      currency: deal.currency,
       tags: deal.tags,
-      // Note: activities stored separately or as JSON if supported
+      custom_fields: deal.customFields,
       updated_at: new Date().toISOString()
     };
   }
@@ -202,8 +211,8 @@ class DealService {
       const newDeal: Deal = {
         id: crypto.randomUUID(),
         ...sanitized as any,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       deals.push(newDeal);
@@ -249,8 +258,8 @@ class DealService {
       const newDeal: Deal = {
         id: crypto.randomUUID(),
         ...sanitized as any,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       deals.push(newDeal);
@@ -342,7 +351,7 @@ class DealService {
       const updatedDeal: Deal = {
         ...deals[dealIndex],
         ...sanitized as any,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date()
       };
       
       deals[dealIndex] = updatedDeal;
@@ -397,7 +406,7 @@ class DealService {
       const updatedDeal: Deal = {
         ...deals[dealIndex],
         ...sanitized as any,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date()
       };
       
       deals[dealIndex] = updatedDeal;
@@ -478,27 +487,18 @@ class DealService {
         const search = filters.search.toLowerCase();
         deals = deals.filter(d => 
           d.title.toLowerCase().includes(search) ||
-          d.description.toLowerCase().includes(search) ||
-          d.company.toLowerCase().includes(search)
+          (d.description && d.description.toLowerCase().includes(search))
         );
       }
       
       if (filters.stage && filters.stage !== 'all') {
-        deals = deals.filter(d => d.stage === filters.stage);
-      }
-      
-      if (filters.status && filters.status !== 'all') {
-        deals = deals.filter(d => d.status === filters.status);
+        deals = deals.filter(d => 
+          typeof d.stage === 'string' ? d.stage === filters.stage : d.stage.id === filters.stage
+        );
       }
       
       if (filters.priority && filters.priority !== 'all') {
         deals = deals.filter(d => d.priority === filters.priority);
-      }
-      
-      if (filters.hasAIScore !== undefined) {
-        deals = deals.filter(d => 
-          filters.hasAIScore ? !!d.aiScore : !d.aiScore
-        );
       }
       
       // Apply sorting
@@ -553,7 +553,6 @@ class DealService {
     const stats: DealStats = {
       total: deals.length,
       byStage: {},
-      byStatus: {},
       byPriority: {},
       totalValue: 0,
       averageValue: 0,
@@ -565,10 +564,8 @@ class DealService {
 
     deals.forEach(deal => {
       // Count by stage
-      stats.byStage[deal.stage] = (stats.byStage[deal.stage] || 0) + 1;
-      
-      // Count by status
-      stats.byStatus[deal.status] = (stats.byStatus[deal.status] || 0) + 1;
+      const stageKey = typeof deal.stage === 'string' ? deal.stage : deal.stage.id;
+      stats.byStage[stageKey] = (stats.byStage[stageKey] || 0) + 1;
       
       // Count by priority
       stats.byPriority[deal.priority] = (stats.byPriority[deal.priority] || 0) + 1;
@@ -576,7 +573,7 @@ class DealService {
       // Calculate values
       totalValue += deal.value;
       
-      if (deal.stage === 'won') {
+      if (stageKey === 'won') {
         wonDeals++;
       }
     });
