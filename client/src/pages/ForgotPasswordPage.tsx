@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 
 const ForgotPasswordPage: React.FC = () => {
@@ -21,11 +21,8 @@ const ForgotPasswordPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      // Import the supabase client directly
-      const { supabase } = await import('../lib/supabase');
-      
       if (!supabase) {
-        setError('Authentication service is not configured.');
+        setError('Authentication service is not configured. Please contact support.');
         return;
       }
       
@@ -34,12 +31,14 @@ const ForgotPasswordPage: React.FC = () => {
       });
 
       if (error) {
-        setError(error.message);
+        console.error('Reset password error:', error);
+        setError(error.message || 'Failed to send password reset email.');
       } else {
         setSuccess('Check your email for the password reset link!');
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      console.error('Password reset exception:', err);
+      setError('An unexpected error occurred. Please try again or contact support.');
     } finally {
       setLoading(false);
     }

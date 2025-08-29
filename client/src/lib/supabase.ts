@@ -13,29 +13,22 @@ if (!hasValidCredentials) {
   console.warn('Supabase credentials not configured. Using development mode.');
 }
 
-// Create client with proper configuration - singleton pattern to prevent multiple instances
-let supabaseInstance: any = null;
-
+// Create client with proper configuration
 export const supabase = hasValidCredentials
-  ? (() => {
-      if (!supabaseInstance) {
-        supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-          auth: {
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: true,
-            flowType: 'pkce',
-            storageKey: 'smartcrm-auth-token'
-          },
-          global: {
-            headers: {
-              'apikey': supabaseAnonKey,
-            },
-          },
-        });
-      }
-      return supabaseInstance;
-    })()
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+        storageKey: 'smartcrm-auth-token'
+      },
+      global: {
+        headers: {
+          'apikey': supabaseAnonKey,
+        },
+      },
+    })
   : null;
 
 // Export a flag to check if Supabase is available
