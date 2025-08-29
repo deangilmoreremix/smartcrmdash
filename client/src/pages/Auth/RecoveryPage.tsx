@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { Loader2, Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+
+// Create Supabase client directly
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function RecoveryPage() {
   const navigate = useNavigate();
@@ -26,11 +31,15 @@ export default function RecoveryPage() {
 
         if (type === "recovery" && accessToken) {
           // Optionally verify session:
-          const { data } = await supabase.auth.getSession();
-          if (data.session) {
-            setIsValidToken(true);
-          } else {
-            setIsValidToken(true); // still allow; supabase will accept updateUser after link click
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+              setIsValidToken(true);
+            } else {
+              setIsValidToken(true); // still allow; supabase will accept updateUser after link click
+            }
+          } catch (sessionErr) {
+            setIsValidToken(true); // still proceed with password reset
           }
         } else {
           setError('Invalid or expired recovery link. Please request a new password reset.');

@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { User, Session, AuthError, createClient } from '@supabase/supabase-js';
+
+// Create Supabase client directly to avoid null issues
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    storageKey: 'smartcrm-auth-token'
+  }
+});
 
 interface AuthContextType {
   user: User | null;
@@ -57,9 +69,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        // Check if Supabase is properly configured
-        if (!supabase) {
-          console.warn('Supabase client not initialized, using fallback authentication');
+        // Check if Supabase credentials are configured
+        if (!supabaseUrl || !supabaseAnonKey) {
+          console.warn('Supabase credentials not configured, using fallback authentication');
           // Set a mock user to prevent auth blocking
           setUser({ id: 'demo-user', email: 'demo@example.com' } as any);
           setLoading(false);

@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabase } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+
+// Create Supabase client directly
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const ForgotPasswordPage: React.FC = () => {
   const { isDark } = useTheme();
@@ -21,24 +26,20 @@ const ForgotPasswordPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      if (!supabase) {
-        setError('Authentication service is not configured. Please contact support.');
-        return;
-      }
-      
+      // Call the Supabase password reset method directly
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/recovery`
       });
-
+      
       if (error) {
-        console.error('Reset password error:', error);
+        console.error('Password reset error:', error);
         setError(error.message || 'Failed to send password reset email.');
       } else {
         setSuccess('Check your email for the password reset link!');
       }
     } catch (err: any) {
       console.error('Password reset exception:', err);
-      setError('An unexpected error occurred. Please try again or contact support.');
+      setError(err.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
