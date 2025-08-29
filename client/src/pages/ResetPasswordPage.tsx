@@ -44,8 +44,8 @@ const ResetPasswordPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const client = await import('../lib/supabase').then(m => m.getSupabaseClient());
-      const { error } = await client.auth.updateUser({
+      const { supabase } = await import('../lib/supabase');
+      const { error } = await supabase.auth.updateUser({
         password: password
       });
       

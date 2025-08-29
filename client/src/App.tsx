@@ -117,9 +117,11 @@ const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
 // Added lazy import for IframeOverlapChecker
 const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 
-// Placeholder imports for routes that might not be implemented yet
+// Authentication imports
 import Login from './pages/Auth/Login';
 const CallbackPage = lazy(() => import('./pages/Auth/CallbackPage'));
+const ConfirmPage = lazy(() => import('./pages/Auth/ConfirmPage'));
+const RecoveryPage = lazy(() => import('./pages/Auth/RecoveryPage'));
 import TaskCalendarView from './pages/TaskCalendarView'; // Assuming this path
 import BusinessAnalyzer from './pages/BusinessAnalyzer'; // Assuming this path
 import DocumentCenter from './pages/DocumentCenter'; // Assuming this path
@@ -235,6 +237,8 @@ const AppContent = () => {
                         <Route path="/login" element={<SignInPage />} />
                         <Route path="/register" element={<SignUpPage />} />
                         <Route path="/auth/callback" element={<CallbackPage />} />
+                        <Route path="/auth/confirm" element={<ConfirmPage />} />
+                        <Route path="/auth/recovery" element={<RecoveryPage />} />
                         <Route path="/demo" element={<LandingPage />} />
 
                         {/* Interactive Demos for Sales */}
