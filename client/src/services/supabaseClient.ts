@@ -16,7 +16,7 @@ if (!hasValidCredentials) {
 // Create client with proper configuration
 let supabaseInstance: any = null;
 
-export const getSupabaseClient = () => {
+export function getSupabaseClient() {
   if (!hasValidCredentials) {
     console.warn('Supabase not configured properly');
     return null;
@@ -39,7 +39,7 @@ export const getSupabaseClient = () => {
     });
   }
   return supabaseInstance;
-};
+}
 
 // Export the client instance directly as well
 export const supabase = getSupabaseClient();

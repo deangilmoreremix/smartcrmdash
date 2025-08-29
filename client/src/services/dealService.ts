@@ -2,7 +2,7 @@ import { Deal, DealStage, DealActivity } from '../types/deal';
 import { cacheService } from './cache.service';
 import { logger } from './logger.service';
 import { validationService } from './validation.service';
-import { getSupabaseClient } from './supabaseClient';
+import { supabase } from './supabaseClient';
 
 export interface DealFilters {
   search?: string;
@@ -608,9 +608,7 @@ export class DealService {
     return deal;
   }
 
-  private getClient() {
-    return getSupabaseClient();
-  }
+  
 }
 
 export const dealService = new DealService();
