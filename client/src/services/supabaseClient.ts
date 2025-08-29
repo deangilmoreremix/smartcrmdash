@@ -4,6 +4,6 @@ export { supabase, isSupabaseConfigured, checkSupabaseConnection, auth } from '.
 
 // Also export getSupabaseClient for backward compatibility
 export const getSupabaseClient = () => {
-  const { supabase } = require('../lib/supabase');
+  // Use ES6 import instead of require for browser compatibility
   return supabase;
 };

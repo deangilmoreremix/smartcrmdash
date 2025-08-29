@@ -2,7 +2,7 @@ import { Deal, DealStage, DealActivity } from '../types/deal';
 import { cacheService } from './cache.service';
 import { logger } from './logger.service';
 import { validationService } from './validation.service';
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabase';
 
 export interface DealFilters {
   search?: string;
