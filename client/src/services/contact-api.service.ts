@@ -1,5 +1,5 @@
 import { Contact } from '../types/contact';
-import { cacheService } from './cacheService';
+import { cacheService } from './cache.service';
 import { logger } from '../utils/logger';
 import { validationService } from './validationService';
 
