@@ -1,7 +1,7 @@
 import { Deal } from '../types/deal';
-import { cacheService } from './cacheService';
-import { logger } from '../utils/logger';
-import { validationService } from './validationService';
+import { cacheService } from './cache.service';
+import { logger } from './logger.service';
+import { validationService } from './validation.service';
 
 export interface DealFilters {
   search?: string;
