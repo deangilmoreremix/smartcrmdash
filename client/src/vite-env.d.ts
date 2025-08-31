@@ -26,6 +26,18 @@ declare namespace JSX {
       'agent-id': string;
       style?: React.CSSProperties;
       className?: string;
+      ref?: React.RefObject<HTMLElement>;
+      onLoad?: () => void;
+      onError?: (error: any) => void;
+    };
+  }
+}
+
+// Declare the custom element for better TypeScript support
+declare global {
+  interface HTMLElementTagNameMap {
+    'elevenlabs-convai': HTMLElement & {
+      'agent-id': string;
     };
   }
 }

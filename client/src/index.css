@@ -226,11 +226,25 @@ elevenlabs-convai {
   height: 100% !important;
   border-radius: 12px !important;
   overflow: hidden !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
 }
 
 /* Ensure widget respects dark mode */
 .dark elevenlabs-convai {
   filter: brightness(0.9) contrast(1.1);
+}
+
+/* Force the widget to be visible and interactive */
+elevenlabs-convai * {
+  pointer-events: auto !important;
+}
+
+/* Ensure proper z-index for voice widget */
+.voice-widget-container {
+  z-index: 9999 !important;
+  position: fixed !important;
 }
 
 /* Light mode scrollbar */
