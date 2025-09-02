@@ -1,20 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { MessageCircle, Minimize2, X } from 'lucide-react';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'elevenlabs-convai': {
-        'agent-id': string;
-        style?: React.CSSProperties;
-        className?: string;
-        ref?: React.RefObject<HTMLElement>;
-        onLoad?: () => void;
-        onError?: (error: any) => void;
-      };
-    }
-  }
-}
+import { MessageCircle, Minimize2, X, Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
+import { useConversation } from '@elevenlabs/react';
 
 interface VoiceAgentWidgetProps {
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -29,53 +15,57 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadElevenLabsScript = useCallback(() => {
-    // Check if script already exists
-    const existingScript = document.querySelector('script[src*="convai-widget-embed"]');
-    if (existingScript) {
-      console.log('✅ ElevenLabs script already loaded');
-      setScriptLoaded(true);
-      return;
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log('✅ ElevenLabs conversation connected');
+      setError(null);
+    },
+    onDisconnect: () => {
+      console.log('🔌 ElevenLabs conversation disconnected');
+      setConversationId(null);
+    },
+    onMessage: (message) => {
+      console.log('💬 ElevenLabs message:', message);
+    },
+    onError: (error) => {
+      console.error('❌ ElevenLabs conversation error:', error);
+      setError('Connection failed. Please try again.');
     }
+  });
 
-    console.log('Loading ElevenLabs script...');
+  const startConversation = async () => {
+    try {
+      console.log('🎤 Starting ElevenLabs conversation...');
+      
+      // Request microphone access first
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      const id = await conversation.startSession({
+        agentId: agentId,
+        connectionType: 'webrtc',
+        userId: 'smartcrm-user-' + Date.now()
+      });
+      
+      setConversationId(id);
+      console.log('✅ Conversation started with ID:', id);
+    } catch (error) {
+      console.error('❌ Failed to start conversation:', error);
+      setError('Failed to start conversation. Please check microphone permissions.');
+    }
+  };
 
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
-    script.async = true;
-    script.type = 'text/javascript';
-
-    script.onload = () => {
-      console.log('✅ ElevenLabs script loaded successfully');
-      // Add a small delay to ensure the custom element is registered
-      setTimeout(() => {
-        setScriptLoaded(true);
-        setScriptError(false);
-      }, 500);
-    };
-
-    script.onerror = (error) => {
-      console.error('❌ Failed to load ElevenLabs script:', error);
-      setScriptError(true);
-      setScriptLoaded(false);
-    };
-
-    document.head.appendChild(script);
-  }, []);
-
-  useEffect(() => {
-    // Add a small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      loadElevenLabsScript();
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [loadElevenLabsScript]);
+  const endConversation = async () => {
+    try {
+      await conversation.endSession();
+      setConversationId(null);
+      console.log('🛑 Conversation ended');
+    } catch (error) {
+      console.error('❌ Failed to end conversation:', error);
+    }
+  };
 
   const getPositionClasses = () => {
     const baseClasses = 'fixed z-50 transition-all duration-300 ease-in-out';
@@ -143,18 +133,18 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
 
           {/* Content */}
           <div className="p-4">
-            {scriptError ? (
+            {error ? (
               <div className="text-center py-8">
                 <div className="text-red-500 mb-2">
                   <MessageCircle size={48} className="mx-auto opacity-50" />
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  Voice assistant temporarily unavailable
+                  {error}
                 </p>
                 <button
                   onClick={() => {
-                    setScriptError(false);
-                    loadElevenLabsScript();
+                    setError(null);
+                    startConversation();
                   }}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
                   data-testid="button-retry"
@@ -162,37 +152,66 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
                   Retry
                 </button>
               </div>
-            ) : !scriptLoaded ? (
-              <div className="text-center py-8">
-                <div className="animate-pulse">
-                  <MessageCircle size={48} className="mx-auto text-purple-600 mb-2" />
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Loading voice assistant...
-                </p>
-              </div>
             ) : (
               <>
                 <div className="mb-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     Ask me anything about your CRM or get help with your sales process.
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                    💡 If the voice assistant isn't responding, ensure your agent is configured as public in ElevenLabs dashboard.
-                  </p>
+                  <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-500">
+                    <div className={`h-2 w-2 rounded-full ${conversation.status === 'connected' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                    <span>{conversation.status === 'connected' ? 'Connected' : 'Disconnected'}</span>
+                    {conversation.isSpeaking && (
+                      <span className="text-purple-600 font-medium">• Speaking</span>
+                    )}
+                  </div>
                 </div>
 
-                {/* ElevenLabs Widget Container */}
-                <div className="voice-widget-container" style={{ minHeight: '200px', width: '100%' }}>
-                  <elevenlabs-convai 
-                    agent-id={agentId}
-                    style={{
-                      width: '100%',
-                      height: '200px',
-                      border: 'none',
-                      borderRadius: '8px'
-                    }}
-                  />
+                {/* Conversation Controls */}
+                <div className="voice-widget-container">
+                  {!conversationId ? (
+                    <div className="text-center py-6">
+                      <button
+                        onClick={startConversation}
+                        className="flex items-center space-x-2 mx-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+                        data-testid="button-start-conversation"
+                      >
+                        <Mic size={20} />
+                        <span>Start Voice Chat</span>
+                      </button>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Click to begin voice conversation
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <div className="mb-4">
+                        <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full ${conversation.isSpeaking ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                          {conversation.isSpeaking ? (
+                            <>
+                              <div className="animate-pulse">
+                                <Mic size={16} />
+                              </div>
+                              <span className="text-sm font-medium">AI is speaking...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mic size={16} />
+                              <span className="text-sm font-medium">Listening...</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={endConversation}
+                        className="flex items-center space-x-2 mx-auto px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        data-testid="button-end-conversation"
+                      >
+                        <PhoneOff size={20} />
+                        <span>End Call</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
