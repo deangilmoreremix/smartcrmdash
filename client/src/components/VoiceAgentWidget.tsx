@@ -50,8 +50,11 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
 
     script.onload = () => {
       console.log('✅ ElevenLabs script loaded successfully');
-      setScriptLoaded(true);
-      setScriptError(false);
+      // Add a small delay to ensure the custom element is registered
+      setTimeout(() => {
+        setScriptLoaded(true);
+        setScriptError(false);
+      }, 500);
     };
 
     script.onerror = (error) => {
@@ -177,8 +180,16 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
                 </div>
 
                 {/* ElevenLabs Widget Container */}
-                <div className="voice-widget-container">
-                  <elevenlabs-convai agent-id={agentId} />
+                <div className="voice-widget-container" style={{ minHeight: '200px', width: '100%' }}>
+                  <elevenlabs-convai 
+                    agent-id={agentId}
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      border: 'none',
+                      borderRadius: '8px'
+                    }}
+                  />
                 </div>
               </>
             )}
