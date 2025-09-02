@@ -45,9 +45,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (devSession && devToken) {
           try {
             const devUser = JSON.parse(devSession);
+            const devTokenData = JSON.parse(devToken);
             console.log('Using dev bypass session:', devUser.email);
+            
+            // Set both user and session properly
             setUser(devUser as any);
-            setSession({ user: devUser, access_token: 'dev-bypass-token' } as any);
+            setSession({
+              user: devUser,
+              access_token: devTokenData.access_token || 'dev-bypass-token',
+              refresh_token: devTokenData.refresh_token || 'dev-bypass-refresh',
+              expires_at: devTokenData.expires_at || (Date.now() + 24 * 60 * 60 * 1000)
+            } as any);
+            
             setLoading(false);
             return;
           } catch (e) {

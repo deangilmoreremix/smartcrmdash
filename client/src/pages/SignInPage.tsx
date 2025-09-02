@@ -42,6 +42,8 @@ const SignInPage: React.FC = () => {
     setError(null);
     
     try {
+      console.log('🚀 Starting dev bypass...');
+      
       const response = await fetch('/api/auth/dev-bypass', {
         method: 'POST',
         headers: {
@@ -50,6 +52,7 @@ const SignInPage: React.FC = () => {
       });
       
       const data = await response.json();
+      console.log('Dev bypass API response:', data);
       
       if (response.ok && data.success) {
         // Store dev session in localStorage for the auth context
@@ -63,16 +66,10 @@ const SignInPage: React.FC = () => {
         // Store additional dev user data
         localStorage.setItem('dev-user-session', JSON.stringify(data.user));
         
-        // Trigger auth state change if using auth context
-        if (signIn) {
-          await signIn(data.user.email, 'dev-bypass-password');
-        }
+        console.log('✅ Dev session stored, redirecting...');
         
-        // Small delay to ensure state updates
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-          window.location.reload(); // Force refresh to update auth state
-        }, 100);
+        // Force a page reload to reinitialize auth context
+        window.location.href = '/dashboard';
       } else {
         setError(data.message || 'Development bypass failed');
         setLoading(false);
@@ -192,21 +189,20 @@ const SignInPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Development Bypass Button - Only shows in development */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-4">
-              <button
-                onClick={handleDevBypass}
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-              >
-                🚀 Dev Bypass - Skip Authentication
-              </button>
-              <p className="text-xs text-center mt-2 text-gray-500">
-                Development mode only - bypasses authentication
-              </p>
-            </div>
-          )}
+          {/* Development Bypass Button - Always visible for testing */}
+          <div className="mt-4">
+            <button
+              onClick={handleDevBypass}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+              data-testid="button-dev-bypass"
+            >
+              🚀 Dev Bypass - Skip Authentication
+            </button>
+            <p className="text-xs text-center mt-2 text-gray-500">
+              Development mode - bypasses authentication ({window.location.hostname})
+            </p>
+          </div>
           
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
