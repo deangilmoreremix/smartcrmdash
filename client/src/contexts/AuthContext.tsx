@@ -202,8 +202,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
+      // Determine the correct redirect URL based on current environment
+      const currentOrigin = window.location.origin;
+      const isDevelopment = currentOrigin.includes('localhost') || 
+                           currentOrigin.includes('replit.dev') || 
+                           currentOrigin.includes('replit.app');
+      
+      const redirectUrl = isDevelopment 
+        ? `${currentOrigin}/auth/recovery`
+        : 'https://smart-crm.videoremix.io/auth/recovery';
+      
+      console.log('AuthContext resetPassword with redirect URL:', redirectUrl);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/recovery`,
+        redirectTo: redirectUrl,
       });
       return { error };
     } catch (error) {

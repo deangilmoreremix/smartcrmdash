@@ -15,8 +15,21 @@ const ForgotPasswordPage: React.FC = () => {
     setError(null);
 
     try {
+      // Determine the correct redirect URL based on current environment
+      const currentOrigin = window.location.origin;
+      const isDevelopment = currentOrigin.includes('localhost') || 
+                           currentOrigin.includes('replit.dev') || 
+                           currentOrigin.includes('replit.app');
+      
+      const redirectUrl = isDevelopment 
+        ? `${currentOrigin}/auth/recovery`
+        : 'https://smart-crm.videoremix.io/auth/recovery';
+      
+      console.log('Sending password reset with redirect URL:', redirectUrl);
+      console.log('Current origin:', currentOrigin, 'Is development:', isDevelopment);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/recovery`
+        redirectTo: redirectUrl
       });
       
       if (error) {

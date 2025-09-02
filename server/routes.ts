@@ -1449,7 +1449,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           invited_at: new Date().toISOString(),
           invited_by: 'admin' // Could be made dynamic based on current user
         },
-        redirectTo: 'https://smart-crm.videoremix.io/auth/callback'
+        redirectTo: req.get('origin') && req.get('origin')?.includes('localhost') || req.get('origin')?.includes('replit') 
+          ? `${req.get('origin')}/auth/callback`
+          : 'https://smart-crm.videoremix.io/auth/callback'
       });
 
       if (error) throw error;

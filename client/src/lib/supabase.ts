@@ -31,12 +31,24 @@ export const checkSupabaseConnection = async () => {
 // Auth helpers
 export const auth = {
   signUp: async (email: string, password: string, options?: any) => {
+    // Get dynamic redirect URL based on environment
+    const currentOrigin = window.location.origin;
+    const isDevelopment = currentOrigin.includes('localhost') || 
+                         currentOrigin.includes('replit.dev') || 
+                         currentOrigin.includes('replit.app');
+    
+    const emailRedirectTo = isDevelopment 
+      ? `${currentOrigin}/auth/callback`
+      : 'https://smart-crm.videoremix.io/auth/callback';
+
+    console.log('SignUp with emailRedirectTo:', emailRedirectTo);
+
     return await supabase.auth.signUp({
       email,
       password,
       options: {
         ...options,
-        emailRedirectTo: undefined, // Disable email verification redirect
+        emailRedirectTo,
         data: {
           app_context: 'smartcrm',
           email_template_set: 'smartcrm',
