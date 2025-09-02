@@ -2090,6 +2090,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ElevenLabs signed URL endpoint for private agents
+  app.get('/api/elevenlabs/signed-url', async (req, res) => {
+    try {
+      const agentId = req.query.agent_id || process.env.ELEVENLABS_AGENT_ID || 'agent_01jvwktgjsefkts3rv9jqwcx33';
+      
+      if (!process.env.ELEVENLABS_API_KEY) {
+        return res.status(500).json({ error: 'ElevenLabs API key not configured' });
+      }
+
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${agentId}`,
+        {
+          headers: {
+            // Requesting a signed url requires your ElevenLabs API key
+            // Do NOT expose your API key to the client!
+            "xi-api-key": process.env.ELEVENLABS_API_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('ElevenLabs API error:', response.status, errorText);
+        return res.status(500).json({ error: 'Failed to get signed URL from ElevenLabs' });
+      }
+
+      const body = await response.json();
+      res.json({ signed_url: body.signed_url });
+    } catch (error) {
+      console.error('Error getting ElevenLabs signed URL:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
     res.json({ message: 'CRM API is working', supabase: 'Edge Functions will handle AI operations' });

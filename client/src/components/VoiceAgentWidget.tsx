@@ -45,14 +45,36 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
       await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('🎤 Microphone access granted');
       
-      const id = await conversation.startSession({
-        agentId: agentId,
-        connectionType: 'webrtc',
-        userId: 'smartcrm-user-' + Date.now()
-      });
-      
-      setConversationId(id);
-      console.log('✅ Conversation started with ID:', id);
+      // Try public agent first (for public agents)
+      try {
+        const id = await conversation.startSession({
+          agentId: agentId,
+          connectionType: 'webrtc'
+        });
+        
+        setConversationId(id);
+        console.log('✅ Conversation started with public agent, ID:', id);
+        return;
+      } catch (publicError) {
+        console.log('🔐 Public agent failed, trying signed URL approach:', publicError);
+        
+        // Try signed URL approach for private agents
+        const response = await fetch(`/api/elevenlabs/signed-url?agent_id=${agentId}`);
+        if (!response.ok) {
+          throw new Error('Failed to get signed URL');
+        }
+        
+        const { signed_url } = await response.json();
+        console.log('🔗 Got signed URL, starting session...');
+        
+        const id = await conversation.startSession({
+          signedUrl: signed_url,
+          connectionType: 'websocket'
+        });
+        
+        setConversationId(id);
+        console.log('✅ Conversation started with signed URL, ID:', id);
+      }
     } catch (error) {
       console.error('❌ Failed to start conversation:', error);
       console.error('Error details:', error);
@@ -62,7 +84,7 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
         if (error.message.includes('Permission denied')) {
           setError('Microphone access denied. Please allow microphone permissions and try again.');
         } else if (error.message.includes('agent') || error.message.includes('authentication')) {
-          setError('Agent not available. Please ensure your ElevenLabs agent is configured as public.');
+          setError('Agent not available. Please ensure your ElevenLabs agent is configured as public or check API key.');
         } else {
           setError(`Connection failed: ${error.message}`);
         }
