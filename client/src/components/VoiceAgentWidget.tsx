@@ -216,11 +216,6 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
               </div>
             )}
 
-            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                Powered by ElevenLabs AI
-              </p>
-            </div>
           </div>
         </div>
       )}
