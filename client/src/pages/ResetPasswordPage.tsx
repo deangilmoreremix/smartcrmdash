@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { auth } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -17,9 +17,11 @@ const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if we have the access token in the URL
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
+    // Check if we have the access token in the URL search params (not hash)
+    const url = new URL(window.location.href);
+    const type = url.searchParams.get('type');
+    const accessToken = url.searchParams.get('access_token');
+    if (type !== 'recovery' || !accessToken) {
       setErrorMessage('Invalid or expired reset link. Please request a new password reset.');
     }
   }, []);
@@ -44,7 +46,6 @@ const ResetPasswordPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const { supabase } = await import('../lib/supabase');
       const { error } = await supabase.auth.updateUser({
         password: password
       });

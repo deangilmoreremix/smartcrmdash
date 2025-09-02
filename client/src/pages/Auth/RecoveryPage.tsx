@@ -154,7 +154,7 @@ export default function RecoveryPage() {
               {error || 'This password reset link has expired or is invalid. Please request a new one.'}
             </p>
             <button
-              onClick={() => navigate('/auth/forgot-password')}
+              onClick={() => navigate('/forgot-password')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
               data-testid="button-request-new-reset"
             >
