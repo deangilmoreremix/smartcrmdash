@@ -1303,6 +1303,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check admin status endpoint
+  app.get('/api/admin/check-status', async (req, res) => {
+    try {
+      const ADMIN_EMAILS = [
+        'victor@videoremix.io',
+        'samuel@videoremix.io', 
+        'dean@videoremix.io'
+      ];
+
+      const results = [];
+
+      for (const email of ADMIN_EMAILS) {
+        try {
+          // Get all users and find this one
+          const { data: users } = await supabase.auth.admin.listUsers();
+          const user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+          if (user) {
+            // Check profile
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+
+            results.push({
+              email,
+              status: 'found',
+              user_id: user.id,
+              email_confirmed: !!user.email_confirmed_at,
+              last_sign_in: user.last_sign_in_at,
+              auth_role: user.user_metadata?.role || 'none',
+              profile_role: profile?.role || 'none',
+              has_profile: !!profile,
+              can_sign_in: !!user.email_confirmed_at
+            });
+          } else {
+            results.push({
+              email,
+              status: 'not_found',
+              user_id: null,
+              email_confirmed: false,
+              last_sign_in: null,
+              auth_role: 'none',
+              profile_role: 'none',
+              has_profile: false,
+              can_sign_in: false
+            });
+          }
+        } catch (error: any) {
+          results.push({
+            email,
+            status: 'error',
+            error: error.message
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        admins: results,
+        summary: {
+          total: ADMIN_EMAILS.length,
+          found: results.filter(r => r.status === 'found').length,
+          confirmed: results.filter(r => r.email_confirmed).length,
+          can_sign_in: results.filter(r => r.can_sign_in).length
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Admin status check error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check admin status',
+        message: error.message
+      });
+    }
+  });
+
+  // Fix admin access endpoint
+  app.post('/api/admin/fix-access', async (req, res) => {
+    try {
+      const ADMIN_EMAILS = [
+        'victor@videoremix.io',
+        'samuel@videoremix.io', 
+        'dean@videoremix.io'
+      ];
+
+      const results = [];
+
+      for (const email of ADMIN_EMAILS) {
+        try {
+          console.log(`🔧 Fixing access for ${email}...`);
+          
+          // Check if user exists
+          const { data: users } = await supabase.auth.admin.listUsers();
+          let user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          
+          if (!user) {
+            // Create user
+            const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+              email: email,
+              email_confirm: true,
+              user_metadata: {
+                first_name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+                last_name: 'Admin',
+                role: 'super_admin',
+                app_context: 'smartcrm',
+                email_template_set: 'smartcrm'
+              }
+            });
+            
+            if (createError) throw createError;
+            user = newUser.user;
+            
+            console.log(`✅ Created user: ${email}`);
+          } else {
+            // Update existing user
+            const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, {
+              email_confirm: true,
+              user_metadata: {
+                ...user.user_metadata,
+                role: 'super_admin',
+                app_context: 'smartcrm',
+                email_template_set: 'smartcrm'
+              }
+            });
+            
+            if (updateError) throw updateError;
+            console.log(`✅ Updated user: ${email}`);
+          }
+          
+          // Ensure profile exists
+          if (user) {
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+            
+            if (!existingProfile) {
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .insert({
+                  id: user.id,
+                  username: email.split('@')[0],
+                  first_name: user.user_metadata?.first_name || email.split('@')[0],
+                  last_name: user.user_metadata?.last_name || 'Admin',
+                  role: 'super_admin',
+                  status: 'active'
+                });
+              
+              if (profileError) throw profileError;
+              console.log(`✅ Created profile: ${email}`);
+            } else {
+              const { error: profileUpdateError } = await supabase
+                .from('profiles')
+                .update({
+                  role: 'super_admin',
+                  status: 'active'
+                })
+                .eq('id', user.id);
+              
+              if (profileUpdateError) throw profileUpdateError;
+              console.log(`✅ Updated profile: ${email}`);
+            }
+            
+            // Generate magic link
+            const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+              type: 'magiclink',
+              email: email,
+              options: {
+                redirectTo: req.get('origin') 
+                  ? `${req.get('origin')}/auth/callback`
+                  : 'https://smartcrm-videoremix.replit.app/auth/callback'
+              }
+            });
+            
+            results.push({
+              email,
+              status: 'fixed',
+              user_id: user.id,
+              magic_link: linkData?.properties?.action_link || null,
+              message: 'Admin access configured successfully'
+            });
+          }
+        } catch (error: any) {
+          console.error(`❌ Failed to fix ${email}:`, error);
+          results.push({
+            email,
+            status: 'failed',
+            error: error.message
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: 'Admin access fix completed',
+        results,
+        dev_bypass_url: req.get('origin') 
+          ? `${req.get('origin')}/dev`
+          : 'https://smartcrm-videoremix.replit.app/dev'
+      });
+
+    } catch (error: any) {
+      console.error('Admin access fix error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fix admin access',
+        message: error.message
+      });
+    }
+  });
+
   // Admin management endpoints
   app.post('/api/admin/resend-confirmations', async (req, res) => {
     try {
