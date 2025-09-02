@@ -93,26 +93,8 @@ const LandingHeader = () => {
               Sign In
             </Link>
             <Link 
-              to="/dev" 
+              to="/dev-bypass" 
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              onClick={(e) => {
-                // Ensure bypass works by setting session immediately
-                try {
-                  const devUser = {
-                    id: 'dev-user-12345',
-                    email: 'dev@smartcrm.local',
-                    name: 'Development User',
-                    role: 'super_admin'
-                  };
-                  localStorage.setItem('dev-user-session', JSON.stringify(devUser));
-                  localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
-                    access_token: 'dev-bypass-token',
-                    user: devUser
-                  }));
-                } catch (error) {
-                  console.warn('Pre-bypass setup failed:', error);
-                }
-              }}
             >
               🚀 Dashboard
             </Link>

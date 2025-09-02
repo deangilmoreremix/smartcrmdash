@@ -38,53 +38,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
-        // Check for dev bypass session first
-        const devSession = localStorage.getItem('dev-user-session');
-        const devToken = localStorage.getItem('sb-supabase-auth-token');
-        
-        if (devSession && devToken) {
-          try {
-            const devUser = JSON.parse(devSession);
-            const devTokenData = JSON.parse(devToken);
-            console.log('Using dev bypass session:', devUser.email);
-            
-            // Set both user and session properly
-            setUser(devUser as any);
-            setSession({
-              user: devUser,
-              access_token: devTokenData.access_token || 'dev-bypass-token',
-              refresh_token: devTokenData.refresh_token || 'dev-bypass-refresh',
-              expires_at: devTokenData.expires_at || (Date.now() + 24 * 60 * 60 * 1000)
-            } as any);
-            
-            setLoading(false);
-            return;
-          } catch (e) {
-            console.warn('Invalid dev session, clearing...');
-            localStorage.removeItem('dev-user-session');
-            localStorage.removeItem('sb-supabase-auth-token');
-          }
-        }
+        // Check for dev session in localStorage
+        const checkDevSession = () => {
+          const devSession = localStorage.getItem('dev-user-session');
+          const devToken = localStorage.getItem('sb-supabase-auth-token');
 
-        // Check if Supabase is available
-        if (!supabase) {
-          console.warn('Supabase not configured, using fallback authentication');
-          // Set a mock user to prevent auth blocking
-          setUser({ id: 'demo-user', email: 'demo@example.com' } as any);
-          setLoading(false);
+          if (devSession && devToken) {
+            try {
+              const userData = JSON.parse(devSession);
+              const tokenData = JSON.parse(devToken);
+
+              console.log('Using dev bypass session:', userData.email);
+              setUser(userData);
+              setSession({
+                user: userData,
+                access_token: tokenData.access_token || 'dev-bypass-token',
+                refresh_token: tokenData.refresh_token || 'dev-bypass-refresh',
+                expires_at: tokenData.expires_at || (Date.now() + 24 * 60 * 60 * 1000)
+              } as any);
+              setLoading(false);
+              return true;
+            } catch (error) {
+              console.error('Invalid dev session data:', error);
+              localStorage.removeItem('dev-user-session');
+              localStorage.removeItem('sb-supabase-auth-token');
+            }
+          }
+          return false;
+        };
+
+        // First check for dev session
+        if (checkDevSession()) {
           return;
         }
 
-        // Get initial session with error handling
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Continue with normal Supabase auth if no dev session
+        const { data: { session: supabaseSession }, error: sessionError } = await supabase.auth.getSession();
 
-        if (error) {
-          console.warn('Auth session warning:', error);
+        if (sessionError) {
+          console.warn('Auth session warning:', sessionError);
           // Don't block the app, just log the warning
           setAuthError(null); // Clear error to prevent blocking
         } else {
-          setSession(session);
-          setUser(session?.user ?? null);
+          setSession(supabaseSession);
+          setUser(supabaseSession?.user ?? null);
           setAuthError(null);
         }
 
@@ -130,10 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      
+
       // Handle dev bypass special case
       if (password === 'dev-bypass-password') {
         const devSession = localStorage.getItem('dev-user-session');
@@ -144,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return { error: null };
         }
       }
-      
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -185,11 +183,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      
+
       // Clear dev session data
       localStorage.removeItem('dev-user-session');
       localStorage.removeItem('sb-supabase-auth-token');
-      
+
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
@@ -207,13 +205,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isDevelopment = currentOrigin.includes('localhost') || 
                            currentOrigin.includes('replit.dev') || 
                            currentOrigin.includes('replit.app');
-      
+
       const redirectUrl = isDevelopment 
         ? `${currentOrigin}/auth/recovery`
         : 'https://smart-crm.videoremix.io/auth/recovery';
-      
+
       console.log('AuthContext resetPassword with redirect URL:', redirectUrl);
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });

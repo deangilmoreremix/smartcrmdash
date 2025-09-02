@@ -66,15 +66,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Development bypass endpoint - Skip authentication in dev mode
+  // Development bypass endpoint - Only works in development
   app.post('/api/auth/dev-bypass', (req, res) => {
     if (process.env.NODE_ENV !== 'development') {
-      return res.status(403).json({
-        error: 'Dev bypass only available in development mode'
-      });
+      return res.status(404).json({ error: 'Not found' });
     }
 
-    // Create a temporary dev user session
+    // Return dev user with full permissions and session
     const devUser = {
       id: 'dev-user-12345',
       email: 'dev@smartcrm.local',
@@ -82,21 +80,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       firstName: 'Development',
       lastName: 'User',
       role: 'super_admin',
-      app_context: 'smartcrm',
-      avatar_url: null,
-      created_at: new Date().toISOString()
+      permissions: ['all'],
+      tenantId: 'development',
+      status: 'active',
+      lastActive: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      app_context: 'smartcrm'
+    };
+
+    const devSession = {
+      access_token: 'dev-bypass-token-' + Date.now(),
+      refresh_token: 'dev-bypass-refresh-' + Date.now(),
+      expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+      user: devUser
     };
 
     res.json({
       success: true,
       user: devUser,
-      session: {
-        access_token: 'dev-bypass-token-12345',
-        refresh_token: 'dev-bypass-refresh-12345',
-        expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-        user: devUser
-      },
-      message: 'Development bypass authentication successful'
+      session: devSession,
+      hasAccess: true,
+      permissions: ['all']
     });
   });
 
@@ -1091,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerBulkImportRoutes(app);
 
   // Partner Management API Endpoints
-  
+
   // Get all partners
   app.get('/api/partners', async (req, res) => {
     try {
@@ -1146,7 +1150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/partners/onboard', async (req, res) => {
     try {
       const { brandingConfig, ...partnerData } = req.body;
-      
+
       const newPartner = await storage.createPartner({
         ...partnerData,
         brandingConfig,
@@ -1532,7 +1536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Inline migration logic
       console.log('🔄 Starting user role migration...');
-      
+
       const SUPER_ADMIN_EMAILS = [
         'dean@videoremix.io',
         'victor@videoremix.io', 
@@ -1541,7 +1545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get all existing users from profiles table
       let users, fetchError;
-      
+
       if (process.env.NODE_ENV === 'development') {
         // Use local database via storage layer for development
         try {
@@ -1620,7 +1624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const update of updates) {
         try {
           let updateError = null;
-          
+
           if (process.env.NODE_ENV === 'development') {
             // Use storage layer for development
             try {
@@ -1652,13 +1656,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const message = `Migration complete! Successful: ${successCount}, Failed: ${errorCount}`;
       console.log(`🎉 ${message}`);
-      
+
       res.json({ 
         success: true, 
         message,
         stats: { successCount, errorCount, totalProcessed: users.length }
       });
-      
+
     } catch (error) {
       console.error('Role migration failed:', error);
       res.status(500).json({ error: 'Failed to migrate user roles' });
@@ -1669,7 +1673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/sync-metadata', async (req, res) => {
     try {
       console.log('🔄 Syncing Supabase Auth metadata with profile roles...');
-      
+
       // Get all profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -1721,13 +1725,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const message = `Metadata sync complete! Successful: ${successCount}, Failed: ${errorCount}`;
       console.log(`🎉 ${message}`);
-      
+
       res.json({ 
         success: true, 
         message,
         stats: { successCount, errorCount, totalProcessed: profiles.length }
       });
-      
+
     } catch (error) {
       console.error('Metadata sync failed:', error);
       res.status(500).json({ error: 'Failed to sync metadata' });
@@ -1758,7 +1762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // White Label API Routes
-  
+
   // Tenant Configuration Routes
   app.get('/api/tenant/config/:tenantId', async (req, res) => {
     try {

@@ -251,6 +251,7 @@ const AppContent = () => {
                         <Route path="/demo/contacts" element={<ContactsDemo />} />
                         <Route path="/demo/pipeline" element={<PipelineDemo />} />
                         <Route path="/dev" element={<DevBypassPage />} />
+                        <Route path="/dev-bypass" element={<DevBypassPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
 
