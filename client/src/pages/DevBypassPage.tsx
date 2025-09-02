@@ -38,7 +38,7 @@ const DevBypassPage = () => {
           console.log('Dev session stored successfully');
 
           // Force immediate redirect with replace to avoid back button issues
-          window.location.replace('/dashboard');
+          window.location.href = '/dashboard';
         } else {
           throw new Error('Invalid dev bypass response');
         }
@@ -70,9 +70,8 @@ const DevBypassPage = () => {
 
         console.log('Fallback dev session created');
 
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1500);
+        console.log('✅ Fallback dev session created');
+        window.location.href = '/dashboard';
       }
     };
 

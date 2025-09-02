@@ -95,6 +95,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       user: devUser
     };
 
+    console.log('✅ Dev bypass session created for:', devUser.email);
+
     res.json({
       success: true,
       user: devUser,

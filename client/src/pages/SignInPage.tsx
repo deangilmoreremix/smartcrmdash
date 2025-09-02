@@ -77,7 +77,7 @@ const SignInPage: React.FC = () => {
         console.log('✅ Dev session stored, redirecting...');
         
         // Force immediate redirect with replace to avoid auth loops
-        window.location.replace('/dashboard');
+        window.location.href = '/dashboard';
       } else {
         setError(data.message || 'Development bypass failed');
         setLoading(false);
@@ -109,7 +109,7 @@ const SignInPage: React.FC = () => {
       localStorage.setItem('smartcrm-dev-user', JSON.stringify(fallbackUser));
 
       console.log('✅ Fallback dev session created');
-      window.location.replace('/dashboard');
+      window.location.href = '/dashboard';
     }
   };
 
