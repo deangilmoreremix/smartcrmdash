@@ -177,6 +177,9 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     Ask me anything about your CRM or get help with your sales process.
                   </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                    💡 If the voice assistant isn't responding, ensure your agent is configured as public in ElevenLabs dashboard.
+                  </p>
                 </div>
 
                 {/* ElevenLabs Widget Container */}
