@@ -163,6 +163,7 @@ import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyze
 
 import './styles/design-system.css';
 import VoiceAgentWidget from './components/VoiceAgentWidget';
+import ElevenLabsIframeWidget from './components/ElevenLabsIframeWidget';
 
 
 // Reusable placeholder
@@ -274,7 +275,7 @@ function AppContent() {
                           <Route path="/*" element={
                             <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
                               <Navbar />
-                              <VoiceAgentWidget />
+                              <ElevenLabsIframeWidget />
                               <div className="flex-1 overflow-hidden navbar-spacing" style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
                                 <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
                                   <Routes>
