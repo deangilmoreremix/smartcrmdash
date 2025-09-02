@@ -39,9 +39,11 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
   const startConversation = async () => {
     try {
       console.log('🎤 Starting ElevenLabs conversation...');
+      console.log('🔗 Using agent ID:', agentId);
       
       // Request microphone access first
       await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('🎤 Microphone access granted');
       
       const id = await conversation.startSession({
         agentId: agentId,
@@ -53,7 +55,20 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
       console.log('✅ Conversation started with ID:', id);
     } catch (error) {
       console.error('❌ Failed to start conversation:', error);
-      setError('Failed to start conversation. Please check microphone permissions.');
+      console.error('Error details:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('Permission denied')) {
+          setError('Microphone access denied. Please allow microphone permissions and try again.');
+        } else if (error.message.includes('agent') || error.message.includes('authentication')) {
+          setError('Agent not available. Please ensure your ElevenLabs agent is configured as public.');
+        } else {
+          setError(`Connection failed: ${error.message}`);
+        }
+      } else {
+        setError('Failed to start conversation. Please try again.');
+      }
     }
   };
 
