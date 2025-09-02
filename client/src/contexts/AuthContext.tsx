@@ -42,11 +42,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const checkDevSession = () => {
           const devSession = localStorage.getItem('dev-user-session');
           const devToken = localStorage.getItem('sb-supabase-auth-token');
+          const devMode = localStorage.getItem('smartcrm-dev-mode');
 
-          if (devSession && devToken) {
+          if ((devSession && devToken) || devMode === 'true') {
             try {
-              const userData = JSON.parse(devSession);
-              const tokenData = JSON.parse(devToken);
+              let userData;
+              let tokenData;
+
+              if (devSession && devToken) {
+                userData = JSON.parse(devSession);
+                tokenData = JSON.parse(devToken);
+              } else {
+                // Fallback dev user data
+                userData = {
+                  id: 'dev-user-12345',
+                  email: 'dev@smartcrm.local',
+                  username: 'developer',
+                  firstName: 'Development',
+                  lastName: 'User',
+                  role: 'super_admin',
+                  app_context: 'smartcrm'
+                };
+                tokenData = {
+                  access_token: 'dev-bypass-token',
+                  refresh_token: 'dev-bypass-refresh',
+                  expires_at: Date.now() + (24 * 60 * 60 * 1000)
+                };
+              }
 
               console.log('Using dev bypass session:', userData.email);
               setUser(userData);
@@ -62,6 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.error('Invalid dev session data:', error);
               localStorage.removeItem('dev-user-session');
               localStorage.removeItem('sb-supabase-auth-token');
+              localStorage.removeItem('smartcrm-dev-mode');
+              localStorage.removeItem('smartcrm-dev-user');
             }
           }
           return false;

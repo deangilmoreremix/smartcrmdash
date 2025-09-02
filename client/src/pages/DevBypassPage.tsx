@@ -31,12 +31,14 @@ const DevBypassPage = () => {
           localStorage.setItem('dev-user-session', JSON.stringify(data.user));
           localStorage.setItem('sb-supabase-auth-token', JSON.stringify(data.session));
           
+          // Also store in the format the auth context expects
+          localStorage.setItem('smartcrm-dev-mode', 'true');
+          localStorage.setItem('smartcrm-dev-user', JSON.stringify(data.user));
+          
           console.log('Dev session stored successfully');
 
-          // Trigger a page reload to reinitialize auth context
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 1000);
+          // Force immediate redirect with replace to avoid back button issues
+          window.location.replace('/dashboard');
         } else {
           throw new Error('Invalid dev bypass response');
         }
