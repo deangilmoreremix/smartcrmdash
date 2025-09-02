@@ -58,7 +58,6 @@ const SignInPage = lazy(() => import('./pages/SignInPage'));
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const DevBypassPage = lazy(() => import('./pages/DevBypassPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage')); // Added ForgotPasswordPage import
-import ResetPasswordPage from './pages/ResetPasswordPage'; // Added ResetPasswordPage import
 
 // New comprehensive implementations
 const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
@@ -254,7 +253,6 @@ const AppContent = () => {
                         <Route path="/dev" element={<DevBypassPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
-                        <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Added ResetPasswordPage route */}
 
                         {/* All other routes with navbar */}
                         <Route path="/*" element={
