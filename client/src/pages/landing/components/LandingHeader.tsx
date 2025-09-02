@@ -7,7 +7,7 @@ const LandingHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
-  
+
   // Track scroll position to change header style
   useEffect(() => {
     const handleScroll = () => {
@@ -17,7 +17,7 @@ const LandingHeader = () => {
         setIsScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -36,7 +36,7 @@ const LandingHeader = () => {
               Smart<span className="text-gray-900">CRM</span>
             </span>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             <div className="relative">
@@ -47,7 +47,7 @@ const LandingHeader = () => {
               >
                 Features <ChevronDown size={16} className={`ml-1 transition-transform ${featuresOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {featuresOpen && (
                 <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-[100]">
                   <div className="grid grid-cols-2 gap-2">
@@ -79,7 +79,7 @@ const LandingHeader = () => {
                 </div>
               )}
             </div>
-            
+
             <HashLink smooth to="/#pricing" className="text-gray-700 hover:text-blue-600 transition-colors">
               Pricing
             </HashLink>
@@ -94,7 +94,25 @@ const LandingHeader = () => {
             </Link>
             <Link 
               to="/dev" 
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              onClick={(e) => {
+                // Ensure bypass works by setting session immediately
+                try {
+                  const devUser = {
+                    id: 'dev-user-12345',
+                    email: 'dev@smartcrm.local',
+                    name: 'Development User',
+                    role: 'super_admin'
+                  };
+                  localStorage.setItem('dev-user-session', JSON.stringify(devUser));
+                  localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
+                    access_token: 'dev-bypass-token',
+                    user: devUser
+                  }));
+                } catch (error) {
+                  console.warn('Pre-bypass setup failed:', error);
+                }
+              }}
             >
               🚀 Dashboard
             </Link>

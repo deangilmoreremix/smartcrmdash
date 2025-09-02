@@ -900,9 +900,9 @@ const AppContent = () => {
                         } />
                       </Routes>
                       <RemoteAppRefreshManager />
-                      
+
                       {/* Voice Agent Widget - Available on all pages */}
-                      <VoiceAgentWidget 
+                      <VoiceAgentWidget
                         position="bottom-right"
                         minimizable={true}
                       />

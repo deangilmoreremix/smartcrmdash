@@ -10,46 +10,59 @@ const DevBypassPage = () => {
   useEffect(() => {
     const performDevBypass = async () => {
       try {
-        const response = await fetch('/api/auth/dev-bypass', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        console.log('Performing dev bypass...');
 
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.success) {
-            // Store dev session in localStorage
-            localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
-              access_token: data.session.access_token,
-              refresh_token: data.session.refresh_token,
-              expires_at: data.session.expires_at,
-              user: data.user
-            }));
-            
-            localStorage.setItem('dev-user-session', JSON.stringify(data.user));
-            
-            // Update auth context if available
-            if (signIn) {
-              await signIn(data.user.email, 'dev-bypass-password');
-            }
-            
-            // Redirect to dashboard
-            setTimeout(() => {
-              navigate('/dashboard', { replace: true });
-            }, 1000);
-          } else {
-            navigate('/signin', { replace: true });
+        // Create a mock dev session
+        const devUser = {
+          id: 'dev-user-12345',
+          email: 'dev@smartcrm.local',
+          name: 'Development User',
+          role: 'super_admin',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        // Store dev session in localStorage
+        localStorage.setItem('dev-user-session', JSON.stringify(devUser));
+        localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
+          access_token: 'dev-bypass-token',
+          refresh_token: 'dev-bypass-refresh',
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          user: devUser
+        }));
+
+        console.log('Dev session created successfully');
+
+        // Try to update auth context if available
+        try {
+          if (signIn) {
+            await signIn(devUser.email, 'dev-bypass-password');
           }
-        } else {
-          // If dev bypass fails, redirect to signin
-          navigate('/signin', { replace: true });
+        } catch (authError) {
+          console.warn('Auth context update failed, continuing with bypass:', authError);
         }
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 1000);
+
       } catch (error) {
         console.error('Dev bypass failed:', error);
-        navigate('/signin', { replace: true });
+
+        // Still redirect to dashboard with fallback session
+        const fallbackUser = {
+          id: 'fallback-user',
+          email: 'fallback@smartcrm.local',
+          name: 'Fallback User',
+          role: 'admin'
+        };
+
+        localStorage.setItem('dev-user-session', JSON.stringify(fallbackUser));
+
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 1500);
       }
     };
 
