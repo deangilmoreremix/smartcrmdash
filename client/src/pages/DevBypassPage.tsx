@@ -1,73 +1,81 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 const DevBypassPage = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
 
   useEffect(() => {
     const performDevBypass = async () => {
       try {
         console.log('Performing dev bypass...');
 
-        // Create a mock dev session
-        const devUser = {
-          id: 'dev-user-12345',
-          email: 'dev@smartcrm.local',
-          name: 'Development User',
-          role: 'super_admin',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        // Call the dev bypass API endpoint
+        const response = await fetch('/api/auth/dev-bypass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
 
-        // Store dev session in localStorage
-        localStorage.setItem('dev-user-session', JSON.stringify(devUser));
-        localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
-          access_token: 'dev-bypass-token',
-          refresh_token: 'dev-bypass-refresh',
-          expires_at: Math.floor(Date.now() / 1000) + 3600,
-          user: devUser
-        }));
-
-        console.log('Dev session created successfully');
-
-        // Try to update auth context if available
-        try {
-          if (signIn) {
-            await signIn(devUser.email, 'dev-bypass-password');
-          }
-        } catch (authError) {
-          console.warn('Auth context update failed, continuing with bypass:', authError);
+        if (!response.ok) {
+          throw new Error(`Dev bypass API failed: ${response.status}`);
         }
 
-        // Redirect to dashboard
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 1000);
+        const data = await response.json();
+        console.log('Dev bypass API response:', data);
+
+        if (data.success && data.user && data.session) {
+          // Store the dev session in localStorage
+          localStorage.setItem('dev-user-session', JSON.stringify(data.user));
+          localStorage.setItem('sb-supabase-auth-token', JSON.stringify(data.session));
+          
+          console.log('Dev session stored successfully');
+
+          // Trigger a page reload to reinitialize auth context
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1000);
+        } else {
+          throw new Error('Invalid dev bypass response');
+        }
 
       } catch (error) {
         console.error('Dev bypass failed:', error);
 
-        // Still redirect to dashboard with fallback session
+        // Fallback: create session manually
         const fallbackUser = {
-          id: 'fallback-user',
-          email: 'fallback@smartcrm.local',
-          name: 'Fallback User',
-          role: 'admin'
+          id: 'dev-user-12345',
+          email: 'dev@smartcrm.local',
+          username: 'developer',
+          firstName: 'Development',
+          lastName: 'User',
+          role: 'super_admin',
+          app_context: 'smartcrm',
+          created_at: new Date().toISOString()
+        };
+
+        const fallbackSession = {
+          access_token: 'dev-bypass-token-fallback',
+          refresh_token: 'dev-bypass-refresh-fallback',
+          expires_at: Date.now() + (24 * 60 * 60 * 1000),
+          user: fallbackUser
         };
 
         localStorage.setItem('dev-user-session', JSON.stringify(fallbackUser));
+        localStorage.setItem('sb-supabase-auth-token', JSON.stringify(fallbackSession));
+
+        console.log('Fallback dev session created');
 
         setTimeout(() => {
-          navigate('/dashboard', { replace: true });
+          window.location.href = '/dashboard';
         }, 1500);
       }
     };
 
     performDevBypass();
-  }, [signIn, navigate]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
@@ -76,10 +84,10 @@ const DevBypassPage = () => {
           <LoadingSpinner size="lg" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          🚀 Bypassing Authentication
+          🚀 Setting up Development Access
         </h2>
-        <p className="text-gray-600">
-          Setting up development access...
+        <p className="text-gray-600 mb-4">
+          Bypassing authentication for development...
         </p>
         <div className="mt-4 text-sm text-green-600 font-medium">
           Redirecting to dashboard...
