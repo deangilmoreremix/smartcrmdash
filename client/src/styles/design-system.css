@@ -6,22 +6,22 @@
   --color-primary-200: #bfdbfe;
   --color-primary-300: #93c5fd;
   --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  --color-primary-500: var(--wl-primary-color, #3b82f6);
+  --color-primary-600: color-mix(in srgb, var(--wl-primary-color, #3b82f6) 90%, black);
+  --color-primary-700: color-mix(in srgb, var(--wl-primary-color, #3b82f6) 80%, black);
+  --color-primary-800: color-mix(in srgb, var(--wl-primary-color, #3b82f6) 70%, black);
+  --color-primary-900: color-mix(in srgb, var(--wl-primary-color, #3b82f6) 60%, black);
 
   --color-secondary-50: #f0fdfa;
   --color-secondary-100: #ccfbf1;
   --color-secondary-200: #99f6e4;
   --color-secondary-300: #5eead4;
   --color-secondary-400: #2dd4bf;
-  --color-secondary-500: #14b8a6;
-  --color-secondary-600: #0d9488;
-  --color-secondary-700: #0f766e;
-  --color-secondary-800: #115e59;
-  --color-secondary-900: #134e4a;
+  --color-secondary-500: var(--wl-secondary-color, #14b8a6);
+  --color-secondary-600: color-mix(in srgb, var(--wl-secondary-color, #14b8a6) 90%, black);
+  --color-secondary-700: color-mix(in srgb, var(--wl-secondary-color, #14b8a6) 80%, black);
+  --color-secondary-800: color-mix(in srgb, var(--wl-secondary-color, #14b8a6) 70%, black);
+  --color-secondary-900: color-mix(in srgb, var(--wl-secondary-color, #14b8a6) 60%, black);
 
   --color-accent-50: #fff7ed;
   --color-accent-100: #ffedd5;
@@ -114,6 +114,10 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-full: 9999px;
+
+  /* Whitelabel Variables */
+  --wl-primary-color: #3b82f6;
+  --wl-secondary-color: #6366f1;
 }
 
 /* Base Styles */

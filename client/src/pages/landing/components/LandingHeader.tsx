@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { useWhitelabel } from '../../../contexts/WhitelabelContext';
 
 const LandingHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const { config } = useWhitelabel();
   
   // Track scroll position to change header style
   useEffect(() => {
@@ -31,9 +33,16 @@ const LandingHeader: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-gray-900">
+          <Link to="/" className="flex items-center space-x-3 text-2xl font-bold text-gray-900">
+            {config.logoUrl && (
+              <img
+                src={config.logoUrl}
+                alt={`${config.companyName || 'Company'} Logo`}
+                className="h-8 w-8 object-contain"
+              />
+            )}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              Smart<span className="text-gray-900">CRM</span>
+              {config.companyName || 'Smart'}<span className="text-gray-900">{config.companyName ? 'CRM' : 'CRM'}</span>
             </span>
           </Link>
           
@@ -128,9 +137,23 @@ const LandingHeader: React.FC = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="lg:hidden bg-white shadow-lg p-4 mt-3">
+          {/* Mobile Logo */}
+          <div className="flex items-center space-x-3 pb-4 border-b border-gray-100 mb-4">
+            {config.logoUrl && (
+              <img
+                src={config.logoUrl}
+                alt={`${config.companyName || 'Company'} Logo`}
+                className="h-6 w-6 object-contain"
+              />
+            )}
+            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+              {config.companyName || 'Smart'}<span className="text-gray-900">{config.companyName ? 'CRM' : 'CRM'}</span>
+            </span>
+          </div>
+
           <nav className="flex flex-col space-y-4">
             <div className="py-2 border-b border-gray-100">
-              <button 
+              <button
                 className="flex items-center text-gray-700 w-full text-left"
                 onClick={() => setFeaturesOpen(!featuresOpen)}
               >

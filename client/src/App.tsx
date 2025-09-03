@@ -3,6 +3,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { WhitelabelProvider } from './contexts/WhitelabelContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
@@ -31,6 +32,11 @@ const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
 const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
+
+// Auth pages
+const Login = lazy(() => import('./pages/Auth/Login'));
+const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
 import SalesTools from './pages/SalesTools';
 import PipelineIntelligence from './pages/PipelineIntelligence';
 import DealRiskMonitor from './pages/DealRiskMonitor';
@@ -70,6 +76,10 @@ import SmartEmailOptimizer from './pages/SmartEmailOptimizer';
 import SentimentMonitor from './pages/SentimentMonitor';
 import CommPerformance from './pages/CommPerformance';
 
+// Whitelabel imports
+import WhiteLabelCustomization from './pages/WhiteLabelCustomization';
+import LinkRedirect from './components/shared/LinkRedirect';
+
 
 import './styles/design-system.css';
 
@@ -93,19 +103,35 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{child
 function App() {
   return (
     <ThemeProvider>
-      <AIToolsProvider>
-        <ModalsProvider>
-          <EnhancedHelpProvider>
-            <VideoCallProvider>
-              <NavigationProvider>
-                <DashboardLayoutProvider>
-                  <AIProvider>
-                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                      <Navbar />
-                      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-                        <Routes>
+      <WhitelabelProvider>
+        <AIToolsProvider>
+          <ModalsProvider>
+            <EnhancedHelpProvider>
+              <VideoCallProvider>
+                <NavigationProvider>
+                  <DashboardLayoutProvider>
+                    <AIProvider>
+                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                        <Navbar />
+                        <LinkRedirect />
+                        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+                          <Routes>
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+                          {/* Auth pages */}
+                          <Route
+                            path="/auth/login"
+                            element={<Login />}
+                          />
+                          <Route
+                            path="/auth/forgot-password"
+                            element={<ForgotPassword />}
+                          />
+                          <Route
+                            path="/auth/reset-password"
+                            element={<ResetPassword />}
+                          />
 
                           {/* Core pages */}
                           <Route
@@ -539,7 +565,11 @@ function App() {
                           {/* ===== Apps dropdown internal links ===== */}
                           <Route
                             path="/white-label"
-                            element={<PlaceholderPage title="White-Label Customization" />}
+                            element={
+                              <ProtectedRoute>
+                                <WhiteLabelCustomization />
+                              </ProtectedRoute>
+                            }
                           />
 
                           {/* Misc / Settings */}
@@ -563,16 +593,17 @@ function App() {
 
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                      </Suspense>
-                    </div>
-                  </AIProvider>
-                </DashboardLayoutProvider>
-              </NavigationProvider>
-            </VideoCallProvider>
-          </EnhancedHelpProvider>
-        </ModalsProvider>
-      </AIToolsProvider>
+                          </Routes>
+                        </Suspense>
+                      </div>
+                    </AIProvider>
+                  </DashboardLayoutProvider>
+                </NavigationProvider>
+              </VideoCallProvider>
+            </EnhancedHelpProvider>
+          </ModalsProvider>
+        </AIToolsProvider>
+      </WhitelabelProvider>
     </ThemeProvider>
   );
 }

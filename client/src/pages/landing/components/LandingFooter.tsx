@@ -1,20 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Twitter, 
-  Linkedin, 
-  Facebook, 
-  Instagram, 
-  Youtube, 
-  ArrowRight 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Twitter,
+  Linkedin,
+  Facebook,
+  Instagram,
+  Youtube,
+  ArrowRight
 } from 'lucide-react';
+import { useWhitelabel } from '../../../contexts/WhitelabelContext';
 
 const LandingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const { config } = useWhitelabel();
   
   return (
     <footer className="bg-gray-900 text-white pt-20 pb-10">
@@ -23,22 +25,37 @@ const LandingFooter: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Company Info */}
           <div className="lg:col-span-2">
-            <Link to="/" className="text-2xl font-bold mb-6 inline-block">
+            <Link to="/" className="flex items-center space-x-3 text-2xl font-bold mb-6">
+              {config.logoUrl && (
+                <img
+                  src={config.logoUrl}
+                  alt={`${config.companyName || 'Company'} Logo`}
+                  className="h-8 w-8 object-contain"
+                />
+              )}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                Smart<span className="text-white">CRM</span>
+                {config.companyName || 'Smart'}<span className="text-white">{config.companyName ? 'CRM' : 'CRM'}</span>
               </span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-sm">
               The all-in-one sales platform that combines powerful CRM capabilities with AI-driven insights to transform your sales process.
             </p>
             <div className="space-y-2">
+              {config.supportEmail && (
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-blue-400 mr-3" />
+                  <span className="text-gray-300">{config.supportEmail}</span>
+                </div>
+              )}
+              {config.supportPhone && (
+                <div className="flex items-center">
+                  <Phone className="h-5 w-5 text-blue-400 mr-3" />
+                  <span className="text-gray-300">{config.supportPhone}</span>
+                </div>
+              )}
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">contact@smartcrm.com</span>
-              </div>
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">(555) 123-4567</span>
+                <span className="text-gray-300">contact@{config.companyName ? config.companyName.toLowerCase().replace(/\s+/g, '') : 'smartcrm'}.com</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="h-5 w-5 text-blue-400 mr-3" />
@@ -183,7 +200,7 @@ const LandingFooter: React.FC = () => {
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <p className="text-gray-400 text-sm">
-              &copy; {currentYear} SmartCRM. All rights reserved.
+              &copy; {currentYear} {config.companyName || 'SmartCRM'}. All rights reserved.
             </p>
           </div>
           

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
+import { useWhitelabel } from '../../contexts/WhitelabelContext';
 import { 
   Brain, 
   Mail, 
@@ -36,20 +37,21 @@ import LandingFooter from './components/LandingFooter';
 import PricingCard from './components/PricingCard';
 import FeatureCard from './components/FeatureCard';
 import TestimonialCard from './components/TestimonialCard';
-import AnimatedFeatureIcon from '../../components/Landing/AnimatedFeatureIcon';
-import FloatingIcons from '../../components/Landing/FloatingIcons';
-import ProductDemo from '../../components/Landing/ProductDemo';
-import ClientLogos from '../../components/Landing/ClientLogos';
-import StatCounter from '../../components/Landing/StatCounter';
-import FeatureShowcase from '../../components/Landing/FeatureShowcase';
-import ParallaxHero from '../../components/Landing/ParallaxHero';
-import ScrollAnimationWrapper from '../../components/Landing/ScrollAnimationWrapper';
-import FeatureDemo from '../../components/Landing/FeatureDemo';
-import InteractiveFeaturesGrid from '../../components/Landing/InteractiveFeaturesGrid';
-import ParticleBackground from '../../components/Landing/ParticleBackground';
+import AnimatedFeatureIcon from '../../components/landing/AnimatedFeatureIcon';
+import FloatingIcons from '../../components/landing/FloatingIcons';
+import ProductDemo from '../../components/landing/ProductDemo';
+import ClientLogos from '../../components/landing/ClientLogos';
+import StatCounter from '../../components/landing/StatCounter';
+import FeatureShowcase from '../../components/landing/FeatureShowcase';
+import ParallaxHero from '../../components/landing/ParallaxHero';
+import ScrollAnimationWrapper from '../../components/landing/ScrollAnimationWrapper';
+import FeatureDemo from '../../components/landing/FeatureDemo';
+import InteractiveFeaturesGrid from '../../components/landing/InteractiveFeaturesGrid';
+import ParticleBackground from '../../components/landing/ParticleBackground';
 
 const LandingPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { config } = useWhitelabel();
   
   // Function to handle page initialization only once
   useEffect(() => {
@@ -118,7 +120,11 @@ const LandingPage = () => {
       <LandingHeader />
       
       {/* Hero Section */}
-      <ParallaxHero />
+      <ParallaxHero
+        title={config.heroTitle}
+        subtitle={config.heroSubtitle}
+        ctaButtons={config.ctaButtons.filter(button => button.enabled)}
+      />
       
       {/* Client logos */}
       <ClientLogos />
@@ -224,109 +230,111 @@ const LandingPage = () => {
       <FeatureShowcase />
       
       {/* Features Section */}
-      <section className="py-20 content-stable" id="features">
-        <div className="container mx-auto px-4">
-          <ScrollAnimationWrapper animation="fade-up">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                All the Features You Need to Succeed
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Smart CRM combines powerful sales tools with advanced AI capabilities to streamline your workflow and boost your results.
-              </p>
+      {config.showFeatures && (
+        <section className="py-20 content-stable" id="features">
+          <div className="container mx-auto px-4">
+            <ScrollAnimationWrapper animation="fade-up">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  All the Features You Need to Succeed
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Smart CRM combines powerful sales tools with advanced AI capabilities to streamline your workflow and boost your results.
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <ScrollAnimationWrapper animation="fade-up" delay={100}>
+                <FeatureCard
+                  icon={<Brain className="h-8 w-8 text-blue-600" />}
+                  title="AI Sales Tools"
+                  description="Access 20+ AI tools to automate tasks, get insights, and personalize your sales approach."
+                  link="/features/ai-tools"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={200}>
+                <FeatureCard
+                  icon={<Users className="h-8 w-8 text-indigo-600" />}
+                  title="Contact Management"
+                  description="Organize and track all your contacts, leads, and accounts in one unified database."
+                  link="/features/contacts"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={300}>
+                <FeatureCard
+                  icon={<Briefcase className="h-8 w-8 text-violet-600" />}
+                  title="Deal Pipeline"
+                  description="Visualize and optimize your sales pipeline with drag-and-drop simplicity and AI insights."
+                  link="/features/pipeline"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={150}>
+                <FeatureCard
+                  icon={<Brain className="h-8 w-8 text-fuchsia-600" />}
+                  title="AI Assistant"
+                  description="Work with a context-aware AI assistant that remembers conversations and takes actions for you."
+                  link="/features/ai-assistant"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={250}>
+                <FeatureCard
+                  icon={<Eye className="h-8 w-8 text-cyan-600" />}
+                  title="Vision Analyzer"
+                  description="Extract insights from images, documents, competitor materials, and visual content."
+                  link="/features/vision-analyzer"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={350}>
+                <FeatureCard
+                  icon={<Image className="h-8 w-8 text-emerald-600" />}
+                  title="Image Generator"
+                  description="Create professional images for presentations, proposals, and marketing materials instantly."
+                  link="/features/image-generator"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={150}>
+                <FeatureCard
+                  icon={<Mic className="h-8 w-8 text-indigo-600" />}
+                  title="Voice Features"
+                  description="Voice profiles and audio management for your sales content."
+                  link="/voice-profiles"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={250}>
+                <FeatureCard
+                  icon={<Search className="h-8 w-8 text-blue-600" />}
+                  title="Semantic Search"
+                  description="Find anything in your CRM with natural language queries and contextual understanding."
+                  link="/features/semantic-search"
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={350}>
+                <FeatureCard
+                  icon={<Zap className="h-8 w-8 text-yellow-600" />}
+                  title="Function Assistant"
+                  description="Let AI perform real actions in your CRM through natural conversation."
+                  link="/features/function-assistant"
+                />
+              </ScrollAnimationWrapper>
             </div>
-          </ScrollAnimationWrapper>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <ScrollAnimationWrapper animation="fade-up" delay={100}>
-              <FeatureCard
-                icon={<Brain className="h-8 w-8 text-blue-600" />}
-                title="AI Sales Tools"
-                description="Access 20+ AI tools to automate tasks, get insights, and personalize your sales approach."
-                link="/features/ai-tools"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={200}>
-              <FeatureCard
-                icon={<Users className="h-8 w-8 text-indigo-600" />}
-                title="Contact Management"
-                description="Organize and track all your contacts, leads, and accounts in one unified database."
-                link="/features/contacts"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={300}>
-              <FeatureCard
-                icon={<Briefcase className="h-8 w-8 text-violet-600" />}
-                title="Deal Pipeline"
-                description="Visualize and optimize your sales pipeline with drag-and-drop simplicity and AI insights."
-                link="/features/pipeline"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={150}>
-              <FeatureCard
-                icon={<Brain className="h-8 w-8 text-fuchsia-600" />}
-                title="AI Assistant"
-                description="Work with a context-aware AI assistant that remembers conversations and takes actions for you."
-                link="/features/ai-assistant"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={250}>
-              <FeatureCard
-                icon={<Eye className="h-8 w-8 text-cyan-600" />}
-                title="Vision Analyzer"
-                description="Extract insights from images, documents, competitor materials, and visual content."
-                link="/features/vision-analyzer"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={350}>
-              <FeatureCard
-                icon={<Image className="h-8 w-8 text-emerald-600" />}
-                title="Image Generator"
-                description="Create professional images for presentations, proposals, and marketing materials instantly."
-                link="/features/image-generator"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={150}>
-              <FeatureCard
-                icon={<Mic className="h-8 w-8 text-indigo-600" />}
-                title="Voice Features"
-                description="Voice profiles and audio management for your sales content."
-                link="/voice-profiles"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={250}>
-              <FeatureCard
-                icon={<Search className="h-8 w-8 text-blue-600" />}
-                title="Semantic Search"
-                description="Find anything in your CRM with natural language queries and contextual understanding."
-                link="/features/semantic-search"
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={350}>
-              <FeatureCard
-                icon={<Zap className="h-8 w-8 text-yellow-600" />}
-                title="Function Assistant"
-                description="Let AI perform real actions in your CRM through natural conversation."
-                link="/features/function-assistant"
-              />
-            </ScrollAnimationWrapper>
+
+            <div className="text-center mt-12">
+              <Link to="/ai-tools" className="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
+                Explore AI Tools <ChevronRight className="ml-2 h-5 w-5" />
+              </Link>
+            </div>
           </div>
-          
-          <div className="text-center mt-12">
-            <Link to="/ai-tools" className="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
-              Explore AI Tools <ChevronRight className="ml-2 h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
       
       {/* AI Highlights Section */}
       <section className="py-20 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 content-stable gpu-accelerated">
@@ -451,138 +459,142 @@ const LandingPage = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50 content-stable">
-        <div className="container mx-auto px-4">
-          <ScrollAnimationWrapper animation="fade-up">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Loved by Sales Teams Everywhere
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Don't take our word for it - see what our customers have to say
-              </p>
+      {config.showTestimonials && (
+        <section className="py-20 bg-gray-50 content-stable">
+          <div className="container mx-auto px-4">
+            <ScrollAnimationWrapper animation="fade-up">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Loved by Sales Teams Everywhere
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Don't take our word for it - see what our customers have to say
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <ScrollAnimationWrapper animation="fade-up" delay={100}>
+                <TestimonialCard
+                  quote="Smart CRM has completely transformed our sales process. The AI tools save us hours each week and provide insights we never had before."
+                  name="Sarah Johnson"
+                  position="VP of Sales"
+                  company="TechCorp"
+                  image="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                  stars={5}
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={300}>
+                <TestimonialCard
+                  quote="The AI assistant is like having an extra team member. It handles routine tasks, provides insights, and helps us close more deals."
+                  name="Michael Rodriguez"
+                  position="Sales Director"
+                  company="Global Solutions"
+                  image="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                  stars={5}
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={500}>
+                <TestimonialCard
+                  quote="We've seen a 32% increase in our sales since implementing Smart CRM. The AI-powered features are a game-changer!"
+                  name="Jennifer Lee"
+                  position="CEO"
+                  company="Startup Innovations"
+                  image="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                  stars={5}
+                />
+              </ScrollAnimationWrapper>
             </div>
-          </ScrollAnimationWrapper>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollAnimationWrapper animation="fade-up" delay={100}>
-              <TestimonialCard
-                quote="Smart CRM has completely transformed our sales process. The AI tools save us hours each week and provide insights we never had before."
-                name="Sarah Johnson"
-                position="VP of Sales"
-                company="TechCorp"
-                image="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                stars={5}
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={300}>
-              <TestimonialCard
-                quote="The AI assistant is like having an extra team member. It handles routine tasks, provides insights, and helps us close more deals."
-                name="Michael Rodriguez"
-                position="Sales Director"
-                company="Global Solutions"
-                image="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                stars={5}
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={500}>
-              <TestimonialCard
-                quote="We've seen a 32% increase in our sales since implementing Smart CRM. The AI-powered features are a game-changer!"
-                name="Jennifer Lee"
-                position="CEO"
-                company="Startup Innovations"
-                image="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                stars={5}
-              />
-            </ScrollAnimationWrapper>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
       
       {/* Pricing Section */}
-      <section className="py-20 content-stable" id="pricing">
-        <div className="container mx-auto px-4">
-          <ScrollAnimationWrapper animation="fade-up">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Simple, Transparent Pricing
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Choose the plan that's right for your business
-              </p>
+      {config.showPricing && (
+        <section className="py-20 content-stable" id="pricing">
+          <div className="container mx-auto px-4">
+            <ScrollAnimationWrapper animation="fade-up">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Simple, Transparent Pricing
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Choose the plan that's right for your business
+                </p>
+              </div>
+            </ScrollAnimationWrapper>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <ScrollAnimationWrapper animation="fade-up" delay={100}>
+                <PricingCard
+                  tier="Starter"
+                  price={25}
+                  description="Perfect for individuals and small teams"
+                  buttonText="Get Started"
+                  features={[
+                    "Up to 5 users",
+                    "Contact & deal management",
+                    "Basic AI tools",
+                    "Email integration",
+                    "Mobile app access",
+                    "5GB storage"
+                  ]}
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={0}>
+                <PricingCard
+                  tier="Professional"
+                  price={65}
+                  description="Ideal for growing teams with advanced needs"
+                  buttonText="Start Free Trial"
+                  popular={true}
+                  color="bg-gradient-to-r from-blue-50 to-indigo-50"
+                  features={[
+                    "Up to 25 users",
+                    "All Starter features",
+                    "Full AI toolset",
+                    "Custom sales pipeline",
+                    "Advanced analytics",
+                    "API access",
+                    "25GB storage",
+                    "Priority support"
+                  ]}
+                />
+              </ScrollAnimationWrapper>
+
+              <ScrollAnimationWrapper animation="fade-up" delay={200}>
+                <PricingCard
+                  tier="Enterprise"
+                  price={125}
+                  description="For organizations requiring maximum capability"
+                  buttonText="Contact Sales"
+                  features={[
+                    "Unlimited users",
+                    "All Professional features",
+                    "Dedicated AI resources",
+                    "Custom AI model training",
+                    "Advanced security controls",
+                    "Dedicated account manager",
+                    "Unlimited storage",
+                    "24/7 premium support",
+                    "Custom integrations"
+                  ]}
+                />
+              </ScrollAnimationWrapper>
             </div>
-          </ScrollAnimationWrapper>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <ScrollAnimationWrapper animation="fade-up" delay={100}>
-              <PricingCard
-                tier="Starter"
-                price={25}
-                description="Perfect for individuals and small teams"
-                buttonText="Get Started"
-                features={[
-                  "Up to 5 users",
-                  "Contact & deal management",
-                  "Basic AI tools",
-                  "Email integration",
-                  "Mobile app access",
-                  "5GB storage"
-                ]}
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={0}>
-              <PricingCard
-                tier="Professional"
-                price={65}
-                description="Ideal for growing teams with advanced needs"
-                buttonText="Start Free Trial"
-                popular={true}
-                color="bg-gradient-to-r from-blue-50 to-indigo-50"
-                features={[
-                  "Up to 25 users",
-                  "All Starter features",
-                  "Full AI toolset",
-                  "Custom sales pipeline",
-                  "Advanced analytics",
-                  "API access",
-                  "25GB storage",
-                  "Priority support"
-                ]}
-              />
-            </ScrollAnimationWrapper>
-            
-            <ScrollAnimationWrapper animation="fade-up" delay={200}>
-              <PricingCard
-                tier="Enterprise"
-                price={125}
-                description="For organizations requiring maximum capability"
-                buttonText="Contact Sales"
-                features={[
-                  "Unlimited users",
-                  "All Professional features",
-                  "Dedicated AI resources",
-                  "Custom AI model training",
-                  "Advanced security controls",
-                  "Dedicated account manager",
-                  "Unlimited storage",
-                  "24/7 premium support",
-                  "Custom integrations"
-                ]}
-              />
-            </ScrollAnimationWrapper>
+
+            <div className="mt-12 text-center">
+              <p className="text-gray-600 mb-6">All plans include a 14-day free trial. No credit card required.</p>
+              <Link to="/pricing" className="text-blue-600 hover:text-blue-800 font-medium">
+                View full pricing details
+              </Link>
+            </div>
           </div>
-          
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-6">All plans include a 14-day free trial. No credit card required.</p>
-            <Link to="/pricing" className="text-blue-600 hover:text-blue-800 font-medium">
-              View full pricing details
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
       
       {/* Call to Action */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white relative overflow-hidden gpu-accelerated">

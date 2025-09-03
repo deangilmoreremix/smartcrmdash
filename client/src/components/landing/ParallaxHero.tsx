@@ -2,8 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { Brain, Users, BarChart3, Zap, Search, Image, Mail, ArrowRight } from 'lucide-react';
+import { WhitelabelButton } from '../../types/whitelabel';
 
-const ParallaxHero: React.FC = () => {
+interface ParallaxHeroProps {
+  title?: string;
+  subtitle?: string;
+  ctaButtons?: WhitelabelButton[];
+}
+
+const ParallaxHero: React.FC<ParallaxHeroProps> = ({
+  title = "Experience the Future of Sales Technology",
+  subtitle = "Our AI-powered CRM transforms how sales teams work by automating routine tasks, providing deep insights, and helping you close more deals.",
+  ctaButtons = []
+}) => {
   const [scrollY, setScrollY] = useState(0);
   const [hasRendered, setHasRendered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -150,28 +161,51 @@ const ParallaxHero: React.FC = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Experience the Future of <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Sales Technology</span>
+            {title.includes('Sales Technology') ? (
+              <>Experience the Future of <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Sales Technology</span></>
+            ) : (
+              title
+            )}
           </h1>
-          
+
           <p className="text-xl text-gray-700 mb-12">
-            Our AI-powered CRM transforms how sales teams work by automating routine tasks, providing deep insights, and helping you close more deals.
+            {subtitle}
           </p>
-          
+
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/dashboard" className="
-              px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl 
-              hover:shadow-lg transition duration-300 transform hover:translate-y-[-2px]
-              flex items-center
-            ">
-              Try it for Free <ArrowRight size={18} className="ml-2" />
-            </Link>
-            
-            <HashLink to="#features" className="
-              px-8 py-4 bg-white text-indigo-600 font-medium rounded-xl border border-indigo-200 
-              hover:border-indigo-300 hover:shadow-md transition duration-300 transform hover:translate-y-[-2px]
-            ">
-              Explore Features
-            </HashLink>
+            {ctaButtons.length > 0 ? (
+              ctaButtons.map((button) => (
+                <Link
+                  key={button.id}
+                  to={button.url}
+                  style={{ backgroundColor: button.color }}
+                  className="
+                    px-8 py-4 text-white font-medium rounded-xl
+                    hover:shadow-lg transition duration-300 transform hover:translate-y-[-2px]
+                    flex items-center
+                  "
+                >
+                  {button.text} <ArrowRight size={18} className="ml-2" />
+                </Link>
+              ))
+            ) : (
+              <>
+                <Link to="/dashboard" className="
+                  px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl
+                  hover:shadow-lg transition duration-300 transform hover:translate-y-[-2px]
+                  flex items-center
+                ">
+                  Try it for Free <ArrowRight size={18} className="ml-2" />
+                </Link>
+
+                <HashLink to="#features" className="
+                  px-8 py-4 bg-white text-indigo-600 font-medium rounded-xl border border-indigo-200
+                  hover:border-indigo-300 hover:shadow-md transition duration-300 transform hover:translate-y-[-2px]
+                ">
+                  Explore Features
+                </HashLink>
+              </>
+            )}
           </div>
         </div>
       </div>
