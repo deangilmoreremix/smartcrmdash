@@ -19,8 +19,17 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { openTool } = useAITools();
   const navigate = useNavigate();
+  
+  // Safe access to AITools with error handling
+  let openTool: ((toolName: string) => void) | null = null;
+  try {
+    const aiTools = useAITools();
+    openTool = aiTools?.openTool || null;
+  } catch (error) {
+    // AIToolsProvider not available - continue without AI tools
+    openTool = null;
+  }
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -34,7 +43,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const openAITool = (toolName: string) => {
-    openTool(toolName);
+    if (openTool) {
+      openTool(toolName);
+    }
   };
 
   const navigateToFeature = (feature: string) => {
