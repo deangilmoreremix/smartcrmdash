@@ -64,9 +64,25 @@ const StructuredAIResult: React.FC<StructuredAIResultProps> = ({
       </div>
       <div className="text-green-700">
         {typeof data === 'string' ? (
-          <pre className="whitespace-pre-wrap">{data}</pre>
+          <div className="whitespace-pre-wrap">{data}</div>
         ) : (
-          <pre className="whitespace-pre-wrap">{JSON.stringify(data, null, 2)}</pre>
+          <div className="space-y-2">
+            <p className="font-medium">Analysis Complete</p>
+            <p className="text-sm text-green-600">
+              {data?.summary || data?.message || 'Data processed successfully'}
+            </p>
+            {/* Hide raw JSON from users - only show in dev mode */}
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-4">
+                <summary className="cursor-pointer text-xs text-green-500 hover:text-green-700">
+                  Show Raw Data (Debug)
+                </summary>
+                <pre className="mt-2 text-xs bg-green-100 p-2 rounded text-green-800 overflow-auto max-h-40">
+                  {JSON.stringify(data, null, 2)}
+                </pre>
+              </details>
+            )}
+          </div>
         )}
       </div>
     </div>
