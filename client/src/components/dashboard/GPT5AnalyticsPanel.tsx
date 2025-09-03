@@ -390,7 +390,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
                 {Array.isArray(businessIntelligence.growthOpportunities) && businessIntelligence.growthOpportunities.slice(0, 3).map((opp, index) => (
                   <li key={index} className={`${isDark ? 'text-purple-100' : 'text-purple-700'} flex items-center gap-2`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-purple-300' : 'bg-purple-500'}`} />
-                    {typeof opp === 'string' ? opp : typeof opp === 'object' && opp.description ? opp.description : typeof opp === 'object' && opp.action ? opp.action : JSON.stringify(opp)}
+                    {typeof opp === 'string' ? opp : typeof opp === 'object' && opp.description ? opp.description : typeof opp === 'object' && opp.action ? opp.action : 'Growth opportunity identified'}
                   </li>
                 ))}
               </ul>
@@ -404,7 +404,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
                 {Array.isArray(businessIntelligence.strategicRecommendations) && businessIntelligence.strategicRecommendations.slice(0, 3).map((rec, index) => (
                   <li key={index} className={`${isDark ? 'text-purple-100' : 'text-purple-700'} flex items-center gap-2`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-purple-300' : 'bg-purple-500'}`} />
-                    {typeof rec === 'string' ? rec : typeof rec === 'object' && rec.description ? rec.description : typeof rec === 'object' && rec.action ? rec.action : JSON.stringify(rec)}
+                    {typeof rec === 'string' ? rec : typeof rec === 'object' && rec.description ? rec.description : typeof rec === 'object' && rec.action ? rec.action : 'Strategic recommendation available'}
                   </li>
                 ))}
               </ul>
