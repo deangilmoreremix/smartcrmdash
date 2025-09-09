@@ -219,33 +219,9 @@ iframe {
   background: rgb(156 163 175 / 0.7);
 }
 
-/* ElevenLabs Voice Agent Widget Styling */
-elevenlabs-convai {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-}
+/* ElevenLabs styles removed */
 
-/* Ensure widget respects dark mode */
-.dark elevenlabs-convai {
-  filter: brightness(0.9) contrast(1.1);
-}
-
-/* Force the widget to be visible and interactive */
-elevenlabs-convai * {
-  pointer-events: auto !important;
-}
-
-/* Ensure proper z-index for voice widget */
-.voice-widget-container {
-  z-index: 9999 !important;
-  position: fixed !important;
-}
+/* ElevenLabs widget interaction styles removed */
 
 /* Light mode scrollbar */
 ::-webkit-scrollbar {
@@ -482,56 +458,6 @@ button, a, input, select, textarea, [role="button"], [onclick] {
   @apply focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900;
 }
 
-/* Voice Agent Widget Styles */
-.voice-agent-widget {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999;
-}
+/* Voice agent widget styles removed */
 
-.voice-widget-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  min-height: 200px;
-}
-
-.voice-widget-container elevenlabs-convai {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 0.5rem;
-}
-
-.voice-widget-minimized {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.voice-widget-minimized:hover {
-  transform: scale(1.1);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* Fix potential conflicts with ElevenLabs widget */
-elevenlabs-convai {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  min-height: 200px !important;
-}
-
-/* Prevent module externalization errors */
-.voice-widget-container * {
-  box-sizing: border-box;
-}
+/* ElevenLabs widget styles removed */

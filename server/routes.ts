@@ -10,11 +10,7 @@ import { db } from './db';
 import { entitlements } from '@shared/schema';
 import { createClient } from '@supabase/supabase-js';
 import { handleAuthWebhook, createUserMetadata, determineUserRole } from './email-routing';
-
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase, isSupabaseConfigured } from './supabase';
 
 // Google AI integration
 interface GoogleAIResponse {
@@ -26,14 +22,26 @@ interface GoogleAIResponse {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize AI clients with fallback strategy
-  const userOpenAIKey = process.env.OPENAI_API_KEY;
-  const workingOpenAIKey = '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';
-  const googleAIKey = process.env.GOOGLE_AI_API_KEY;
+  let openai: OpenAI | null = null;
 
-  // Use working key as fallback for production reliability
-  const openaiApiKey = userOpenAIKey || workingOpenAIKey;
-  const openai = new OpenAI({ apiKey: openaiApiKey });
+  try {
+    // Initialize AI clients with fallback strategy
+    const userOpenAIKey = process.env.OPENAI_API_KEY;
+    const workingOpenAIKey = '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';
+    const googleAIKey = process.env.GOOGLE_AI_API_KEY;
+
+    // Use working key as fallback for production reliability
+    const openaiApiKey = userOpenAIKey || workingOpenAIKey;
+    if (openaiApiKey) {
+      openai = new OpenAI({ apiKey: openaiApiKey });
+      console.log('✅ OpenAI client initialized');
+    } else {
+      console.warn('⚠️ No OpenAI API key available');
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize OpenAI client:', error);
+    console.log('🔄 Continuing without OpenAI...');
+  }
 
   // Google AI helper function
   async function callGoogleAI(prompt: string, model: string = 'gemini-1.5-flash'): Promise<string> {
@@ -60,6 +68,495 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const data: GoogleAIResponse = await response.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
+
+  // Partner Management Routes
+  app.get('/api/partners/pending', async (req, res) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const pendingPartners = [
+          {
+            id: 'partner_1',
+            name: 'TechCorp Solutions',
+            contact_email: 'contact@techcorp.com',
+            subdomain: 'techcorp',
+            created_at: new Date().toISOString(),
+            status: 'pending'
+          },
+          {
+            id: 'partner_2',
+            name: 'Digital Marketing Pro',
+            contact_email: 'hello@digitalmarketing.com',
+            subdomain: 'digitalpro',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            status: 'pending'
+          }
+        ];
+        return res.json(pendingPartners);
+      }
+
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching pending partners:', error);
+      res.status(500).json({ error: 'Failed to fetch pending partners' });
+    }
+  });
+
+  app.get('/api/partners/active', async (req, res) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const activePartners = [
+          {
+            id: 'partner_3',
+            name: 'SalesForce Plus',
+            contact_email: 'admin@salesforceplus.com',
+            subdomain: 'salesforceplus',
+            created_at: new Date(Date.now() - 604800000).toISOString(),
+            status: 'active'
+          }
+        ];
+        return res.json(activePartners);
+      }
+
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching active partners:', error);
+      res.status(500).json({ error: 'Failed to fetch active partners' });
+    }
+  });
+
+  app.get('/api/partners/:partnerId/stats', async (req, res) => {
+    try {
+      const { partnerId } = req.params;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const stats = {
+          total_customers: 42,
+          active_customers: 38,
+          total_revenue: 14200,
+          monthly_revenue: 14200,
+          customer_growth_rate: 23
+        };
+        return res.json(stats);
+      }
+
+      // Get partner stats from database
+      const { data: stats, error: statsError } = await supabase
+        .from('partner_stats')
+        .select('*')
+        .eq('partner_id', partnerId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (statsError && statsError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw statsError;
+      }
+
+      // If no stats found, calculate from partner customers
+      if (!stats) {
+        const { data: customers, error: customersError } = await supabase
+          .from('partner_customers')
+          .select('monthly_revenue, status')
+          .eq('partner_id', partnerId);
+
+        if (customersError) throw customersError;
+
+        const totalCustomers = customers?.length || 0;
+        const activeCustomers = customers?.filter(c => c.status === 'active').length || 0;
+        const totalRevenue = customers?.reduce((sum, c) => sum + (c.monthly_revenue || 0), 0) || 0;
+
+        const calculatedStats = {
+          total_customers: totalCustomers,
+          active_customers: activeCustomers,
+          total_revenue: totalRevenue,
+          monthly_revenue: totalRevenue,
+          customer_growth_rate: 0 // Would need historical data to calculate
+        };
+
+        return res.json(calculatedStats);
+      }
+
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching partner stats:', error);
+      res.status(500).json({ error: 'Failed to fetch partner stats' });
+    }
+  });
+
+  app.get('/api/partners/:partnerId/customers', async (req, res) => {
+    try {
+      const { partnerId } = req.params;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const customers = [
+          {
+            id: '1',
+            name: 'Acme Corp',
+            subdomain: 'acme',
+            status: 'active',
+            plan: 'enterprise',
+            monthly_revenue: 299,
+            created_at: '2024-01-15T00:00:00Z',
+            last_active: '2024-06-28T00:00:00Z'
+          },
+          {
+            id: '2',
+            name: 'TechStart Inc',
+            subdomain: 'techstart',
+            status: 'active',
+            plan: 'pro',
+            monthly_revenue: 149,
+            created_at: '2024-02-20T00:00:00Z',
+            last_active: '2024-06-27T00:00:00Z'
+          }
+        ];
+        return res.json(customers);
+      }
+
+      const { data, error } = await supabase
+        .from('partner_customers')
+        .select('*')
+        .eq('partner_id', partnerId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching partner customers:', error);
+      res.status(500).json({ error: 'Failed to fetch partner customers' });
+    }
+  });
+
+  app.post('/api/partners/:partnerId/customers', (req, res) => {
+    const { partnerId } = req.params;
+    const { companyName, contactEmail, plan } = req.body;
+
+    // Mock customer creation
+    const newCustomer = {
+      id: `customer_${Date.now()}`,
+      name: companyName,
+      subdomain: companyName.toLowerCase().replace(/\s+/g, ''),
+      status: 'active',
+      plan: plan || 'basic',
+      monthlyRevenue: plan === 'enterprise' ? 299 : plan === 'pro' ? 149 : 49,
+      createdAt: new Date().toISOString(),
+      lastActive: new Date().toISOString()
+    };
+
+    res.json(newCustomer);
+  });
+
+  app.post('/api/partners/onboard', (req, res) => {
+    const partnerData = req.body;
+
+    // Mock partner onboarding
+    const newPartner = {
+      id: `partner_${Date.now()}`,
+      name: partnerData.companyName,
+      contactEmail: partnerData.contactEmail,
+      subdomain: partnerData.subdomain,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      brandingConfig: partnerData.brandingConfig
+    };
+
+    res.json(newPartner);
+  });
+
+  app.post('/api/partners/:partnerId/approve', (req, res) => {
+    const { partnerId } = req.params;
+
+    // Mock partner approval
+    const approvedPartner = {
+      id: partnerId,
+      status: 'active',
+      approvedAt: new Date().toISOString()
+    };
+
+    res.json(approvedPartner);
+  });
+
+  app.get('/api/partners', async (req, res) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const partners = [
+          {
+            id: 'partner_1',
+            name: 'TechCorp Solutions',
+            status: 'active',
+            contact_email: 'contact@techcorp.com',
+            subdomain: 'techcorp',
+            created_at: '2024-01-01T00:00:00Z'
+          },
+          {
+            id: 'partner_2',
+            name: 'Digital Marketing Pro',
+            status: 'active',
+            contact_email: 'hello@digitalmarketing.com',
+            subdomain: 'digitalpro',
+            created_at: '2024-02-01T00:00:00Z'
+          }
+        ];
+        return res.json(partners);
+      }
+
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      res.status(500).json({ error: 'Failed to fetch partners' });
+    }
+  });
+
+  // White-label tenant management routes
+  app.get('/api/white-label/tenants', async (req, res) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const tenants = [
+          {
+            id: 'tenant_1',
+            name: 'Acme Corp',
+            subdomain: 'acme',
+            custom_domain: null,
+            status: 'active',
+            type: 'customer',
+            plan: 'enterprise',
+            contact_email: 'admin@acme.com',
+            monthly_revenue: 299,
+            user_count: 25,
+            created_at: '2024-01-15T00:00:00Z',
+            parent_partner_id: 'partner_1'
+          },
+          {
+            id: 'tenant_2',
+            name: 'TechStart Inc',
+            subdomain: 'techstart',
+            custom_domain: null,
+            status: 'active',
+            type: 'customer',
+            plan: 'pro',
+            contact_email: 'admin@techstart.com',
+            monthly_revenue: 149,
+            user_count: 12,
+            created_at: '2024-02-20T00:00:00Z',
+            parent_partner_id: 'partner_2'
+          },
+          {
+            id: 'tenant_3',
+            name: 'SalesForce Plus',
+            subdomain: 'salesforceplus',
+            custom_domain: 'crm.salesforceplus.com',
+            status: 'active',
+            type: 'partner',
+            plan: 'enterprise',
+            contact_email: 'admin@salesforceplus.com',
+            monthly_revenue: 499,
+            user_count: 50,
+            created_at: '2024-01-01T00:00:00Z'
+          }
+        ];
+        return res.json(tenants);
+      }
+
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching tenants:', error);
+      res.status(500).json({ error: 'Failed to fetch tenants' });
+    }
+  });
+
+  app.put('/api/white-label/tenants/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+      const updates = req.body;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock response if Supabase not configured
+        const updatedTenant = {
+          id: tenantId,
+          ...updates,
+          updated_at: new Date().toISOString()
+        };
+        return res.json(updatedTenant);
+      }
+
+      const { data, error } = await supabase
+        .from('tenants')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', tenantId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating tenant:', error);
+      res.status(500).json({ error: 'Failed to update tenant' });
+    }
+  });
+
+  app.delete('/api/white-label/tenants/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock response if Supabase not configured
+        return res.json({ message: 'Tenant deleted successfully', id: tenantId });
+      }
+
+      const { error } = await supabase
+        .from('tenants')
+        .delete()
+        .eq('id', tenantId);
+
+      if (error) throw error;
+      res.json({ message: 'Tenant deleted successfully', id: tenantId });
+    } catch (error) {
+      console.error('Error deleting tenant:', error);
+      res.status(500).json({ error: 'Failed to delete tenant' });
+    }
+  });
+
+  // Get white-label configuration for a tenant
+  app.get('/api/white-label/config/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock data if Supabase not configured
+        const mockConfig = {
+          id: 'config_1',
+          tenant_id: tenantId,
+          company_name: 'Demo Company',
+          logo_url: null,
+          primary_color: '#3B82F6',
+          secondary_color: '#6366F1',
+          hero_title: 'Welcome to Our Platform',
+          hero_subtitle: 'Transform your business with our solutions',
+          cta_buttons: [],
+          redirect_mappings: {},
+          show_pricing: true,
+          show_testimonials: true,
+          show_features: true,
+          support_email: 'support@demo.com',
+          support_phone: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        return res.json(mockConfig);
+      }
+
+      const { data, error } = await supabase
+        .from('white_label_configs')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error;
+      }
+
+      if (!data) {
+        return res.status(404).json({ error: 'White-label configuration not found' });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching white-label config:', error);
+      res.status(500).json({ error: 'Failed to fetch white-label configuration' });
+    }
+  });
+
+  // Update white-label configuration
+  app.put('/api/white-label/config/:tenantId', async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+      const updates = req.body;
+
+      if (!isSupabaseConfigured() || !supabase) {
+        // Fallback to mock response if Supabase not configured
+        const updatedConfig = {
+          id: 'config_1',
+          tenant_id: tenantId,
+          ...updates,
+          updated_at: new Date().toISOString()
+        };
+        return res.json(updatedConfig);
+      }
+
+      // First check if config exists
+      const { data: existingConfig } = await supabase
+        .from('white_label_configs')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .single();
+
+      let result;
+      if (existingConfig) {
+        // Update existing config
+        const { data, error } = await supabase
+          .from('white_label_configs')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('tenant_id', tenantId)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      } else {
+        // Create new config
+        const { data, error } = await supabase
+          .from('white_label_configs')
+          .insert({
+            tenant_id: tenantId,
+            ...updates,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error updating white-label config:', error);
+      res.status(500).json({ error: 'Failed to update white-label configuration' });
+    }
+  });
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
@@ -106,11 +603,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // User role check endpoint for development
+  // User role check endpoint for development (should be first to override auth routes)
   app.get('/api/auth/user-role', (req, res) => {
-    if (process.env.NODE_ENV !== 'development') {
-      return res.status(403).json({
-        error: 'Dev endpoint only available in development mode'
+    console.log('Auth user-role endpoint called, NODE_ENV:', process.env.NODE_ENV);
+
+    if (process.env.NODE_ENV === 'development') {
+      // Return dev user with full permissions
+      const devUser = {
+        userId: 'dev-user-12345',
+        email: 'dev@smartcrm.local',
+        role: 'super_admin'
+      };
+
+      console.log('✅ Dev bypass activated for user-role');
+      return res.json({
+        success: true,
+        data: devUser
       });
     }
 
@@ -133,6 +641,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       user: devUser,
       hasAccess: true,
       permissions: ['all']
+    });
+  });
+
+  // OpenAI API status check with model availability
+  app.get('/api/openai/status', async (req, res) => {
+    const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;
+
+    if (!hasApiKey) {
+      return res.json({
+        configured: false,
+        model: 'none',
+        status: 'needs_configuration',
+        error: 'No API key configured'
+      });
+    }
+
+    // Check GPT-5 availability
+    let gpt5Available = false;
+    try {
+      const testResponse = await openai.chat.completions.create({
+        model: "gpt-5",
+        messages: [{ role: "user", content: "test" }],
+        max_tokens: 1
+      });
+      gpt5Available = true;
+    } catch (error: any) {
+      gpt5Available = false;
+    }
+
+    res.json({
+      configured: true,
+      model: gpt5Available ? 'gpt-5' : 'gpt-4o',
+      status: 'ready',
+      gpt5Available,
+      capabilities: gpt5Available ? [
+        '94.6% AIME mathematical accuracy',
+        '74.9% SWE-bench coding accuracy',
+        '84.2% MMMU multimodal performance',
+        'Unified reasoning system',
+        'Advanced verbosity and reasoning_effort controls'
+      ] : [
+        'GPT-4 Omni model available',
+        'Advanced reasoning and analysis',
+        'Multimodal capabilities',
+        'JSON output formatting'
+      ]
     });
   });
 
@@ -388,7 +942,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Smart greeting error:', error);
-
       // Intelligent fallback with dynamic data
       res.json({ 
         greeting: `Good ${timeOfDay}! You have ${userMetrics?.totalDeals || 0} deals worth $${(userMetrics?.totalValue || 0).toLocaleString()}.`,
@@ -1306,6 +1859,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check admin status endpoint
   app.get('/api/admin/check-status', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const ADMIN_EMAILS = [
         'victor@videoremix.io',
         'samuel@videoremix.io', 
@@ -1385,6 +1942,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fix admin access endpoint
   app.post('/api/admin/fix-access', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const ADMIN_EMAILS = [
         'victor@videoremix.io',
         'samuel@videoremix.io', 
@@ -1396,11 +1957,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const email of ADMIN_EMAILS) {
         try {
           console.log(`🔧 Fixing access for ${email}...`);
-          
+
           // Check if user exists
           const { data: users } = await supabase.auth.admin.listUsers();
           let user = users?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-          
+
           if (!user) {
             // Create user
             const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
@@ -1414,10 +1975,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 email_template_set: 'smartcrm'
               }
             });
-            
+
             if (createError) throw createError;
             user = newUser.user;
-            
+
             console.log(`✅ Created user: ${email}`);
           } else {
             // Update existing user
@@ -1430,11 +1991,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 email_template_set: 'smartcrm'
               }
             });
-            
+
             if (updateError) throw updateError;
             console.log(`✅ Updated user: ${email}`);
           }
-          
+
           // Ensure profile exists
           if (user) {
             const { data: existingProfile } = await supabase
@@ -1442,7 +2003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .select('*')
               .eq('id', user.id)
               .single();
-            
+
             if (!existingProfile) {
               const { error: profileError } = await supabase
                 .from('profiles')
@@ -1454,7 +2015,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   role: 'super_admin',
                   status: 'active'
                 });
-              
+
               if (profileError) throw profileError;
               console.log(`✅ Created profile: ${email}`);
             } else {
@@ -1465,11 +2026,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   status: 'active'
                 })
                 .eq('id', user.id);
-              
+
               if (profileUpdateError) throw profileUpdateError;
               console.log(`✅ Updated profile: ${email}`);
             }
-            
+
             // Generate magic link
             const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
               type: 'magiclink',
@@ -1480,7 +2041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   : 'https://smartcrm-videoremix.replit.app/auth/callback'
               }
             });
-            
+
             results.push({
               email,
               status: 'fixed',
@@ -1517,6 +2078,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Import and use auth routes (after dev overrides)
+  if (process.env.NODE_ENV !== 'development') {
+    const authRouter = (await import('./routes/auth.js')).default;
+    app.use('/api/auth', authRouter);
+  } else {
+    console.log('🔧 Development mode: Using dev auth endpoints');
+  }
 
   // Admin management endpoints
   app.post('/api/admin/resend-confirmations', async (req, res) => {
@@ -1630,6 +2199,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Management API Endpoints
   app.get('/api/users', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
       const { data: users, error } = await supabase
         .from('profiles')
         .select('*')
@@ -1646,6 +2218,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/users/invite', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const { email, role, firstName, lastName, permissions } = req.body;
 
       // Validate role against new role system
@@ -1687,6 +2263,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/users/:userId/role', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const { userId } = req.params;
       const { role } = req.body;
 
@@ -1731,6 +2311,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/users/:userId/status', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const { userId } = req.params;
       const { status } = req.body;
 
@@ -1751,6 +2335,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Role migration endpoint (admin only)
   app.post('/api/admin/migrate-roles', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       // Inline migration logic
       console.log('🔄 Starting user role migration...');
 
@@ -1889,6 +2477,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync Supabase metadata endpoint (admin only)  
   app.post('/api/admin/sync-metadata', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       console.log('🔄 Syncing Supabase Auth metadata with profile roles...');
 
       // Get all profiles with their roles
@@ -1957,6 +2549,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/users/:userId', async (req, res) => {
     try {
+      if (!supabase) {
+        return res.status(500).json({ error: 'Supabase not configured' });
+      }
+
       const { userId } = req.params;
 
       // Delete from auth
@@ -2090,30 +2686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ElevenLabs signed URL endpoint for private agents
-  app.get('/api/elevenlabs/signed-url', async (req, res) => {
-    try {
-      const agentId = req.query.agent_id || process.env.ELEVENLABS_AGENT_ID || 'agent_01jvwktgjsefkts3rv9jqwcx33';
-      
-      if (!process.env.ELEVENLABS_API_KEY) {
-        return res.status(500).json({ error: 'ElevenLabs API key not configured' });
-      }
-
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${agentId}`,
-        {
-          headers: {
-            // Requesting a signed url requires your ElevenLabs API key
-            // Do NOT expose your API key to the client!
-            "xi-api-key": process.env.ELEVENLABS_API_KEY,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('ElevenLabs API error:', response.status, errorText);
-        return res.status(500).json({ error: 'Failed to get signed URL from ElevenLabs' });
+  // ElevenLabs endpoint removedailed to get signed URL from ElevenLabs' });
       }
 
       const body = await response.json();

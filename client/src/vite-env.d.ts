@@ -19,25 +19,4 @@ declare global {
   }
 }
 
-// ElevenLabs Conversational AI Widget Types
-declare namespace JSX {
-  interface IntrinsicElements {
-    'elevenlabs-convai': {
-      'agent-id': string;
-      style?: React.CSSProperties;
-      className?: string;
-      ref?: React.RefObject<HTMLElement>;
-      onLoad?: () => void;
-      onError?: (error: any) => void;
-    };
-  }
-}
-
-// Declare the custom element for better TypeScript support
-declare global {
-  interface HTMLElementTagNameMap {
-    'elevenlabs-convai': HTMLElement & {
-      'agent-id': string;
-    };
-  }
-}
+// ElevenLabs declarations removed

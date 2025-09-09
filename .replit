@@ -16,7 +16,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Development Server"
+runButton = "Fix Dev Issues"
 
 [[workflows.workflow]]
 name = "Project"
@@ -43,11 +43,71 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pkill -f \"tsx server/index.ts\" || true"
+args = "npm install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "sleep 2"
+args = "npm run check"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Start Development Server"
+author = 38953287
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pkill -f \"tsx\" || true"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 1"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Simple Dev Server"
+author = 38953287
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Clean Dev Start"
+author = 38953287
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install --force"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Fix Dev Issues"
+author = 38953287
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export NODE_ENV=development"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

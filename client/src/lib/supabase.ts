@@ -47,30 +47,79 @@ export const auth = {
       email,
       password,
       options: {
-        ...options,
         emailRedirectTo,
-        data: {
-          app_context: 'smartcrm',
-          email_template_set: 'smartcrm',
-          ...options?.data
-        }
+        ...options
       }
     });
   },
 
   signIn: async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
+    return await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+  },
+
+  signInWithProvider: async (provider: 'google' | 'github' | 'discord') => {
+    // Get dynamic redirect URL based on environment
+    const currentOrigin = window.location.origin;
+    const isDevelopment = currentOrigin.includes('localhost') || 
+                         currentOrigin.includes('replit.dev') || 
+                         currentOrigin.includes('replit.app');
+    
+    const redirectTo = isDevelopment 
+      ? `${currentOrigin}/auth/callback`
+      : 'https://smart-crm.videoremix.io/auth/callback';
+
+    console.log('OAuth SignIn with redirectTo:', redirectTo);
+
+    return await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo
+      }
+    });
   },
 
   signOut: async () => {
     return await supabase.auth.signOut();
   },
 
+  resetPassword: async (email: string) => {
+    // Get dynamic redirect URL based on environment
+    const currentOrigin = window.location.origin;
+    const isDevelopment = currentOrigin.includes('localhost') || 
+                         currentOrigin.includes('replit.dev') || 
+                         currentOrigin.includes('replit.app');
+    
+    const redirectTo = isDevelopment 
+      ? `${currentOrigin}/auth/reset-password`
+      : 'https://smart-crm.videoremix.io/auth/reset-password';
+
+    console.log('Password reset with redirectTo:', redirectTo);
+
+    return await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo
+    });
+  },
+
+  updatePassword: async (password: string) => {
+    return await supabase.auth.updateUser({
+      password
+    });
+  },
+
+  getSession: async () => {
+    return await supabase.auth.getSession();
+  },
+
   getUser: async () => {
-    return supabase.auth.getUser();
+    return await supabase.auth.getUser();
   },
 
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
     return supabase.auth.onAuthStateChange(callback);
   }
 };
+
+export default supabase;

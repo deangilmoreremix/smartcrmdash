@@ -11,30 +11,24 @@ interface VoiceAgentWidgetProps {
 const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
   position = 'bottom-right',
   minimizable = true,
-  agentId = 'agent_01jvwktgjsefkts3rv9jqwcx33'
+  agentId = 'default'
 }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log('✅ ElevenLabs conversation connected');
-      setError(null);
+  // Mock conversation object for now since ElevenLabs is disabled
+  const conversation = {
+    status: 'disconnected',
+    isSpeaking: false,
+    startSession: async (config: any) => {
+      throw new Error('ElevenLabs integration is currently disabled');
     },
-    onDisconnect: () => {
-      console.log('🔌 ElevenLabs conversation disconnected');
+    endSession: async () => {
       setConversationId(null);
-    },
-    onMessage: (message) => {
-      console.log('💬 ElevenLabs message:', message);
-    },
-    onError: (error) => {
-      console.error('❌ ElevenLabs conversation error:', error);
-      setError('Connection failed. Please try again.');
     }
-  });
+  };
 
   const startConversation = async () => {
     try {

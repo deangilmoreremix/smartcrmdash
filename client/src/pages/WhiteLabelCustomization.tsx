@@ -1,845 +1,315 @@
-import { useState, useEffect } from 'react';
-import { Palette, Upload, Eye, Save, RotateCcw, Sparkles, Globe, Code, Monitor, Mail, Loader2 } from 'lucide-react';
-import { useTenant } from '../contexts/TenantProvider';
-import { ConditionalRender } from '../components/RoleBasedAccess';
-import { useWLState, useCreateUserWLSettings, useUpdateUserWLSettings, useUserWLSettings, useCreateTenantConfig, useUpdateTenantConfig } from '@/hooks/useWLSettings';
-import { useToast } from '@/hooks/use-toast';
-import { WLService } from '@/services/wlService';
+import React, { useState } from 'react';
+import { useWhitelabel } from '../contexts/WhitelabelContext';
+import { WhitelabelButton } from '../types/whitelabel';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Badge } from '../components/ui/badge';
+import {
+  Save,
+  RotateCcw,
+  Download,
+  Upload,
+  Copy,
+  Check,
+  Plus,
+  Trash2,
+  Palette,
+  Type,
+  Link,
+  Eye,
+  Settings,
+  Sparkles,
+  Wand2,
+  Globe,
+  MessageSquare
+} from 'lucide-react';
 
-interface BrandingConfig {
-  logo?: string;
-  favicon?: string;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  backgroundColor: string;
-  textColor: string;
-  companyName: string;
-  tagline?: string;
-  customDomain?: string;
-  customCSS?: string;
-  footerText?: string;
-  loginPageConfig: {
-    backgroundImage?: string;
-    welcomeMessage?: string;
-    supportEmail?: string;
+const WhiteLabelCustomization: React.FC = () => {
+  const { config, updateConfig, resetToDefault, exportConfig, importConfig } = useWhitelabel();
+  const [copied, setCopied] = useState(false);
+  const [importText, setImportText] = useState('');
+
+  const handleButtonUpdate = (index: number, updates: Partial<WhitelabelButton>) => {
+    const newButtons = [...config.ctaButtons];
+    newButtons[index] = { ...newButtons[index], ...updates };
+    updateConfig({ ctaButtons: newButtons });
   };
-  emailConfig: {
-    fromName?: string;
-    replyToEmail?: string;
-    emailSignature?: string;
-    headerLogo?: string;
+
+  const addButton = () => {
+    const newButton: WhitelabelButton = {
+      id: `button_${Date.now()}`,
+      text: 'New Button',
+      url: '/dashboard',
+      color: '#3B82F6',
+      variant: 'primary',
+      enabled: true
+    };
+    updateConfig({ ctaButtons: [...config.ctaButtons, newButton] });
   };
-  features: {
-    showPoweredBy: boolean;
-    customFavicon: boolean;
-    customEmailTemplates: boolean;
-    advancedBranding: boolean;
-    whiteLabel: boolean;
+
+  const removeButton = (index: number) => {
+    const newButtons = config.ctaButtons.filter((_, i) => i !== index);
+    updateConfig({ ctaButtons: newButtons });
   };
-}
 
-export default function WhiteLabelCustomization() {
-  const [config, setConfig] = useState<BrandingConfig>({
-    primaryColor: '#3B82F6',
-    secondaryColor: '#1E40AF',
-    accentColor: '#10B981',
-    backgroundColor: '#FFFFFF',
-    textColor: '#1F2937',
-    companyName: '',
-    loginPageConfig: {},
-    emailConfig: {},
-    features: {
-      showPoweredBy: true,
-      customFavicon: false,
-      customEmailTemplates: false,
-      advancedBranding: false,
-      whiteLabel: false,
-    },
-  });
+  const handleExport = () => {
+    const configString = exportConfig();
+    navigator.clipboard.writeText(configString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile' | 'email'>('desktop');
-  const [activeTab, setActiveTab] = useState('basic');
-
-  const { tenant, applyBranding } = useTenant();
-  const { toast } = useToast();
-
-  // White Label hooks for database persistence
-  const userId = 'dev-user-12345'; // In production, get from auth context
-  const tenantId = tenant?.id || 'default-tenant';
-  const { settings: userWLSettings } = useUserWLSettings(userId);
-  const createUserWLSettings = useCreateUserWLSettings();
-  const updateUserWLSettings = useUpdateUserWLSettings(userId);
-  const createTenantConfig = useCreateTenantConfig();
-  const updateTenantConfig = useUpdateTenantConfig(tenantId);
-  const { currentSettings, updateLocalSettings, isModified } = useWLState();
-
-  useEffect(() => {
-    fetchBrandingConfig();
-  }, [tenant]);
-
-  const fetchBrandingConfig = async () => {
+  const handleImport = () => {
     try {
-      setIsLoading(true);
-      if (tenant) {
-        const response = await fetch(`/api/white-label/tenants/${tenant.id}/branding`);
-        if (response.ok) {
-          const brandingData = await response.json();
-          setConfig({ ...config, ...brandingData });
-        }
-      }
+      importConfig(importText);
+      setImportText('');
     } catch (error) {
-      console.error('Failed to fetch branding config:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to import config:', error);
     }
   };
-
-  const saveBrandingConfig = async () => {
-    try {
-      setSaving(true);
-
-      // Prepare data for database storage
-      const userWLData = {
-        userId,
-        customBranding: config,
-        enabledFeatures: Object.keys(config.features).filter(key => config.features[key as keyof typeof config.features]),
-        preferences: {
-          activeTab,
-          previewMode,
-          lastModified: new Date().toISOString()
-        },
-        settings: {
-          companyName: config.companyName,
-          primaryColor: config.primaryColor,
-          secondaryColor: config.secondaryColor
-        }
-      };
-
-      const tenantConfigData = {
-        tenantId,
-        companyName: config.companyName,
-        logo: config.logo,
-        favicon: config.favicon,
-        primaryColor: config.primaryColor,
-        secondaryColor: config.secondaryColor,
-        accentColor: config.accentColor,
-        backgroundColor: config.backgroundColor,
-        textColor: config.textColor,
-        customDomain: config.customDomain,
-        customCSS: config.customCSS,
-        emailFromName: config.emailConfig.fromName,
-        emailReplyTo: config.emailConfig.replyToEmail,
-        emailSignature: config.emailConfig.emailSignature,
-        brandingConfig: config,
-        features: config.features,
-        profileId: userId
-      };
-
-      // Save to database using the WL service
-      try {
-        await WLService.syncUserData(userId, userWLData);
-        await WLService.syncTenantData(tenantId, tenantConfigData);
-        
-        toast({
-          title: "Settings saved successfully!",
-          description: "Your white label configuration has been saved to the database.",
-        });
-      } catch (dbError) {
-        console.warn('Database save failed, falling back to localStorage:', dbError);
-        // Fallback to localStorage if database fails
-        WLService.saveToLocalStorage('user-settings', userWLData);
-        WLService.saveToLocalStorage('tenant-config', tenantConfigData);
-        
-        // Show debug info in console
-        console.log('✓ WL Save Test - Data saved to localStorage:');
-        console.log('  User Settings:', userWLData);
-        console.log('  Tenant Config:', tenantConfigData);
-        console.log('  LocalStorage keys:', Object.keys(localStorage).filter(k => k.startsWith('wl_')));
-        
-        toast({
-          title: "Settings saved locally",
-          description: "Configuration saved locally. Database sync will retry later.",
-        });
-      }
-      
-      if (tenant) {
-        applyBranding();
-      }
-    } catch (error) {
-      console.error('Failed to save branding config:', error);
-      toast({
-        title: "Save failed",
-        description: "Failed to save white label configuration. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const resetToDefaults = () => {
-    if (confirm('Are you sure you want to reset to default branding? This will lose all customizations.')) {
-      setConfig({
-        primaryColor: '#3B82F6',
-        secondaryColor: '#1E40AF',
-        accentColor: '#10B981',
-        backgroundColor: '#FFFFFF',
-        textColor: '#1F2937',
-        companyName: '',
-        loginPageConfig: {},
-        emailConfig: {},
-        features: {
-          showPoweredBy: true,
-          customFavicon: false,
-          customEmailTemplates: false,
-          advancedBranding: false,
-          whiteLabel: false,
-        },
-      });
-    }
-  };
-
-  const uploadFile = async (file: File, type: 'logo' | 'favicon' | 'background') => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-
-    try {
-      const response = await fetch('/api/white-label/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const { url } = await response.json();
-        return url;
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
-    return null;
-  };
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'favicon' | 'background') => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const url = await uploadFile(file, type);
-      if (url) {
-        if (type === 'logo') {
-          setConfig({ ...config, logo: url });
-        } else if (type === 'favicon') {
-          setConfig({ ...config, favicon: url });
-        } else if (type === 'background') {
-          setConfig({
-            ...config,
-            loginPageConfig: { ...config.loginPageConfig, backgroundImage: url }
-          });
-        }
-      }
-    }
-  };
-
-  const presetThemes = [
-    { name: 'Default Blue', primary: '#3B82F6', secondary: '#1E40AF', accent: '#10B981' },
-    { name: 'Professional Gray', primary: '#6B7280', secondary: '#374151', accent: '#059669' },
-    { name: 'Elegant Purple', primary: '#8B5CF6', secondary: '#7C3AED', accent: '#F59E0B' },
-    { name: 'Modern Green', primary: '#10B981', secondary: '#059669', accent: '#3B82F6' },
-    { name: 'Warm Orange', primary: '#F97316', secondary: '#EA580C', accent: '#EF4444' },
-    { name: 'Dark Mode', primary: '#1F2937', secondary: '#111827', accent: '#3B82F6' },
-  ];
-
-  const applyTheme = (theme: typeof presetThemes[0]) => {
-    setConfig({
-      ...config,
-      primaryColor: theme.primary,
-      secondaryColor: theme.secondary,
-      accentColor: theme.accent,
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading branding configuration...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-      {/* Header - Fixed */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <Palette className="h-8 w-8 text-purple-600 mr-3" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  White-Label Customization
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Customize your brand identity and user experience
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={resetToDefaults}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Reset
-              </button>
-              <button
-                onClick={saveBrandingConfig}
-                disabled={isSaving}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50"
-              >
-                <Save className="h-4 w-4" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
+    <div className="container mx-auto p-6 space-y-8 max-w-6xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">White Label Customization</h1>
+          <p className="text-gray-600">Customize your application's branding and appearance</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={resetToDefault}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          <Button onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Configuration Panel */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Navigation Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
-              <nav className="-mb-px flex space-x-8">
-                {[
-                  { id: 'basic', label: 'Basic Branding', icon: Palette },
-                  { id: 'advanced', label: 'Advanced', icon: Sparkles },
-                  { id: 'domain', label: 'Domain & URLs', icon: Globe },
-                  { id: 'code', label: 'Custom Code', icon: Code },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? 'border-purple-500 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <tab.icon className="h-4 w-4" />
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Company Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Globe className="h-5 w-5 mr-2" />
+              Company Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="companyName">Company Name</Label>
+              <Input
+                id="companyName"
+                value={config.companyName}
+                onChange={(e) => updateConfig({ companyName: e.target.value })}
+                placeholder="Your Company Name"
+              />
             </div>
+            <div>
+              <Label htmlFor="logoUrl">Logo URL</Label>
+              <Input
+                id="logoUrl"
+                value={config.logoUrl}
+                onChange={(e) => updateConfig({ logoUrl: e.target.value })}
+                placeholder="https://your-logo.png"
+              />
+            </div>
+            <div>
+              <Label htmlFor="supportEmail">Support Email</Label>
+              <Input
+                id="supportEmail"
+                value={config.supportEmail}
+                onChange={(e) => updateConfig({ supportEmail: e.target.value })}
+                placeholder="support@yourcompany.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="supportPhone">Support Phone</Label>
+              <Input
+                id="supportPhone"
+                value={config.supportPhone}
+                onChange={(e) => updateConfig({ supportPhone: e.target.value })}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Basic Branding Tab */}
-            {activeTab === 'basic' && (
-              <div className="space-y-6">
-                {/* Company Information */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Company Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Color Scheme */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Palette className="h-5 w-5 mr-2" />
+              Color Scheme
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="primaryColor">Primary Color</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="primaryColor"
+                  type="color"
+                  value={config.primaryColor}
+                  onChange={(e) => updateConfig({ primaryColor: e.target.value })}
+                  className="w-12 h-10 p-1"
+                />
+                <Input
+                  value={config.primaryColor}
+                  onChange={(e) => updateConfig({ primaryColor: e.target.value })}
+                  placeholder="#3B82F6"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="secondaryColor">Secondary Color</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="secondaryColor"
+                  type="color"
+                  value={config.secondaryColor}
+                  onChange={(e) => updateConfig({ secondaryColor: e.target.value })}
+                  className="w-12 h-10 p-1"
+                />
+                <Input
+                  value={config.secondaryColor}
+                  onChange={(e) => updateConfig({ secondaryColor: e.target.value })}
+                  placeholder="#1E40AF"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CTA Buttons */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Call-to-Action Buttons
+              </div>
+              <Button onClick={addButton} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Button
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {config.ctaButtons.map((button, index) => (
+                <div key={button.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Company Name
-                      </label>
-                      <input
-                        type="text"
-                        value={config.companyName}
-                        onChange={(e) => setConfig({ ...config, companyName: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="Your Company Name"
+                      <Label>Button Text</Label>
+                      <Input
+                        value={button.text}
+                        onChange={(e) => handleButtonUpdate(index, { text: e.target.value })}
+                        placeholder="Button Text"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Tagline
-                      </label>
-                      <input
-                        type="text"
-                        value={config.tagline || ''}
-                        onChange={(e) => setConfig({ ...config, tagline: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="Your company tagline"
+                      <Label>URL</Label>
+                      <Input
+                        value={button.url}
+                        onChange={(e) => handleButtonUpdate(index, { url: e.target.value })}
+                        placeholder="/dashboard"
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* Logo Upload */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Logo & Assets
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Company Logo
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        {config.logo ? (
-                          <img src={config.logo} alt="Logo" className="h-16 mx-auto mb-2" />
-                        ) : (
-                          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'logo')}
-                          className="hidden"
-                          id="logo-upload"
-                        />
-                        <label
-                          htmlFor="logo-upload"
-                          className="cursor-pointer text-sm text-purple-600 hover:text-purple-700"
-                        >
-                          Upload Logo
-                        </label>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Favicon
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        {config.favicon ? (
-                          <img src={config.favicon} alt="Favicon" className="h-8 mx-auto mb-2" />
-                        ) : (
-                          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'favicon')}
-                          className="hidden"
-                          id="favicon-upload"
-                        />
-                        <label
-                          htmlFor="favicon-upload"
-                          className="cursor-pointer text-sm text-purple-600 hover:text-purple-700"
-                        >
-                          Upload Favicon
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Color Scheme */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Color Scheme
-                  </h3>
-                  
-                  {/* Preset Themes */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                      Quick Themes
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {presetThemes.map((theme) => (
-                        <button
-                          key={theme.name}
-                          onClick={() => applyTheme(theme)}
-                          className="p-3 border border-gray-200 rounded-lg hover:border-purple-300 text-left"
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="w-4 h-4 rounded" style={{ backgroundColor: theme.primary }}></div>
-                            <div className="w-4 h-4 rounded" style={{ backgroundColor: theme.secondary }}></div>
-                            <div className="w-4 h-4 rounded" style={{ backgroundColor: theme.accent }}></div>
-                          </div>
-                          <span className="text-sm font-medium">{theme.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Custom Colors */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Primary Color
-                      </label>
-                      <div className="flex gap-2">
-                        <input
+                      <Label>Color</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
                           type="color"
-                          value={config.primaryColor}
-                          onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
-                          className="w-12 h-10 border border-gray-300 rounded"
+                          value={button.color}
+                          onChange={(e) => handleButtonUpdate(index, { color: e.target.value })}
+                          className="w-12 h-10 p-1"
                         />
-                        <input
-                          type="text"
-                          value={config.primaryColor}
-                          onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Secondary Color
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="color"
-                          value={config.secondaryColor}
-                          onChange={(e) => setConfig({ ...config, secondaryColor: e.target.value })}
-                          className="w-12 h-10 border border-gray-300 rounded"
-                        />
-                        <input
-                          type="text"
-                          value={config.secondaryColor}
-                          onChange={(e) => setConfig({ ...config, secondaryColor: e.target.value })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        <Input
+                          value={button.color}
+                          onChange={(e) => handleButtonUpdate(index, { color: e.target.value })}
+                          placeholder="#3B82F6"
+                          className="flex-1"
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Accent Color
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="color"
-                          value={config.accentColor}
-                          onChange={(e) => setConfig({ ...config, accentColor: e.target.value })}
-                          className="w-12 h-10 border border-gray-300 rounded"
-                        />
-                        <input
-                          type="text"
-                          value={config.accentColor}
-                          onChange={(e) => setConfig({ ...config, accentColor: e.target.value })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Advanced Tab */}
-            {activeTab === 'advanced' && (
-              <div className="space-y-6">
-                {/* Login Page Customization */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Login Page Customization
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Welcome Message
-                      </label>
-                      <input
-                        type="text"
-                        value={config.loginPageConfig.welcomeMessage || ''}
-                        onChange={(e) => setConfig({
-                          ...config,
-                          loginPageConfig: { ...config.loginPageConfig, welcomeMessage: e.target.value }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="Welcome to our platform"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Background Image
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        {config.loginPageConfig.backgroundImage ? (
-                          <img src={config.loginPageConfig.backgroundImage} alt="Background" className="h-20 mx-auto mb-2 object-cover rounded" />
-                        ) : (
-                          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'background')}
-                          className="hidden"
-                          id="background-upload"
-                        />
-                        <label
-                          htmlFor="background-upload"
-                          className="cursor-pointer text-sm text-purple-600 hover:text-purple-700"
-                        >
-                          Upload Background
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Email Configuration */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Email Branding
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        From Name
-                      </label>
-                      <input
-                        type="text"
-                        value={config.emailConfig.fromName || ''}
-                        onChange={(e) => setConfig({
-                          ...config,
-                          emailConfig: { ...config.emailConfig, fromName: e.target.value }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="Your Company"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Reply-To Email
-                      </label>
-                      <input
-                        type="email"
-                        value={config.emailConfig.replyToEmail || ''}
-                        onChange={(e) => setConfig({
-                          ...config,
-                          emailConfig: { ...config.emailConfig, replyToEmail: e.target.value }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="noreply@yourcompany.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Feature Toggles */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    White-Label Features
-                  </h3>
-                  <div className="space-y-4">
-                    {[
-                      { key: 'showPoweredBy', label: 'Show "Powered by" branding', description: 'Display platform attribution' },
-                      { key: 'customFavicon', label: 'Custom favicon support', description: 'Use your own favicon' },
-                      { key: 'customEmailTemplates', label: 'Custom email templates', description: 'Branded email communications' },
-                      { key: 'advancedBranding', label: 'Advanced branding options', description: 'CSS customization and more' },
-                      { key: 'whiteLabel', label: 'Complete white-label mode', description: 'Remove all platform branding' },
-                    ].map((feature) => (
-                      <div key={feature.key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{feature.label}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{feature.description}</p>
-                        </div>
-                        <button
-                          onClick={() => setConfig({
-                            ...config,
-                            features: {
-                              ...config.features,
-                              [feature.key]: !config.features[feature.key as keyof typeof config.features]
-                            }
-                          })}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            config.features[feature.key as keyof typeof config.features] ? 'bg-purple-600' : 'bg-gray-200'
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              config.features[feature.key as keyof typeof config.features] ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Domain Tab */}
-            {activeTab === 'domain' && (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Domain Configuration
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Custom Domain
-                    </label>
-                    <input
-                      type="text"
-                      value={config.customDomain || ''}
-                      onChange={(e) => setConfig({ ...config, customDomain: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="crm.yourcompany.com"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Point your domain's DNS to our servers to use a custom domain
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Custom Code Tab */}
-            {activeTab === 'code' && (
-              <ConditionalRender resource="custom_branding">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Custom CSS
-                  </h3>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Additional CSS
-                    </label>
-                    <textarea
-                      value={config.customCSS || ''}
-                      onChange={(e) => setConfig({ ...config, customCSS: e.target.value })}
-                      className="w-full h-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm"
-                      placeholder="/* Add your custom CSS here */"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Custom CSS will be injected into your application
-                    </p>
-                  </div>
-                </div>
-              </ConditionalRender>
-            )}
-          </div>
-
-          {/* Preview Panel */}
-          <div className="space-y-6">
-            {/* Preview Controls */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Live Preview
-                </h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPreviewMode('desktop')}
-                    className={`p-2 rounded ${previewMode === 'desktop' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  >
-                    <Monitor className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setPreviewMode('mobile')}
-                    className={`p-2 rounded ${previewMode === 'mobile' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  >
-                    <div className="h-4 w-4 border-2 border-current rounded-sm"></div>
-                  </button>
-                  <button
-                    onClick={() => setPreviewMode('email')}
-                    className={`p-2 rounded ${previewMode === 'email' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
-                  >
-                    <Mail className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Preview Content */}
-              <div className={`border rounded-lg overflow-hidden ${
-                previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
-              }`}>
-                {previewMode === 'desktop' || previewMode === 'mobile' ? (
-                  <div 
-                    className="p-6"
-                    style={{ 
-                      backgroundColor: config.backgroundColor,
-                      color: config.textColor 
-                    }}
-                  >
-                    {/* Header Preview */}
-                    <div 
-                      className="flex items-center justify-between p-4 rounded-lg mb-4"
-                      style={{ backgroundColor: config.primaryColor }}
-                    >
-                      <div className="flex items-center gap-3">
-                        {config.logo && (
-                          <img src={config.logo} alt="Logo" className="h-8" />
-                        )}
-                        <span className="text-white font-semibold">{config.companyName || 'Your Company'}</span>
-                      </div>
-                    </div>
-
-                    {/* Content Preview */}
-                    <div className="space-y-4">
-                      <h2 className="text-xl font-bold" style={{ color: config.textColor }}>
-                        Welcome to {config.companyName || 'Your Company'}
-                      </h2>
-                      {config.tagline && (
-                        <p className="text-gray-600">{config.tagline}</p>
-                      )}
-                      
-                      <button 
-                        className="px-4 py-2 rounded-lg text-white font-medium"
-                        style={{ backgroundColor: config.accentColor }}
+                    <div className="flex items-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeButton(index)}
+                        className="text-red-600 hover:text-red-700"
                       >
-                        Get Started
-                      </button>
-                      
-                      <button 
-                        className="px-4 py-2 rounded-lg font-medium ml-2"
-                        style={{ 
-                          backgroundColor: config.secondaryColor,
-                          color: 'white'
-                        }}
-                      >
-                        Learn More
-                      </button>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                ) : (
-                  /* Email Preview */
-                  <div className="p-4 bg-gray-100">
-                    <div className="bg-white rounded-lg p-6 max-w-md">
-                      {config.emailConfig.headerLogo && (
-                        <img src={config.emailConfig.headerLogo} alt="Logo" className="h-12 mb-4" />
-                      )}
-                      <h3 className="text-lg font-semibold mb-4">
-                        Email from {config.emailConfig.fromName || config.companyName || 'Your Company'}
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        This is how your emails will appear to customers.
-                      </p>
-                      <div className="border-t pt-4 text-sm text-gray-500">
-                        {config.emailConfig.emailSignature || `Best regards,\n${config.companyName || 'Your Company'} Team`}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              ))}
+              {config.ctaButtons.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No buttons configured. Add your first button to get started.
+                </div>
+              )}
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Quick Actions</h4>
-              <div className="space-y-2">
-                <button
-                  onClick={saveBrandingConfig}
-                  className="w-full p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  Save & Apply
-                </button>
-                <button
-                  onClick={() => window.open('/', '_blank')}
-                  className="w-full p-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
-                >
-                  <Eye className="h-4 w-4" />
-                  Preview Live
-                </button>
+        {/* Import/Export */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Settings className="h-5 w-5 mr-2" />
+              Import/Export Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="configImport">Import Configuration</Label>
+              <div className="flex space-x-2">
+                <Textarea
+                  id="configImport"
+                  value={importText}
+                  onChange={(e) => setImportText(e.target.value)}
+                  placeholder="Paste your configuration JSON here..."
+                  rows={3}
+                  className="flex-1"
+                />
+                <Button onClick={handleImport} disabled={!importText.trim()}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
+            <div className="pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Export current configuration</span>
+                <Button onClick={handleExport} variant="outline">
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2 text-green-600" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Config
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
+};
+
+export default WhiteLabelCustomization;

@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Twitter, 
-  Linkedin, 
-  Facebook, 
-  Instagram, 
-  Youtube, 
-  ArrowRight 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Twitter,
+  Linkedin,
+  Facebook,
+  Instagram,
+  Youtube,
+  ArrowRight
 } from 'lucide-react';
+import { useWhitelabel } from '../../../contexts/WhitelabelContext';
 
 const LandingFooter = () => {
   const currentYear = new Date().getFullYear();
+  const { config } = useWhitelabel();
   
   return (
     <footer className="bg-gray-900 text-white pt-20 pb-10">
@@ -22,22 +24,37 @@ const LandingFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Company Info */}
           <div className="lg:col-span-2">
-            <Link to="/" className="text-2xl font-bold mb-6 inline-block">
+            <Link to="/" className="flex items-center space-x-3 text-2xl font-bold mb-6">
+              {config.logoUrl && (
+                <img
+                  src={config.logoUrl}
+                  alt={`${config.companyName || 'Company'} Logo`}
+                  className="h-8 w-8 object-contain"
+                />
+              )}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                Smart<span className="text-white">CRM</span>
+                {config.companyName || 'Smart'}<span className="text-white">{config.companyName ? 'CRM' : 'CRM'}</span>
               </span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-sm">
               The all-in-one sales platform that combines powerful CRM capabilities with AI-driven insights to transform your sales process.
             </p>
             <div className="space-y-2">
+              {config.supportEmail && (
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-blue-400 mr-3" />
+                  <span className="text-gray-300">{config.supportEmail}</span>
+                </div>
+              )}
+              {config.supportPhone && (
+                <div className="flex items-center">
+                  <Phone className="h-5 w-5 text-blue-400 mr-3" />
+                  <span className="text-gray-300">{config.supportPhone}</span>
+                </div>
+              )}
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">contact@smartcrm.com</span>
-              </div>
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">(555) 123-4567</span>
+                <span className="text-gray-300">contact@{config.companyName ? config.companyName.toLowerCase().replace(/\s+/g, '') : 'smartcrm'}.com</span>
               </div>
               <div className="flex items-center">
                 <MapPin className="h-5 w-5 text-blue-400 mr-3" />
@@ -149,43 +166,42 @@ const LandingFooter = () => {
           </div>
         </div>
         
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-8 mt-12">
-          <div className="flex justify-between items-center">
-            <div className="flex space-x-6">
-              <a href="https://twitter.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="https://linkedin.com/company/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="https://facebook.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="https://instagram.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="https://youtube.com/smartcrm" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Youtube className="h-5 w-5" />
-              </a>
-            </div>
-            
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <div className="flex space-x-6 text-sm">
-                <Link to="/privacy" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Privacy Policy
-                </Link>
-                <Link to="/terms" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Terms of Service
-                </Link>
-                <Link to="/cookies" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Cookie Policy
-                </Link>
-              </div>
-              <p className="text-gray-400 text-sm">
-                © {currentYear} Smart CRM. All rights reserved.
-              </p>
-            </div>
+        {/* Bottom Footer */}
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-4 md:mb-0">
+            <p className="text-gray-400 text-sm">
+              &copy; {currentYear} {config.companyName || 'SmartCRM'}. All rights reserved.
+            </p>
+          </div>
+          
+          <div className="flex space-x-8">
+            <Link to="/legal/privacy" className="text-gray-400 hover:text-blue-400 transition-colors text-sm">
+              Privacy Policy
+            </Link>
+            <Link to="/legal/terms" className="text-gray-400 hover:text-blue-400 transition-colors text-sm">
+              Terms of Service
+            </Link>
+            <Link to="/legal/cookies" className="text-gray-400 hover:text-blue-400 transition-colors text-sm">
+              Cookie Policy
+            </Link>
+          </div>
+          
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <Twitter size={20} />
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <Linkedin size={20} />
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <Facebook size={20} />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <Instagram size={20} />
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <Youtube size={20} />
+            </a>
           </div>
         </div>
       </div>

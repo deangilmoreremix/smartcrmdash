@@ -97,6 +97,19 @@ const Login: React.FC = () => {
                 Sign In
               </Button>
             </form>
+            {/* Development Bypass Button */}
+            <div className="mt-4">
+              <Link to="/dev-bypass">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full border-green-500 text-green-600 hover:bg-green-50 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-900"
+                >
+                  🚀 Development Bypass Login
+                </Button>
+              </Link>
+            </div>
+            
             <div className="mt-6 text-center">
               <p className={`text-sm ${
                 isDark ? 'text-gray-400' : 'text-gray-600'

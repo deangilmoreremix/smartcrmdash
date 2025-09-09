@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
@@ -10,18 +9,35 @@ interface State {
   error?: Error;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+// Assuming ErrorBoundaryProps and ErrorBoundaryState are defined elsewhere or are the same as Props and State
+// For this example, we'll use the same types for simplicity.
+type ErrorBoundaryProps = Props;
+type ErrorBoundaryState = State;
+
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Dashboard Error Boundary caught an error:', error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error details
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    // Don't report certain expected errors
+    if (error.message?.includes('403') || error.message?.includes('Unauthorized')) {
+      console.warn('Authentication error caught, user may need to log in');
+      return;
+    }
+
+    // Report other errors to your error tracking service
+    // errorTracker.captureException(error, { extra: errorInfo });
   }
 
   render() {

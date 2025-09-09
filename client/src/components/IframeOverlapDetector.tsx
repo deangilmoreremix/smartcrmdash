@@ -66,12 +66,18 @@ const IframeOverlapDetector: React.FC = () => {
       iframe.style.height = '1px';
       
       iframe.onload = () => {
-        // Check if iframe content would be covered by navbar
-        const navbarHeight = 80; // Approximate navbar height
-        const hasIssue = true; // For demo purposes, assume all have issues initially
-        
-        document.body.removeChild(iframe);
-        resolve(hasIssue);
+        try {
+          // Check if iframe content would be covered by navbar
+          const navbarHeight = 80; // Approximate navbar height
+          const hasIssue = app.url.includes('netlify') || app.url.includes('bolt'); // Only flag external apps
+          
+          document.body.removeChild(iframe);
+          resolve(hasIssue);
+        } catch (error) {
+          console.warn('Error checking iframe overlap:', error);
+          document.body.removeChild(iframe);
+          resolve(false);
+        }
       };
       
       iframe.onerror = () => {

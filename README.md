@@ -1,224 +1,183 @@
-# Smart CRM Dashboard - GPT-5 Enhanced AI Sales Platform
+# Supabase CLI
 
-A comprehensive AI-powered Customer Relationship Management system built with GPT-5 integration, featuring advanced business intelligence, predictive analytics, and intelligent automation for modern sales teams.
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-## 🚀 GPT-5 Integration Features
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-### Official GPT-5 Implementation (Released August 7, 2025)
-- **Advanced AI Models**: Full support for `gpt-5`, `gpt-5-mini`, and `gpt-5-nano`
-- **Unified Reasoning System**: Automatic selection between fast responses and deep reasoning modes
-- **Expert-Level Capabilities**: 94.6% AIME mathematical accuracy, 74.9% SWE-bench coding accuracy
-- **Enhanced Performance**: 22% fewer tokens, 45% fewer tool calls, 50-80% efficiency improvements
+This repository contains all the functionality for Supabase CLI.
 
-### Smart API Parameters
-- **Verbosity Control**: `"low"`, `"medium"`, `"high"` for response length optimization
-- **Reasoning Effort**: `"minimal"`, `"low"`, `"medium"`, `"high"` for computational depth
-- **Intelligent Fallbacks**: Graceful degradation from GPT-5 → GPT-5-mini → GPT-4o
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-## 🎯 Core Features
+## Getting started
 
-### AI-Powered Analytics
-- **Smart Greeting Generation**: Personalized daily insights with strategic recommendations
-- **KPI Analysis**: Advanced mathematical analysis with confidence intervals
-- **Deal Intelligence**: Expert-level sales forecasting and risk assessment
-- **Business Intelligence**: Multi-domain expert analysis across 40+ professional areas
+### Install the CLI
 
-### Comprehensive CRM System
-- **Contact Management**: Advanced contact organization with AI-powered insights
-- **Deal Pipeline**: Visual pipeline management with AI-driven probability scoring
-- **Task Management**: Smart task prioritization with calendar integration
-- **Appointment Scheduling**: Professional scheduling system with 1000+ lines of functionality
-- **Communication Hub**: Unified SMS, WhatsApp, and Email messaging
-- **Document Center**: Centralized document management and storage
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
-### Advanced Features
-- **Circle Prospecting**: Geographic lead generation with AI-powered scoring
-- **Phone System**: Complete VoIP integration with call management
-- **Invoicing**: Professional invoice generation and tracking
-- **Forms & Surveys**: Custom form builder with advanced analytics
-- **Voice Profiles**: AI voice management and customization
-- **Content Library**: Media content organization and management
+```bash
+npm i supabase --save-dev
+```
 
-## 🏗 Technical Architecture
+To install the beta release channel:
 
-### Frontend Stack
-- **React 18** with TypeScript for type-safe development
-- **Vite** for fast development and optimized builds
-- **Tailwind CSS** with glass morphism design system
-- **Shadcn/UI** for consistent component library
-- **Zustand** for lightweight state management
-- **React Router** for client-side navigation
+```bash
+npm i supabase@beta --save-dev
+```
 
-### Backend Infrastructure
-- **Node.js/Express** server with TypeScript
-- **PostgreSQL** with Neon serverless hosting
-- **Drizzle ORM** for type-safe database operations
-- **Session Management** with PostgreSQL-backed storage
-- **RESTful API** design with comprehensive error handling
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-### AI Integration Layer
-- **OpenAI GPT-5** with official API implementation
-- **Advanced Parameter Control** for verbosity and reasoning effort
-- **Intelligent Error Handling** with fallback mechanisms
-- **Real-time Status Monitoring** for API availability
-- **Cost Optimization** with smart model selection
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-## 🚀 Getting Started
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-### Prerequisites
-- Node.js 18+ installed
-- PostgreSQL database (or Neon account)
-- OpenAI API key with GPT-5 access
+<details>
+  <summary><b>macOS</b></summary>
 
-### Installation
+  Available via [Homebrew](https://brew.sh). To install:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/deangilmoreremix/smartcrmdash.git
-   cd smartcrmdash
-   ```
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-3. **Set up environment variables**
-   Create a `.env` file with:
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   DATABASE_URL=your_postgresql_connection_string
-   ```
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-4. **Initialize the database**
-   ```bash
-   npm run db:push
-   ```
+<details>
+  <summary><b>Windows</b></summary>
 
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+  Available via [Scoop](https://scoop.sh). To install:
 
-6. **Open your browser**
-   Navigate to `http://localhost:5000`
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-## 🔧 Configuration
+  To upgrade:
 
-### OpenAI API Setup
-1. Visit [platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
-2. Generate a new API key with GPT-5 access
-3. Ensure sufficient billing credits for GPT-5 usage
-4. Add the key to your environment variables
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-### Database Configuration
-- The system uses PostgreSQL with Drizzle ORM
-- Run `npm run db:push` to sync schema changes
-- Database migrations are handled automatically
+<details>
+  <summary><b>Linux</b></summary>
 
-## 📊 GPT-5 Model Pricing
+  Available via [Homebrew](https://brew.sh) and Linux packages.
 
-| Model | Input Tokens | Output Tokens | Best For |
-|-------|-------------|---------------|----------|
-| **gpt-5** | $1.25/1M | $10/1M | Complex reasoning, expert analysis |
-| **gpt-5-mini** | $0.25/1M | $2/1M | Balanced performance, general use |
-| **gpt-5-nano** | $0.05/1M | $0.40/1M | High-volume, simple tasks |
+  #### via Homebrew
 
-## 🎨 Design System
+  To install:
 
-### Glass Morphism UI
-- Modern glass card design with backdrop blur effects
-- Consistent color palette with CSS variables
-- Dark mode support with automatic theme switching
-- Responsive design for all screen sizes
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-### Component Architecture
-- Modular component design with TypeScript interfaces
-- Reusable UI components with shadcn/ui
-- Context-based state management
-- Performance-optimized with React.memo
+  To upgrade:
 
-## 🔐 Security Features
+  ```sh
+  brew upgrade supabase
+  ```
 
-- **Session Management**: Secure PostgreSQL-backed sessions
-- **API Key Protection**: Server-side OpenAI API key handling
-- **Role-Based Access**: Hierarchical permission system
-- **Data Validation**: Zod schema validation throughout
-- **Error Handling**: Comprehensive error boundaries
+  #### via Linux packages
 
-## 📈 Performance Optimizations
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
 
-### GPT-5 Efficiency
-- **Smart Model Selection**: Automatic model routing based on task complexity
-- **Token Optimization**: 22% fewer tokens vs previous reasoning models
-- **Tool Call Reduction**: 45% fewer API calls for equivalent results
-- **Response Caching**: Intelligent caching for repeated queries
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
 
-### Frontend Performance
-- **Code Splitting**: Lazy-loaded routes and components
-- **Bundle Optimization**: Vite-powered build optimization
-- **State Management**: Efficient Zustand stores
-- **Image Optimization**: SVG assets and optimized loading
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
 
-## 📱 Responsive Design
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
 
-- **Desktop-First**: Optimized for professional desktop workflows
-- **Tablet Support**: Responsive layouts for tablet devices
-- **Mobile Friendly**: Touch-optimized interface for mobile access
-- **Progressive Enhancement**: Graceful degradation across devices
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
 
-## 🧪 Testing & Quality
+<details>
+  <summary><b>Other Platforms</b></summary>
 
-- **TypeScript**: Full type safety throughout the application
-- **ESLint**: Code quality enforcement
-- **Error Boundaries**: Comprehensive error handling
-- **API Monitoring**: Real-time API status tracking
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
 
-## 📖 API Documentation
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
 
-### GPT-5 Endpoints
-- `POST /api/openai/smart-greeting` - Personalized business greetings
-- `POST /api/openai/kpi-analysis` - Advanced KPI trend analysis
-- `POST /api/openai/deal-intelligence` - Expert deal analysis
-- `GET /api/openai/status` - API key and model availability
+  Add a symlink to the binary in `$PATH` for easier access:
 
-### CRM Endpoints
-- `GET /api/contacts` - Contact management
-- `GET /api/deals` - Deal pipeline operations
-- `GET /api/tasks` - Task management
-- `GET /api/appointments` - Appointment scheduling
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
 
-## 🚀 Deployment
+  This works on other non-standard Linux distros.
+</details>
 
-### Replit Deployment
-1. Configure environment variables in Replit Secrets
-2. Ensure database connection is properly configured
-3. Use the built-in deployment system
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
 
-### Manual Deployment
-1. Build the application: `npm run build`
-2. Set up production environment variables
-3. Configure PostgreSQL database
-4. Deploy using your preferred hosting service
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
 
-## 🤝 Contributing
+  ```bash
+  pkgx install supabase
+  ```
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
 
-## 📄 License
+### Run the CLI
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```bash
+supabase bootstrap
+```
 
-## 🔗 Links
+Or using npx:
 
-- **Repository**: [https://github.com/deangilmoreremix/smartcrmdash](https://github.com/deangilmoreremix/smartcrmdash)
-- **OpenAI GPT-5 Docs**: [https://platform.openai.com/docs/guides/latest-model](https://platform.openai.com/docs/guides/latest-model)
-- **Replit**: [https://replit.com](https://replit.com)
+```bash
+npx supabase bootstrap
+```
 
----
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
 
-**Built with GPT-5's advanced reasoning capabilities for next-generation sales automation** 🧠✨
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

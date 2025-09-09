@@ -1,5 +1,5 @@
-import React, { createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
+import { useNavigate as reactNavigate } from 'react-router-dom';
 import { useAITools } from '../components/AIToolsProvider';
 
 interface NavigationContextType {
@@ -20,7 +20,8 @@ export const useNavigation = () => {
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  
+  const [currentPath, setCurrentPath] = React.useState('');
+
   // Safe access to AITools with error handling
   let openTool: ((toolName: string) => void) | null = null;
   try {
@@ -34,8 +35,8 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
+      element.scrollIntoView({
+        behavior: 'smooth',
         block: 'start',
         inline: 'nearest'
       });
@@ -89,6 +90,29 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         console.log(`Navigation to ${feature} not implemented`);
     }
   };
+
+  const navigate = useCallback((path: string, options?: any) => {
+    if (path === currentPath) return;
+
+    // Debounce navigation to prevent rapid fire
+    clearTimeout(navigationTimeoutRef.current);
+    navigationTimeoutRef.current = setTimeout(() => {
+      setCurrentPath(path);
+      reactNavigate(path, options);
+    }, 100);
+  }, [currentPath, reactNavigate]);
+
+  // Add ref for timeout
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <NavigationContext.Provider value={{ scrollToSection, openAITool, navigateToFeature }}>

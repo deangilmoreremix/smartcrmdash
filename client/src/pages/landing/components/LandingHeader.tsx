@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { useWhitelabel } from '../../../contexts/WhitelabelContext';
 
 const LandingHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
-
+  const { config } = useWhitelabel();
   // Track scroll position to change header style
   useEffect(() => {
     const handleScroll = () => {
@@ -31,9 +32,16 @@ const LandingHeader = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-gray-900">
+          <Link to="/" className="flex items-center space-x-3 text-2xl font-bold text-gray-900">
+            {config.logoUrl && (
+              <img
+                src={config.logoUrl}
+                alt={`${config.companyName || 'Company'} Logo`}
+                className="h-8 w-8 object-contain"
+              />
+            )}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              Smart<span className="text-gray-900">CRM</span>
+              {config.companyName || 'Smart'}<span className="text-gray-900">{config.companyName ? 'CRM' : 'CRM'}</span>
             </span>
           </Link>
 
@@ -114,38 +122,53 @@ const LandingHeader = () => {
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-gray-200 relative z-[60]">
-            <nav className="flex flex-col space-y-2 pt-4">
-              <Link to="/features/ai-tools" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                AI Sales Tools
-              </Link>
-              <Link to="/features/contacts" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                Contact Management
-              </Link>
-              <Link to="/features/pipeline" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                Deal Pipeline
-              </Link>
-              <HashLink smooth to="/#pricing" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                Pricing
-              </HashLink>
-              <HashLink smooth to="/#faq" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                FAQ
-              </HashLink>
-              <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
-                Sign In
-              </Link>
-              <Link 
-                to="/signup" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
-              >
-                Get Started
-              </Link>
-            </nav>
+      </div>
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden bg-white shadow-lg p-4 mt-3">
+          {/* Mobile Logo */}
+          <div className="flex items-center space-x-3 pb-4 border-b border-gray-100 mb-4">
+            {config.logoUrl && (
+              <img
+                src={config.logoUrl}
+                alt={`${config.companyName || 'Company'} Logo`}
+                className="h-6 w-6 object-contain"
+              />
+            )}
+            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+              {config.companyName || 'Smart'}<span className="text-gray-900">{config.companyName ? 'CRM' : 'CRM'}</span>
+            </span>
           </div>
-        )}
+
+          <nav className="flex flex-col space-y-4">
+            <Link to="/features/ai-tools" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              AI Sales Tools
+            </Link>
+            <Link to="/features/contacts" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              Contact Management
+            </Link>
+            <Link to="/features/pipeline" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              Deal Pipeline
+            </Link>
+            <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
+              Sign In
+            </Link>
+            <Link 
+              to="/dev-bypass" 
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg font-medium transition-all w-fit"
+            >
+              🚀 Dashboard
+            </Link>
+            <Link 
+              to="/signup" 
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
+            >
+              Get Started
+            </Link>
+          </nav>
+        </div>
+      )}
       </div>
     </header>
   );
