@@ -1,8 +1,11 @@
 // src/App.tsx
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { TenantProvider } from './contexts/TenantProvider';
 import { WhitelabelProvider } from './contexts/WhitelabelContext';
 import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
@@ -11,6 +14,8 @@ import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { RoleProvider } from './components/RoleBasedAccess';
 import Navbar from './components/Navbar';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
@@ -102,20 +107,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{child
 
 function App() {
   return (
-    <ThemeProvider>
-      <WhitelabelProvider>
-        <AIToolsProvider>
-          <ModalsProvider>
-            <EnhancedHelpProvider>
-              <VideoCallProvider>
-                <NavigationProvider>
-                  <DashboardLayoutProvider>
-                    <AIProvider>
-                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                        <Navbar />
-                        <LinkRedirect />
-                        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-                          <Routes>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RoleProvider>
+          <TenantProvider>
+            <ThemeProvider>
+              <WhitelabelProvider>
+                <AIToolsProvider>
+                  <ModalsProvider>
+                    <EnhancedHelpProvider>
+                      <VideoCallProvider>
+                        <NavigationProvider>
+                          <DashboardLayoutProvider>
+                            <AIProvider>
+                              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                                <Navbar />
+                                <LinkRedirect />
+                                <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+                                  <Routes>
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
@@ -594,18 +603,22 @@ function App() {
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                           </Routes>
-                        </Suspense>
-                      </div>
-                    </AIProvider>
-                  </DashboardLayoutProvider>
-                </NavigationProvider>
-              </VideoCallProvider>
-            </EnhancedHelpProvider>
-          </ModalsProvider>
-        </AIToolsProvider>
-      </WhitelabelProvider>
-    </ThemeProvider>
-  );
-}
+                                  </Suspense>
+                                </div>
+                              </AIProvider>
+                            </DashboardLayoutProvider>
+                          </NavigationProvider>
+                        </VideoCallProvider>
+                      </EnhancedHelpProvider>
+                    </ModalsProvider>
+                  </AIToolsProvider>
+                </WhitelabelProvider>
+              </ThemeProvider>
+            </TenantProvider>
+          </RoleProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    );
+  }
 
 export default App;

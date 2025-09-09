@@ -2,6 +2,15 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Diagnostic logging for environment variables
+console.log('=== SERVER STARTUP DIAGNOSTICS ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('VITE_SUPABASE_URL configured:', !!process.env.VITE_SUPABASE_URL);
+console.log('SUPABASE_SERVICE_ROLE_KEY configured:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+console.log('OPENAI_API_KEY configured:', !!process.env.OPENAI_API_KEY);
+console.log('PORT from env:', process.env.PORT);
+console.log('=== END DIAGNOSTICS ===');
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -60,11 +69,15 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
+  console.log(`Attempting to start server on port ${port}...`);
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
+    console.log(`✅ Server successfully started and listening on port ${port}`);
     log(`serving on port ${port}`);
+  }).on('error', (error) => {
+    console.error(`❌ Failed to start server on port ${port}:`, error);
   });
 })();
