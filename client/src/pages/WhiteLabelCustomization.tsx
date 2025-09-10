@@ -72,12 +72,13 @@ const WhiteLabelCustomization: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8 max-w-6xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">White Label Customization</h1>
-          <p className="text-gray-600">Customize your application's branding and appearance</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6 space-y-8 max-w-6xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">White Label Customization</h1>
+            <p className="text-gray-600 dark:text-gray-300">Customize your application's branding and appearance</p>
+          </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={resetToDefault}>
             <RotateCcw className="h-4 w-4 mr-2" />
