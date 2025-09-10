@@ -6,7 +6,7 @@ const ContactsWorking: React.FC = () => {
   const { isDark } = useTheme();
 
   return (
-    <div className="w-full overflow-hidden relative" style={{ height: 'calc(100vh - 80px)', paddingTop: '60px' }}>
+    <div className="w-full h-full overflow-hidden">
       {/* Full Screen Contacts Component */}
       <div className="h-full w-full">
         <ModuleFederationContacts showHeader={false} />
