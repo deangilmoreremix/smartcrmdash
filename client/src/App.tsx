@@ -7,14 +7,13 @@ import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TenantProvider } from './contexts/TenantProvider';
 import { WhitelabelProvider } from './contexts/WhitelabelContext';
-// AI components disabled to prevent freezing
-// import { AIToolsProvider } from './components/AIToolsProvider';
+import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
 import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
-// import { AIProvider } from './contexts/AIContext';
+import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
 import Navbar from './components/Navbar';
@@ -146,8 +145,9 @@ import LinkRedirect from './components/shared/LinkRedirect';
 const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomization'));
 
 import './styles/design-system.css';
-import VoiceAgentWidget from './components/VoiceAgentWidget';
-import ElevenLabsIframeWidget from './components/ElevenLabsIframeWidget';
+// ElevenLabs widgets removed to prevent performance issues
+// import VoiceAgentWidget from './components/VoiceAgentWidget';
+// import ElevenLabsIframeWidget from './components/ElevenLabsIframeWidget';
 
 // Reusable placeholder
 const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
@@ -325,16 +325,7 @@ function AppContent() {
       {/* Toaster for notifications */}
       <Toaster />
       
-      {/* Voice Agent Widget - Available on all pages */}
-      <VoiceAgentWidget
-        position="bottom-right"
-        minimizable={true}
-      />
-      
-      {/* ElevenLabs Iframe Widget */}
-      <ElevenLabsIframeWidget
-        agentId="agent_01jvwktgjsefkts3rv9jqwcx33"
-      />
+      {/* ElevenLabs widgets removed to prevent performance issues */}
     </div>
   );
 }
