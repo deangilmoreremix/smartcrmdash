@@ -97,6 +97,31 @@ if (typeof window !== 'undefined') {
     event.stopPropagation();
     return false;
   }, true);
+
+  // Disable Vite's runtime error overlay specifically
+  if (import.meta.env.DEV) {
+    // Override Vite's error overlay by preventing it from being created
+    const style = document.createElement('style');
+    style.textContent = `
+      vite-error-overlay {
+        display: none !important;
+      }
+      [data-vite-error-overlay] {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Remove any existing error overlays
+    const removeOverlays = () => {
+      document.querySelectorAll('vite-error-overlay').forEach(el => el.remove());
+      document.querySelectorAll('[data-vite-error-overlay]').forEach(el => el.remove());
+    };
+    
+    // Run periodically to catch any overlays that appear
+    setInterval(removeOverlays, 100);
+    removeOverlays();
+  }
 }
 
 createRoot(document.getElementById('root')!).render(
