@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useTheme } from '../contexts/ThemeContext';
 import { 
   DollarSign, 
   Users, 
@@ -39,6 +40,7 @@ interface Commission {
 }
 
 export default function PartnerDashboard() {
+  const { isDark } = useTheme();
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   // In a real app, this would be the logged-in partner's ID
@@ -74,36 +76,36 @@ export default function PartnerDashboard() {
 
   const getTierBadgeColor = (tier: string) => {
     const colors = {
-      bronze: 'bg-orange-100 text-orange-800',
-      silver: 'bg-gray-100 text-gray-800',
-      gold: 'bg-yellow-100 text-yellow-800',
-      platinum: 'bg-purple-100 text-purple-800',
+      bronze: 'bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-800',
+      silver: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700',
+      gold: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+      platinum: 'bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800',
     };
-    return colors[tier as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[tier as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
   };
 
   const getStatusBadgeColor = (status: string) => {
     const colors = {
-      active: 'bg-green-100 text-green-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      suspended: 'bg-red-100 text-red-800',
-      terminated: 'bg-gray-100 text-gray-800',
+      active: 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800',
+      pending: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+      suspended: 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
+      terminated: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700',
     };
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[status as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
   };
 
   if (statsLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="animate-pulse bg-white dark:bg-gray-800">
               <CardHeader className="pb-2">
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </CardHeader>
               <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </CardContent>
             </Card>
           ))}
@@ -113,12 +115,12 @@ export default function PartnerDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6" data-testid="partner-dashboard">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6" data-testid="partner-dashboard">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Partner Dashboard</h1>
-          <p className="text-gray-600 mt-1">Monitor your performance and earnings</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Partner Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">Monitor your performance and earnings</p>
         </div>
         <div className="flex items-center gap-2">
           {partnerStats && (
