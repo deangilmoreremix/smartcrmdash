@@ -79,7 +79,7 @@ const WhiteLabelCustomization: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">White Label Customization</h1>
             <p className="text-gray-600 dark:text-gray-300">Customize your application's branding and appearance</p>
           </div>
-        <div className="flex gap-3">
+          <div className="flex gap-3">
           <Button variant="outline" onClick={resetToDefault}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
@@ -308,6 +308,7 @@ const WhiteLabelCustomization: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
