@@ -363,6 +363,157 @@ function AppContent() {
             }
           />
 
+          {/* AI Tools */}
+          <Route
+            path="/ai-tools"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AITools />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* AI Assistants */}
+          <Route
+            path="/assistants"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AssistantsDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Tasks */}
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TasksNew />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Appointments */}
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Communication */}
+          <Route
+            path="/communication"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Communication />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Communication and CRM Tools */}
+          <Route
+            path="/phone-system"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PhoneSystem />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoicing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Invoicing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-library"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentLibrary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <FormsAndSurveys />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/business-analysis"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/communication-hub"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CommunicationHub />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Business Intelligence and Remote Apps */}
+          <Route
+            path="/business-intel"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessIntelPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/intel"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <IntelPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wl"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WLPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Contacts and Pipeline Routes */}
           <Route
             path="/contacts"
