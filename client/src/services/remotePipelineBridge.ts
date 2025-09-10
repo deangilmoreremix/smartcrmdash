@@ -16,6 +16,31 @@ export interface PipelineMessage {
   timestamp: number;
 }
 
+export interface CRMDeal {
+  id: string;
+  title: string;
+  value: number;
+  stage: string;
+  contactId?: string;
+  contactName?: string;
+  company?: string;
+  probability?: number;
+  expectedCloseDate?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CRMPipelineData {
+  deals: CRMDeal[];
+  stages: {
+    id: string;
+    name: string;
+    order: number;
+    color?: string;
+  }[];
+}
+
 export class RemotePipelineBridge {
   private iframe: HTMLIFrameElement | null = null;
   private status: RemotePipelineStatus;
@@ -23,6 +48,7 @@ export class RemotePipelineBridge {
   private maxAttempts = 3;
   private retryDelay = 2000;
   private messageHandler: (event: MessageEvent) => void;
+  private messageCallbacks: ((data: any) => void)[] = [];
 
   constructor(statusCallback: (status: RemotePipelineStatus) => void) {
     this.statusCallback = statusCallback;
@@ -87,7 +113,14 @@ export class RemotePipelineBridge {
         case 'DEAL_DELETED':
         case 'DEAL_STAGE_CHANGED':
           this.updateStatus({ lastSync: new Date() });
-          // These would be handled by the parent component
+          // Notify all message callbacks
+          this.messageCallbacks.forEach(callback => {
+            try {
+              callback(message.data);
+            } catch (error) {
+              console.error('Message callback failed:', error);
+            }
+          });
           break;
           
         case 'CONNECTION_ERROR':
@@ -259,7 +292,7 @@ export class RemotePipelineBridge {
         setTimeout(() => {
           try {
             if (this.iframe?.contentWindow) {
-              this.iframe.contentWindow.eval(bridgeCode);
+              (this.iframe.contentWindow as any).eval(bridgeCode);
               console.log('Bridge code injected via eval');
             }
           } catch (evalError) {
@@ -328,7 +361,32 @@ export class RemotePipelineBridge {
     return { ...this.status };
   }
 
+  onMessage(callback: (data: any) => void) {
+    this.messageCallbacks.push(callback);
+  }
+
+  syncDeals(deals: CRMDeal[]) {
+    this.sendMessage('SYNC_DEALS', { deals });
+    this.updateStatus({ 
+      lastSync: new Date(),
+      dealCount: deals.length 
+    });
+  }
+
+  disconnect() {
+    this.updateStatus({
+      isConnected: false,
+      lastSync: null,
+      dealCount: 0,
+      errorMessage: undefined
+    });
+    if (this.iframe) {
+      this.iframe.src = 'about:blank';
+    }
+  }
+
   destroy() {
     window.removeEventListener('message', this.messageHandler);
+    this.messageCallbacks = [];
   }
 }

@@ -88,14 +88,18 @@ const PipelinePage: React.FC = () => {
 
   // Initialize bridge and set up communication
   useEffect(() => {
-    const bridge = new RemotePipelineBridge();
+    const bridge = new RemotePipelineBridge((status) => {
+      setIsConnected(status.isConnected);
+      if (status.errorMessage) {
+        console.error('Pipeline bridge error:', status.errorMessage);
+      }
+    });
     bridgeRef.current = bridge;
 
-    // Register with universal manager
-    remoteAppManager.registerBridge('pipeline', bridge);
-
-    // Initialize universal sync
-    universalDataSync.initialize();
+    // Set iframe reference when available
+    if (iframeRef.current) {
+      bridge.setIframe(iframeRef.current);
+    }
 
     // Set up message event listener
     const handleMessage = (event: MessageEvent) => {
@@ -149,52 +153,52 @@ const PipelinePage: React.FC = () => {
     window.addEventListener('message', handleMessage);
 
     // Set up message handlers
-    bridge.onMessage('REMOTE_READY', () => {
-      console.log('✅ Remote pipeline module connected via bridge');
-      setIsConnected(true);
-      initializePipelineCommunication();
-    });
-
-    bridge.onMessage('DEAL_CREATED', (deal) => {
-      console.log('📝 Remote deal created:', deal);
-      addDeal(deal);
-    });
-
-    bridge.onMessage('DEAL_UPDATED', (deal) => {
-      console.log('✏️ Remote deal updated:', deal);
-      updateDeal(deal.id, deal);
-    });
-
-    bridge.onMessage('DEAL_DELETED', (data) => {
-      console.log('🗑️ Remote deal deleted:', data.id);
-      deleteDeal(data.id);
-    });
-
-    bridge.onMessage('DEAL_STAGE_CHANGED', (data) => {
-      console.log('↔️ Remote deal stage changed:', data);
-      updateDeal(data.dealId, { stage: data.newStage });
-    });
-
-    bridge.onMessage('REQUEST_PIPELINE_DATA', () => {
-      console.log('📤 Remote requesting pipeline data');
-      const crmDeals = Object.values(deals).map(convertToCRMDeal);
-      const pipelineData: CRMPipelineData = {
-        deals: crmDeals,
-        stages: ['prospect', 'qualified', 'proposal', 'negotiation', 'closed-won', 'closed-lost'],
-        totalValue: crmDeals.reduce((sum, deal) => sum + deal.value, 0),
-        activeDeals: crmDeals.filter(deal => !deal.stage.includes('closed')).length
-      };
-      bridge.syncDeals(crmDeals);
-    });
-
-    bridge.onMessage('NAVIGATE', (data) => {
-      console.log('🧭 Remote requesting navigation to:', data.route);
-      if (data.route && typeof data.route === 'string') {
-        if (data.route.startsWith('/')) {
-          window.location.pathname = data.route;
-        } else {
-          window.location.hash = '#/' + data.route;
-        }
+    bridge.onMessage((message) => {
+      console.log('Bridge message received:', message);
+      
+      switch (message.type) {
+        case 'REMOTE_READY':
+          console.log('✅ Remote pipeline module connected via bridge');
+          setIsConnected(true);
+          initializePipelineCommunication();
+          break;
+          
+        case 'DEAL_CREATED':
+          console.log('📝 Remote deal created:', message.data);
+          addDeal(message.data);
+          break;
+          
+        case 'DEAL_UPDATED':
+          console.log('✏️ Remote deal updated:', message.data);
+          updateDeal(message.data.id, message.data);
+          break;
+          
+        case 'DEAL_DELETED':
+          console.log('🗑️ Remote deal deleted:', message.data);
+          deleteDeal(message.data.id);
+          break;
+          
+        case 'DEAL_STAGE_CHANGED':
+          console.log('↔️ Remote deal stage changed:', message.data);
+          updateDeal(message.data.dealId, { stage: message.data.newStage });
+          break;
+          
+        case 'REQUEST_PIPELINE_DATA':
+          console.log('📤 Remote requesting pipeline data');
+          const crmDeals = Object.values(deals).map(convertToCRMDeal);
+          bridge.syncDeals(crmDeals);
+          break;
+          
+        case 'NAVIGATE':
+          console.log('🧭 Remote requesting navigation to:', message.data.route);
+          if (message.data.route && typeof message.data.route === 'string') {
+            if (message.data.route.startsWith('/')) {
+              window.location.pathname = message.data.route;
+            } else {
+              window.location.hash = '#/' + message.data.route;
+            }
+          }
+          break;
       }
     });
 
