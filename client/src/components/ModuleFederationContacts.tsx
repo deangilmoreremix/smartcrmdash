@@ -51,6 +51,7 @@ const ContactsApp: React.FC = () => {
       <iframe
         src="https://taupe-sprinkles-83c9ee.netlify.app"
         className="w-full h-full border-0"
+        style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
         title="Enhanced Contacts Module"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
@@ -68,7 +69,7 @@ interface ModuleFederationContactsProps {
 
 const ModuleFederationContacts: React.FC<ModuleFederationContactsProps> = ({ showHeader = false }) => {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full flex flex-col" style={{ margin: 0, padding: 0 }}>
       {showHeader && (
         <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
@@ -82,7 +83,7 @@ const ModuleFederationContacts: React.FC<ModuleFederationContactsProps> = ({ sho
           </div>
         </div>
       )}
-      <div className="flex-1">
+      <div className="flex-1 w-full h-full" style={{ margin: 0, padding: 0 }}>
         <ContactsApp />
       </div>
     </div>
