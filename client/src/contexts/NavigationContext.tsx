@@ -19,7 +19,7 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const navigate = useNavigate();
+  const routerNavigate = reactNavigate;
   const [currentPath, setCurrentPath] = React.useState('');
 
   // Safe access to AITools with error handling
@@ -84,7 +84,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       case '/contacts':
       case '/tasks':
       case '/settings':
-        navigate(feature);
+        routerNavigate(feature);
         break;
       default:
         console.log(`Navigation to ${feature} not implemented`);
@@ -98,9 +98,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     clearTimeout(navigationTimeoutRef.current);
     navigationTimeoutRef.current = setTimeout(() => {
       setCurrentPath(path);
-      reactNavigate(path, options);
+      routerNavigate(path, options);
     }, 100);
-  }, [currentPath, reactNavigate]);
+  }, [currentPath, routerNavigate]);
 
   // Add ref for timeout
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
