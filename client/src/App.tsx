@@ -358,7 +358,6 @@ function AppContent() {
             path="/ai-goals"
             element={
               <ProtectedRoute>
-                <Navbar />
                 <AIGoalsWithRemote />
               </ProtectedRoute>
             }
