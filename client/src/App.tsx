@@ -144,6 +144,9 @@ import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyze
 import LinkRedirect from './components/shared/LinkRedirect';
 const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomization'));
 
+// Landing page import
+import LandingPage from './pages/LandingPage';
+
 import './styles/design-system.css';
 // ElevenLabs widgets removed to prevent performance issues
 // import VoiceAgentWidget from './components/VoiceAgentWidget';
@@ -249,8 +252,8 @@ function AppContent() {
       <RemoteAppRefreshManager />
       <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
         <Routes>
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Landing page as root */}
+          <Route path="/" element={<LandingPage />} />
 
           {/* Auth pages */}
           <Route path="/auth/login" element={<Login />} />
