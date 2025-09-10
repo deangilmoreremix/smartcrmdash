@@ -420,6 +420,33 @@ function AppContent() {
 
           {/* Communication and CRM Tools */}
           <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-email"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Video Email" description="Video email functionality coming soon..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/text-messages"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TextMessages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/phone-system"
             element={
               <ProtectedRoute>
@@ -438,11 +465,20 @@ function AppContent() {
             }
           />
           <Route
-            path="/content-library"
+            path="/lead-automation"
             element={
               <ProtectedRoute>
                 <Navbar />
-                <ContentLibrary />
+                <PlaceholderPage title="Lead Automation" description="AI-powered lead automation tools coming soon..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/circle-prospecting"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Circle Prospecting" description="Circle prospecting tools coming soon..." />
               </ProtectedRoute>
             }
           />
@@ -461,6 +497,24 @@ function AppContent() {
               <ProtectedRoute>
                 <Navbar />
                 <BusinessAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-library"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentLibrary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voice-profiles"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VoiceProfiles />
               </ProtectedRoute>
             }
           />
