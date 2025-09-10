@@ -576,7 +576,21 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <button
                             key={index}
                             onClick={() => {
-                              navigate(`/${tool.tool}`);
+                              console.log('Communication tool clicked:', tool.tool, tool.name);
+                              const routeMap: { [key: string]: string } = {
+                                'appointments': '/appointments',
+                                'video-email': '/video-profiles',
+                                'text-messages': '/communication-hub',
+                                'phone-system': '/phone-system',
+                                'invoicing': '/invoicing',
+                                'lead-automation': '/lead-automation',
+                                'circle-prospecting': '/circle-prospecting',
+                                'forms': '/forms',
+                                'business-analysis': '/business-analysis'
+                              };
+                              
+                              const route = routeMap[tool.tool] || `/${tool.tool}`;
+                              navigate(route);
                               setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
