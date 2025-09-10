@@ -7,13 +7,14 @@ import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { TenantProvider } from './contexts/TenantProvider';
 import { WhitelabelProvider } from './contexts/WhitelabelContext';
-import { AIToolsProvider } from './components/AIToolsProvider';
+// AI components disabled to prevent freezing
+// import { AIToolsProvider } from './components/AIToolsProvider';
 import { ModalsProvider } from './components/ModalsProvider';
 import { EnhancedHelpProvider } from './contexts/EnhancedHelpContext';
 import { VideoCallProvider } from './contexts/VideoCallContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
-import { AIProvider } from './contexts/AIContext';
+// import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
 import Navbar from './components/Navbar';

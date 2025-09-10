@@ -13,6 +13,8 @@ const VoiceAgentWidget: React.FC<VoiceAgentWidgetProps> = ({
   minimizable = true,
   agentId = 'default'
 }) => {
+  // Component disabled to prevent performance issues
+  return null;
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [error, setError] = useState<string | null>(null);
