@@ -312,6 +312,24 @@ function AppContent() {
             }
           />
 
+          {/* Contacts and Pipeline Routes */}
+          <Route
+            path="/contacts"
+            element={
+              <ProtectedRoute>
+                <ContactsWorking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipeline"
+            element={
+              <ProtectedRoute>
+                <Pipeline />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Feature showcase routes */}
           <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
