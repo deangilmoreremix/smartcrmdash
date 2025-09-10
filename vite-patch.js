@@ -13,8 +13,8 @@ try {
   
   // Patch the allowedHosts configuration
   const patchedConfig = viteConfig.replace(
-    /allowedHosts:\s*\[\s*[^}]+\]/gm,
-    'allowedHosts: "all"'
+    /allowedHosts:\s*(?:\[\s*[^}]+\]|"all")/gm,
+    'allowedHosts: true'
   );
   
   if (patchedConfig !== viteConfig) {
