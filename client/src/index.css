@@ -71,6 +71,17 @@ body {
   padding-top: 80px;
 }
 
+/* Ensure navbar is always visible at top */
+body {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* Ensure main content starts below the navbar */
+main {
+  padding-top: 80px;
+}
+
 /* WL Dropdown specific fixes */
 .wl-dropdown {
   max-height: 80vh !important;
