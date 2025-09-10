@@ -12,7 +12,7 @@ const RemotePipeline: React.FC = () => {
   
   const { deals, fetchDeals } = useDealStore();
 
-  const REMOTE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
+  const REMOTE_URL = 'https://smartcrm.replit.app';
 
   useEffect(() => {
     // Initialize the bridge
