@@ -440,6 +440,15 @@ function AppContent() {
 
           {/* Communication and CRM Tools */}
           <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/video-email"
             element={
               <ProtectedRoute>
