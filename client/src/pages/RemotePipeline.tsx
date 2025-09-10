@@ -24,13 +24,49 @@ const RemotePipeline: React.FC = () => {
         }
       });
       
-      // Set up message handlers
-      bridgeRef.current.onMessage('REMOTE_READY');
+      // Set up message handlers with callbacks
+      bridgeRef.current.onMessage('REMOTE_READY', () => {
+        console.log('🎉 Remote pipeline is ready');
+        setIsConnected(true);
+        setIsLoading(false);
+      });
 
-      bridgeRef.current.onMessage('DEAL_CREATED');
-      bridgeRef.current.onMessage('DEAL_UPDATED');
-      bridgeRef.current.onMessage('DEAL_DELETED');
-      bridgeRef.current.onMessage('REQUEST_PIPELINE_DATA');
+      bridgeRef.current.onMessage('DEAL_CREATED', (data: any) => {
+        console.log('🆕 Deal created in remote pipeline:', data);
+        fetchDeals();
+      });
+
+      bridgeRef.current.onMessage('DEAL_UPDATED', (data: any) => {
+        console.log('✏️ Deal updated in remote pipeline:', data);
+        fetchDeals();
+      });
+
+      bridgeRef.current.onMessage('DEAL_DELETED', (data: any) => {
+        console.log('🗑️ Deal deleted in remote pipeline:', data);
+        fetchDeals();
+      });
+
+      bridgeRef.current.onMessage('REQUEST_PIPELINE_DATA', () => {
+        console.log('📊 Remote pipeline requesting CRM data');
+        // Convert deals to CRMDeal format
+        const crmDeals = deals.map(deal => ({
+          id: deal.id,
+          title: deal.title,
+          value: deal.value,
+          stage: deal.stage.toString(),
+          contactId: deal.contactId,
+          contactName: deal.contactName,
+          company: deal.company,
+          probability: deal.probability,
+          expectedCloseDate: deal.expectedCloseDate,
+          notes: deal.notes,
+          createdAt: deal.createdAt,
+          updatedAt: deal.updatedAt
+        }));
+        if (bridgeRef.current) {
+          bridgeRef.current.syncDeals(crmDeals);
+        }
+      });
     }
 
     return () => {
@@ -67,10 +103,11 @@ const RemotePipeline: React.FC = () => {
         
         if (bridgeRef.current) {
           bridgeRef.current.setIframe(iframe);
-          // Try to inject bridge code after a delay
+          // Initialize bridge communication
           setTimeout(() => {
             if (bridgeRef.current) {
-              bridgeRef.current.injectBridgeCode();
+              // Bridge initialization handled in constructor
+              console.log('🔗 Bridge communication initialized');
             }
           }, 2000);
         }
