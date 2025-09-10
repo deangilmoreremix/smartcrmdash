@@ -122,7 +122,6 @@ import AIGoalsPage from './pages/AIGoals/AIGoalsPage';
 const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
 import GoalCardDemo from './pages/GoalCardDemo';
 import ContactDetail from './pages/ContactDetail';
-import Pipeline from './pages/PipelinePage';
 
 // Bulk import page
 const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
@@ -379,7 +378,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <Pipeline />
+                <PipelinePage />
               </ProtectedRoute>
             }
           />
