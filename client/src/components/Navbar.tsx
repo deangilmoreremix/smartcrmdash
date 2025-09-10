@@ -377,8 +377,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             </div>
 
             {/* Desktop nav pills */}
-            <div className="hidden lg:flex items-center space-x-1 flex-1 min-w-0 overflow-x-auto overflow-y-visible whitespace-nowrap" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-              {mainTabs.map((tab) => {
+            <div className="hidden lg:flex flex-1 min-w-0">
+              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                <div className="inline-flex items-center gap-1 whitespace-nowrap">
+                  {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <div key={tab.id} className="relative shrink-0">
@@ -388,7 +390,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       }}
                       data-testid={`nav-tab-${tab.id}`}
                       className={`
-                        relative flex items-center space-x-2 px-3 py-2 rounded-full leading-none
+                        relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                         transition-all duration-300 transform hover:scale-105 text-xs
                         ${isActive
                           ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20`
@@ -470,58 +472,58 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     )}
                   </div>
                 );
-              })}
+                  })}
 
-              {/* Dropdowns */}
-              {dropdownMenus.map(menu => (
-                <div key={menu.id} className="relative shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (menu.id === 'business-intel') {
-                        handleNavigation('/business-intel', 'business-intel');
-                      } else if (menu.id === 'intel') {
-                        handleNavigation('/intel', 'intel');
-                      } else {
-                        toggleDropdown(menu.id, e);
-                      }
-                    }}
-                    data-dropdown-toggle="true"
-                    data-testid={`button-dropdown-${menu.id}`}
-                    className={`
-                      relative flex items-center space-x-2 px-3 py-2 rounded-full leading-none
-                      transition-all duration-300 transform hover:scale-105
-                      ${activeDropdown === menu.id
-                        ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20`
-                        : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
-                      }
-                      group
-                    `}
-                  >
-                    {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'wl' && <Globe size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'intel' && <Brain size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'apps' && <Grid3X3 size={16} className="block overflow-visible shrink-0 transition-transform duration-300 group-hover:scale-110" />}
+                  {/* Dropdowns */}
+                  {dropdownMenus.map(menu => (
+                    <div key={menu.id} className="relative shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (menu.id === 'business-intel') {
+                            handleNavigation('/business-intel', 'business-intel');
+                          } else if (menu.id === 'intel') {
+                            handleNavigation('/intel', 'intel');
+                          } else {
+                            toggleDropdown(menu.id, e);
+                          }
+                        }}
+                        data-dropdown-toggle="true"
+                        data-testid={`button-dropdown-${menu.id}`}
+                        className={`
+                          relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
+                          transition-all duration-300 transform hover:scale-105
+                          ${activeDropdown === menu.id
+                            ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20`
+                            : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
+                          }
+                          group
+                        `}
+                      >
+                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'apps' && <Grid3X3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
 
-                    <span className="text-xs font-medium">
-                      {menu.id === 'sales' ? 'Sales'
-                        : menu.id === 'communication' ? 'Comm'
-                        : menu.id === 'business-intel' ? 'Business Intel'
-                        : menu.id === 'wl' ? 'WL'
-                        : menu.id === 'intel' ? 'Intel'
-                        : 'Apps'}
-                    </span>
-                    {/* Only show chevron for dropdown menus */}
-                    {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
-                      <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
-                    )}
-                    {renderBadge(menu.badge, menu.badgeColor)}
-                    {activeDropdown === menu.id && (
-                      <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
-                    )}
-                  </button>
+                        <span className="text-xs font-medium">
+                          {menu.id === 'sales' ? 'Sales'
+                            : menu.id === 'communication' ? 'Comm'
+                            : menu.id === 'business-intel' ? 'Business Intel'
+                            : menu.id === 'wl' ? 'WL'
+                            : menu.id === 'intel' ? 'Intel'
+                            : 'Apps'}
+                        </span>
+                        {/* Only show chevron for dropdown menus */}
+                        {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
+                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                        )}
+                        {renderBadge(menu.badge, menu.badgeColor)}
+                        {activeDropdown === menu.id && (
+                          <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
+                        )}
+                      </button>
 
 
 
@@ -764,8 +766,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     </div>
                   )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
 
             {/* Mobile menu button */}
