@@ -1,211 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, BarChart3, Users, TrendingUp, Wifi, WifiOff, ExternalLink } from 'lucide-react';
+import { Target, Users, TrendingUp, ExternalLink, Zap } from 'lucide-react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../hooks/useContactStore';
-import { RemotePipelineBridge, CRMDeal, CRMPipelineData } from '../services/remotePipelineBridge';
+import ModuleFederationPipeline from '../components/ModuleFederationPipeline';
 
 const PipelinePage: React.FC = () => {
   const { isDark } = useTheme();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const bridgeRef = useRef<RemotePipelineBridge | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { deals, addDeal, updateDeal, deleteDeal } = useDealStore();
+  const { deals } = useDealStore();
   const { contacts } = useContactStore();
 
-  // Convert Deal to CRMDeal format
-  const convertToCRMDeal = (deal: any): CRMDeal => ({
-    id: deal.id,
-    title: deal.title || deal.name,
-    value: deal.value || 0,
-    stage: typeof deal.stage === 'string' ? deal.stage : deal.stage?.name || 'prospect',
-    contactId: deal.contactId,
-    contactName: contacts[deal.contactId]?.name,
-    company: contacts[deal.contactId]?.company,
-    probability: deal.probability || 50,
-    expectedCloseDate: deal.expectedCloseDate,
-    notes: deal.notes || deal.description,
-    createdAt: typeof deal.createdAt === 'string' ? deal.createdAt : deal.createdAt?.toISOString(),
-    updatedAt: typeof deal.updatedAt === 'string' ? deal.updatedAt : deal.updatedAt?.toISOString()
-  });
-
-  // Handle iframe load
-  const handleIframeLoad = () => {
-    console.log('📺 Pipeline iframe loaded');
-    setIsLoading(false);
-    
-    // Initialize communication after a short delay
-    setTimeout(() => {
-      initializePipelineCommunication();
-    }, 1000);
-  };
-
-  // Initialize pipeline communication
-  const initializePipelineCommunication = () => {
-    if (!iframeRef.current?.contentWindow) {
-      console.warn('⚠️ Iframe not ready for communication');
-      return;
-    }
-
-    console.log('🚀 Initializing CRM connection with pipeline data');
-    
-    // Convert deals to CRM format
-    const crmDeals = Object.values(deals).map(convertToCRMDeal);
-    
-    // Send initialization data to remote pipeline
-    const initMessage = {
-      type: 'CRM_INIT',
-      source: 'CRM',
-      data: {
-        crmInfo: {
-          name: 'Professional CRM',
-          version: '1.0.0',
-          timestamp: new Date().toISOString()
-        },
-        pipelineData: {
-          deals: crmDeals,
-          stages: [
-            { id: 'qualification', name: 'Qualification', order: 1, color: '#3B82F6' },
-            { id: 'proposal', name: 'Proposal', order: 2, color: '#8B5CF6' },
-            { id: 'negotiation', name: 'Negotiation', order: 3, color: '#F59E0B' },
-            { id: 'closed-won', name: 'Closed Won', order: 4, color: '#10B981' },
-            { id: 'closed-lost', name: 'Closed Lost', order: 5, color: '#EF4444' }
-          ]
-        }
-      }
-    };
-
-    try {
-      iframeRef.current.contentWindow.postMessage(initMessage, 'https://cheery-syrniki-b5b6ca.netlify.app');
-      console.log('📤 Pipeline message sent:', initMessage.type, initMessage.data);
-      setIsConnected(true);
-    } catch (error) {
-      console.error('❌ Failed to send init message:', error);
-    }
-  };
-
-  // Initialize bridge and set up communication
-  useEffect(() => {
-    const bridge = new RemotePipelineBridge((status) => {
-      setIsConnected(status.isConnected);
-      if (status.errorMessage) {
-        console.error('Pipeline bridge error:', status.errorMessage);
-      }
-    });
-    bridgeRef.current = bridge;
-
-    // Set iframe reference when available
-    if (iframeRef.current) {
-      bridge.setIframe(iframeRef.current);
-    }
-
-    // Set up message event listener
-    const handleMessage = (event: MessageEvent) => {
-      const allowedOrigins = [
-        'https://cheery-syrniki-b5b6ca.netlify.app',
-        'http://localhost:3000',
-        'https://localhost:3000'
-      ];
-
-      if (!allowedOrigins.includes(event.origin)) {
-        return;
-      }
-
-      const message = event.data;
-      if (!message || message.source !== 'REMOTE_PIPELINE') {
-        return;
-      }
-
-      console.log('📨 Remote pipeline message:', message.type, message.data);
-
-      switch (message.type) {
-        case 'REMOTE_READY':
-          console.log('✅ Remote pipeline module connected');
-          setIsConnected(true);
-          // Re-initialize communication when remote is ready
-          setTimeout(() => initializePipelineCommunication(), 500);
-          break;
-        
-        case 'DEAL_CREATED':
-          console.log('📝 Remote deal created:', message.data);
-          addDeal(message.data);
-          break;
-        
-        case 'DEAL_UPDATED':
-          console.log('✏️ Remote deal updated:', message.data);
-          updateDeal(message.data.id, message.data);
-          break;
-        
-        case 'DEAL_DELETED':
-          console.log('🗑️ Remote deal deleted:', message.data);
-          deleteDeal(message.data.id);
-          break;
-        
-        case 'CRM_INIT_COMPLETE':
-          console.log('✅ Pipeline initialization complete:', message.data);
-          setIsConnected(true);
-          break;
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    // Set up message handlers
-    bridge.onMessage((message) => {
-      console.log('Bridge message received:', message);
-      
-      switch (message.type) {
-        case 'REMOTE_READY':
-          console.log('✅ Remote pipeline module connected via bridge');
-          setIsConnected(true);
-          initializePipelineCommunication();
-          break;
-          
-        case 'DEAL_CREATED':
-          console.log('📝 Remote deal created:', message.data);
-          addDeal(message.data);
-          break;
-          
-        case 'DEAL_UPDATED':
-          console.log('✏️ Remote deal updated:', message.data);
-          updateDeal(message.data.id, message.data);
-          break;
-          
-        case 'DEAL_DELETED':
-          console.log('🗑️ Remote deal deleted:', message.data);
-          deleteDeal(message.data.id);
-          break;
-          
-        case 'DEAL_STAGE_CHANGED':
-          console.log('↔️ Remote deal stage changed:', message.data);
-          updateDeal(message.data.dealId, { stage: message.data.newStage });
-          break;
-          
-        case 'REQUEST_PIPELINE_DATA':
-          console.log('📤 Remote requesting pipeline data');
-          const crmDeals = Object.values(deals).map(convertToCRMDeal);
-          bridge.syncDeals(crmDeals);
-          break;
-          
-        case 'NAVIGATE':
-          console.log('🧭 Remote requesting navigation to:', message.data.route);
-          if (message.data.route && typeof message.data.route === 'string') {
-            if (message.data.route.startsWith('/')) {
-              window.location.pathname = message.data.route;
-            } else {
-              window.location.hash = '#/' + message.data.route;
-            }
-          }
-          break;
-      }
-    });
-
-    return () => {
-      bridge.disconnect();
-    };
-  }, [addDeal, updateDeal, deleteDeal, deals, contacts]);
+  // Module Federation approach - no complex bridge logic needed
+  // Data sync happens through the ModuleFederationPipeline component
 
   
 
@@ -229,18 +36,10 @@ const PipelinePage: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`flex items-center space-x-2 px-3 py-2 rounded-full ${
-                isConnected 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-              }`}>
-                {isConnected ? (
-                  <Wifi className="h-4 w-4" />
-                ) : (
-                  <WifiOff className="h-4 w-4" />
-                )}
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                <Zap className="h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {isConnected ? 'Connected' : 'Connecting...'}
+                  Module Federation
                 </span>
               </div>
               <a
@@ -279,39 +78,13 @@ const PipelinePage: React.FC = () => {
           </CardHeader>
           <CardContent className="p-0">
             <div className="w-full h-[900px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
-              {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 z-10">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                      Loading Pipeline Module...
-                    </p>
-                  </div>
-                </div>
-              )}
-              <iframe 
-                ref={iframeRef}
-                src="https://cheery-syrniki-b5b6ca.netlify.app"
-                className="w-full h-full border-0"
-                title="Pipeline Management System"
-                allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation allow-modals"
-                onLoad={handleIframeLoad}
-                style={{ minHeight: '900px' }}
-                allow="fullscreen"
-              />
+              <ModuleFederationPipeline showHeader={false} />
               
-              {/* Connection Status Indicator */}
+              {/* Module Federation Status Indicator */}
               <div className="absolute top-4 right-4 z-20">
-                <div className={`flex items-center space-x-2 px-3 py-2 rounded-full text-xs font-medium ${
-                  isConnected 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full ${
-                    isConnected ? 'bg-green-500' : 'bg-yellow-500'
-                  }`}></div>
-                  <span>{isConnected ? 'Connected' : 'Connecting...'}</span>
+                <div className="flex items-center space-x-2 px-3 py-2 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                  <span>Module Federation</span>
                 </div>
               </div>
             </div>
