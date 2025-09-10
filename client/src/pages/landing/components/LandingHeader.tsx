@@ -169,7 +169,6 @@ const LandingHeader = () => {
           </nav>
         </div>
       )}
-      </div>
     </header>
   );
 };
