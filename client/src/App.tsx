@@ -317,6 +317,32 @@ function AppContent() {
           <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
           <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
 
+          {/* Remote App Routes */}
+          <Route
+            path="/funnelcraft-ai"
+            element={
+              <ProtectedRoute>
+                <FunnelCraftPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/smartcrm-closer"
+            element={
+              <ProtectedRoute>
+                <SmartCRMPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-ai"
+            element={
+              <ProtectedRoute>
+                <ContentAIPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
