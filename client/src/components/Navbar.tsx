@@ -429,7 +429,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               data-testid={`ai-tool-${tool.id}`}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              {tool.icon ? <tool.icon size={16} className="text-pink-500" /> : <Sparkles size={16} className="text-pink-500" />}
+                              {tool.icon ? <tool.icon size={16} className="block overflow-visible shrink-0 text-pink-500" /> : <Sparkles size={16} className="block overflow-visible shrink-0 text-pink-500" />}
                               <span className="text-sm font-medium">{tool.title}</span>
                             </button>
                           ))}
@@ -461,7 +461,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              <option.icon size={16} className="text-blue-500" />
+                              <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
                               <span className="text-sm font-medium">{option.name}</span>
                             </button>
                           ))}
@@ -554,7 +554,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-green-500" />
+                            <tool.icon size={16} className="block overflow-visible shrink-0 text-green-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -589,7 +589,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-blue-500" />
+                            <tool.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -609,14 +609,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Open in new tab"
                               >
-                                <ExternalLink size={16} />
+                                <ExternalLink size={16} className="block overflow-visible shrink-0" />
                               </button>
                               <button
                                 onClick={() => setActiveDropdown(null)}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Close"
                               >
-                                <X size={16} />
+                                <X size={16} className="block overflow-visible shrink-0" />
                               </button>
                             </div>
                           </div>
@@ -658,10 +658,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
                               <div className="flex items-center space-x-3">
-                                <app.icon size={16} className="text-indigo-500" />
+                                <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
                                 <span className="text-sm font-medium">{app.name}</span>
                               </div>
-                              <ExternalLink size={12} className="opacity-50" />
+                              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
                             </a>
                           ) : (
                             <button
@@ -673,7 +673,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               }}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              <app.icon size={16} className="text-indigo-500" />
+                              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
                               <span className="text-sm font-medium">{app.name}</span>
                             </button>
                           )
@@ -694,14 +694,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Open in new tab"
                               >
-                                <ExternalLink size={16} />
+                                <ExternalLink size={16} className="block overflow-visible shrink-0" />
                               </button>
                               <button
                                 onClick={() => setActiveDropdown(null)}
                                 className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                                 title="Close"
                               >
-                                <X size={16} />
+                                <X size={16} className="block overflow-visible shrink-0" />
                               </button>
                             </div>
                           </div>
@@ -745,10 +745,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
                               <div className="flex items-center space-x-3">
-                                <app.icon size={16} className="text-purple-500" />
+                                <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
                                 <span className="text-sm font-medium">{app.name}</span>
                               </div>
-                              <ExternalLink size={12} className="opacity-50" />
+                              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
                             </a>
                           ) : (
                             <button
@@ -756,7 +756,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               onClick={() => handleNavigation(app.url, 'white-label')}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              <app.icon size={16} className="text-purple-500" />
+                              <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
                               <span className="text-sm font-medium">{app.name}</span>
                             </button>
                           )
@@ -852,7 +852,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   onClick={tab.action}
                   className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                 >
-                  <tab.icon size={20} />
+                  <tab.icon size={20} className="block overflow-visible shrink-0" />
                   <span className="font-medium">{tab.label}</span>
                   {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
                 </button>
