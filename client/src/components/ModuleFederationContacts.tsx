@@ -10,12 +10,20 @@ const ContactsApp: React.FC = () => {
     const loadRemote = async () => {
       try {
         console.log('🚀 Loading Module Federation Contacts...');
-        const module = await loadRemoteComponent(
+        
+        // Reduced timeout for faster fallback to iframe
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Module Federation loading timeout')), 2000);
+        });
+        
+        const modulePromise = loadRemoteComponent(
           'https://taupe-sprinkles-83c9ee.netlify.app',
           'ContactsApp',
           './ContactsApp'
         );
-        setRemoteContacts(() => module.default || module);
+        
+        const module = await Promise.race([modulePromise, timeoutPromise]);
+        setRemoteContacts(() => (module as any).default || module);
         console.log('✅ Module Federation Contacts loaded successfully');
       } catch (err) {
         console.warn('❌ Module Federation failed, using iframe fallback:', err);
