@@ -119,6 +119,7 @@ import PartnerManagementPage from './pages/PartnerManagementPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import LeadCapture from './pages/LeadCapture';
 import AIGoalsPage from './pages/AIGoals/AIGoalsPage';
+const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
 import GoalCardDemo from './pages/GoalCardDemo';
 import ContactDetail from './pages/ContactDetail';
 import Pipeline from './pages/PipelinePage';
@@ -358,7 +359,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <AIGoalsPage />
+                <AIGoalsWithRemote />
               </ProtectedRoute>
             }
           />

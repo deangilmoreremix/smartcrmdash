@@ -1,67 +1,41 @@
-// Remote AI Goals Page - Exact same pattern as ContactsWithRemote.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Wifi, WifiOff } from 'lucide-react';
+import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { ExternalLink, Brain } from 'lucide-react';
+import ModuleFederationAIGoals from '../components/ModuleFederationAIGoals';
 
 const AIGoalsWithRemote: React.FC = () => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isConnected, setIsConnected] = useState(false);
-
-  // Handle iframe load event - same as contacts
-  const handleIframeLoad = () => {
-    console.log('📱 Remote AI Goals iframe loaded');
-    // Set connected status - no complex bridge needed
-    setTimeout(() => {
-      setIsConnected(true);
-    }, 1000);
-  };
+  const { isDark } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header - exact same pattern as contacts */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <ExternalLink className="h-6 w-6 text-blue-600" />
-              AI Goals Module
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Remote AI goals management system
-            </p>
+    <div className={`min-h-screen ${
+      isDark ? 'bg-gray-900' : 'bg-gray-50'
+    } transition-colors duration-200`}>
+      <div className="container mx-auto px-4 py-6">
+        {/* AI Goals Component - Slightly smaller to show remote app's UI */}
+        <div className="w-full h-[85vh] rounded-lg overflow-hidden relative shadow-lg">
+          <ModuleFederationAIGoals showHeader={false} />
+          
+          {/* Module Federation Status Indicator - Floating */}
+          <div className="absolute top-4 right-4 z-30">
+            <div className="flex items-center space-x-2 px-3 py-2 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400 shadow-lg">
+              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+              <span>Module Federation</span>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <div className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
-              ✓ Remote Module
-            </div>
-            <div className={`text-sm px-3 py-1 rounded-full flex items-center gap-1 ${
-              isConnected 
-                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200'
-            }`}>
-              {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-              {isConnected ? 'CRM Connected' : 'Connecting...'}
-            </div>
+          {/* External Link Button - Floating */}
+          <div className="absolute top-4 left-4 z-30">
+            <a
+              href="https://tubular-choux-2a9b3c.netlify.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors shadow-lg"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="text-sm">Open in New Tab</span>
+            </a>
           </div>
         </div>
-      </div>
-
-      {/* Embedded Remote App - exact same pattern as contacts */}
-      <div className="flex-1" style={{ height: 'calc(100vh - 100px)' }}>
-        <iframe
-          ref={iframeRef}
-          src="https://tubular-choux-2a9b3c.netlify.app"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            overflow: 'hidden'
-          }}
-          title="Remote AI Goals Module"
-          allow="clipboard-read; clipboard-write"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
-          onLoad={handleIframeLoad}
-        />
       </div>
     </div>
   );
