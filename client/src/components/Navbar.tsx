@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
@@ -33,6 +33,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
@@ -211,15 +212,16 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     ]
   };
 
-  // Click outside to close
+  // Click outside to close dropdowns only (not mobile menu)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('[data-dropdown-toggle]')) return;
-      setActiveDropdown(null);
-      setIsMobileMenuOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+        // Don't auto-close mobile menu - only close it explicitly
+      }
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
@@ -230,13 +232,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const handleNavigation = useCallback((route: string, tabName: string) => {
     console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
     navigate(route);
-    setActiveTab(tabName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-    // Force update to ensure tab state is properly set
-    setTimeout(() => {
-      setActiveTab(tabName);
-    }, 100);
+    // Remove setTimeout hack and duplicate setActiveTab - useEffect handles this
   }, [navigate, location.pathname]);
 
   const handleAIToolClick = useCallback((toolId: string) => {
@@ -366,7 +364,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 p-2">
+    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 p-2">
       <div className="max-w-[90rem] mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
           <div className="flex items-center justify-between px-4 lg:px-6 py-2">
