@@ -98,36 +98,42 @@ const AiAssistantFeaturePage: React.FC = () => {
               icon={<Brain className="h-8 w-8 text-indigo-600" />}
               title="Context-Aware Conversations"
               description="Remembers every interaction, understands your sales context, and provides relevant suggestions based on your history."
+              link="/signup"
             />
             
             <FeatureCard
               icon={<Search className="h-8 w-8 text-blue-600" />}
               title="Intelligent CRM Search"
               description="Find any contact, deal, or information instantly using natural language queries across your entire CRM database."
+              link="/signup"
             />
             
             <FeatureCard
               icon={<Calendar className="h-8 w-8 text-green-600" />}
               title="Smart Scheduling"
               description="Automatically schedule meetings, set reminders, and manage your calendar based on your conversation requests."
+              link="/signup"
             />
             
             <FeatureCard
               icon={<Mail className="h-8 w-8 text-purple-600" />}
               title="Email Generation"
               description="Compose personalized emails, follow-ups, and proposals that match your tone and sales methodology."
+              link="/signup"
             />
             
             <FeatureCard
               icon={<FileText className="h-8 w-8 text-orange-600" />}
               title="Document Analysis"
               description="Analyze contracts, proposals, and documents to extract key insights and action items automatically."
+              link="/signup"
             />
             
             <FeatureCard
               icon={<TrendingUp className="h-8 w-8 text-red-600" />}
               title="Sales Intelligence"
               description="Get real-time insights about deal progression, risk assessment, and next best actions for every opportunity."
+              link="/signup"
             />
           </div>
         </div>
