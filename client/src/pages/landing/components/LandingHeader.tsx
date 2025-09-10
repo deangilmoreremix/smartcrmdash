@@ -9,10 +9,14 @@ const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
   
+  // Debug logging
+  console.log('LandingHeader component rendering');
+  
   // Temporarily bypass the useWhitelabel hook to test if it's causing issues
   let config: any;
   try {
     config = useWhitelabel().config;
+    console.log('WhitelabelContext working, config:', config);
   } catch (error) {
     console.error('WhitelabelContext error:', error);
     config = { companyName: 'Smart', logoUrl: null };
@@ -34,13 +38,17 @@ const LandingHeader = () => {
   }, []);
 
   return (
-    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
-    }`}>
+    <header 
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
+      }`}
+      data-testid="landing-header"
+      style={{ display: 'block', visibility: 'visible' }}
+    >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 text-2xl font-bold text-gray-900">
+          <Link to="/" className="flex items-center space-x-3 text-2xl font-bold text-gray-900" data-testid="logo-link">
             {config.logoUrl && (
               <img
                 src={config.logoUrl}
