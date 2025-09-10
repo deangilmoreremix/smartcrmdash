@@ -398,7 +398,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       `}
                       title={tab.label}
                     >
-                      <tab.icon size={12} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      <tab.icon size={16} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                       <span className="text-xs font-medium hidden lg:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
@@ -413,7 +413,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         'bg-blue-500'
                       )}
                       {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
-                        <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
@@ -498,12 +498,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       group
                     `}
                   >
-                    {menu.id === 'sales' && <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'communication' && <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'business-intel' && <BarChart3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'wl' && <Globe size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'intel' && <Brain size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'apps' && <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'sales' && <DollarSign size={16} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'communication' && <MessageSquare size={16} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'business-intel' && <BarChart3 size={16} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'wl' && <Globe size={16} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'intel' && <Brain size={16} className="transition-transform duration-300 group-hover:scale-110" />}
+                    {menu.id === 'apps' && <Grid3X3 size={16} className="transition-transform duration-300 group-hover:scale-110" />}
 
                     <span className="text-xs font-medium">
                       {menu.id === 'sales' ? 'Sales'
@@ -515,7 +515,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     </span>
                     {/* Only show chevron for dropdown menus */}
                     {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
-                      <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                      <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                     )}
                     {renderBadge(menu.badge, menu.badgeColor)}
                     {activeDropdown === menu.id && (
@@ -775,7 +775,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 data-testid="button-mobile-menu-toggle"
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
               >
-                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
 
@@ -786,7 +786,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               className={`p-2 rounded-lg transition-colors lg:hidden ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             {/* Right controls */}
@@ -794,12 +794,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               <button 
                 data-testid="button-search"
                 className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Search size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
+                <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
               <button 
                 data-testid="button-notifications"
                 className={`relative p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Bell size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
+                <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
               <button
@@ -808,7 +808,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
-                {isDark ? <Sun size={12} className="text-white" /> : <Moon size={12} className="text-gray-600" />}
+                {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
               </button>
               <div className="relative">
                 <button
@@ -816,7 +816,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   data-testid="button-user-menu"
                   className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 >
-                  <User size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
+                  <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 </button>
 
                 {activeDropdown === 'user' && (
@@ -852,7 +852,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   onClick={tab.action}
                   className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                 >
-                  <tab.icon size={18} />
+                  <tab.icon size={20} />
                   <span className="font-medium">{tab.label}</span>
                   {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
                 </button>
@@ -865,7 +865,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   onClick={toggleTheme}
                   className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                 >
-                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                  {isDark ? <Sun size={20} /> : <Moon size={20} />}
                   <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
                 </button>
               </div>
