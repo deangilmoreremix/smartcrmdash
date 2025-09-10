@@ -370,20 +370,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
           <div className="flex items-center justify-between px-4 lg:px-6 py-2">
 
             {/* Logo */}
-            <div className="flex items-center space-x-1 flex-none shrink-0">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Smart<span className="text-green-400">CRM</span>
-                </h1>
-              </div>
+            <div className="flex items-center flex-none shrink-0">
+              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Smart<span className="text-green-400">CRM</span>
+              </h1>
             </div>
 
             {/* Desktop nav pills */}
