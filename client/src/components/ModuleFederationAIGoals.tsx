@@ -3,7 +3,6 @@ import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
 const AIGoalsApp: React.FC = () => {
   const [RemoteAIGoals, setRemoteAIGoals] = useState<React.ComponentType | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,22 +27,11 @@ const AIGoalsApp: React.FC = () => {
       } catch (err) {
         console.warn('❌ Module Federation failed, using iframe fallback:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
       }
     };
 
     loadRemote();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-        <span className="ml-3 text-gray-600">Loading AI Goals...</span>
-      </div>
-    );
-  }
 
   if (error || !RemoteAIGoals) {
     // Fallback to iframe

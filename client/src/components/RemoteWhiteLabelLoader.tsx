@@ -11,7 +11,6 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
   showHeader = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,13 +28,11 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
     if (iframe) {
       const handleLoad = () => {
         setError(null);
-        setIsLoading(false);
         setIsConnected(true);
       };
 
       const handleError = () => {
         setError('Network error: Could not connect to the white label suite.');
-        setIsLoading(false);
         setIsConnected(false);
       };
 
@@ -50,7 +47,6 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
   }, []);
 
   const handleRefresh = () => {
-    setIsLoading(true);
     setError(null);
     manualRefresh();
   };
@@ -132,28 +128,6 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
         </div>
       )}
 
-      {isLoading && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '200px',
-          backgroundColor: '#f9fafb'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #e5e7eb',
-              borderTop: '4px solid #667eea',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 12px'
-            }}></div>
-            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>Loading White Label Suite...</p>
-          </div>
-        </div>
-      )}
 
       <iframe
         ref={iframeRef}
@@ -164,7 +138,7 @@ const RemoteWhiteLabelLoader: React.FC<RemoteWhiteLabelLoaderProps> = ({
           height: showHeader ? 'calc(100vh - 60px)' : '100vh',
           minHeight: '800px',
           border: 'none',
-          display: isLoading ? 'none' : 'block',
+          display: 'block',
           overflow: 'auto'
         }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

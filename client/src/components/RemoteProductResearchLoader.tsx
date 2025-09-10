@@ -10,7 +10,6 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
   showHeader = false 
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -21,13 +20,11 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
     if (iframe) {
       const handleLoad = () => {
         setError(null);
-        setIsLoading(false);
         setIsConnected(true);
       };
 
       const handleError = () => {
         setError('Network error: Could not connect to the product research module.');
-        setIsLoading(false);
         setIsConnected(false);
       };
 
@@ -43,7 +40,6 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
 
   const handleRefresh = () => {
     if (iframeRef.current) {
-      setIsLoading(true);
       setError(null);
       iframeRef.current.src = iframeRef.current.src;
     }
@@ -63,17 +59,17 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
             ) : (
               <div className="flex items-center text-gray-500 text-xs">
                 <WifiOff className="w-3 h-3 mr-1" />
-                {isLoading ? 'Loading...' : 'Disconnected'}
+                Disconnected
               </div>
             )}
           </div>
           
           <button
             onClick={handleRefresh}
-            disabled={isLoading}
+            disabled={false}
             className="flex items-center px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
           >
-            <RefreshCw className={`w-3 h-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className="w-3 h-3 mr-1" />
             Refresh
           </button>
         </div>
