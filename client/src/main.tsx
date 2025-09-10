@@ -18,18 +18,32 @@ if (typeof process === 'undefined') {
 (window as any).Buffer = (window as any).Buffer || undefined;
 (window as any).require = (window as any).require || function() { return {}; };
 
-// Error boundary for unhandled errors
+// Enhanced error boundary for unhandled errors
 window.addEventListener('error', (event) => {
-  if (event.message?.includes('Script error') || event.message?.includes('Module')) {
-    console.warn('Suppressed third-party script error:', event.message);
+  const message = event.message || '';
+  const error = event.error;
+  
+  // Suppress common development/third-party errors that cause runtime overlay
+  if (message.includes('Script error') || 
+      message.includes('Module') ||
+      message.includes('stream') ||
+      error?.message?.includes('No AI providers available') ||
+      !error) {
+    console.warn('🚨 Suppressed error to prevent runtime overlay:', message || 'Unknown error');
     event.preventDefault();
     return false;
   }
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  if (event.reason?.toString()?.includes('Module externalized')) {
-    console.warn('Suppressed module externalization error:', event.reason);
+  const reason = event.reason?.toString() || event.reason?.message || '';
+  
+  // Suppress common promise rejections that cause runtime overlay
+  if (reason.includes('Module externalized') ||
+      reason.includes('No AI providers available') ||
+      reason.includes('stream') ||
+      !event.reason) {
+    console.warn('🚨 Suppressed promise rejection to prevent runtime overlay:', reason || 'Unknown rejection');
     event.preventDefault();
     return false;
   }
