@@ -369,10 +369,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     <nav className="fixed top-0 left-0 right-0 z-50 p-2">
       <div className="max-w-[90rem] mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
-          <div className="flex items-center justify-between px-6 py-2">
+          <div className="flex items-center justify-between px-4 lg:px-6 py-2">
 
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-none shrink-0">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                   <Sparkles className="w-5 h-5 text-white" />
@@ -389,11 +389,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             </div>
 
             {/* Desktop nav pills */}
-            <div className="hidden lg:flex items-center space-x-1">
+            <div className="hidden lg:flex items-center space-x-1 flex-1 min-w-0 overflow-x-auto whitespace-nowrap" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
               {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
-                  <div key={tab.id} className="relative">
+                  <div key={tab.id} className="relative shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action();
@@ -482,7 +482,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
               {/* Dropdowns */}
               {dropdownMenus.map(menu => (
-                <div key={menu.id} className="relative">
+                <div key={menu.id} className="relative shrink-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -785,8 +785,17 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               </button>
             </div>
 
+            {/* Mobile theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-colors lg:hidden ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             {/* Right controls */}
-            <div className="hidden lg:flex items-center space-x-0.5">
+            <div className="hidden lg:flex items-center space-x-0.5 flex-none shrink-0 pl-2">
               <button className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <Search size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
