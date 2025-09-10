@@ -247,12 +247,11 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
       <LinkRedirect />
       <RemoteAppRefreshManager />
       <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
         <Routes>
-          {/* Landing page as root */}
+          {/* Landing page as root - no navbar */}
           <Route path="/" element={<LandingPage />} />
 
           {/* Auth pages */}
@@ -266,6 +265,7 @@ function AppContent() {
             path="/system-overview"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <SystemOverview />
               </ProtectedRoute>
             }
@@ -274,6 +274,7 @@ function AppContent() {
             path="/dashboard"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -282,6 +283,7 @@ function AppContent() {
             path="/analytics"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <Analytics />
               </ProtectedRoute>
             }
@@ -290,6 +292,7 @@ function AppContent() {
             path="/ai-integration"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <AIIntegration />
               </ProtectedRoute>
             }
@@ -300,6 +303,7 @@ function AppContent() {
             path="/white-label"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <WhiteLabelCustomization />
               </ProtectedRoute>
             }
@@ -310,6 +314,7 @@ function AppContent() {
             path="/ai-goals"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <AIGoalsPage />
               </ProtectedRoute>
             }
@@ -320,6 +325,7 @@ function AppContent() {
             path="/contacts"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <ContactsWorking />
               </ProtectedRoute>
             }
@@ -328,6 +334,7 @@ function AppContent() {
             path="/pipeline"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <Pipeline />
               </ProtectedRoute>
             }
@@ -343,6 +350,7 @@ function AppContent() {
             path="/funnelcraft-ai"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <FunnelCraftPage />
               </ProtectedRoute>
             }
@@ -351,6 +359,7 @@ function AppContent() {
             path="/smartcrm-closer"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <SmartCRMPage />
               </ProtectedRoute>
             }
@@ -359,6 +368,7 @@ function AppContent() {
             path="/content-ai"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <ContentAIPage />
               </ProtectedRoute>
             }
