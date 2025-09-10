@@ -11,9 +11,9 @@ const PipelineApp: React.FC = () => {
       try {
         console.log('🚀 Loading Module Federation Pipeline...');
         
-        // Add timeout to prevent infinite loading
+        // Reduced timeout for faster fallback to iframe
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Module Federation loading timeout')), 8000);
+          setTimeout(() => reject(new Error('Module Federation loading timeout')), 2000);
         });
         
         const modulePromise = loadRemoteComponent(
