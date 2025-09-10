@@ -23,21 +23,22 @@ interface GoogleAIResponse {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   let openai: OpenAI | null = null;
+  
+  // Initialize AI clients with fallback strategy
+  const userOpenAIKey = process.env.OPENAI_API_KEY;
+  const workingOpenAIKey = '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';
+  const googleAIKey = process.env.GOOGLE_AI_API_KEY;
 
   try {
-    // Initialize AI clients with fallback strategy
-    const userOpenAIKey = process.env.OPENAI_API_KEY;
-    const workingOpenAIKey = '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';
-    const googleAIKey = process.env.GOOGLE_AI_API_KEY;
 
-    // Use working key as fallback for production reliability
-    const openaiApiKey = userOpenAIKey || workingOpenAIKey;
-    if (openaiApiKey) {
-      openai = new OpenAI({ apiKey: openaiApiKey });
-      console.log('✅ OpenAI client initialized');
-    } else {
-      console.warn('⚠️ No OpenAI API key available');
-    }
+  // Use working key as fallback for production reliability
+  const openaiApiKey = userOpenAIKey || workingOpenAIKey;
+  if (openaiApiKey) {
+    openai = new OpenAI({ apiKey: openaiApiKey });
+    console.log('✅ OpenAI client initialized');
+  } else {
+    console.warn('⚠️ No OpenAI API key available');
+  }
   } catch (error) {
     console.error('❌ Failed to initialize OpenAI client:', error);
     console.log('🔄 Continuing without OpenAI...');
@@ -660,6 +661,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Check GPT-5 availability
     let gpt5Available = false;
     try {
+      if (!openai) {
+        throw new Error('OpenAI client not initialized');
+      }
       const testResponse = await openai.chat.completions.create({
         model: "gpt-5",
         messages: [{ role: "user", content: "test" }],
@@ -801,6 +805,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Test OpenAI
     try {
+      if (!openai) {
+        throw new Error('OpenAI client not initialized');
+      }
       const testResponse = await openai.responses.create({
         model: "gpt-5",
         input: "Test connection",
@@ -814,6 +821,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
     } catch (error: any) {
       try {
+        if (!openai) {
+          throw new Error('OpenAI client not initialized');
+        }
         const fallbackResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: "Test" }],
@@ -1100,6 +1110,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GPT-5 Business Intelligence
   app.post('/api/openai/business-intelligence', async (req, res) => {
+    if (!openai) {
+      return res.status(400).json({
+        error: 'OpenAI API key not configured',
+        market_insights: ['Configure API key for AI-powered insights'],
+        competitive_advantages: ['Manual analysis available'],
+        risk_factors: ['Limited AI capabilities without API key'],
+        growth_opportunities: ['Enable AI for advanced analysis'],
+        strategic_recommendations: ['Set up OpenAI integration']
+      });
+    }
+
     try {
       const { businessData, marketContext, objectives } = req.body;
 
