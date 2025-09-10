@@ -1,18 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
-// TODO: Replace with Module Federation import once vite.config.ts is updated:
-// const AnalyticsApp = React.lazy(() => import('analytics/AnalyticsApp'));
+const AnalyticsApp: React.FC = () => {
+  const [RemoteAnalytics, setRemoteAnalytics] = useState<React.ComponentType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const AnalyticsApp: React.FC = () => (
-  <iframe
-    src="https://resilient-frangipane-6289c8.netlify.app"
-    className="w-full h-full border-0"
-    title="AI Analytics Dashboard"
-    allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
-    loading="lazy"
-  />
-);
+  useEffect(() => {
+    const loadRemote = async () => {
+      try {
+        console.log('🚀 Loading Module Federation Analytics...');
+        const module = await loadRemoteComponent(
+          'https://resilient-frangipane-6289c8.netlify.app',
+          'AnalyticsApp',
+          './AnalyticsApp'
+        );
+        setRemoteAnalytics(() => module.default || module);
+        console.log('✅ Module Federation Analytics loaded successfully');
+      } catch (err) {
+        console.warn('❌ Module Federation failed, using iframe fallback:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRemote();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <span className="ml-3 text-gray-600">Loading Module Federation...</span>
+      </div>
+    );
+  }
+
+  if (error || !RemoteAnalytics) {
+    // Fallback to iframe
+    return (
+      <iframe
+        src="https://resilient-frangipane-6289c8.netlify.app"
+        className="w-full h-full border-0"
+        title="AI Analytics Dashboard"
+        allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        loading="lazy"
+      />
+    );
+  }
+
+  return <RemoteAnalytics />;
+};
 
 interface ModuleFederationAnalyticsProps {
   showHeader?: boolean;

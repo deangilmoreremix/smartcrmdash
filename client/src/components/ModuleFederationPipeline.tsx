@@ -1,17 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
-// TODO: Replace with Module Federation import once vite.config.ts is updated:
-// const PipelineApp = React.lazy(() => import('deals/PipelineApp'));
+const PipelineApp: React.FC = () => {
+  const [RemotePipeline, setRemotePipeline] = useState<React.ComponentType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const PipelineApp: React.FC = () => (
-  <iframe
-    src="https://cheery-syrniki-b5b6ca.netlify.app"
-    className="w-full h-full border-0"
-    title="Remote Pipeline System"
-    allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
-  />
-);
+  useEffect(() => {
+    const loadRemote = async () => {
+      try {
+        console.log('🚀 Loading Module Federation Pipeline...');
+        const module = await loadRemoteComponent(
+          'https://cheery-syrniki-b5b6ca.netlify.app',
+          'PipelineApp',
+          './PipelineApp'
+        );
+        setRemotePipeline(() => module.default || module);
+        console.log('✅ Module Federation Pipeline loaded successfully');
+      } catch (err) {
+        console.warn('❌ Module Federation failed, using iframe fallback:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRemote();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <span className="ml-3 text-gray-600">Loading Module Federation...</span>
+      </div>
+    );
+  }
+
+  if (error || !RemotePipeline) {
+    // Fallback to iframe
+    return (
+      <iframe
+        src="https://cheery-syrniki-b5b6ca.netlify.app"
+        className="w-full h-full border-0"
+        title="Remote Pipeline System"
+        allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+      />
+    );
+  }
+
+  return <RemotePipeline />;
+};
 
 interface ModuleFederationPipelineProps {
   showHeader?: boolean;
