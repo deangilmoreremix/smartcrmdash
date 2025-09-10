@@ -388,7 +388,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       }}
                       data-testid={`nav-tab-${tab.id}`}
                       className={`
-                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full
+                        relative flex items-center space-x-2 px-3 py-2 rounded-full
                         transition-all duration-300 transform hover:scale-105 text-xs
                         ${isActive
                           ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20`
@@ -489,7 +489,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     data-dropdown-toggle="true"
                     data-testid={`button-dropdown-${menu.id}`}
                     className={`
-                      relative flex items-center space-x-1 px-2 py-1.5 rounded-full
+                      relative flex items-center space-x-2 px-3 py-2 rounded-full
                       transition-all duration-300 transform hover:scale-105
                       ${activeDropdown === menu.id
                         ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20`
@@ -793,19 +793,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             <div className="hidden lg:flex items-center space-x-0.5 flex-none shrink-0 pl-2">
               <button 
                 data-testid="button-search"
-                className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
               <button 
                 data-testid="button-notifications"
-                className={`relative p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
               <button
                 onClick={toggleTheme}
                 data-testid="button-theme-toggle"
-                className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
                 {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
@@ -814,7 +814,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
                   data-testid="button-user-menu"
-                  className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                  className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 >
                   <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
                 </button>
