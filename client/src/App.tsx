@@ -351,6 +351,15 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/partner-onboarding"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PartnerOnboardingPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* AI Goals */}
           <Route
@@ -418,16 +427,18 @@ function AppContent() {
             }
           />
 
-          {/* Communication and CRM Tools */}
+          {/* Analytics Remote Routes */}
           <Route
-            path="/appointments"
+            path="/analytics-remote"
             element={
               <ProtectedRoute>
                 <Navbar />
-                <Appointments />
+                <AnalyticsRemotePage />
               </ProtectedRoute>
             }
           />
+
+          {/* Communication and CRM Tools */}
           <Route
             path="/video-email"
             element={
@@ -564,6 +575,98 @@ function AppContent() {
               <ProtectedRoute>
                 <Navbar />
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Sales Intelligence Routes */}
+          <Route
+            path="/pipeline-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Pipeline Intelligence" description="Advanced pipeline analytics and intelligence..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/deal-risk-monitor"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Deal Risk Monitor" description="Monitor and analyze deal risks in real-time..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/smart-conversion-insights"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Smart Conversion Insights" description="AI-powered conversion optimization insights..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipeline-health-dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Pipeline Health Dashboard" description="Comprehensive pipeline health monitoring..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-cycle-analytics"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Sales Cycle Analytics" description="Analyze and optimize your sales cycles..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/win-rate-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WinRateIntelligence />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-sales-forecast"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AISalesForecast />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/live-deal-analysis"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <LiveDealAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/competitor-insights"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CompetitorInsights />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/revenue-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <RevenueIntelligence />
               </ProtectedRoute>
             }
           />
