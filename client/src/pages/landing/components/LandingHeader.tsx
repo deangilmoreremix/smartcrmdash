@@ -8,7 +8,15 @@ const LandingHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
-  const { config } = useWhitelabel();
+  
+  // Temporarily bypass the useWhitelabel hook to test if it's causing issues
+  let config: any;
+  try {
+    config = useWhitelabel().config;
+  } catch (error) {
+    console.error('WhitelabelContext error:', error);
+    config = { companyName: 'Smart', logoUrl: null };
+  }
   // Track scroll position to change header style
   useEffect(() => {
     const handleScroll = () => {
