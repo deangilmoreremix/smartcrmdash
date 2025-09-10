@@ -14,8 +14,6 @@ const PipelinePage: React.FC = () => {
   // Module Federation approach - no complex bridge logic needed
   // Data sync happens through the ModuleFederationPipeline component
 
-  
-
   return (
     <div className={`min-h-screen ${
       isDark ? 'bg-gray-900' : 'bg-gray-50'
