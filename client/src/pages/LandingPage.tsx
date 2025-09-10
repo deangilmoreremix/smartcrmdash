@@ -52,6 +52,7 @@ import ParticleBackground from '../components/landing/ParticleBackground';
 
 // Import the embedded dashboard demo
 import EmbeddedDashboardDemo from '../components/landing/EmbeddedDashboardDemo';
+import VideoCallDemo from '../components/landing/VideoCallDemo';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -190,6 +191,24 @@ const LandingPage = () => {
             delay={1}
             size="lg"
           />
+        </div>
+      </section>
+      
+      {/* Video Call Demo Section */}
+      <section className="landing-section py-16 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <ScrollAnimationWrapper animation="fade-up">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Integrated Video Calling</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Connect with clients and team members through built-in HD video calls with AI-powered features
+              </p>
+            </div>
+            
+            <div className="max-w-4xl mx-auto">
+              <VideoCallDemo />
+            </div>
+          </ScrollAnimationWrapper>
         </div>
       </section>
       
