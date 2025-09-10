@@ -1643,8 +1643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Apply admin middleware to bulk import routes
-  app.use('/api/bulk-import*', requireAdmin);
-  app.use('/api/admin*', requireAdmin);
+  app.use('/api/bulk-import', requireAdmin);
+  app.use('/api/admin', requireAdmin);
 
   // Register bulk import routes
   registerBulkImportRoutes(app);
@@ -2686,16 +2686,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ElevenLabs endpoint removedailed to get signed URL from ElevenLabs' });
-      }
-
-      const body = await response.json();
-      res.json({ signed_url: body.signed_url });
-    } catch (error) {
-      console.error('Error getting ElevenLabs signed URL:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
 
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
