@@ -786,27 +786,27 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             </div>
 
             {/* Right controls */}
-            <div className="hidden lg:flex items-center space-x-1">
-              <button className={`p-1.5 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Search size={14} className={isDark ? 'text-white' : 'text-gray-600'} />
+            <div className="hidden lg:flex items-center space-x-0.5">
+              <button className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Search size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
-              <button className={`relative p-1.5 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Bell size={14} className={isDark ? 'text-white' : 'text-gray-600'} />
+              <button className={`relative p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Bell size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
               <button
                 onClick={toggleTheme}
-                className={`p-1.5 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
-                {isDark ? <Sun size={14} className="text-white" /> : <Moon size={14} className="text-gray-600" />}
+                {isDark ? <Sun size={12} className="text-white" /> : <Moon size={12} className="text-gray-600" />}
               </button>
               <div className="relative">
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
-                  className={`p-1.5 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                  className={`p-1 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
                 >
-                  <User size={14} className={isDark ? 'text-white' : 'text-gray-600'} />
+                  <User size={12} className={isDark ? 'text-white' : 'text-gray-600'} />
                 </button>
 
                 {activeDropdown === 'user' && (
