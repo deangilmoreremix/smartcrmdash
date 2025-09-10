@@ -46,6 +46,8 @@ const TextMessages = lazy(() => import('./pages/TextMessages'));
 
 // Authentication
 const Login = lazy(() => import('./pages/Auth/Login'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
 const DevBypassPage = lazy(() => import('./pages/DevBypassPage'));
@@ -259,6 +261,9 @@ function AppContent() {
           <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/dev-bypass" element={<DevBypassPage />} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/voice-profiles" element={<VoiceProfiles />} />
 
           {/* Core pages */}
           <Route
@@ -341,9 +346,14 @@ function AppContent() {
           />
 
           {/* Feature showcase routes */}
-          <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
-          <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
-          <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
+          <Route path="/features/ai-tools" element={<AiToolsFeaturePage />} />
+          <Route path="/features/contacts" element={<ContactsFeaturePage />} />
+          <Route path="/features/pipeline" element={<PipelineFeaturePage />} />
+          <Route path="/features/ai-assistant" element={<AiAssistantFeaturePage />} />
+          <Route path="/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
+          <Route path="/features/image-generator" element={<ImageGeneratorFeaturePage />} />
+          <Route path="/features/function-assistant" element={<FunctionAssistantFeaturePage />} />
+          <Route path="/features/speech-to-text" element={<SemanticSearchFeaturePage />} />
 
           {/* Remote App Routes */}
           <Route
