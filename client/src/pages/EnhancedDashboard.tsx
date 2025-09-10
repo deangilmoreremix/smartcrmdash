@@ -556,7 +556,7 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* FunnelCraft AI - Marketing Team */}
           <a 
-            href="https://funnelcraft-ai.videoremix.io/" 
+            href="https://serene-valkyrie-fec320.netlify.app/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="group p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100"
@@ -574,7 +574,7 @@ const Dashboard: React.FC = () => {
 
           {/* SmartCRM Closer - Outreach Team */}
           <a 
-            href="https://smartcrm-closer.videoremix.io" 
+            href="https://stupendous-twilight-64389a.netlify.app/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="group p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100"
@@ -592,7 +592,7 @@ const Dashboard: React.FC = () => {
 
           {/* ContentAI - Content & Support Team */}
           <a 
-            href="https://content-ai.videoremix.io" 
+            href="https://capable-mermaid-3c73fa.netlify.app/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="group p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100"

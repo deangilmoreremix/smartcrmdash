@@ -27,7 +27,7 @@ const RemoteContentAILoader: React.FC = () => {
     <div className="w-full h-full bg-white">
       <iframe
         ref={iframeRef}
-        src="https://content-ai.videoremix.io"
+        src="https://capable-mermaid-3c73fa.netlify.app/"
         className="w-full h-full border-0"
         title="ContentAI Platform"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
