@@ -378,6 +378,7 @@ function AppContent() {
             path="/pipeline"
             element={
               <ProtectedRoute>
+                <Navbar />
                 <Pipeline />
               </ProtectedRoute>
             }
