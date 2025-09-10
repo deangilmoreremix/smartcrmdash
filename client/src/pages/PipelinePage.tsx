@@ -15,7 +15,7 @@ const PipelinePage: React.FC = () => {
   // Data sync happens through the ModuleFederationPipeline component
 
   return (
-    <div className="w-full overflow-hidden relative" style={{ height: 'calc(100vh - 80px)' }}>
+    <div className="h-screen w-full overflow-hidden relative">
       {/* Full Screen Pipeline Component - Positioned below navbar */}
       <div className="h-full w-full">
         <ModuleFederationPipeline showHeader={false} />
