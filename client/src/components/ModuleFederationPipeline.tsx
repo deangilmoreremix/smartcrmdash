@@ -10,12 +10,20 @@ const PipelineApp: React.FC = () => {
     const loadRemote = async () => {
       try {
         console.log('🚀 Loading Module Federation Pipeline...');
-        const module = await loadRemoteComponent(
+        
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Module Federation loading timeout')), 8000);
+        });
+        
+        const modulePromise = loadRemoteComponent(
           'https://cheery-syrniki-b5b6ca.netlify.app',
           'PipelineApp',
           './PipelineApp'
         );
-        setRemotePipeline(() => module.default || module);
+        
+        const module = await Promise.race([modulePromise, timeoutPromise]);
+        setRemotePipeline(() => (module as any).default || module);
         console.log('✅ Module Federation Pipeline loaded successfully');
       } catch (err) {
         console.warn('❌ Module Federation failed, using iframe fallback:', err);
