@@ -313,6 +313,44 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          
+          {/* White Label Management Routes */}
+          <Route
+            path="/white-label-management"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WhiteLabelManagementDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/package-builder"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WhiteLabelPackageBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/revenue-sharing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <RevenueSharingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner-dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PartnerDashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* AI Goals */}
           <Route
