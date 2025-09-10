@@ -12,57 +12,25 @@ const RemotePipeline: React.FC = () => {
   
   const { deals, fetchDeals } = useDealStore();
 
-  const REMOTE_URL = 'https://smartcrm.replit.app';
+  const REMOTE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
 
   useEffect(() => {
     // Initialize the bridge
     if (!bridgeRef.current) {
-      bridgeRef.current = new RemotePipelineBridge();
+      bridgeRef.current = new RemotePipelineBridge((status) => {
+        setIsConnected(status.isConnected);
+        if (status.errorMessage) {
+          setError(status.errorMessage);
+        }
+      });
       
       // Set up message handlers
-      bridgeRef.current.onMessage('REMOTE_READY', () => {
-        console.log('🎉 Remote pipeline is ready');
-        setIsConnected(true);
-        setIsLoading(false);
-        
-        // Send initial CRM data
-        if (bridgeRef.current) {
-          bridgeRef.current.initializeCRM({
-            deals: deals,
-            stages: ['Lead', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'],
-            totalValue: deals.reduce((sum, deal) => sum + deal.value, 0),
-            activeDeals: deals.filter(d => !['Closed Won', 'Closed Lost'].includes(d.stage)).length
-          }, {
-            name: 'CRM System',
-            version: '1.0.0'
-          });
-        }
-      });
+      bridgeRef.current.onMessage('REMOTE_READY');
 
-      bridgeRef.current.onMessage('DEAL_CREATED', (data) => {
-        console.log('🆕 Deal created in remote pipeline:', data);
-        // Refresh deals in CRM
-        fetchDeals();
-      });
-
-      bridgeRef.current.onMessage('DEAL_UPDATED', (data) => {
-        console.log('✏️ Deal updated in remote pipeline:', data);
-        // Refresh deals in CRM
-        fetchDeals();
-      });
-
-      bridgeRef.current.onMessage('DEAL_DELETED', (data) => {
-        console.log('🗑️ Deal deleted in remote pipeline:', data);
-        // Refresh deals in CRM
-        fetchDeals();
-      });
-
-      bridgeRef.current.onMessage('REQUEST_PIPELINE_DATA', () => {
-        console.log('📊 Remote pipeline requesting CRM data');
-        if (bridgeRef.current) {
-          bridgeRef.current.syncDeals(deals);
-        }
-      });
+      bridgeRef.current.onMessage('DEAL_CREATED');
+      bridgeRef.current.onMessage('DEAL_UPDATED');
+      bridgeRef.current.onMessage('DEAL_DELETED');
+      bridgeRef.current.onMessage('REQUEST_PIPELINE_DATA');
     }
 
     return () => {

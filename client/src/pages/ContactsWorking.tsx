@@ -3,7 +3,7 @@ import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
 const ContactsWorking: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const [remoteUrl, setRemoteUrl] = useState('https://smartcrm.replit.app/');
+  const [remoteUrl, setRemoteUrl] = useState('https://taupe-sprinkles-83c9ee.netlify.app/');
   const [useRemote, setUseRemote] = useState(false);
   const [RemoteContacts, setRemoteContacts] = useState<React.ComponentType | null>(null);
   const [loading, setLoading] = useState(false);
