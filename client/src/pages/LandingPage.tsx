@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useWhitelabel } from '../contexts/WhitelabelContext';
 import { HashLink } from 'react-router-hash-link';
 import { 
   Brain, 
@@ -56,6 +57,7 @@ import VideoCallDemo from '../components/landing/VideoCallDemo';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { config } = useWhitelabel();
 
   // Function to handle page initialization only once
   useEffect(() => {
@@ -85,7 +87,11 @@ const LandingPage = () => {
       <main className="landing-content">
         {/* Hero Section */}
         <section className="landing-section">
-          <ParallaxHero />
+          <ParallaxHero 
+            title={config.heroTitle}
+            subtitle={config.heroSubtitle}
+            ctaButtons={config.ctaButtons}
+          />
         </section>
         
         {/* Client logos */}
