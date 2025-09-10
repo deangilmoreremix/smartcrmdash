@@ -113,10 +113,17 @@ class AIOrchestrator {
         processingTime: response.metadata.processingTime 
       });
     } catch (error) {
+      // Enhanced error handling to prevent uncaught exceptions
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       logger.error('AI request failed', error as Error, { 
         requestId: request.id, 
-        type: request.type 
+        type: request.type
       });
+      
+      // Silently handle "No AI providers available" to prevent runtime errors
+      if (errorMsg.includes('No AI providers available')) {
+        console.warn('⚠️ Skipping AI request due to no providers:', request.type);
+      }
     } finally {
       this.processing = false;
     }
@@ -191,6 +198,8 @@ class AIOrchestrator {
       .filter(p => p.available && p.rateLimit.remaining > 0);
 
     if (availableProviders.length === 0) {
+      // Silently skip requests when no providers are available instead of throwing
+      console.warn('⚠️ No AI providers available, skipping request:', request.type);
       throw new Error('No AI providers available');
     }
 
