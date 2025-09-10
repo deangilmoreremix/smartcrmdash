@@ -75,7 +75,7 @@ const PipelinePage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="w-full h-[900px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
+            <div className="w-full h-[900px] rounded-lg overflow-hidden relative">
               <ModuleFederationPipeline showHeader={false} />
               
               {/* Module Federation Status Indicator */}

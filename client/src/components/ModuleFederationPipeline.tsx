@@ -67,7 +67,7 @@ interface ModuleFederationPipelineProps {
 
 const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ showHeader = false }) => {
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full flex flex-col">
       {showHeader && (
         <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
@@ -81,7 +81,7 @@ const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ sho
           </div>
         </div>
       )}
-      <div className="flex-1">
+      <div className="flex-1 h-full">
         <PipelineApp />
       </div>
     </div>
