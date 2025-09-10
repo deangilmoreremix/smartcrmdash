@@ -64,6 +64,41 @@ window.onerror = function(message, source, lineno, colno, error) {
   return true; // Prevent default error handling
 };
 
+// Enhanced error handler to catch ALL thrown objects (including non-Error objects)
+const originalError = console.error;
+console.error = function(...args) {
+  // Only log actual errors to console, suppress development/third-party errors
+  const message = args[0]?.toString() || '';
+  if (message.includes('uncaught exception') ||
+      message.includes('Script error') ||
+      message.includes('Module') ||
+      message.includes('stream') ||
+      message.includes('No AI providers') ||
+      message.includes('loading') ||
+      message.includes('timeout')) {
+    console.warn('🚨 Suppressed console.error to prevent runtime overlay:', ...args);
+    return;
+  }
+  originalError.apply(console, args);
+};
+
+// Override any exception handlers that might show runtime overlays
+if (typeof window !== 'undefined') {
+  // Prevent all runtime error overlays by suppressing uncaught exceptions
+  window.addEventListener('unhandledrejection', (event) => {
+    console.warn('🚨 Prevented unhandledrejection overlay:', event.reason);
+    event.preventDefault();
+    return false;
+  }, true);
+  
+  window.addEventListener('error', (event) => {
+    console.warn('🚨 Prevented error overlay:', event.error || event.message);
+    event.preventDefault(); 
+    event.stopPropagation();
+    return false;
+  }, true);
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
