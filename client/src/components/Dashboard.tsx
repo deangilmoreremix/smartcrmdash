@@ -10,10 +10,10 @@ import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
 import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';
 import { LoadingSpinner } from './ui/LoadingSpinner';
-import RemotePipelineLoader from './RemotePipelineLoader';
+import ModuleFederationPipeline from './ModuleFederationPipeline';
 import RemoteWhiteLabelLoader from './RemoteWhiteLabelLoader';
 import RemoteProductResearchLoader from './RemoteProductResearchLoader';
-import RemoteAIAnalyticsLoader from './RemoteAIAnalyticsLoader';
+import ModuleFederationAnalytics from './ModuleFederationAnalytics';
 import RemoteAIGoalsLoader from './RemoteAIGoalsLoader';
 import AssistantStatusWidget from './ui/AssistantStatusWidget';
 
@@ -261,7 +261,7 @@ const Dashboard: React.FC = React.memo(() => {
             </div>
           }>
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-              <RemotePipelineLoader showHeader={true} />
+              <ModuleFederationPipeline showHeader={true} />
             </div>
           </React.Suspense>
         );
@@ -298,7 +298,7 @@ const Dashboard: React.FC = React.memo(() => {
       case 'ai-analytics-section':
         return (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <RemoteAIAnalyticsLoader showHeader={true} />
+            <ModuleFederationAnalytics showHeader={true} />
           </div>
         );
 
