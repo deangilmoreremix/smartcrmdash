@@ -109,8 +109,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RoleProvider>
-          <TenantProvider>
+        <TenantProvider>
+          <RoleProvider>
             <ThemeProvider>
               <WhitelabelProvider>
                 <AIToolsProvider>
@@ -614,8 +614,8 @@ function App() {
                   </AIToolsProvider>
                 </WhitelabelProvider>
               </ThemeProvider>
-            </TenantProvider>
           </RoleProvider>
+        </TenantProvider>
         </AuthProvider>
       </QueryClientProvider>
     );

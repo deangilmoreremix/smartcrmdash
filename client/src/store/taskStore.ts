@@ -1,40 +1,53 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { 
-  Task, 
-  SubTask, 
-  TaskAttachment, 
-  TaskReminder, 
-  TaskTemplate, 
-  TaskActivity, 
-  TaskAnalytics, 
-  CalendarEvent, 
-  ActivityFilter, 
-  TaskPriority, 
-  TaskStatus 
+import {
+  Task,
+  SubTask,
+  TaskAttachment,
+  TaskReminder,
+  TaskTemplate,
+  Activity,
+  TaskMetrics,
+  CalendarEvent,
+  TaskFilter,
+  TaskPriority,
+  TaskStatus
 } from '../types/task';
+
+interface TaskFilters {
+  searchTerm?: string;
+  priorities?: TaskPriority[];
+  isOverdue?: boolean;
+  isDueToday?: boolean;
+}
 
 interface TaskStore {
   // State
   tasks: Task[];
   templates: TaskTemplate[];
-  activities: TaskActivity[];
+  activities: Activity[];
   calendarEvents: CalendarEvent[];
-  analytics: TaskAnalytics;
-  
+  analytics: TaskMetrics;
+
   // Filter states
-  statusFilter: TaskStatus | 'all';
-  priorityFilter: TaskPriority | 'all';
+  statusFilter: Task['status'] | 'all';
+  priorityFilter: Task['priority'] | 'all';
   assigneeFilter: string | 'all';
   dueDateFilter: 'all' | 'overdue' | 'today' | 'week' | 'month';
   searchQuery: string;
-  activityFilter: ActivityFilter;
+  activityFilter: TaskFilter;
+  filters: TaskFilter;
+  selectedTask: Task | null;
   
   // Actions - Tasks
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   getTask: (id: string) => Task | undefined;
+
+  // Filter actions
+  setFilters: (filters: Partial<TaskFilter>) => void;
+  setSelectedTask: (task: Task | null) => void;
   
   // Computed properties
   getFilteredTasks: () => Task[];
@@ -52,16 +65,18 @@ export const useTaskStore = create<TaskStore>()(
       analytics: {
         totalTasks: 0,
         completedTasks: 0,
+        pendingTasks: 0,
         overdueTasks: 0,
-        tasksCreatedToday: 0,
         tasksCompletedToday: 0,
+        tasksCompletedThisWeek: 0,
+        tasksCompletedThisMonth: 0,
         averageCompletionTime: 0,
-        productivityScore: 0,
-        upcomingDeadlines: 0,
-        tasksByPriority: { low: 0, medium: 0, high: 0 },
-        tasksByStatus: { pending: 0, 'in-progress': 0, completed: 0, cancelled: 0, overdue: 0 },
         completionRate: 0,
-        trendsData: []
+        tasksByType: {} as Record<Task['type'], number>,
+        tasksByPriority: { low: 0, medium: 0, high: 0, urgent: 0 },
+        tasksByStatus: { pending: 0, 'in-progress': 0, completed: 0, cancelled: 0, overdue: 0 },
+        tasksByUser: {},
+        productivityScore: 0
       },
       
       // Filter initial states
@@ -72,9 +87,11 @@ export const useTaskStore = create<TaskStore>()(
       searchQuery: '',
       activityFilter: {
         types: [],
-        dateRange: null,
+        dateRange: undefined,
         users: []
       },
+      filters: {},
+      selectedTask: null,
       
       // Task actions
       addTask: (taskData) => {
@@ -259,13 +276,24 @@ export const useTaskStore = create<TaskStore>()(
         const startOfWeek = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000);
         startOfWeek.setHours(0, 0, 0, 0);
         const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
-        
-        return get().tasks.filter(task => 
-          task.dueDate && 
-          new Date(task.dueDate) >= startOfWeek && 
+
+        return get().tasks.filter(task =>
+          task.dueDate &&
+          new Date(task.dueDate) >= startOfWeek &&
           new Date(task.dueDate) < endOfWeek &&
           task.status !== 'completed'
         );
+      },
+
+      // Filter actions
+      setFilters: (newFilters) => {
+        set((state) => ({
+          filters: { ...state.filters, ...newFilters }
+        }));
+      },
+
+      setSelectedTask: (task) => {
+        set({ selectedTask: task });
       }
     }),
     {

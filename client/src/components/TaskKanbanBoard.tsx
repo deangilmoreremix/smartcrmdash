@@ -34,7 +34,7 @@ import { TaskDetailsModal } from './TaskDetailsModal';
 const statusColumns = [
   { id: 'pending', title: 'To Do', color: 'bg-gray-100', headerColor: 'bg-gray-50' },
   { id: 'in-progress', title: 'In Progress', color: 'bg-blue-100', headerColor: 'bg-blue-50' },
-  { id: 'on-hold', title: 'On Hold', color: 'bg-yellow-100', headerColor: 'bg-yellow-50' },
+  { id: 'cancelled', title: 'On Hold', color: 'bg-yellow-100', headerColor: 'bg-yellow-50' },
   { id: 'completed', title: 'Completed', color: 'bg-green-100', headerColor: 'bg-green-50' },
 ] as const;
 
@@ -305,7 +305,7 @@ export const TaskKanbanBoard: React.FC = () => {
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
                 Filters
-                {Object.keys(filters).length > 0 && (
+                {filters && Object.keys(filters).length > 0 && (
                   <Badge className="ml-2 bg-blue-100 text-blue-800">
                     {Object.keys(filters).length}
                   </Badge>

@@ -5,7 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 // Diagnostic logging for environment variables
 console.log('=== SERVER STARTUP DIAGNOSTICS ===');
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('VITE_SUPABASE_URL configured:', !!process.env.VITE_SUPABASE_URL);
+console.log('SUPABASE_URL configured:', !!process.env.SUPABASE_URL);
 console.log('SUPABASE_SERVICE_ROLE_KEY configured:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 console.log('OPENAI_API_KEY configured:', !!process.env.OPENAI_API_KEY);
 console.log('PORT from env:', process.env.PORT);
