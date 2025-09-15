@@ -1,11 +1,7 @@
 import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 
-interface EdgeZonesProps {
-  onDragEnd: (result: any) => void;
-}
-
-export const EdgeZones: React.FC<EdgeZonesProps> = ({ onDragEnd }) => {
+export const EdgeZones: React.FC = () => {
   const edgeZones = [
     { id: 'top-edge', position: 'top' },
     { id: 'bottom-edge', position: 'bottom' },

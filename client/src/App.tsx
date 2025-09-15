@@ -2,6 +2,7 @@
 
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -16,7 +17,9 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
+import { NavbarPositionProvider, useNavbarPosition } from './contexts/NavbarPositionContext';
 import Navbar from './components/Navbar';
+import { EdgeZones } from './components/EdgeZones';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
@@ -221,7 +224,9 @@ function App() {
                         <DashboardLayoutProvider>
                           <AIProvider>
                             <RoleProvider>
-                              <AppContent />
+                              <NavbarPositionProvider>
+                                <AppContent />
+                              </NavbarPositionProvider>
                             </RoleProvider>
                           </AIProvider>
                         </DashboardLayoutProvider>
@@ -242,16 +247,32 @@ function App() {
 function AppContent() {
   const { user, loading } = useAuth();
   const [darkMode, setDarkMode] = useDarkMode();
+  const { setPosition } = useNavbarPosition();
+
+  // Handle navbar drag end
+  const handleNavbarDragEnd = (result: DropResult) => {
+    const { destination, source } = result;
+
+    if (!destination) return;
+
+    // If dropped on an edge zone, snap to that position
+    if (destination.droppableId.includes('-edge')) {
+      const position = destination.droppableId.split('-')[0] as 'top' | 'left' | 'right' | 'bottom';
+      setPosition(position);
+    }
+  };
 
   if (loading) {
     return <AuthLoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <LinkRedirect />
-      <RemoteAppRefreshManager />
-      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+    <DragDropContext onDragEnd={handleNavbarDragEnd}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <EdgeZones />
+        <LinkRedirect />
+        <RemoteAppRefreshManager />
+        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
         <Routes>
           {/* Landing page as root - no navbar */}
           <Route path="/" element={<LandingPage />} />
@@ -743,12 +764,13 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-      
+
       {/* Toaster for notifications */}
       <Toaster />
-      
+
       {/* ElevenLabs widgets removed to prevent performance issues */}
     </div>
+    </DragDropContext>
   );
 }
 

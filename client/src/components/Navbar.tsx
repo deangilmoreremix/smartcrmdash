@@ -1,17 +1,19 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus, GripVertical
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRole } from './RoleBasedAccess';
+import { useNavbarPosition } from '../contexts/NavbarPositionContext';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -38,6 +40,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
   const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
+  const { position, isDragging, setIsDragging } = useNavbarPosition();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -363,18 +366,55 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     );
   }, []);
 
-  return (
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
-      <div className="max-w-[90rem] mx-auto will-change-transform">
-        <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
-          <div className="flex items-center justify-between px-6 lg:px-8 py-3">
+  // Determine navbar dimensions and layout based on position
+  const isVertical = position === 'left' || position === 'right';
+  const navbarWidth = isVertical ? '60px' : '100%';
+  const navbarHeight = isVertical ? '100vh' : 'auto';
 
-            {/* Logo */}
-            <div className="flex items-center flex-none shrink-0">
-              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Smart<span className="text-green-400">CRM</span>
-              </h1>
-            </div>
+  return (
+    <Draggable draggableId="navbar" index={0}>
+      {(provided, snapshot) => (
+        <nav
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={`z-50 p-4 transition-all duration-300 ${
+            snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105' : ''
+          }`}
+          style={{
+            ...provided.draggableProps.style,
+            position: 'absolute',
+            top: position === 'top' ? 0 : position === 'bottom' ? 'auto' : 0,
+            bottom: position === 'bottom' ? 0 : 'auto',
+            left: position === 'left' ? 0 : position === 'right' ? 'auto' : 0,
+            right: position === 'right' ? 0 : 'auto',
+            width: navbarWidth,
+            height: navbarHeight,
+            zIndex: snapshot.isDragging ? 9999 : 50
+          }}
+        >
+          <div className="will-change-transform">
+            <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-2xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} ${
+              isVertical ? 'h-full rounded-2xl' : 'rounded-full'
+            }`}>
+              <div className={`flex ${isVertical ? 'flex-col items-center justify-start py-4 space-y-4' : 'items-center justify-between'} px-4 py-2`}>
+
+                {/* Drag Handle */}
+                <div
+                  {...provided.dragHandleProps}
+                  className={`cursor-move p-2 rounded-lg transition-colors ${
+                    isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                  } ${isVertical ? 'mb-2' : 'mr-2'}`}
+                  title="Drag to move navbar"
+                >
+                  <GripVertical className={`h-4 w-4 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+                </div>
+
+                {/* Logo */}
+                <div className="flex items-center flex-none shrink-0">
+                  <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Smart<span className="text-green-400">CRM</span>
+                  </h1>
+                </div>
 
             {/* Desktop nav pills */}
             <div className="hidden lg:flex flex-1 min-w-0">
@@ -878,6 +918,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
         )}
       </div>
     </nav>
+      )}
+    </Draggable>
   );
 });
 
