@@ -406,9 +406,9 @@ function AppContent() {
             }
           />
 
-          {/* Appointments - Remote Calendar */}
+          {/* Calendar - Remote Calendar Moderation */}
           <Route
-            path="/appointments"
+            path="/calendar"
             element={
               <ProtectedRoute>
                 <Navbar />

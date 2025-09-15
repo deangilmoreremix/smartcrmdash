@@ -167,7 +167,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const communicationTools = [
-    { name: 'Appointments', tool: 'appointments', icon: Calendar },
+    { name: 'Calendar', tool: 'calendar', icon: Calendar },
     { name: 'Video Email', tool: 'video-email', icon: Video },
     { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
     { name: 'Phone System', tool: 'phone-system', icon: Phone },

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff, Calendar } from 'lucide-react';
-import { useAppointmentStore } from '../hooks/useAppointmentStore';
+import { useAppointmentStore } from '../store/appointmentStore';
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';
 
@@ -100,7 +100,7 @@ const RemoteCalendar: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { appointments, fetchAppointments, addAppointment, updateAppointment, deleteAppointment } = useAppointmentStore();
+  const { appointments, fetchAppointments, createAppointment, updateAppointment, deleteAppointment } = useAppointmentStore();
 
   const REMOTE_URL = 'https://ai-calendar-applicat-qshp.bolt.host';
 
@@ -122,7 +122,7 @@ const RemoteCalendar: React.FC = () => {
 
       bridgeRef.current.onMessage('APPOINTMENT_CREATED', (data: any) => {
         console.log('📅 Appointment created in remote calendar:', data);
-        addAppointment(data);
+        createAppointment(data);
       });
 
       bridgeRef.current.onMessage('APPOINTMENT_UPDATED', (data: any) => {
@@ -170,7 +170,7 @@ const RemoteCalendar: React.FC = () => {
         bridgeRef.current = null;
       }
     };
-  }, [appointments, fetchAppointments, addAppointment, updateAppointment, deleteAppointment]);
+  }, [appointments, fetchAppointments, createAppointment, updateAppointment, deleteAppointment]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
