@@ -4,15 +4,16 @@ import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 const ContactsApp: React.FC = () => {
   const [RemoteContacts, setRemoteContacts] = useState<React.ComponentType | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadRemote = async () => {
       try {
-        console.log('🚀 Loading Module Federation Contacts...');
+        console.log('🚀 Attempting Module Federation for Contacts...');
         
-        // Reduced timeout for faster fallback to iframe
+        // Try Module Federation first
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Module Federation loading timeout')), 2000);
+          setTimeout(() => reject(new Error('Module Federation timeout - remote app may need MF configuration')), 3000);
         });
         
         const modulePromise = loadRemoteComponent(
@@ -24,17 +25,30 @@ const ContactsApp: React.FC = () => {
         const module = await Promise.race([modulePromise, timeoutPromise]);
         setRemoteContacts(() => (module as any).default || module);
         console.log('✅ Module Federation Contacts loaded successfully');
+        setIsLoading(false);
       } catch (err) {
-        console.warn('❌ Module Federation failed, using iframe fallback:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.log('📺 Module Federation not available, using iframe fallback (remote app needs MF configuration)');
+        setError('Remote app needs Module Federation configuration');
+        setIsLoading(false);
       }
     };
 
     loadRemote();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Contacts Module...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !RemoteContacts) {
-    // Fallback to iframe
+    // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
         src="https://taupe-sprinkles-83c9ee.netlify.app"

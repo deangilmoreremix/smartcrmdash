@@ -60,22 +60,24 @@ class DynamicModuleFederation {
       
       const tryNextUrl = () => {
         if (currentUrlIndex >= possibleUrls.length) {
-          reject(new Error(`Failed to load remote script from any of: ${possibleUrls.join(', ')}`));
+          const error = new Error(`Failed to load remote script from any of: ${possibleUrls.join(', ')}`);
+          console.error('❌ Module Federation script loading failed:', error);
+          reject(error);
           return;
         }
         
         script.src = possibleUrls[currentUrlIndex];
-        // Trying to load Module Federation script
+        console.log(`🔄 Trying Module Federation script: ${script.src}`);
         currentUrlIndex++;
       };
       
       script.onload = () => {
-        // Module Federation script loaded successfully
+        console.log(`✅ Module Federation script loaded: ${script.src}`);
         resolve();
       };
       
-      script.onerror = () => {
-        console.warn(`Failed to load script from: ${script.src}`);
+      script.onerror = (error) => {
+        console.warn(`❌ Failed to load script from: ${script.src}`, error);
         tryNextUrl();
       };
       
@@ -86,6 +88,7 @@ class DynamicModuleFederation {
 
   private async getContainer(scope: string): Promise<ModuleContainer> {
     if (this.loadedContainers.has(scope)) {
+      console.log(`♻️ Using cached Module Federation container: ${scope}`);
       return this.loadedContainers.get(scope)!;
     }
 
@@ -93,14 +96,14 @@ class DynamicModuleFederation {
     let retries = 0;
     const maxRetries = 20; // 2 seconds max wait
     
-    // Looking for Module Federation container silently
+    console.log(`🔍 Looking for Module Federation container: ${scope}`);
     
     while (!window[scope] && retries < maxRetries) {
       await new Promise(resolve => setTimeout(resolve, 100));
       retries++;
       
       if (retries % 10 === 0) {
-        // Waiting for container (silent retry)
+        console.log(`⏳ Still waiting for container "${scope}" (${retries}/${maxRetries})`);
       }
     }
 
@@ -110,9 +113,12 @@ class DynamicModuleFederation {
         window[key] !== null && 
         typeof (window[key] as any).get === 'function'
       );
-      throw new Error(`Remote container "${scope}" not found. Available containers: ${availableContainers.join(', ') || 'none'}`);
+      const error = new Error(`Remote container "${scope}" not found. Available containers: ${availableContainers.join(', ') || 'none'}`);
+      console.error('❌ Module Federation container not found:', error);
+      throw error;
     }
 
+    console.log(`✅ Module Federation container found: ${scope}`);
     const container = window[scope] as ModuleContainer;
     this.loadedContainers.set(scope, container);
     return container;
