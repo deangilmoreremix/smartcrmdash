@@ -196,6 +196,21 @@ export class RemoteCalendarBridge {
 
     console.log('📤 Initializing calendar with CRM data:', initMessage);
     this.iframe.contentWindow.postMessage(initMessage, this.origin);
+
+    // Also try simple postMessage format in case the remote app expects a different format
+    setTimeout(() => {
+      if (this.iframe?.contentWindow) {
+        this.iframe.contentWindow.postMessage({
+          type: 'SET_THEME',
+          theme: 'light'
+        }, '*');
+        
+        this.iframe.contentWindow.postMessage({
+          type: 'INIT_CRM_BRIDGE',
+          data: initMessage.data
+        }, '*');
+      }
+    }, 500);
   }
 
   // Public API methods
