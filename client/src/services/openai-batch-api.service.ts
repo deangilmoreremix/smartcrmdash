@@ -506,11 +506,11 @@ Provide: likely social media platforms, professional interests, content engageme
   // Data fetching methods (integrate with your existing services)
   private async getContactsById(contactIds: string[]): Promise<any[]> {
     // Use your existing contact service
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
     const contacts = [];
     for (const id of contactIds) {
       try {
-        const contact = await contactAPI.getContact(id);
+        const contact = await contactAPIService.getContact(id);
         contacts.push(contact);
       } catch (error) {
         logger.warn(`Could not fetch contact ${id}`, { error });
@@ -521,13 +521,13 @@ Provide: likely social media platforms, professional interests, content engageme
 
   private async getDealsById(dealIds: string[]): Promise<any[]> {
     // Use your existing deal service
-    const { dealService } = await import('./dealService');
+    const { dealService } = await import('./dealService-updated');
     return await dealService.getDealsById(dealIds);
   }
 
   // Result processing methods
   private async updateContactsWithEnrichment(results: any[]): Promise<void> {
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
@@ -545,7 +545,7 @@ Provide: likely social media platforms, professional interests, content engageme
           const enrichmentData = JSON.parse(result.response.choices[0].message.content);
 
           // Update contact with enrichment data
-          await contactAPI.updateContact(contactId, {
+          await contactAPIService.updateContact(contactId, {
             [`ai_${analysisType}_analysis`]: enrichmentData,
             lastEnriched: new Date().toISOString()
           });
@@ -578,7 +578,7 @@ Provide: likely social media platforms, professional interests, content engageme
   }
 
   private async updateDealsWithAnalysis(results: any[]): Promise<void> {
-    const { dealService } = await import('./dealService');
+    const { dealService } = await import('./dealService-updated');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
@@ -608,7 +608,7 @@ Provide: likely social media platforms, professional interests, content engageme
   }
 
   private async updateContactsWithSocialInsights(results: any[]): Promise<void> {
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
@@ -624,7 +624,7 @@ Provide: likely social media platforms, professional interests, content engageme
         try {
           const socialInsights = JSON.parse(result.response.choices[0].message.content);
 
-          await contactAPI.updateContact(contactId, {
+          await contactAPIService.updateContact(contactId, {
             socialInsights: socialInsights,
             lastSocialResearch: new Date().toISOString()
           });
