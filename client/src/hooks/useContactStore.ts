@@ -175,7 +175,7 @@ export const useContactStore = create<ContactStore>((set, get) => ({
       updatedAt: new Date('2024-01-25')
     }
   },
-  isLoading: false,
+  isLoading: false, // Start as false so dashboard renders immediately
   error: null,
   searchTerm: '',
   statusFilter: 'all',

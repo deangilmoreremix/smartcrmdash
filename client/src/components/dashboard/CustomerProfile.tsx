@@ -13,7 +13,6 @@ import {
   Globe,
   Clock
 } from 'lucide-react';
-import Avatar from '../ui/Avatar';
 
 const socialPlatforms = [
   { icon: MessageSquare, color: 'bg-green-500', name: 'WhatsApp' },
@@ -41,12 +40,14 @@ const CustomerProfile: React.FC = () => {
 
       <div className="text-center mb-6">
         <div className="relative inline-block mb-4">
-          <Avatar 
-            src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
-            alt="Eva Robinson"
-            size="xl"
-            status="online"
-          />
+          <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <img 
+              src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
+              alt="Eva Robinson"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
         </div>
         <h4 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>Eva Robinson</h4>
         <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>CEO, Inc. Alabama Machinery & Supply</p>

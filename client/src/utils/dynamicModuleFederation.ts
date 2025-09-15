@@ -89,9 +89,9 @@ class DynamicModuleFederation {
       return this.loadedContainers.get(scope)!;
     }
 
-    // Wait for the global to be available
+    // Wait for the global to be available (reduced for faster fallback)
     let retries = 0;
-    const maxRetries = 50; // 5 seconds max wait
+    const maxRetries = 20; // 2 seconds max wait
     
     console.log(`Looking for Module Federation container: ${scope}`);
     console.log('Available window properties:', Object.keys(window).filter(key => key.includes('App') || key.includes('Contact')));

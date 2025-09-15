@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutGrid, 
   Calendar as CalendarIcon, 
   Activity,
-  BarChart3
+  BarChart3,
+  Search,
+  FileText,
+  X
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -16,14 +20,99 @@ import { ActivityFeed } from '../components/ActivityFeed';
 import { TaskDetailsModal } from '../components/TaskDetailsModal';
 
 export const Tasks: React.FC = () => {
-  const { getTaskMetrics, getOverdueTasks, getTasksDueToday, getTasksDueThisWeek } = useTaskStore();
+  const { tasks, getFilteredTasks } = useTaskStore();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('board');
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
 
-  const metrics = getTaskMetrics();
-  const overdueTasks = getOverdueTasks();
-  const tasksDueToday = getTasksDueToday();
-  const tasksDueThisWeek = getTasksDueThisWeek();
+  // Handle URL parameters for dropdown navigation
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    const action = params.get('action');
+
+    // Handle tab switching from dropdown
+    if (tab && ['board', 'calendar', 'analytics', 'activity'].includes(tab)) {
+      setActiveTab(tab);
+    }
+
+    // Handle actions from dropdown
+    if (action) {
+      switch (action) {
+        case 'new':
+          setShowTaskModal(true);
+          break;
+        case 'search':
+          setShowSearchModal(true);
+          break;
+        case 'templates':
+          setShowTemplatesModal(true);
+          break;
+      }
+      // Clean up URL parameters after handling
+      navigate('/tasks', { replace: true });
+    }
+  }, [location.search, navigate]);
+
+  // Calculate metrics from tasks array
+  const allTasks = tasks || [];
+  const completedTasks = allTasks.filter(task => task.status === 'completed');
+  const pendingTasks = allTasks.filter(task => task.status === 'pending' || task.status === 'in-progress');
+  const overdueTasks = allTasks.filter(task => {
+    if (!task.dueDate) return false;
+    const dueDate = new Date(task.dueDate);
+    return dueDate < new Date() && task.status !== 'completed';
+  });
+  
+  const tasksDueToday = allTasks.filter(task => {
+    if (!task.dueDate) return false;
+    const today = new Date();
+    const dueDate = new Date(task.dueDate);
+    return dueDate.toDateString() === today.toDateString();
+  });
+
+  const tasksDueThisWeek = allTasks.filter(task => {
+    if (!task.dueDate) return false;
+    const today = new Date();
+    const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const dueDate = new Date(task.dueDate);
+    return dueDate >= today && dueDate <= weekFromNow;
+  });
+
+  const metrics = {
+    totalTasks: allTasks.length,
+    completedTasks: completedTasks.length,
+    pendingTasks: pendingTasks.length,
+    overdueTasks: overdueTasks.length,
+    completionRate: allTasks.length > 0 ? (completedTasks.length / allTasks.length) * 100 : 0,
+    productivityScore: allTasks.length > 0 ? ((completedTasks.length / allTasks.length) * 100) : 0,
+    tasksCompletedThisWeek: completedTasks.filter(task => {
+      if (!task.updatedAt) return false;
+      const updated = new Date(task.updatedAt);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      return updated >= weekAgo;
+    }).length,
+    tasksByPriority: {
+      high: allTasks.filter(t => t.priority === 'high').length,
+      medium: allTasks.filter(t => t.priority === 'medium').length,
+      low: allTasks.filter(t => t.priority === 'low').length,
+    },
+    tasksByStatus: {
+      pending: allTasks.filter(t => t.status === 'pending').length,
+      'in-progress': allTasks.filter(t => t.status === 'in-progress').length,
+      completed: allTasks.filter(t => t.status === 'completed').length,
+      cancelled: allTasks.filter(t => t.status === 'cancelled').length,
+      overdue: overdueTasks.length,
+    },
+    tasksByType: allTasks.reduce((acc: Record<string, number>, task) => {
+      const category = task.category || 'uncategorized';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {})
+  };
 
   return (
     <div className="h-full bg-gray-50 flex flex-col">
@@ -294,6 +383,71 @@ export const Tasks: React.FC = () => {
           isOpen={showTaskModal}
           onClose={() => setShowTaskModal(false)}
         />
+      )}
+
+      {/* Search Modal */}
+      {showSearchModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Search Tasks</h3>
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Search className="h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search tasks..."
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <div className="text-sm text-gray-500">
+                Search through your tasks by title, description, or category.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Templates Modal */}
+      {showTemplatesModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Task Templates</h3>
+              <button
+                onClick={() => setShowTemplatesModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              {['Follow-up Call', 'Meeting Prep', 'Project Review', 'Client Proposal'].map((template) => (
+                <button
+                  key={template}
+                  className="w-full text-left p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    setShowTemplatesModal(false);
+                    setShowTaskModal(true);
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4 text-gray-400" />
+                    <span className="font-medium">{template}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

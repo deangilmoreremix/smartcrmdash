@@ -53,7 +53,7 @@ const LiveDealAnalysis: React.FC = () => {
   };
 
   return (
-    <main className="w-full h-full overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+    <main className="h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 overflow-y-auto max-w-7xl mx-auto">
       <div className="space-y-8">
         {/* Dashboard Header */}
         <DashboardHeader 

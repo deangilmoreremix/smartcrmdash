@@ -18,9 +18,22 @@ import {
   Phone,
   RefreshCw,
   Save,
-  Play
+  Play,
+  Search,
+  Users,
+  TrendingUp,
+  Globe,
+  Linkedin,
+  Twitter,
+  Instagram,
+  Youtube,
+  Github,
+  MoreHorizontal,
+  CheckCircle
 } from 'lucide-react';
 import DemoAgentModal from './DemoAgentModal';
+import { gpt5SocialResearchService, SocialResearchResult } from '../services/gpt5SocialResearchService';
+import { useContactStore } from '../store/contactStore';
 
 interface DealDetailProps {
   dealId: string;
@@ -30,15 +43,24 @@ interface DealDetailProps {
 const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
   const { deals, updateDeal, deleteDeal } = useDealStore();
   const gemini = useGemini();
-  const deal = deals[dealId];
-  
+  const { contacts } = useContactStore();
+  const deal = deals[dealId] || null;
+
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [dealAnalysis, setDealAnalysis] = useState<string | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  
+
+  // Social research state
+  const [socialResearch, setSocialResearch] = useState<SocialResearchResult | null>(null);
+  const [isLoadingSocial, setIsLoadingSocial] = useState(false);
+  const [showSocialInsights, setShowSocialInsights] = useState(false);
+
+  // Determine theme for styling
+  const isDark = false; // Replace with actual theme context if available
+
   const [editForm, setEditForm] = useState({
     title: deal.title,
     value: deal.value,
@@ -50,19 +72,19 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
     notes: deal.notes || '',
     nextSteps: deal.nextSteps?.join('\n') || ''
   });
-  
+
   const handleEdit = () => {
     setIsEditing(true);
   };
-  
+
   const handleSave = async () => {
     setIsSaving(true);
-    
+
     const nextStepsArray = editForm.nextSteps
       .split('\n')
       .map(step => step.trim())
       .filter(step => step.length > 0);
-    
+
     const updatedDeal = {
       ...deal,
       title: editForm.title,
@@ -75,26 +97,26 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
       notes: editForm.notes,
       nextSteps: nextStepsArray
     };
-    
+
     await updateDeal(dealId, updatedDeal);
     setIsEditing(false);
     setIsSaving(false);
   };
-  
+
   const handleDelete = async () => {
     if (!isDeleting) {
       setIsDeleting(true);
       return;
     }
-    
+
     await deleteDeal(dealId);
     onClose();
   };
-  
+
   const cancelDelete = () => {
     setIsDeleting(false);
   };
-  
+
   const getStageColor = (stage: string) => {
     switch(stage) {
       case 'qualification': return 'bg-blue-100 text-blue-800';
@@ -105,7 +127,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   const getPriorityColor = (priority?: string) => {
     switch(priority) {
       case 'high': return 'bg-red-100 text-red-800';
@@ -114,7 +136,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   const getStageName = (stage: string) => {
     switch(stage) {
       case 'qualification': return 'Qualification';
@@ -125,15 +147,15 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
       default: return stage;
     }
   };
-  
+
   const generateDealAnalysis = async () => {
     setIsAnalyzing(true);
-    
+
     try {
       // In a real implementation, we would use the Gemini API
       // For demo purposes we'll generate a simulated response
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const analysis = `# Strategic Deal Analysis
 
 ## Projected Win Probability: ${deal.probability || 'N/A'}%
@@ -147,7 +169,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
 - Competitive pressure from ${Math.random() > 0.5 ? 'established vendors' : 'new market entrants'}
 - Budget approval process may delay decision
 - Decision committee has expanded recently
-      
+
 ### Recommended Actions:
 1. Schedule technical deep dive with IT stakeholders
 2. Develop detailed ROI analysis showing 12-month payback
@@ -159,7 +181,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
 - Average time in this stage: 14 days
 - Recommended close date acceleration strategies available
       `;
-      
+
       setDealAnalysis(analysis);
     } catch (error) {
       console.error('Error generating deal analysis:', error);
@@ -172,9 +194,35 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
   const handleOpenDemo = () => {
     setShowDemoModal(true);
   };
-  
+
+  // Social research loading function
+  const loadSocialResearch = async () => {
+    const contact = deal?.contactId ? contacts[deal.contactId] : null;
+    if (!deal?.contactId || !contact) return;
+
+    setIsLoadingSocial(true);
+    try {
+      // Convert contact to match expected type
+      const contactForResearch = {
+        ...contact,
+        lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+      };
+      const research = await gpt5SocialResearchService.researchContactSocialMedia(
+        contactForResearch,
+        ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+        'comprehensive'
+      );
+      setSocialResearch(research);
+      setShowSocialInsights(true);
+    } catch (error) {
+      console.error('Social research failed:', error);
+    } finally {
+      setIsLoadingSocial(false);
+    }
+  };
+
   if (!deal) return null;
-  
+
   return (
     <div className="fixed inset-0 overflow-hidden z-50" aria-labelledby="deal-detail" role="dialog">
       <div className="absolute inset-0 overflow-hidden">
@@ -186,6 +234,16 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
               <div className="px-6 py-6 border-b border-gray-200 flex items-start justify-between">
                 <h2 className="text-lg font-medium text-gray-900">Deal Details</h2>
                 <div className="flex items-center space-x-3">
+                  {/* Social Research Button */}
+                  <button 
+                    onClick={loadSocialResearch}
+                    disabled={isLoadingSocial}
+                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors disabled:opacity-50 text-sm"
+                  >
+                    <Search size={14} className="mr-1" />
+                    {isLoadingSocial ? 'Researching...' : 'Social Research'}
+                  </button>
+
                   {!isEditing && (
                     <>
                       <button
@@ -211,7 +269,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Body */}
               <div className="flex-1 p-6">
                 {isEditing ? (
@@ -226,7 +284,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="company" className="block text-sm font-medium text-gray-700">Company</label>
@@ -238,7 +296,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="contact" className="block text-sm font-medium text-gray-700">Contact Person</label>
                         <input
@@ -250,7 +308,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="value" className="block text-sm font-medium text-gray-700">Value ($)</label>
@@ -262,7 +320,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           onChange={(e) => setEditForm({ ...editForm, value: parseFloat(e.target.value) || 0 })}
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Expected Close Date</label>
                         <input
@@ -274,7 +332,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="probability" className="block text-sm font-medium text-gray-700">Win Probability (%)</label>
@@ -288,7 +346,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           onChange={(e) => setEditForm({ ...editForm, probability: parseFloat(e.target.value) || 0 })}
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="priority" className="block text-sm font-medium text-gray-700">Priority</label>
                         <select
@@ -303,7 +361,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         </select>
                       </div>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
                       <textarea
@@ -314,7 +372,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="nextSteps" className="block text-sm font-medium text-gray-700">Next Steps (one per line)</label>
                       <textarea
@@ -325,7 +383,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         onChange={(e) => setEditForm({ ...editForm, nextSteps: e.target.value })}
                       ></textarea>
                     </div>
-                    
+
                     <div className="flex justify-end space-x-3 pt-2">
                       <button
                         type="button"
@@ -378,7 +436,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="space-y-6">
                       <div>
                         <h1 className="text-2xl font-bold text-gray-900">{deal.title}</h1>
@@ -386,7 +444,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStageColor(deal.stage)}`}>
                             {getStageName(deal.stage)}
                           </span>
-                          
+
                           {deal.priority && (
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(deal.priority)}`}>
                               <Tag size={10} className="mr-1" />
@@ -395,7 +453,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4 border-t border-gray-200 pt-4">
                         <div>
                           <p className="text-sm text-gray-500">Company</p>
@@ -412,7 +470,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4 border-t border-gray-200 pt-4">
                         <div>
                           <p className="text-sm text-gray-500">Deal Value</p>
@@ -433,7 +491,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="border-t border-gray-200 pt-4">
                         <p className="text-sm text-gray-500 mb-2">Win Probability</p>
                         <div className="flex items-center">
@@ -448,14 +506,14 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           <p className="text-sm font-semibold text-gray-900 min-w-[40px]">{deal.probability || 0}%</p>
                         </div>
                       </div>
-                      
+
                       {deal.notes && (
                         <div className="border-t border-gray-200 pt-4">
                           <p className="text-sm text-gray-500 mb-2">Notes</p>
                           <p className="text-sm text-gray-900 whitespace-pre-line">{deal.notes}</p>
                         </div>
                       )}
-                      
+
                       {deal.nextSteps && deal.nextSteps.length > 0 && (
                         <div className="border-t border-gray-200 pt-4">
                           <p className="text-sm text-gray-500 mb-2">Next Steps</p>
@@ -471,7 +529,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           </ul>
                         </div>
                       )}
-                      
+
                       <div className="border-t border-gray-200 pt-4">
                         <div className="flex justify-between items-center mb-4">
                           <p className="text-sm font-medium text-gray-900">AI Deal Analysis</p>
@@ -493,7 +551,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                             )}
                           </button>
                         </div>
-                        
+
                         {dealAnalysis ? (
                           <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-3">
                             <div className="prose prose-sm max-w-none">
@@ -535,7 +593,7 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="border-t border-gray-200 pt-4 mt-6">
                         <p className="text-sm font-medium text-gray-900 mb-3">Quick Actions</p>
                         <div className="flex flex-wrap gap-2">
@@ -565,6 +623,163 @@ const DealDetail: React.FC<DealDetailProps> = ({ dealId, onClose }) => {
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* Social Media Research Insights Panel */}
+                {showSocialInsights && socialResearch && (
+                  <div className={`mt-8 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Social Media Intelligence
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm px-3 py-1 rounded-full ${
+                          isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-800'
+                        }`}>
+                          Confidence: {socialResearch.confidenceScore}%
+                        </span>
+                        <button
+                          onClick={() => setShowSocialInsights(false)}
+                          className={`text-gray-400 hover:text-gray-600 ${isDark ? 'hover:text-gray-300' : ''}`}
+                        >
+                          <MoreHorizontal className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Social Profiles Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                      {socialResearch.profiles.slice(0, 6).map((profile, index) => {
+                        const IconComponent = {
+                          'LinkedIn': Linkedin,
+                          'Twitter': Twitter,
+                          'Instagram': Instagram,
+                          'YouTube': Youtube,
+                          'GitHub': Github
+                        }[profile.platform] || Globe;
+
+                        return (
+                          <div key={index} className={`p-4 rounded-lg ${
+                            isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                          }`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <IconComponent className="h-4 w-4 text-blue-500" />
+                                <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {profile.platform}
+                                </span>
+                              </div>
+                              {profile.verified && (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              )}
+                            </div>
+                            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              @{profile.username}
+                            </p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                {profile.followers?.toLocaleString()} followers
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                profile.confidence > 80 
+                                  ? (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-800')
+                                  : profile.confidence > 60
+                                  ? (isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-800')
+                                  : (isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-800')
+                              }`}>
+                                {profile.confidence}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Show all profiles if more than 6 */}
+                    {socialResearch.profiles.length > 6 && (
+                      <button className={`text-sm ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} mb-6`}>
+                        + {socialResearch.profiles.length - 6} more profiles
+                      </button>
+                    )}
+
+                    {/* Personality Insights */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className={`p-4 rounded-lg ${
+                        isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                      }`}>
+                        <h4 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          <Users className="h-4 w-4 mr-2 text-purple-500" />
+                          Personality Insights
+                        </h4>
+                        <div className="space-y-2">
+                          {Object.entries(socialResearch.personalityInsights.traits).slice(0, 3).map(([trait, description]) => (
+                            <div key={trait}>
+                              <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {trait}:
+                              </span>
+                              <span className={`text-sm ml-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {description}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-lg ${
+                        isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                      }`}>
+                        <h4 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
+                          Engagement Metrics
+                        </h4>
+                        <div className="space-y-2">
+                          <div>
+                            <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              Avg. Engagement:
+                            </span>
+                            <span className={`text-sm ml-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {socialResearch.engagementMetrics.averageEngagement}%
+                            </span>
+                          </div>
+                          <div>
+                            <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              Best Times:
+                            </span>
+                            <span className={`text-sm ml-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {socialResearch.engagementMetrics.bestPostingTimes.join(', ')}
+                            </span>
+                          </div>
+                          <div>
+                            <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              Preferred Content:
+                            </span>
+                            <span className={`text-sm ml-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {socialResearch.engagementMetrics.preferredContentTypes.slice(0, 2).join(', ')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Recommendations */}
+                    {socialResearch.monitoringRecommendations.length > 0 && (
+                      <div className={`mt-6 p-4 rounded-lg ${
+                        isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'
+                      }`}>
+                        <h4 className={`font-semibold mb-2 flex items-center ${isDark ? 'text-blue-400' : 'text-blue-800'}`}>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Recommended Actions
+                        </h4>
+                        <ul className="space-y-1">
+                          {socialResearch.monitoringRecommendations.slice(0, 3).map((recommendation, index) => (
+                            <li key={index} className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                              • {recommendation}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

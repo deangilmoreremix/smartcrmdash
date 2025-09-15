@@ -247,6 +247,28 @@ class ValidationService {
       notes: this.sanitizeString(contact.notes),
     };
   }
+
+  sanitizeDeal(deal: any): any {
+    return {
+      ...deal,
+      title: deal.title ? this.sanitizeString(deal.title) : '',
+      description: deal.description ? this.sanitizeString(deal.description) : '',
+      contactName: deal.contactName ? this.sanitizeString(deal.contactName) : '',
+      company: deal.company ? this.sanitizeString(deal.company) : '',
+      assigneeName: deal.assigneeName ? this.sanitizeString(deal.assigneeName) : '',
+      value: typeof deal.value === 'number' ? deal.value : 0,
+      probability: typeof deal.probability === 'number' ? Math.max(0, Math.min(100, deal.probability)) : 0,
+      stage: deal.stage ? this.sanitizeString(deal.stage) : 'discovery',
+      status: deal.status ? this.sanitizeString(deal.status) : 'active',
+      priority: deal.priority ? this.sanitizeString(deal.priority) : 'medium',
+      tags: Array.isArray(deal.tags) ? deal.tags.map((tag: any) => this.sanitizeString(tag)).filter(Boolean) : [],
+      contactId: deal.contactId ? this.sanitizeString(deal.contactId) : '',
+      assigneeId: deal.assigneeId ? this.sanitizeString(deal.assigneeId) : '',
+      expectedCloseDate: deal.expectedCloseDate,
+      aiScore: typeof deal.aiScore === 'number' ? Math.max(0, Math.min(100, deal.aiScore)) : undefined,
+      activities: Array.isArray(deal.activities) ? deal.activities : []
+    };
+  }
 }
 
 export const validationService = new ValidationService();

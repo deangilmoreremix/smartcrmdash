@@ -1,464 +1,483 @@
-import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { useTheme } from '../contexts/ThemeContext';
+import { 
+  DollarSign, 
+  Users, 
+  TrendingUp, 
+  Calendar,
+  ArrowUpRight,
+  Target,
+  Award,
+  CreditCard,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface PartnerStats {
-  totalCustomers: number;
-  activeCustomers: number;
-  totalRevenue: number;
-  monthlyRevenue: number;
-  customerGrowthRate: number;
+  partnerId: string;
+  totalRevenue: string;
+  totalCommissions: string;
+  customerCount: number;
+  conversionRate: number;
+  monthlyGrowth: number;
+  tier: string;
+  commissionRate: string;
+  status: string;
 }
 
-interface Customer {
+interface Commission {
   id: string;
-  name: string;
-  subdomain: string;
-  status: 'active' | 'trial' | 'suspended';
-  plan: 'basic' | 'pro' | 'enterprise';
-  monthlyRevenue: number;
+  amount: string;
+  status: string;
   createdAt: string;
-  lastActive: string;
+  description: string;
 }
 
 export default function PartnerDashboard() {
-  const [stats, setStats] = useState<PartnerStats | null>(null);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const { isDark } = useTheme();
+  const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
-  useEffect(() => {
-    fetchPartnerData();
-  }, []);
+  // In a real app, this would be the logged-in partner's ID
+  const partnerId = 'partner-001';
 
-  const fetchPartnerData = async () => {
-    try {
-      // Get partner ID from URL or context
-      const partnerId = getPartnerIdFromUrl();
-      
-      if (partnerId) {
-        // Fetch stats
-        const statsResponse = await fetch(`/api/partners/${partnerId}/stats`);
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          setStats(statsData);
-        }
+  const { data: partnerStats, isLoading: statsLoading } = useQuery<PartnerStats>({
+    queryKey: [`/api/partners/${partnerId}/stats`],
+    refetchInterval: 30000,
+  });
 
-        // Fetch customers
-        const customersResponse = await fetch(`/api/partners/${partnerId}/customers`);
-        if (customersResponse.ok) {
-          const customersData = await customersResponse.json();
-          setCustomers(customersData);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch partner data:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { data: commissions, isLoading: commissionsLoading } = useQuery<Commission[]>({
+    queryKey: [`/api/partners/${partnerId}/commissions`],
+    refetchInterval: 30000,
+  });
+
+  const { data: customers, isLoading: customersLoading } = useQuery<any[]>({
+    queryKey: [`/api/partners/${partnerId}/customers`],
+    refetchInterval: 30000,
+  });
+
+  const formatCurrency = (amount: string | number) => {
+    const value = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(value);
   };
 
-  const getPartnerIdFromUrl = (): string | null => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('partnerId') || localStorage.getItem('partnerId');
+  const formatPercentage = (value: number) => {
+    return `${(value * 100).toFixed(1)}%`;
   };
 
-  const createNewCustomer = async () => {
-    const partnerId = getPartnerIdFromUrl();
-    if (!partnerId) return;
-
-    const customerData = {
-      companyName: prompt('Customer Company Name:'),
-      contactEmail: prompt('Customer Email:'),
-      plan: 'basic'
+  const getTierBadgeColor = (tier: string) => {
+    const colors = {
+      bronze: 'bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-800',
+      silver: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700',
+      gold: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+      platinum: 'bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800',
     };
-
-    if (customerData.companyName && customerData.contactEmail) {
-      try {
-        const response = await fetch(`/api/partners/${partnerId}/customers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(customerData),
-        });
-
-        if (response.ok) {
-          fetchPartnerData(); // Refresh data
-          alert('Customer created successfully!');
-        }
-      } catch (error) {
-        alert('Failed to create customer');
-      }
-    }
+    return colors[tier as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
   };
 
-  // Sample chart data
-  const revenueData = [
-    { month: 'Jan', revenue: 4000, customers: 10 },
-    { month: 'Feb', revenue: 6000, customers: 15 },
-    { month: 'Mar', revenue: 8000, customers: 22 },
-    { month: 'Apr', revenue: 10000, customers: 28 },
-    { month: 'May', revenue: 12000, customers: 35 },
-    { month: 'Jun', revenue: 14000, customers: 42 },
-  ];
+  const getStatusBadgeColor = (status: string) => {
+    const colors = {
+      active: 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800',
+      pending: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+      suspended: 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
+      terminated: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700',
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
+  };
 
-  const planDistribution = [
-    { name: 'Basic', value: 60, color: '#8884d8' },
-    { name: 'Pro', value: 30, color: '#82ca9d' },
-    { name: 'Enterprise', value: 10, color: '#ffc658' },
-  ];
-
-  if (isLoading) {
+  if (statsLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading partner dashboard...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse bg-white dark:bg-gray-800">
+              <CardHeader className="pb-2">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6" data-testid="partner-dashboard">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Partner Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                Manage your white-label customers and track performance
-              </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Partner Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">Monitor your performance and earnings</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {partnerStats && (
+            <div className="flex items-center gap-2">
+              <Badge className={getTierBadgeColor(partnerStats.tier)}>
+                {partnerStats.tier.toUpperCase()} TIER
+              </Badge>
+              <Badge className={getStatusBadgeColor(partnerStats.status)}>
+                {partnerStats.status.toUpperCase()}
+              </Badge>
             </div>
-            <button
-              onClick={createNewCustomer}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Customer
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'overview', label: 'Overview', icon: BarChart },
-              { id: 'customers', label: 'Customers', icon: Users },
-              { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-              { id: 'settings', label: 'Settings', icon: Settings },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card data-testid="total-revenue-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(partnerStats?.totalRevenue || '0')}
+            </div>
+            <div className="text-xs text-green-600 flex items-center gap-1">
+              <ArrowUpRight className="h-3 w-3" />
+              {formatPercentage(partnerStats?.monthlyGrowth || 0)} this month
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <Users className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Total Customers
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats?.totalCustomers || 42}
-                    </p>
-                  </div>
-                </div>
+        <Card data-testid="total-commissions-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Commissions</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(partnerStats?.totalCommissions || '0')}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {formatPercentage(parseFloat(partnerStats?.commissionRate || '0') / 100)} commission rate
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="customer-count-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{partnerStats?.customerCount || 0}</div>
+            <div className="text-xs text-muted-foreground">
+              Conversion: {formatPercentage(partnerStats?.conversionRate || 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="next-tier-card">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Next Tier Progress</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="text-sm font-medium">
+                {partnerStats?.tier === 'bronze' ? 'Silver Tier' : 
+                 partnerStats?.tier === 'silver' ? 'Gold Tier' : 
+                 partnerStats?.tier === 'gold' ? 'Platinum Tier' : 'Max Tier'}
               </div>
-
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <Building2 className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Active Customers
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats?.activeCustomers || 38}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <DollarSign className="h-8 w-8 text-yellow-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Monthly Revenue
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      ${stats?.monthlyRevenue?.toLocaleString() || '14,200'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Growth Rate
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      +{stats?.customerGrowthRate || 23}%
-                    </p>
-                  </div>
-                </div>
+              <Progress 
+                value={
+                  partnerStats?.tier === 'bronze' ? 60 : 
+                  partnerStats?.tier === 'silver' ? 40 : 
+                  partnerStats?.tier === 'gold' ? 80 : 100
+                } 
+                className="h-2" 
+              />
+              <div className="text-xs text-muted-foreground">
+                {partnerStats?.tier === 'bronze' ? '$3,500 more needed' : 
+                 partnerStats?.tier === 'silver' ? '$7,500 more needed' : 
+                 partnerStats?.tier === 'gold' ? '$35,000 more needed' : 'Achieved!'}
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Revenue Chart */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Revenue & Customer Growth
-                </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} />
-                    <Line type="monotone" dataKey="customers" stroke="#10B981" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+      {/* Main Content */}
+      <Tabs value="overview" className="space-y-6">
+        <TabsList data-testid="dashboard-tabs">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="commissions">Commissions</TabsTrigger>
+          <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="resources">Resources</TabsTrigger>
+        </TabsList>
 
-              {/* Plan Distribution */}
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Plan Distribution
-                </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={planDistribution}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {planDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Recent Performance */}
+            <Card className="lg:col-span-2" data-testid="performance-chart-card">
+              <CardHeader>
+                <CardTitle>Recent Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <div className="font-medium">This Month</div>
+                      <div className="text-sm text-gray-500">Revenue Generated</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatCurrency(partnerStats?.totalRevenue || '0')}
+                      </div>
+                      <div className="text-sm text-green-600">
+                        +{formatPercentage(partnerStats?.monthlyGrowth || 0)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <div className="font-medium">Commission Earned</div>
+                      <div className="text-sm text-gray-500">This Month</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(partnerStats?.totalCommissions || '0')}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {formatPercentage(parseFloat(partnerStats?.commissionRate || '0') / 100)} rate
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <div className="font-medium">Customer Growth</div>
+                      <div className="text-sm text-gray-500">Active Customers</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">
+                        {partnerStats?.customerCount || 0}
+                      </div>
+                      <div className="text-sm text-green-600">
+                        +15% growth
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tier Benefits */}
+            <Card data-testid="tier-benefits-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Your Tier Benefits
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <Badge className={getTierBadgeColor(partnerStats?.tier || 'bronze')}>
+                    {(partnerStats?.tier || 'Bronze').toUpperCase()} PARTNER
+                  </Badge>
+                  <div className="text-2xl font-bold mt-2">
+                    {formatPercentage(parseFloat(partnerStats?.commissionRate || '0') / 100)}
+                  </div>
+                  <div className="text-sm text-gray-500">Commission Rate</div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Basic CRM Access
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Email Support
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    Partner Portal
+                  </div>
+                  {partnerStats?.tier !== 'bronze' && (
+                    <>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Priority Support
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Custom Branding
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <Button className="w-full" variant="outline" data-testid="upgrade-tier-button">
+                  Upgrade Tier
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="commissions" className="space-y-6">
+          <Card data-testid="commissions-table-card">
+            <CardHeader>
+              <CardTitle>Commission History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {commissionsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : commissions && commissions.length > 0 ? (
+                <div className="space-y-4">
+                  {commissions.map((commission) => (
+                    <div key={commission.id} className="flex justify-between items-center p-4 border rounded-lg">
+                      <div>
+                        <div className="font-medium">{commission.description}</div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(commission.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-green-600">
+                          +{formatCurrency(commission.amount)}
+                        </div>
+                        <Badge 
+                          className={commission.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                        >
+                          {commission.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Commissions Yet</h3>
+                  <p className="text-gray-600">Your commission history will appear here once you start earning.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="customers" className="space-y-6">
+          <Card data-testid="customers-table-card">
+            <CardHeader>
+              <CardTitle>Your Customers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {customersLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : customers && customers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-4">Customer</th>
+                        <th className="text-left p-4">Email</th>
+                        <th className="text-left p-4">Status</th>
+                        <th className="text-right p-4">Value</th>
+                        <th className="text-right p-4">Joined</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.map((customer) => (
+                        <tr key={customer.id} className="border-b hover:bg-gray-50">
+                          <td className="p-4 font-medium">{customer.name}</td>
+                          <td className="p-4 text-gray-600">{customer.email}</td>
+                          <td className="p-4">
+                            <Badge className="bg-green-100 text-green-800">
+                              {customer.status}
+                            </Badge>
+                          </td>
+                          <td className="text-right p-4 font-semibold">
+                            {formatCurrency(customer.value)}
+                          </td>
+                          <td className="text-right p-4 text-gray-600">
+                            {new Date(customer.acquisitionDate).toLocaleDateString()}
+                          </td>
+                        </tr>
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Customers Tab */}
-        {activeTab === 'customers' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Customer List
-                </h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Company
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Subdomain
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Plan
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Revenue
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {customers.length > 0 ? customers.map((customer) => (
-                      <tr key={customer.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                          {customer.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                          {customer.subdomain}.smartcrm.com
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            customer.plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                            customer.plan === 'pro' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {customer.plan}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            customer.status === 'active' ? 'bg-green-100 text-green-800' :
-                            customer.status === 'trial' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {customer.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          ${customer.monthlyRevenue}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex gap-2">
-                            <button className="text-blue-600 hover:text-blue-900 flex items-center gap-1">
-                              <Eye className="h-4 w-4" />
-                              View
-                            </button>
-                            <button className="text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                              <Edit className="h-4 w-4" />
-                              Edit
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-300">
-                          No customers found. Create your first customer to get started!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Analytics Tab */}
-        {activeTab === 'analytics' && (
-          <div className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Customer Activity Trends
-              </h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="customers" fill="#3B82F6" />
-                  <Bar dataKey="revenue" fill="#10B981" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow text-center">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Average Revenue Per Customer
-                </h4>
-                <p className="text-3xl font-bold text-blue-600">$338</p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow text-center">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Customer Retention Rate
-                </h4>
-                <p className="text-3xl font-bold text-green-600">94%</p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow text-center">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Churn Rate
-                </h4>
-                <p className="text-3xl font-bold text-red-600">2.1%</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Partner Settings
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Your Company Name"
-                  />
+                    </tbody>
+                  </table>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Contact Email
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="partner@company.com"
-                  />
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Customers Yet</h3>
+                  <p className="text-gray-600">Start referring customers to build your revenue stream.</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Revenue Share Percentage
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="30"
-                    min="0"
-                    max="100"
-                  />
-                </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                  Update Settings
-                </button>
-              </div>
-            </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="resources" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card data-testid="marketing-materials-card">
+              <CardHeader>
+                <CardTitle>Marketing Materials</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full justify-start" data-testid="download-brochures-button">
+                  Download Brochures
+                </Button>
+                <Button variant="outline" className="w-full justify-start" data-testid="get-referral-links-button">
+                  Get Referral Links
+                </Button>
+                <Button variant="outline" className="w-full justify-start" data-testid="access-logos-button">
+                  Access Brand Assets
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="support-card">
+              <CardHeader>
+                <CardTitle>Partner Support</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full justify-start" data-testid="contact-support-button">
+                  Contact Support
+                </Button>
+                <Button variant="outline" className="w-full justify-start" data-testid="view-training-button">
+                  Training Resources
+                </Button>
+                <Button variant="outline" className="w-full justify-start" data-testid="partner-community-button">
+                  Partner Community
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

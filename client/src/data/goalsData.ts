@@ -1,4 +1,4 @@
-import { GoalCategory } from '../types/goals';
+import { GoalCategory, Goal } from '../types/goals';
 import { 
   Target, 
   Mail, 

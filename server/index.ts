@@ -2,15 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Diagnostic logging for environment variables
-console.log('=== SERVER STARTUP DIAGNOSTICS ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('SUPABASE_URL configured:', !!process.env.SUPABASE_URL);
-console.log('SUPABASE_SERVICE_ROLE_KEY configured:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-console.log('OPENAI_API_KEY configured:', !!process.env.OPENAI_API_KEY);
-console.log('PORT from env:', process.env.PORT);
-console.log('=== END DIAGNOSTICS ===');
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -46,38 +37,47 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    log('🚀 Starting server...');
+    
+    const server = await registerRoutes(app);
+    log('✅ Routes registered successfully');
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
-  });
+      log(`❌ Server error: ${status} - ${message}`);
+      res.status(status).json({ message });
+    });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      log('🔧 Setting up Vite in development mode...');
+      await setupVite(app, server);
+      log('✅ Vite setup complete');
+    } else {
+      log('📦 Serving static files in production mode...');
+      serveStatic(app);
+    }
+
+    // ALWAYS serve the app on port 5000
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`🎉 Server running on port ${port}`);
+      log(`🌐 Access your app at: http://localhost:${port}`);
+    });
+
+  } catch (error) {
+    console.error('💥 Failed to start server:', error);
+    process.exit(1);
   }
-
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  console.log(`Attempting to start server on port ${port}...`);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    console.log(`✅ Server successfully started and listening on port ${port}`);
-    log(`serving on port ${port}`);
-  }).on('error', (error) => {
-    console.error(`❌ Failed to start server on port ${port}:`, error);
-  });
 })();

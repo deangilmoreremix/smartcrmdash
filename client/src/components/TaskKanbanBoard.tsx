@@ -238,7 +238,9 @@ export const TaskKanbanBoard: React.FC = () => {
 
   // Update search filter when search term changes
   useEffect(() => {
-    setFilters({ searchTerm: searchTerm || undefined });
+    if (setFilters) {
+      setFilters({ searchTerm: searchTerm || undefined });
+    }
   }, [searchTerm, setFilters]);
 
   const handleDragEnd = async (result: DropResult) => {
@@ -319,14 +321,16 @@ export const TaskKanbanBoard: React.FC = () => {
               {(['low', 'medium', 'high', 'urgent'] as const).map((priority) => (
                 <DropdownMenuCheckboxItem
                   key={priority}
-                  checked={filters.priorities?.includes(priority)}
+                  checked={filters?.priorities?.includes(priority) || false}
                   onCheckedChange={(checked) => {
-                    const priorities = filters.priorities || [];
-                    setFilters({
-                      priorities: checked
-                        ? [...priorities, priority]
-                        : priorities.filter(p => p !== priority)
-                    });
+                    const priorities = filters?.priorities || [];
+                    if (setFilters) {
+                      setFilters({
+                        priorities: checked
+                          ? [...priorities, priority]
+                          : priorities.filter(p => p !== priority)
+                      });
+                    }
                   }}
                 >
                   <span className="capitalize">{priority}</span>
@@ -336,22 +340,22 @@ export const TaskKanbanBoard: React.FC = () => {
               <DropdownMenuSeparator />
               
               <DropdownMenuCheckboxItem
-                checked={filters.isOverdue || false}
-                onCheckedChange={(checked) => setFilters({ isOverdue: checked })}
+                checked={filters?.isOverdue || false}
+                onCheckedChange={(checked) => setFilters && setFilters({ isOverdue: checked })}
               >
                 Overdue Tasks
               </DropdownMenuCheckboxItem>
               
               <DropdownMenuCheckboxItem
-                checked={filters.isDueToday || false}
-                onCheckedChange={(checked) => setFilters({ isDueToday: checked })}
+                checked={filters?.isDueToday || false}
+                onCheckedChange={(checked) => setFilters && setFilters({ isDueToday: checked })}
               >
                 Due Today
               </DropdownMenuCheckboxItem>
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem onClick={() => setFilters({})}>
+              <DropdownMenuItem onClick={() => setFilters && setFilters({})}>
                 Clear All Filters
               </DropdownMenuItem>
             </DropdownMenuContent>

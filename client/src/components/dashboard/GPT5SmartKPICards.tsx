@@ -33,16 +33,22 @@ const GPT5SmartKPICards: React.FC = () => {
 
     // Base calculations
     const totalPipelineValue = dealsArray.reduce((sum, deal) => sum + Number(deal.value || 0), 0);
-    const activeDeals = dealsArray.filter(d => d.stage !== 'won' && d.stage !== 'lost' && d.stage !== 'closed-won' && d.stage !== 'closed-lost');
-    const wonDeals = dealsArray.filter(d => d.stage === 'won' || d.stage === 'closed-won');
+    const activeDeals = dealsArray.filter(d => {
+      const stageId = typeof d.stage === 'string' ? d.stage : d.stage?.id;
+      return stageId !== 'won' && stageId !== 'lost' && stageId !== 'closed-won' && stageId !== 'closed-lost';
+    });
+    const wonDeals = dealsArray.filter(d => {
+      const stageId = typeof d.stage === 'string' ? d.stage : d.stage?.id;
+      return stageId === 'won' || stageId === 'closed-won';
+    });
     const winRate = dealsArray.length > 0 ? (wonDeals.length / dealsArray.length) * 100 : 0;
     const avgDealSize = activeDeals.length > 0 ? totalPipelineValue / activeDeals.length : 0;
 
     setIsAnalyzing(true);
 
     try {
-      // GPT-5 Enhanced Analysis
-      const kpiAnalysis = await gpt5Service.analyzeKPITrends(
+      // GPT-5 Enhanced Analysis with timeout
+      const kpiAnalysisPromise = gpt5Service.analyzeKPITrends(
         {
           historical_pipeline_value: totalPipelineValue * 0.85, // Simulated historical
           historical_win_rate: winRate * 0.92,
@@ -56,6 +62,13 @@ const GPT5SmartKPICards: React.FC = () => {
         }
       );
 
+      // Add timeout to prevent dashboard blocking
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Analysis timeout')), 3000)
+      );
+
+      const kpiAnalysis = await Promise.race([kpiAnalysisPromise, timeoutPromise]);
+
       const smartMetrics: SmartKPIMetric[] = [
         {
           title: 'Pipeline Value',
@@ -63,9 +76,9 @@ const GPT5SmartKPICards: React.FC = () => {
           change: 15.2,
           changeType: 'increase',
           icon: DollarSign,
-          description: 'Total pipeline value (GPT-5 analyzed)',
-          aiInsight: kpiAnalysis?.summary?.includes('pipeline') ? 
-            kpiAnalysis.summary : 'Strong pipeline momentum detected',
+          description: 'Total pipeline value (AI analyzed)',
+          aiInsight: typeof (kpiAnalysis as any)?.summary === 'string' && (kpiAnalysis as any)?.summary?.includes('pipeline') ? 
+            (kpiAnalysis as any).summary : 'Strong pipeline momentum detected',
           confidence: 0.92,
           prediction: `Projected: $${(totalPipelineValue * 1.25).toLocaleString()}`
         },

@@ -83,7 +83,7 @@ const Login: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <Link 
-                  to="/auth/forgot-password"
+                  to="/forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
                 >
                   Forgot Password?
@@ -97,13 +97,26 @@ const Login: React.FC = () => {
                 Sign In
               </Button>
             </form>
+            {/* Development Bypass Button */}
+            <div className="mt-4">
+              <Link to="/dev-bypass">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full border-green-500 text-green-600 hover:bg-green-50 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-900"
+                >
+                  🚀 Development Bypass Login
+                </Button>
+              </Link>
+            </div>
+            
             <div className="mt-6 text-center">
               <p className={`text-sm ${
                 isDark ? 'text-gray-400' : 'text-gray-600'
               }`}>
                 Don't have an account?{' '}
                 <Link 
-                  to="/auth/register"
+                  to="/signup"
                   className="text-blue-600 hover:text-blue-500 dark:text-blue-400"
                 >
                   Sign Up

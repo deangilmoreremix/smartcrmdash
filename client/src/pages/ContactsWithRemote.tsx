@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, Link, Wifi, WifiOff } from 'lucide-react';
 import { useContactStore } from '../hooks/useContactStore';
 import { RemoteContactsBridge, CRMContact } from '../services/remoteContactsBridge';
+import { remoteAppManager } from '../utils/remoteAppManager';
+import { universalDataSync } from '../services/universalDataSync';
 
 const ContactsWithRemote: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -28,6 +30,12 @@ const ContactsWithRemote: React.FC = () => {
   useEffect(() => {
     const bridge = new RemoteContactsBridge();
     bridgeRef.current = bridge;
+
+    // Register with universal manager
+    remoteAppManager.registerBridge('contacts', bridge);
+
+    // Initialize universal sync
+    universalDataSync.initialize();
 
     // Set up message handlers
     bridge.onMessage('REMOTE_READY', () => {

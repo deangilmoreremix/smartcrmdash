@@ -103,8 +103,8 @@ const VideoEmail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'record' | 'library'>('record');
   
-  // AI Services
-  const openai = useOpenAI();
+  // AI Services - Commented out for now to avoid dependency issues
+  // const openai = useOpenAI();
   
   // Mock recipients for demo
   const availableRecipients = [
@@ -218,19 +218,23 @@ const VideoEmail: React.FC = () => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
   
-  // Generate talking points using AI
+  // Generate talking points using AI (currently using mock data)
   const generateTalkingPoints = async () => {
     setIsGeneratingTalkingPoints(true);
     
     try {
-      const prompt = "Generate 5 key talking points for a sales video email";
-      const result = await openai.generateEmailDraft("prospect", prompt);
+      // Mock talking points for now since OpenAI service is disabled
+      const mockTalkingPoints = [
+        "Introduce yourself and company background",
+        "Highlight key product benefits and value proposition",
+        "Address potential customer pain points",
+        "Present competitive advantages and differentiators",
+        "Conclude with clear call-to-action and next steps"
+      ];
       
-      // Parse the result into talking points
-      const points = result.split('\n').filter(line => line.trim()).slice(0, 5);
-      const newTalkingPoints: TalkingPoint[] = points.map((point, index) => ({
+      const newTalkingPoints: TalkingPoint[] = mockTalkingPoints.map((point: string, index: number) => ({
         id: `point-${index}`,
-        text: point.replace(/^\d+\.?\s*/, ''), // Remove numbering
+        text: point,
         completed: false
       }));
       

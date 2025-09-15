@@ -52,13 +52,14 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
     timeLimit: 30000,
     analysisType: 'contact_scoring' as const
   });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSingleAnalysis = async () => {
     if (!contact) return;
 
     try {
       let result;
-      
+
       switch (selectedOperation) {
         case 'score':
           result = await smartScoreContact(contact.id, contact, urgency);
@@ -73,7 +74,7 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
           result = await smartQualifyLead(contact.id, contact);
           break;
       }
-      
+
       if (onAnalysisComplete && result) {
         onAnalysisComplete(result);
       }
@@ -87,13 +88,13 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
 
     try {
       const contactData = contacts.map(c => ({ contactId: c.id, contact: c }));
-      
+
       const result = await smartBulkAnalysis(contactData, bulkSettings.analysisType, {
         urgency,
         costLimit: bulkSettings.costLimit,
         timeLimit: bulkSettings.timeLimit
       });
-      
+
       if (onAnalysisComplete) {
         onAnalysisComplete(result);
       }
@@ -155,7 +156,7 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
             <BarChart3 className="w-5 h-5 mr-2 text-blue-500" />
             AI Performance Overview
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{performance.totalTasks}</div>
@@ -190,13 +191,13 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
             <Brain className="w-5 h-5 mr-2 text-purple-600" />
             Smart AI Analysis - {contact.name}
           </h3>
-          
+
           {/* Operation Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {operations.map((op) => {
               const Icon = op.icon;
               const recommendations = getRecommendationsForTask(op.id.replace('score', 'contact_scoring'));
-              
+
               return (
                 <div
                   key={op.id}
@@ -216,7 +217,7 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
                       <p className="text-sm text-gray-600">{op.description}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
                     <div className="flex items-center space-x-1">
                       <Clock className="w-3 h-3" />
@@ -227,7 +228,7 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
                       <span>{op.bestModel}</span>
                     </div>
                   </div>
-                  
+
                   {recommendations && (
                     <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
                       <strong>Recommended:</strong> {recommendations.recommendedProvider}/{recommendations.recommendedModel}
@@ -380,18 +381,51 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
             </div>
           </div>
 
-          <ModernButton
-            onClick={handleBulkAnalysis}
-            loading={analyzing}
-            className="w-full mt-6 flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600"
-          >
-            <Layers className="w-4 h-4" />
-            <span>
-              {analyzing 
-                ? `Processing ${contacts.length} contacts...` 
-                : `Analyze ${contacts.length} Contacts`}
-            </span>
-          </ModernButton>
+          <div className="flex flex-col space-y-3 mt-6">
+            <ModernButton
+              onClick={async () => {
+                setIsProcessing(true);
+                const { batchAPIService } = await import('../../services/openai-batch-api.service');
+                await batchAPIService.enrichContactsBulk(
+                  contacts.map(c => c.id), 
+                  [bulkSettings.analysisType],
+                  { processingMode: 'immediate' }
+                );
+                setIsProcessing(false);
+              }}
+              loading={isProcessing}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600"
+            >
+              <Zap className="w-4 h-4" />
+              <span>
+                {isProcessing 
+                  ? `Processing ${contacts.length} contacts...` 
+                  : `Immediate Bulk Analysis (${contacts.length} contacts)`}
+              </span>
+            </ModernButton>
+
+            <ModernButton
+              onClick={async () => {
+                setIsProcessing(true);
+                const { batchAPIService } = await import('../../services/openai-batch-api.service');
+                await batchAPIService.enrichContactsBulk(
+                  contacts.map(c => c.id), 
+                  [bulkSettings.analysisType],
+                  { processingMode: 'overnight' }
+                );
+                setIsProcessing(false);
+              }}
+              loading={isProcessing}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600"
+            >
+              <Layers className="w-4 h-4" />
+              <span>
+                {isProcessing 
+                  ? `Queueing ${contacts.length} contacts...` 
+                  : `Overnight Batch Analysis (50% off - ${contacts.length} contacts)`}
+              </span>
+            </ModernButton>
+          </div>
         </GlassCard>
       )}
 
@@ -402,7 +436,7 @@ export const SmartAIControls: React.FC<SmartAIControlsProps> = ({
             <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
             Model Performance Stats
           </h3>
-          
+
           <div className="space-y-3">
             {performance.modelPerformance.slice(0, 5).map((model: any, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

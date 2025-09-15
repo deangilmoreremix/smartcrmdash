@@ -1,5 +1,5 @@
-import React, { createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
+import { useNavigate as reactNavigate } from 'react-router-dom';
 import { useAITools } from '../components/AIToolsProvider';
 
 interface NavigationContextType {
@@ -19,14 +19,24 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { openTool } = useAITools();
-  const navigate = useNavigate();
+  const routerNavigate = reactNavigate;
+  const [currentPath, setCurrentPath] = React.useState('');
+
+  // Safe access to AITools with error handling
+  let openTool: ((toolName: string) => void) | null = null;
+  try {
+    const aiTools = useAITools();
+    openTool = aiTools?.openTool || null;
+  } catch (error) {
+    // AIToolsProvider not available - continue without AI tools
+    openTool = null;
+  }
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
+      element.scrollIntoView({
+        behavior: 'smooth',
         block: 'start',
         inline: 'nearest'
       });
@@ -34,7 +44,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const openAITool = (toolName: string) => {
-    openTool(toolName);
+    if (openTool) {
+      openTool(toolName);
+    }
   };
 
   const navigateToFeature = (feature: string) => {
@@ -72,12 +84,35 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       case '/contacts':
       case '/tasks':
       case '/settings':
-        navigate(feature);
+        routerNavigate(feature);
         break;
       default:
         console.log(`Navigation to ${feature} not implemented`);
     }
   };
+
+  const navigate = useCallback((path: string, options?: any) => {
+    if (path === currentPath) return;
+
+    // Debounce navigation to prevent rapid fire
+    clearTimeout(navigationTimeoutRef.current);
+    navigationTimeoutRef.current = setTimeout(() => {
+      setCurrentPath(path);
+      routerNavigate(path, options);
+    }, 100);
+  }, [currentPath, routerNavigate]);
+
+  // Add ref for timeout
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <NavigationContext.Provider value={{ scrollToSection, openAITool, navigateToFeature }}>

@@ -288,7 +288,8 @@ const CircleProspecting: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 overflow-y-auto">
+      <div className="max-w-7xl mx-auto">
       {/* Header */}
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -721,6 +722,7 @@ const CircleProspecting: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

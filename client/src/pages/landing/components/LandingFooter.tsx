@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import {
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useWhitelabel } from '../../../contexts/WhitelabelContext';
 
-const LandingFooter: React.FC = () => {
+const LandingFooter = () => {
   const currentYear = new Date().getFullYear();
   const { config } = useWhitelabel();
   
@@ -84,18 +83,8 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/features/communications" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Communication Tools
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/automation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Sales Automation
-                </Link>
-              </li>
-              <li>
-                <Link to="/features/appointments" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Appointment Scheduling
+                <Link to="/features/analytics" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Analytics
                 </Link>
               </li>
             </ul>
@@ -111,16 +100,6 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
                 <Link to="/careers" className="text-gray-400 hover:text-blue-400 transition-colors">
                   Careers
                 </Link>
@@ -131,66 +110,57 @@ const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/partners" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Partners
+                <Link to="/blog" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Blog
                 </Link>
               </li>
             </ul>
           </div>
           
-          {/* Resources */}
+          {/* Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Resources</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Support</h3>
             <ul className="space-y-3">
               <li>
-                <HashLink to="/#pricing" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Pricing
-                </HashLink>
-              </li>
-              <li>
-                <Link to="/resources/documentation" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Documentation
+                <Link to="/help" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Help Center
                 </Link>
               </li>
               <li>
-                <Link to="/resources/guides" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Guides
+                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/resources/api" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  API Reference
+                <Link to="/status" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  System Status
                 </Link>
               </li>
               <li>
-                <Link to="/resources/webinars" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Webinars
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/community" className="text-gray-400 hover:text-blue-400 transition-colors">
-                  Community
+                <Link to="/faq" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  FAQ
                 </Link>
               </li>
             </ul>
           </div>
         </div>
         
-        {/* Newsletter */}
-        <div className="border-t border-gray-800 mt-12 pt-8 pb-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-xl font-bold mb-3 text-white">Subscribe to Our Newsletter</h3>
-            <p className="text-gray-400 mb-6">
-              Get the latest tips, updates, and resources to boost your sales performance.
-            </p>
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0">
+        {/* Newsletter Signup */}
+        <div className="border-t border-gray-800 pt-12 mt-12">
+          <div className="flex flex-col lg:flex-row justify-between items-center">
+            <div className="mb-6 lg:mb-0">
+              <h3 className="text-xl font-bold mb-2">Stay Updated</h3>
+              <p className="text-gray-400">Get the latest updates on new features and product releases.</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
               <input
                 type="email"
-                placeholder="Your email address"
-                className="flex-1 px-4 py-3 rounded-l-md text-gray-900 focus:outline-none sm:rounded-r-none"
+                placeholder="Enter your email"
+                className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 min-w-[280px]"
               />
-              <button className="bg-blue-600 hover:bg-blue-700 transition-colors px-6 py-3 rounded-md sm:rounded-l-none font-medium flex items-center justify-center">
-                Subscribe <ArrowRight size={18} className="ml-2" />
+              <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:shadow-md transition duration-300 flex items-center justify-center">
+                Subscribe
+                <ArrowRight className="h-4 w-4 ml-2" />
               </button>
             </div>
           </div>

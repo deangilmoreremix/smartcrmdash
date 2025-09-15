@@ -231,7 +231,6 @@ const AIInsightsPanel = () => {
       
       // For now, keep the default insights since the service doesn't have pipeline analysis
       if (response) {
-        console.log('Generated pipeline analysis:', response);
         setInsights(defaultInsights);
       }
       

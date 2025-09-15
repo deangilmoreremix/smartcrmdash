@@ -1,17 +1,18 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, GripVertical
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
-import { useNavbarPosition } from '../contexts/NavbarPositionContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useRole } from './RoleBasedAccess';
+
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
 import { useTaskStore } from "../store/taskStore";
@@ -32,11 +33,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
-  const { position, isDragging, setIsDragging } = useNavbarPosition();
+  const { signOut, user } = useAuth();
+  const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
+
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check access levels using new role system
+  const isAdmin = isSuperAdmin();
+  const hasAITools = canAccess('ai_tools');
+  const hasAdvancedFeatures = canAccess('advanced_features');
 
   // Data sources
   const { deals } = useDealStore();
@@ -58,9 +67,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     const pendingTasks = Object.values(tasks).filter(task => !task.completed).length;
 
     const todayAppointments = Object.values(appointments).filter(apt => {
-      if (!apt.date || !apt.time) return false;
+      if (!apt.date) return false;
       const today = new Date();
-      const aptDate = new Date(`${apt.date}T${apt.time}`);
+      const aptDate = new Date(apt.date);
       return aptDate.toDateString() === today.toDateString() && apt.status === 'scheduled';
     }).length;
 
@@ -73,14 +82,26 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     };
   }, [deals, contacts, tasks, appointments]);
 
-  // ===== SALES / TASK / COMM / CONTENT MENUS (unchanged lists) =====
+  // ===== UNIFIED TASKS DROPDOWN: View Options + Quick Actions + AI Features =====
   const taskTools = [
-    { name: 'Task Management', tool: 'tasks', icon: CheckSquare },
-    { name: 'Task Automation', tool: 'task-automation', icon: Bot },
-    { name: 'Project Tracker', tool: 'project-tracker', icon: Layers },
-    { name: 'Time Tracking', tool: 'time-tracking', icon: Clock },
-    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat },
-    { name: 'Deadline Manager', tool: 'deadline-manager', icon: AlertTriangle }
+    // VIEW OPTIONS (navigate to TasksNew.tsx tabs)
+    { name: 'Task Board', tool: 'tasks', icon: CheckSquare, action: 'navigate', tab: 'board' },
+    { name: 'Task Calendar', tool: 'tasks', icon: Calendar, action: 'navigate', tab: 'calendar' },
+    { name: 'Task Analytics', tool: 'tasks', icon: BarChart3, action: 'navigate', tab: 'analytics' },
+    { name: 'Activity Feed', tool: 'tasks', icon: Activity, action: 'navigate', tab: 'activity' },
+    { type: 'divider' },
+
+    // QUICK ACTIONS
+    { name: 'New Task', tool: 'new-task', icon: Plus, action: 'modal' },
+    { name: 'Search Tasks', tool: 'search-tasks', icon: Search, action: 'search' },
+    { name: 'Task Templates', tool: 'task-templates', icon: FileText, action: 'templates' },
+    { type: 'divider' },
+
+    // AI ENHANCEMENTS
+    { name: 'AI Task Assistant', tool: 'task-automation', icon: Bot },
+    { name: 'Smart Prioritization', tool: 'smart-priority', icon: Zap },
+    { name: 'Deadline Optimizer', tool: 'deadline-manager', icon: AlertTriangle },
+    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat }
   ];
 
   const salesTools = [
@@ -97,15 +118,17 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   ];
 
   const communicationTools = [
+    { name: 'Appointments', tool: 'appointments', icon: Calendar },
     { name: 'Video Email', tool: 'video-email', icon: Video },
     { name: 'Text Messages', tool: 'text-messages', icon: MessageSquare },
-    { name: 'Email Composer', tool: 'email-composer', icon: Mail },
-    { name: 'Campaigns', tool: 'campaigns', icon: Megaphone },
-    { name: 'Group Calls', tool: 'group-calls', icon: Users },
-    { name: 'Call Recording', tool: 'call-recording', icon: Mic },
-    { name: 'In-Call Messaging', tool: 'in-call-messaging', icon: MessageCircle },
-    { name: 'Call Analytics', tool: 'call-analytics', icon: BarChart3 },
-    { name: 'Connection Quality Monitor', tool: 'connection-quality', icon: Activity }
+    { name: 'Phone System', tool: 'phone-system', icon: Phone },
+    { name: 'Invoicing', tool: 'invoicing', icon: FileText },
+    { name: 'Lead Automation', tool: 'lead-automation', icon: Bot },
+    { name: 'Circle Prospecting', tool: 'circle-prospecting', icon: MapPin },
+    { name: 'Forms & Surveys', tool: 'forms', icon: FileCheck },
+    { name: 'Business Analyzer', tool: 'business-analysis', icon: BarChart3 },
+    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
+    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic }
   ];
 
   const contentTools = [
@@ -117,14 +140,29 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'AI Model Demo', tool: 'ai-model-demo', icon: Brain }
   ];
 
-  const connectedApps = [
-    { name: 'Remote Pipeline', url: '/remote-pipeline', icon: ExternalLink, isExternal: false },
-    { name: 'FunnelCraft AI', url: 'https://funnelcraft-ai.videoremix.io/', icon: Megaphone, isExternal: true },
-    { name: 'SmartCRM Closer', url: 'https://smartcrm-closer.videoremix.io', icon: Users, isExternal: true },
-    { name: 'ContentAI', url: 'https://content-ai.videoremix.io', icon: FileText, isExternal: true },
-    { name: 'Mobile View', url: '/mobile', icon: Camera, isExternal: false },
-    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false }
+  // White Label specific apps
+  const wlApps = [
+    { name: 'White-Label Customization', url: '/white-label', icon: Palette, isExternal: false },
+    { name: 'WL Management Dashboard', url: '/white-label-management', icon: Settings, isExternal: false },
+    { name: 'Revenue Sharing', url: '/revenue-sharing', icon: DollarSign, isExternal: false },
+    { name: 'Package Builder', url: '/package-builder', icon: Package, isExternal: false },
+    { name: 'Partner Dashboard', url: '/partner-dashboard', icon: Users, isExternal: false },
+    { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
   ];
+
+  // General connected apps
+  const connectedApps = [
+    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
+    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
+    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
+  ];
+
+  const analyticsOptions = [
+    { name: 'Analytics Dashboard', url: '/analytics', icon: BarChart3 },
+    { name: 'Insights AI Module', url: '/analytics-remote', icon: Brain }
+  ];
+
+
 
   // ===== All AI tool entries organized by categories =====
   const aiToolCategories = {
@@ -174,15 +212,16 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     ]
   };
 
-  // Click outside to close
+  // Click outside to close dropdowns only (not mobile menu)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('[data-dropdown-toggle]')) return;
-      setActiveDropdown(null);
-      setIsMobileMenuOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+        // Don't auto-close mobile menu - only close it explicitly
+      }
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
@@ -193,9 +232,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const handleNavigation = useCallback((route: string, tabName: string) => {
     console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
     navigate(route);
-    setActiveTab(tabName);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
+    // Remove setTimeout hack and duplicate setActiveTab - useEffect handles this
   }, [navigate, location.pathname]);
 
   const handleAIToolClick = useCallback((toolId: string) => {
@@ -206,6 +245,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     setIsMobileMenuOpen(false);
   }, [navigate, openAITool]);
 
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate('/');
+  }, [signOut, navigate]);
+
   // Active tab based on route
   useEffect(() => {
     const path = location.pathname;
@@ -214,6 +258,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else if (path === '/pipeline') setActiveTab('pipeline');
     else if (path === '/tasks' || path === '/appointments') setActiveTab('appointments');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
+    else if (path === '/assistants') setActiveTab('assistants'); // Add this line for the new route
     else if (path === '/analytics') setActiveTab('analytics');
     else if (path === '/ai-goals') setActiveTab('ai-goals');
     else setActiveTab('');
@@ -222,41 +267,36 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const mainTabs = [
     {
       id: 'dashboard',
-      label: '',
-      icon: () => null,
+      label: 'Dashboard',
+      icon: BarChart3,
       action: () => handleNavigation('/dashboard', 'dashboard'),
-      badge: null,
-      color: 'from-blue-500 to-green-500'
+      badge: 1,
+      color: 'from-indigo-500 to-purple-500'
     },
     {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
       action: () => handleNavigation('/contacts', 'contacts'),
-      badge: Object.values(contacts).filter(c =>
-        (c as any)?.interestLevel === 'hot' || (c as any)?.status?.toLowerCase?.() === 'hot').length,
+      badge: 10,
       color: 'from-purple-500 to-indigo-500'
     },
     {
       id: 'pipeline',
       label: 'Pipeline',
       icon: Briefcase,
-      action: () => {
-        onOpenPipelineModal?.();
-        setActiveTab('pipeline');
-        setActiveDropdown(null);
-        setIsMobileMenuOpen(false);
-      },
-      badge: Object.values(deals).filter(d => String(d.stage) !== 'closed-won' && String(d.stage) !== 'closed-lost').length,
+      action: () => handleNavigation('/pipeline', 'pipeline'),
+      badge: 5,
       color: 'from-green-500 to-emerald-500'
     },
     {
       id: 'analytics',
       label: 'Analytics',
-      icon: BarChart3,
-      action: () => handleNavigation('/analytics', 'analytics'),
-      badge: null,
-      color: 'from-blue-500 to-cyan-500'
+      icon: TrendingUp,
+      action: () => toggleDropdown('analytics'),
+      badge: 30,
+      color: 'from-blue-500 to-cyan-500',
+      hasDropdown: true
     },
     {
       id: 'ai-goals',
@@ -275,20 +315,42 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       color: 'from-pink-500 to-rose-500'
     },
     {
+      id: 'assistants', // New tab for AI Assistants
+      label: 'AI Assistants',
+      icon: Bot,
+      action: () => handleNavigation('/assistants', 'assistants'),
+      badge: 0, // Placeholder for assistant count
+      color: 'from-emerald-500 to-lime-500'
+    },
+    {
       id: 'appointments',
       label: 'Calendar',
       icon: Calendar,
       action: () => handleNavigation('/appointments', 'appointments'),
-      badge: 1,
+      badge: 15,
       color: 'from-cyan-500 to-blue-500'
     }
   ];
 
+  // Add admin panel link to navigation if user is admin
+  if (isAdmin) {
+    mainTabs.push({
+      id: 'admin',
+      label: 'Admin Panel',
+      icon: Shield,
+      action: () => handleNavigation('/admin', 'admin'),
+      badge: 0,
+      color: 'from-red-500 to-orange-500'
+    });
+  }
+
+
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: taskTools.length, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-    { id: 'content', label: 'Content', icon: Edit3, badge: contentTools.length, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
+    { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
@@ -301,91 +363,45 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     );
   }, []);
 
-  // Determine navbar dimensions and layout based on position
-  const isVertical = position === 'left' || position === 'right';
-  const navbarWidth = isVertical ? '60px' : '100%';
-  const navbarHeight = isVertical ? '100vh' : 'auto';
-
   return (
-    <Draggable draggableId="navbar" index={0}>
-      {(provided, snapshot) => (
-        <nav
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          className={`z-50 p-4 transition-all duration-300 ${
-            snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105' : ''
-          }`}
-          style={{
-            ...provided.draggableProps.style,
-            position: 'absolute',
-            top: position === 'top' ? 0 : position === 'bottom' ? 'auto' : 0,
-            bottom: position === 'bottom' ? 0 : 'auto',
-            left: position === 'left' ? 0 : position === 'right' ? 'auto' : 0,
-            right: position === 'right' ? 0 : 'auto',
-            width: navbarWidth,
-            height: navbarHeight,
-            zIndex: snapshot.isDragging ? 9999 : 50
-          }}
-        >
-          <div className="will-change-transform">
-            <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-2xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} ${
-              isVertical ? 'h-full rounded-2xl' : 'rounded-full'
-            }`}>
-              <div className={`flex ${isVertical ? 'flex-col items-center justify-start py-4 space-y-4' : 'items-center justify-between'} px-4 py-2`}>
-
-                {/* Drag Handle */}
-                <div
-                  {...provided.dragHandleProps}
-                  className={`cursor-move p-2 rounded-lg transition-colors ${
-                    isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-                  } ${isVertical ? 'mb-2' : 'mr-2'}`}
-                  title="Drag to move navbar"
-                >
-                  <GripVertical className={`h-4 w-4 ${isDark ? 'text-white' : 'text-gray-600'}`} />
-                </div>
+    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
+      <div className="max-w-[90rem] mx-auto will-change-transform">
+        <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
+          <div className="flex items-center justify-between px-6 lg:px-8 py-3">
 
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                </div>
-              </div>
-              <div className="hidden md:block">
-                <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Smart<span className="text-green-400">CRM</span>
-                </h1>
-              </div>
+            <div className="flex items-center flex-none shrink-0">
+              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Smart<span className="text-green-400">CRM</span>
+              </h1>
             </div>
 
             {/* Desktop nav pills */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {mainTabs.map((tab) => {
+            <div className="hidden lg:flex flex-1 min-w-0">
+              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                <div className="inline-flex items-center gap-1 whitespace-nowrap">
+                  {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
-                  <div key={tab.id} className="relative">
+                  <div key={tab.id} className="relative shrink-0">
                     <button
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        console.log('Tab clicked:', tab.id, tab.label);
-                        tab.action(); 
+                      onClick={(e) => {
+                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action();
                       }}
+                      data-testid={`nav-tab-${tab.id}`}
                       className={`
-                        relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
-                        transition-all duration-300 transform hover:scale-105
-                        ${isActive 
-                          ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20` 
+                        relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
+                        transition-all duration-300 transform hover:scale-105 text-xs
+                        ${isActive
+                          ? `bg-gradient-to-r ${tab.color} text-white shadow-lg ring-2 ring-white/20`
                           : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
                         }
                         group
                       `}
                       title={tab.label}
                     >
-                      <tab.icon size={14} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                      <span className="text-xs font-medium">{tab.label}</span>
+                      <tab.icon size={16} className={`block overflow-visible shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      <span className="text-xs font-medium hidden lg:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
                         tab.id === 'pipeline' ? 'bg-green-500' :
@@ -393,105 +409,128 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'ai-goals' ? 'bg-orange-500' :
                         tab.id === 'ai-tools' ? 'bg-pink-500' :
                         tab.id === 'appointments' ? 'bg-cyan-500' :
+                        tab.id === 'analytics' ? 'bg-blue-500' :
+                        tab.id === 'assistants' ? 'bg-emerald-500' : // Color for new assistants tab
+                        tab.id === 'admin' ? 'bg-red-500' : // Color for admin tab
                         'bg-blue-500'
+                      )}
+                      {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
+                        <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                        <div className="max-h-96 overflow-y-auto p-2">
-                          {Object.entries(aiToolCategories).map(([categoryName, tools]) => (
-                            <div key={categoryName} className="mb-4">
-                              <div className={`text-xs font-semibold uppercase tracking-wider px-3 py-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {categoryName}
-                              </div>
-                              {tools.map((tool) => (
-                                <button
-                                  key={tool.id}
-                                  onClick={() => handleAIToolClick(tool.id)}
-                                  className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'}`}
-                                >
-                                  {tool.icon ? <tool.icon size={14} className="opacity-80" /> : <Sparkles size={14} className="opacity-80" />}
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium">{tool.title}</div>
-                                  </div>
-                                  <ChevronDown size={12} className="opacity-30 rotate-270" />
-                                </button>
-                              ))}
-                            </div>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                        <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                          {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
+                            <button
+                              key={tool.id}
+                              onClick={() => handleAIToolClick(tool.id)}
+                              data-testid={`ai-tool-${tool.id}`}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              {tool.icon ? <tool.icon size={16} className="block overflow-visible shrink-0 text-pink-500" /> : <Sparkles size={16} className="block overflow-visible shrink-0 text-pink-500" />}
+                              <span className="text-sm font-medium">{tool.title}</span>
+                            </button>
                           ))}
                         </div>
-                        <div className="p-2 border-t border-gray-200/30">
+                        <div className="p-3 border-t border-gray-200/30">
                           <button
                             onClick={() => handleNavigation('/ai-tools', 'ai-tools')}
-                            className={`w-full py-2 px-4 rounded-lg border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
+                            data-testid="button-view-all-ai-tools"
+                            className={`w-full py-2 px-4 rounded-xl border-2 border-dashed transition-all duration-200 ${isDark ? 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white' : 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-900'}`}
                           >
                             View All AI Tools
                           </button>
                         </div>
                       </div>
                     )}
+
+                    {/* Analytics Dropdown */}
+                    {tab.id === 'analytics' && activeDropdown === 'analytics' && (
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                        <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                          {analyticsOptions.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                navigate(option.url);
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
+                              <span className="text-sm font-medium">{option.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
-              })}
+                  })}
 
-              {/* Dropdowns */}
-              {[
-                { id: 'sales', items: salesTools, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-                { id: 'tasks', items: taskTools, color: 'from-orange-500 to-red-500', badgeColor: 'bg-orange-500' },
-                { id: 'communication', items: communicationTools, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-                { id: 'content', items: contentTools, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
-                { id: 'apps', items: connectedApps, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
-              ].map(menu => (
-                <div key={menu.id} className="relative">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleDropdown(menu.id, e); }}
-                    data-dropdown-toggle="true"
-                    className={`
-                      relative flex items-center space-x-1 px-2 py-1.5 rounded-full 
-                      transition-all duration-300 transform hover:scale-105
-                      ${activeDropdown === menu.id 
-                        ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20` 
-                        : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
-                      }
-                      group
-                    `}
-                  >
-                    {menu.id === 'sales' && <DollarSign size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'tasks' && <CheckSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'communication' && <MessageSquare size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'content' && <Edit3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
-                    {menu.id === 'apps' && <Grid3X3 size={14} className="transition-transform duration-300 group-hover:scale-110" />}
+                  {/* Dropdowns */}
+                  {dropdownMenus.map(menu => (
+                    <div key={menu.id} className="relative shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (menu.id === 'business-intel') {
+                            handleNavigation('/business-intel', 'business-intel');
+                          } else if (menu.id === 'intel') {
+                            handleNavigation('/intel', 'intel');
+                          } else {
+                            toggleDropdown(menu.id, e);
+                          }
+                        }}
+                        data-dropdown-toggle="true"
+                        data-testid={`button-dropdown-${menu.id}`}
+                        className={`
+                          relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
+                          transition-all duration-300 transform hover:scale-105
+                          ${activeDropdown === menu.id
+                            ? `bg-gradient-to-r ${menu.color} text-white shadow-lg ring-2 ring-white/20`
+                            : `${isDark ? 'text-white hover:bg-white/20 hover:text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
+                          }
+                          group
+                        `}
+                      >
+                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'apps' && <Grid3X3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
 
-                    <span className="text-xs font-medium">
-                      {menu.id === 'sales' ? 'Sales'
-                        : menu.id === 'tasks' ? 'Tasks'
-                        : menu.id === 'communication' ? 'Comm'
-                        : menu.id === 'content' ? 'Content'
-                        : 'Apps'}
-                    </span>
-                    <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
-                    {renderBadge(
-                      menu.id === 'sales' ? salesTools.length
-                        : menu.id === 'tasks' ? taskTools.length
-                        : menu.id === 'communication' ? communicationTools.length
-                        : menu.id === 'content' ? contentTools.length
-                        : connectedApps.length,
-                      menu.badgeColor
-                    )}
-                    {activeDropdown === menu.id && (
-                      <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
-                    )}
-                  </button>
+                        <span className="text-xs font-medium">
+                          {menu.id === 'sales' ? 'Sales'
+                            : menu.id === 'communication' ? 'Comm'
+                            : menu.id === 'business-intel' ? 'Business Intel'
+                            : menu.id === 'wl' ? 'WL'
+                            : menu.id === 'intel' ? 'Intel'
+                            : 'Apps'}
+                        </span>
+                        {/* Only show chevron for dropdown menus */}
+                        {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
+                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                        )}
+                        {renderBadge(menu.badge, menu.badgeColor)}
+                        {activeDropdown === menu.id && (
+                          <div className={`absolute inset-0 bg-gradient-to-r ${menu.color} rounded-full opacity-20 animate-pulse`}></div>
+                        )}
+                      </button>
 
 
 
                   {/* Other dropdown panels (sales/tasks/communication/content/apps) — keep your existing code */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
                     <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
+                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {salesTools.map((tool, index) => (
                           <button
                             key={index}
@@ -509,7 +548,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 'competitor-insights': '/competitor-insights',
                                 'revenue-intelligence': '/revenue-intelligence'
                               };
-                              
+
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
                               setActiveDropdown(null);
@@ -517,24 +556,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-green-500" />
-                            <span className="text-sm font-medium">{tool.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {menu.id === 'tasks' && activeDropdown === 'tasks' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
-                        {taskTools.map((tool, index) => (
-                          <button
-                            key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
-                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                          >
-                            <tool.icon size={16} className="text-orange-500" />
+                            <tool.icon size={16} className="block overflow-visible shrink-0 text-green-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -544,14 +566,32 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                   {menu.id === 'communication' && activeDropdown === 'communication' && (
                     <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
+                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {communicationTools.map((tool, index) => (
                           <button
                             key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
+                            onClick={() => {
+                              console.log('Communication tool clicked:', tool.tool, tool.name);
+                              const routeMap: { [key: string]: string } = {
+                                'appointments': '/appointments',
+                                'video-email': '/video-profiles',
+                                'text-messages': '/communication-hub',
+                                'phone-system': '/phone-system',
+                                'invoicing': '/invoicing',
+                                'lead-automation': '/lead-automation',
+                                'circle-prospecting': '/circle-prospecting',
+                                'forms': '/forms',
+                                'business-analysis': '/business-analysis'
+                              };
+                              
+                              const route = routeMap[tool.tool] || `/${tool.tool}`;
+                              navigate(route);
+                              setActiveDropdown(null);
+                              setIsMobileMenuOpen(false);
+                            }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                           >
-                            <tool.icon size={16} className="text-blue-500" />
+                            <tool.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
                             <span className="text-sm font-medium">{tool.name}</span>
                           </button>
                         ))}
@@ -559,26 +599,144 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     </div>
                   )}
 
-                  {menu.id === 'content' && activeDropdown === 'content' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
-                        {contentTools.map((tool, index) => (
-                          <button
-                            key={index}
-                            onClick={() => { navigate(`/${tool.tool}`); setActiveDropdown(null); setIsMobileMenuOpen(false); }}
-                            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                          >
-                            <tool.icon size={16} className="text-amber-500" />
-                            <span className="text-sm font-medium">{tool.name}</span>
-                          </button>
-                        ))}
+                  {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
+                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Business Intelligence Dashboard - Full Screen</h3>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => window.open('https://ai-powered-analytics-fibd.bolt.host', '_blank')}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Open in new tab"
+                              >
+                                <ExternalLink size={16} className="block overflow-visible shrink-0" />
+                              </button>
+                              <button
+                                onClick={() => setActiveDropdown(null)}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Close"
+                              >
+                                <X size={16} className="block overflow-visible shrink-0" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-2">
+                            <iframe
+                              src="https://ai-powered-analytics-fibd.bolt.host"
+                              className="w-full h-full rounded-xl border-0"
+                              title="Business Intelligence Dashboard"
+                              frameBorder="0"
+                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              onLoad={(e) => {
+                                try {
+                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                    type: 'FULLSCREEN_MODE',
+                                    fullscreen: true
+                                  }, '*');
+                                } catch (error) {
+                                  console.log('Could not communicate with iframe');
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
+
+                  {menu.id === 'wl' && activeDropdown === 'wl' && (
+                    <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-visible animate-fade-in`}>
+                      <div className="p-3 max-h-[80vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        {wlApps.map((app, index) =>
+                          app.isExternal ? (
+                            <a
+                              key={index}
+                              href={app.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
+                                <span className="text-sm font-medium">{app.name}</span>
+                              </div>
+                              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
+                            </a>
+                          ) : (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                handleNavigation(app.url, 'white-label');
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
+                              <span className="text-sm font-medium">{app.name}</span>
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {menu.id === 'intel' && activeDropdown === 'intel' && (
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                      <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
+                            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Intel Dashboard - Full Screen</h3>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => window.open('https://product-research-mod-uay0.bolt.host/', '_blank')}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Open in new tab"
+                              >
+                                <ExternalLink size={16} className="block overflow-visible shrink-0" />
+                              </button>
+                              <button
+                                onClick={() => setActiveDropdown(null)}
+                                className={`p-2 rounded-md ${isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                                title="Close"
+                              >
+                                <X size={16} className="block overflow-visible shrink-0" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-2">
+                            <iframe
+                              src="https://product-research-mod-uay0.bolt.host/"
+                              className="w-full h-full rounded-xl border-0"
+                              title="Intel Dashboard"
+                              frameBorder="0"
+                              allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              onLoad={(e) => {
+                                try {
+                                  (e.target as HTMLIFrameElement).contentWindow?.postMessage({
+                                    type: 'FULLSCREEN_MODE',
+                                    fullscreen: true
+                                  }, '*');
+                                } catch (error) {
+                                  console.log('Could not communicate with iframe');
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+
 
                   {menu.id === 'apps' && activeDropdown === 'apps' && (
                     <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
-                      <div className="p-3">
+                      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {connectedApps.map((app, index) =>
                           app.isExternal ? (
                             <a
@@ -589,10 +747,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               className={`w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
                               <div className="flex items-center space-x-3">
-                                <app.icon size={16} className="text-purple-500" />
+                                <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
                                 <span className="text-sm font-medium">{app.name}</span>
                               </div>
-                              <ExternalLink size={12} className="opacity-50" />
+                              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
                             </a>
                           ) : (
                             <button
@@ -600,7 +758,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               onClick={() => handleNavigation(app.url, 'white-label')}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
                             >
-                              <app.icon size={16} className="text-purple-500" />
+                              <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
                               <span className="text-sm font-medium">{app.name}</span>
                             </button>
                           )
@@ -608,44 +766,118 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     </div>
                   )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
 
             {/* Mobile menu button */}
             <div className="lg:hidden">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(!isMobileMenuOpen); }}
+                data-testid="button-mobile-menu-toggle"
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
               >
-                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {isMobileMenuOpen ? <X size={24} className="block overflow-visible shrink-0" /> : <Menu size={24} className="block overflow-visible shrink-0" />}
               </button>
             </div>
 
+            {/* Mobile theme toggle */}
+            <button
+              onClick={toggleTheme}
+              data-testid="button-mobile-theme-toggle"
+              className={`p-2 rounded-lg transition-colors lg:hidden ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
+            </button>
+
             {/* Right controls */}
-            <div className="hidden lg:flex items-center space-x-2">
-              <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Search size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
+            <div className="hidden lg:flex items-center space-x-0.5 flex-none shrink-0 pl-2">
+              <button 
+                data-testid="button-search"
+                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Search size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
               </button>
-              <button className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Bell size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
+              <button 
+                data-testid="button-notifications"
+                className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Bell size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
                 {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
               </button>
               <button
                 onClick={toggleTheme}
+                data-testid="button-theme-toggle"
                 className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
-                {isDark ? <Sun size={16} className="text-white" /> : <Moon size={16} className="text-gray-600" />}
+                {isDark ? <Sun size={16} className="block overflow-visible shrink-0 text-white" /> : <Moon size={16} className="block overflow-visible shrink-0 text-gray-600" />}
               </button>
-              <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
+                  data-testid="button-user-menu"
+                  className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                >
+                  <User size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+                </button>
+
+                {activeDropdown === 'user' && (
+                  <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      <div className="px-3 py-2 border-b border-gray-200/30">
+                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {user?.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleSignOut}
+                        data-testid="button-sign-out"
+                        className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </nav>
-      )}
-    </Draggable>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className={`lg:hidden mt-4 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden animate-fade-in`}>
+            <div className="p-4 space-y-3">
+              {mainTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={tab.action}
+                  className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  <tab.icon size={20} className="block overflow-visible shrink-0" />
+                  <span className="font-medium">{tab.label}</span>
+                  {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
+                </button>
+              ))}
+
+              <hr className={`${isDark ? 'border-white/20' : 'border-gray-200'}`} />
+
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={toggleTheme}
+                  className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
+                  <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
   );
 });
 

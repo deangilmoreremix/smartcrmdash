@@ -452,7 +452,8 @@ const AITools: React.FC = () => {
   // The modal system now handles tool rendering, so we only show the main grid
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="h-screen overflow-y-auto">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">AI Tools</h1>
         <p className="text-gray-600 mt-1">Advanced AI capabilities for your CRM</p>
@@ -604,6 +605,7 @@ const AITools: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

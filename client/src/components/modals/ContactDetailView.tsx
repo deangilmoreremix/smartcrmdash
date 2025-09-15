@@ -48,6 +48,7 @@ import {
   Camera, 
   Wand2
 } from 'lucide-react';
+import { gpt5SocialResearchService, SocialResearchResult } from '../../services/gpt5SocialResearchService';
 
 interface ContactDetailViewProps {
   contact: Contact;
@@ -90,6 +91,8 @@ export const ContactDetailView: React.FC<ContactDetailViewProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedContact, setEditedContact] = useState<Contact>(contact);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoadingSocial, setIsLoadingSocial] = useState(false);
+  const [socialResearch, setSocialResearch] = useState<SocialResearchResult | null>(null);
 
   const handleSave = async () => {
     if (onUpdate) {
@@ -105,6 +108,27 @@ export const ContactDetailView: React.FC<ContactDetailViewProps> = ({
   const handleCancel = () => {
     setEditedContact(contact);
     setIsEditing(false);
+  };
+
+  const handleSocialResearch = async () => {
+    setIsLoadingSocial(true);
+    try {
+      const contactForResearch = {
+        ...contact,
+        lastContact: contact.lastContact ? new Date(contact.lastContact) : new Date()
+      };
+      const research = await gpt5SocialResearchService.researchContactSocialMedia(
+        contactForResearch,
+        ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+        'comprehensive'
+      );
+      setSocialResearch(research);
+      setActiveTab('social'); // Switch to social tab
+    } catch (error) {
+      console.error('Social research failed:', error);
+    } finally {
+      setIsLoadingSocial(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -133,6 +157,15 @@ export const ContactDetailView: React.FC<ContactDetailViewProps> = ({
           
           <div className="flex items-center space-x-2">
             <ModernButton
+              onClick={handleSocialResearch}
+              disabled={isLoadingSocial}
+              variant="primary"
+              size="sm"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              {isLoadingSocial ? 'Researching...' : 'Social Research'}
+            </ModernButton>
+            <ModernButton
               onClick={() => setIsEditing(!isEditing)}
               variant="outline"
               size="sm"
@@ -158,7 +191,8 @@ export const ContactDetailView: React.FC<ContactDetailViewProps> = ({
               { id: 'overview', label: 'Overview', icon: User },
               { id: 'activity', label: 'Activity', icon: Activity },
               { id: 'communications', label: 'Communications', icon: MessageSquare },
-              { id: 'insights', label: 'AI Insights', icon: Brain }
+              { id: 'insights', label: 'AI Insights', icon: Brain },
+              { id: 'social', label: 'Social Media', icon: Globe }
             ].map((tab) => {
               const Icon = tab.icon;
               return (

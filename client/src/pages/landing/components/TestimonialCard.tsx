@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star } from 'lucide-react';
 
 interface TestimonialCardProps {
@@ -10,14 +9,14 @@ interface TestimonialCardProps {
   stars: number;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({
+const TestimonialCard = ({
   quote,
   name,
   position,
   company,
   image,
   stars
-}) => {
+}: TestimonialCardProps) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 h-full border border-gray-100">
       <div className="flex mb-4">

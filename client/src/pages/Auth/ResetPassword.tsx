@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase, authHelpers, isSupabaseConfigured } from '../../lib/supabase';
+import { supabase, auth, isSupabaseConfigured } from '../../lib/supabase';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
 const ResetPassword: React.FC = () => {
@@ -23,7 +23,7 @@ const ResetPassword: React.FC = () => {
 
       try {
         // Get the current session to validate the reset token
-        const session = await authHelpers.getSession();
+        const session = await auth.getSession();
         if (!session) {
           setErrorMessage('Invalid or expired reset link. Please request a new password reset.');
           return;
@@ -36,7 +36,7 @@ const ResetPassword: React.FC = () => {
         }
 
         // Additional validation: check if token is valid by attempting to get user
-        const user = await authHelpers.getCurrentUser();
+        const user = await auth.getUser();
         if (!user) {
           setErrorMessage('Invalid reset session. Please request a new password reset.');
           return;
@@ -76,7 +76,7 @@ const ResetPassword: React.FC = () => {
     setLoading(true);
 
     try {
-      await authHelpers.updatePassword(password);
+      await auth.updatePassword(password);
       setSuccessMessage('Password has been reset successfully');
 
       // Redirect to login after a short delay

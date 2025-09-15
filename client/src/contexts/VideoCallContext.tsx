@@ -340,7 +340,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const newPeer = new SimplePeer(config);
 
     // Enhanced signaling with real WebRTC
-    newPeer.on('signal', (signal) => {
+    newPeer.on('signal', (signal: any) => {
       console.log('Signal generated:', signal.type, signal);
       
       // In a production app, you'd send this to a signaling server
@@ -349,7 +349,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     // Handle incoming stream
-    newPeer.on('stream', (stream) => {
+    newPeer.on('stream', (stream: MediaStream) => {
       console.log('Remote stream received:', stream.getTracks().map(t => `${t.kind}: ${t.label || 'unlabeled'}`));
       setRemoteStream(stream);
       setCallStatus('connected');
@@ -379,7 +379,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     // Handle data channel messages
-    newPeer.on('data', (data) => {
+    newPeer.on('data', (data: any) => {
       try {
         const message = data.toString();
         console.log('Received data:', message);
@@ -398,7 +398,7 @@ export const VideoCallProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     // Enhanced error handling
-    newPeer.on('error', (error) => {
+    newPeer.on('error', (error: any) => {
       console.error('Peer error:', error);
       
       if (error.message.includes('Ice connection failed')) {

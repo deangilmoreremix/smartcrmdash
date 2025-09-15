@@ -9,7 +9,7 @@ const ConnectedApps: React.FC = () => {
   const connectedApps = [
     { 
       name: 'FunnelCraft AI', 
-      url: 'https://funnelcraft-ai.videoremix.io/', 
+      url: 'https://serene-valkyrie-fec320.netlify.app/', 
       icon: Megaphone, 
       team: 'Marketing Team',
       description: 'Create high-converting funnels with AI-powered optimization',
@@ -20,7 +20,7 @@ const ConnectedApps: React.FC = () => {
     },
     { 
       name: 'SmartCRM Closer', 
-      url: 'https://smartcrm-closer.videoremix.io', 
+      url: 'https://stupendous-twilight-64389a.netlify.app/', 
       icon: Users, 
       team: 'Outreach Team',
       description: 'Advanced outreach automation and deal closing tools',
@@ -31,7 +31,7 @@ const ConnectedApps: React.FC = () => {
     },
     { 
       name: 'ContentAI', 
-      url: 'https://content-ai.videoremix.io', 
+      url: 'https://capable-mermaid-3c73fa.netlify.app/', 
       icon: FileText, 
       team: 'Content & Support',
       description: 'AI-powered content creation and support documentation',

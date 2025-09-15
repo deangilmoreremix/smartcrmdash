@@ -15,11 +15,21 @@ import {
   Paperclip,
   MessageSquare,
   Plus,
-  TrendingUp
+  TrendingUp,
+  Search, 
+  Users, 
+  Globe, 
+  Linkedin, 
+  Twitter, 
+  Instagram, 
+  Youtube, 
+  Github, 
+  CheckCircle
 } from 'lucide-react';
 import { Deal, DealStage } from '../types/deal';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
+import { gpt5SocialResearchService, SocialResearchResult } from '../services/gpt5SocialResearchService';
 
 interface DealDetailsModalProps {
   deal: Deal | null;
@@ -37,16 +47,25 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedDeal, setEditedDeal] = useState<Deal | null>(deal);
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'files'>('overview');
-  
+  const [socialResearch, setSocialResearch] = useState<SocialResearchResult | null>(null);
+  const [isLoadingSocial, setIsLoadingSocial] = useState(false);
+  const [showSocialTab, setShowSocialTab] = useState(false);
+
   const { updateDeal, getActivePipeline } = useDealStore();
   const { contacts } = useContactStore();
-  
+
+  // Assume getTheme is available from ThemeContext or similar
+  const isDark = false; // Placeholder for theme detection
+
   const pipeline = getActivePipeline();
   const contact = deal ? contacts[deal.contactId] : null;
 
   React.useEffect(() => {
     setEditedDeal(deal);
     setIsEditing(false);
+    // Reset social research state when a new deal is opened
+    setSocialResearch(null);
+    setShowSocialTab(false);
   }, [deal]);
 
   if (!isOpen || !deal || !editedDeal) return null;
@@ -89,39 +108,47 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
     };
   };
 
+  const loadSocialResearch = async () => {
+    if (!contact) return;
+
+    setIsLoadingSocial(true);
+    try {
+      const research = await gpt5SocialResearchService.researchContactSocialMedia(
+        contact,
+        ['LinkedIn', 'Twitter', 'Instagram', 'YouTube', 'GitHub'],
+        'comprehensive'
+      );
+      setSocialResearch(research);
+      setShowSocialTab(true);
+    } catch (error) {
+      console.error('Social research failed:', error);
+    } finally {
+      setIsLoadingSocial(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-          <div className="flex-1">
-            {isEditing ? (
-              <input
-                type="text"
-                value={editedDeal.title}
-                onChange={(e) => setEditedDeal({ ...editedDeal, title: e.target.value })}
-                className="text-xl font-semibold text-gray-900 bg-transparent border-none outline-none w-full"
-              />
-            ) : (
-              <h2 className="text-xl font-semibold text-gray-900">{deal.title}</h2>
-            )}
-            <div className="flex items-center space-x-4 mt-2">
-              <span
-                className="px-3 py-1 rounded-full text-sm font-medium border"
-                style={getStageColor(deal.stage)}
-              >
-                {deal.stage.name}
-              </span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(deal.priority)}`}>
-                {deal.priority} priority
-              </span>
-              <span className="text-sm text-gray-500">
-                #{deal.id.slice(-6)}
-              </span>
-            </div>
+        <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div>
+            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {deal.title}
+            </h2>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Deal Details
+            </p>
           </div>
-          
           <div className="flex items-center space-x-2">
+            <button
+              onClick={loadSocialResearch}
+              disabled={isLoadingSocial}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors disabled:opacity-50"
+            >
+              <Search size={16} className="mr-1" />
+              {isLoadingSocial ? 'Researching...' : 'Social Intel'}
+            </button>
             {isEditing ? (
               <>
                 <button
@@ -156,33 +183,131 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <div className="flex space-x-8 px-6">
-            {[
-              { id: 'overview', label: 'Overview', icon: Target },
-              { id: 'activity', label: 'Activity', icon: Activity },
-              { id: 'files', label: 'Files', icon: Paperclip }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <tab.icon size={16} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+        {/* Tab Navigation */}
+        {showSocialTab && (
+          <div className={`flex border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            <button
+              onClick={() => {
+                setShowSocialTab(false);
+                setActiveTab('overview'); // Ensure overview tab is active when switching back
+              }}
+              className={`px-4 py-2 text-sm font-medium ${
+                !showSocialTab 
+                  ? (isDark ? 'text-blue-400 border-b-2 border-blue-400' : 'text-blue-600 border-b-2 border-blue-600')
+                  : (isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900')
+              }`}
+            >
+              Deal Info
+            </button>
+            <button
+              onClick={() => {
+                setShowSocialTab(true);
+                setActiveTab('overview'); // Keep overview active or let it be controlled by showSocialTab
+              }}
+              className={`px-4 py-2 text-sm font-medium ${
+                showSocialTab 
+                  ? (isDark ? 'text-blue-400 border-b-2 border-blue-400' : 'text-blue-600 border-b-2 border-blue-600')
+                  : (isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900')
+              }`}
+            >
+              Social Intelligence
+            </button>
           </div>
-        </div>
+        )}
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {activeTab === 'overview' && (
+          {showSocialTab && socialResearch ? (
+            // Social Research Content
+            <div className="space-y-6">
+              {/* Social Profiles */}
+              <div>
+                <h3 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Social Media Profiles
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {socialResearch.profiles.slice(0, 4).map((profile, index) => {
+                    const IconComponent = {
+                      'LinkedIn': Linkedin,
+                      'Twitter': Twitter,
+                      'Instagram': Instagram,
+                      'YouTube': Youtube,
+                      'GitHub': Github
+                    }[profile.platform] || Globe;
+
+                    return (
+                      <div key={index} className={`p-3 rounded-lg ${
+                        isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                      }`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center space-x-2">
+                            <IconComponent className="h-3 w-3 text-blue-500" />
+                            <span className={`font-medium text-xs ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {profile.platform}
+                            </span>
+                          </div>
+                          {profile.verified && <CheckCircle className="h-3 w-3 text-green-500" />}
+                        </div>
+                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          @{profile.username}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
+                          profile.confidence > 80 
+                            ? (isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-800')
+                            : (isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-800')
+                        }`}>
+                          {profile.confidence}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quick Insights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`p-3 rounded-lg ${
+                  isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <h4 className={`font-medium text-sm mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Communication Style
+                  </h4>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {socialResearch.personalityInsights.communicationStyle}
+                  </p>
+                </div>
+                <div className={`p-3 rounded-lg ${
+                  isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <h4 className={`font-medium text-sm mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Best Engagement Times
+                  </h4>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {socialResearch.engagementMetrics.bestPostingTimes.join(', ')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Recommendations */}
+              {socialResearch.monitoringRecommendations.length > 0 && (
+                <div className={`p-3 rounded-lg ${
+                  isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'
+                }`}>
+                  <h4 className={`font-medium text-sm mb-2 ${isDark ? 'text-blue-400' : 'text-blue-800'}`}>
+                    Recommended Actions
+                  </h4>
+                  <ul className="space-y-1">
+                    {socialResearch.monitoringRecommendations.slice(0, 2).map((recommendation, index) => (
+                      <li key={index} className={`text-xs ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                        • {recommendation}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Original Deal Info Content
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Info */}
               <div className="lg:col-span-2 space-y-6">
@@ -211,7 +336,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                         </div>
                       )}
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Probability
@@ -330,7 +455,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                         <p className="text-sm text-gray-600">{deal.createdAt.toLocaleDateString()}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-3">
                       <Clock size={16} className="text-gray-400" />
                       <div>
@@ -338,7 +463,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                         <p className="text-sm text-gray-600">{deal.updatedAt.toLocaleDateString()}</p>
                       </div>
                     </div>
-                    
+
                     {deal.expectedCloseDate && (
                       <div className="flex items-center space-x-3">
                         <Target size={16} className="text-gray-400" />
@@ -348,7 +473,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                         </div>
                       </div>
                     )}
-                    
+
                     {deal.daysInStage && (
                       <div className="flex items-center space-x-3">
                         <Clock size={16} className="text-orange-500" />
@@ -364,7 +489,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
             </div>
           )}
 
-          {activeTab === 'activity' && (
+          {!showSocialTab && activeTab === 'activity' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
@@ -373,7 +498,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                   Add Activity
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 {deal.activities.length === 0 ? (
                   <div className="text-center py-8">
@@ -400,7 +525,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
             </div>
           )}
 
-          {activeTab === 'files' && (
+          {!showSocialTab && activeTab === 'files' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Attachments</h3>
@@ -409,7 +534,7 @@ const DealDetailsModal: React.FC<DealDetailsModalProps> = ({
                   Upload File
                 </button>
               </div>
-              
+
               <div className="space-y-3">
                 {deal.attachments.length === 0 ? (
                   <div className="text-center py-8">

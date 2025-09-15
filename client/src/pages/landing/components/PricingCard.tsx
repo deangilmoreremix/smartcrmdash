@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Zap } from 'lucide-react';
 
@@ -12,7 +11,7 @@ interface PricingCardProps {
   color?: string;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({
+const PricingCard = ({
   tier,
   price,
   description,
@@ -20,7 +19,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   features,
   popular = false,
   color = 'bg-white'
-}) => {
+}: PricingCardProps) => {
   return (
     <div className={`rounded-xl ${color} p-8 border relative h-full ${
       popular ? 'transform scale-105 shadow-xl z-10' : 'shadow-lg'

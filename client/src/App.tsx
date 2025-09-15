@@ -1,8 +1,7 @@
 // src/App.tsx
 
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -17,10 +16,13 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
-import { NavbarPositionProvider, useNavbarPosition } from './contexts/NavbarPositionContext';
 import Navbar from './components/Navbar';
-import { EdgeZones } from './components/EdgeZones';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
+import { universalDataSync } from './services/universalDataSync';
+import { Toaster } from './components/ui/toaster';
+import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
@@ -30,34 +32,28 @@ import SystemOverview from './pages/SystemOverview';
 const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
-const Contacts = lazy(() => import('./pages/Contacts')); // details handled via modal inside
-const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote')); // Enhanced with Module Federation
-const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest')); // Button test
-const ContactsWorking = lazy(() => import('./pages/ContactsWorking')); // Working contacts with inline styles
-const Pipeline = lazy(() => import('./pages/Pipeline'));
+const Contacts = lazy(() => import('./pages/Contacts'));
+const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote'));
+const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest'));
+const ContactsWorking = lazy(() => import('./pages/ContactsWorking'));
+const PipelineWithRemote = lazy(() => import('./pages/PipelineWithRemote'));
 const PipelinePage = lazy(() => import('./pages/PipelinePage'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
-const MobileResponsiveness = lazy(() => import('./pages/MobileResponsiveness'));
+const Settings = lazy(() => import('./pages/Settings'));
+const TextMessages = lazy(() => import('./pages/TextMessages'));
 
-// Auth pages
+// Authentication
 const Login = lazy(() => import('./pages/Auth/Login'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
-import SalesTools from './pages/SalesTools';
-import PipelineIntelligence from './pages/PipelineIntelligence';
-import DealRiskMonitor from './pages/DealRiskMonitor';
-import SmartConversionInsights from './pages/SmartConversionInsights';
-import SalesCycleAnalytics from './pages/SalesCycleAnalytics';
-import PipelineHealthDashboard from './pages/PipelineHealthDashboard';
-import LeadAutomation from './pages/LeadAutomation';
-import CircleProspecting from './pages/CircleProspecting';
-const VideoEmail = lazy(() => import('./pages/VideoEmail'));
-const TextMessages = lazy(() => import('./pages/TextMessages'));
-const AIGoalsPage = lazy(() => import('./pages/AIGoalsPage'));
+const DevBypassPage = lazy(() => import('./pages/DevBypassPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 
-// New comprehensive implementations
+// Comprehensive implementations
 const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
 const Invoicing = lazy(() => import('./pages/Invoicing'));
 const ContentLibrary = lazy(() => import('./pages/ContentLibrary'));
@@ -68,30 +64,95 @@ const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
 
-// Sales pages added
+// Sales pages
 import WinRateIntelligence from './pages/WinRateIntelligence';
 import AISalesForecast from './pages/AISalesForecast';
 import LiveDealAnalysis from './pages/LiveDealAnalysis';
 import CompetitorInsights from './pages/CompetitorInsights';
 import RevenueIntelligence from './pages/RevenueIntelligence';
 
-// Communication pages added
+// Communication pages
 import ActivityAnalytics from './pages/ActivityAnalytics';
 import ResponseIntelligence from './pages/ResponseIntelligence';
 import ChannelSyncHub from './pages/ChannelSyncHub';
-// New imports for additional Communication pages
 import SmartEmailOptimizer from './pages/SmartEmailOptimizer';
 import SentimentMonitor from './pages/SentimentMonitor';
 import CommPerformance from './pages/CommPerformance';
 
-// Whitelabel imports
-import WhiteLabelCustomization from './pages/WhiteLabelCustomization';
-import LinkRedirect from './components/shared/LinkRedirect';
+// Remote embed pages
+const BusinessIntelPage = lazy(() => import('./pages/BusinessIntelPage'));
+const WLPage = lazy(() => import('./pages/WLPage'));
+const IntelPage = lazy(() => import('./pages/IntelPage'));
 
+// White-label management components
+const WhiteLabelManagementDashboard = lazy(() => import('./pages/WhiteLabelManagementDashboard'));
+const WhiteLabelPackageBuilder = lazy(() => import('./pages/WhiteLabelPackageBuilder'));
+const RevenueSharingPage = lazy(() => import('./pages/RevenueSharingPage'));
+const PartnerDashboard = lazy(() => import('./pages/PartnerDashboard'));
+const PartnerOnboardingPage = lazy(() => import('./pages/PartnerOnboardingPage'));
+
+// Connected Apps Remote Pages
+const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
+const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
+const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
+const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
+
+// User Account Management
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+
+// Demo Pages for Sales
+const DashboardDemo = lazy(() => import('./pages/demos/DashboardDemo'));
+const ContactsDemo = lazy(() => import('./pages/demos/ContactsDemo'));
+const PipelineDemo = lazy(() => import('./pages/demos/PipelineDemo'));
+
+// Import AssistantsDashboard component
+const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
+
+// Added lazy import for IframeOverlapChecker
+const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
+
+// Authentication imports
+import FormPublic from './pages/FormPublic';
+import UnauthorizedPage from './pages/UnauthorizedPage';
+import UserManagement from './pages/UserManagement';
+import PartnerManagementPage from './pages/PartnerManagementPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import LeadCapture from './pages/LeadCapture';
+import AIGoalsPage from './pages/AIGoals/AIGoalsPage';
+const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
+import GoalCardDemo from './pages/GoalCardDemo';
+import ContactDetail from './pages/ContactDetail';
+
+// Bulk import page
+const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
+// Admin Dashboard page
+import AdminDashboard from './pages/AdminDashboard';
+
+// Entitlements management page
+const EntitlementsPage = lazy(() => import('./pages/EntitlementsPage'));
+
+// Feature pages
+import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
+import AiToolsFeaturePage from './pages/landing/FeaturePage/AiToolsFeaturePage';
+import CommunicationsFeaturePage from './pages/landing/FeaturePage/CommunicationsFeaturePage';
+import ContactsFeaturePage from './pages/landing/FeaturePage/ContactsFeaturePage';
+import FunctionAssistantFeaturePage from './pages/landing/FeaturePage/FunctionAssistantFeaturePage';
+import ImageGeneratorFeaturePage from './pages/landing/FeaturePage/ImageGeneratorFeaturePage';
+import PipelineFeaturePage from './pages/landing/FeaturePage/PipelineFeaturePage';
+import SemanticSearchFeaturePage from './pages/landing/FeaturePage/SemanticSearchFeaturePage';
+import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyzerFeaturePage';
+
+// Additional whitelabel imports
+import LinkRedirect from './components/shared/LinkRedirect';
+const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomization'));
+
+// Landing page import
+import LandingPage from './pages/LandingPage';
 
 import './styles/design-system.css';
-
-
+// ElevenLabs widgets removed to prevent performance issues
+// import VoiceAgentWidget from './components/VoiceAgentWidget';
+// import ElevenLabsIframeWidget from './components/ElevenLabsIframeWidget';
 
 // Reusable placeholder
 const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
@@ -105,567 +166,589 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
   </div>
 );
 
-// Simple protected wrapper if/when you add auth
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+// Loading screen component
+const AuthLoadingScreen = () => (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Smart CRM</h2>
+      <p className="text-gray-600">Please wait while we initialize your session...</p>
+    </div>
+  </div>
+);
 
-// Inner component that has access to navbar position context
-const AppContent: React.FC = () => {
-  const { position, setPosition } = useNavbarPosition();
+// Dark mode hook
+const useDarkMode = () => {
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source } = result;
-
-    if (!destination) return;
-
-    // If dropped on an edge zone, snap to that position
-    if (destination.droppableId.includes('-edge')) {
-      const newPosition = destination.droppableId.split('-')[0] as 'top' | 'left' | 'right' | 'bottom';
-      setPosition(newPosition);
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDark));
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-  };
+  }, [isDark]);
 
-  // Calculate padding based on navbar position
-  const getContentPadding = () => {
-    const isVertical = position === 'left' || position === 'right';
-    const navbarSize = isVertical ? '60px' : '80px'; // Approximate navbar height/width
-
-    switch (position) {
-      case 'top':
-        return { paddingTop: navbarSize };
-      case 'bottom':
-        return { paddingBottom: navbarSize };
-      case 'left':
-        return { paddingLeft: navbarSize };
-      case 'right':
-        return { paddingRight: navbarSize };
-      default:
-        return { paddingTop: navbarSize };
-    }
-  };
-
-  return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900" style={getContentPadding()}>
-        <Navbar />
-        <EdgeZones onDragEnd={handleDragEnd} />
-        <LinkRedirect />
-        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-          <Routes>
-                          {/* Redirect root to dashboard */}
-                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-                          {/* Auth pages */}
-                          <Route
-                            path="/auth/login"
-                            element={<Login />}
-                          />
-                          <Route
-                            path="/auth/forgot-password"
-                            element={<ForgotPassword />}
-                          />
-                          <Route
-                            path="/auth/reset-password"
-                            element={<ResetPassword />}
-                          />
-
-                          {/* Core pages */}
-                          <Route
-                            path="/system-overview"
-                            element={
-                              <ProtectedRoute>
-                                <SystemOverview />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/dashboard"
-                            element={
-                              <ProtectedRoute>
-                                <Dashboard />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/analytics"
-                            element={
-                              <ProtectedRoute>
-                                <Analytics />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/ai-integration"
-                            element={
-                              <ProtectedRoute>
-                                <AIIntegration />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/ai-tools"
-                            element={
-                              <ProtectedRoute>
-                                <AITools />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/pipeline"
-                            element={
-                              <ProtectedRoute>
-                                <PipelinePage />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/remote-pipeline"
-                            element={
-                              <ProtectedRoute>
-                                <RemotePipeline />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/mobile"
-                            element={
-                              <ProtectedRoute>
-                                <MobileResponsiveness />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Test route for debugging buttons */}
-                          <Route
-                            path="/test-buttons"
-                            element={
-                              <ProtectedRoute>
-                                <SimpleContactsTest />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Contacts page - Using Remote Module Federation */}
-                          <Route
-                            path="/contacts"
-                            element={
-                              <ProtectedRoute>
-                                <ContactsWithRemote />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Deep-link: /contacts/:id opens same page and the page handles auto-opening modal */}
-                          <Route
-                            path="/contacts/:id"
-                            element={
-                              <ProtectedRoute>
-                                <ContactsWithRemote />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Legacy contacts route for fallback */}
-                          <Route
-                            path="/contacts-legacy"
-                            element={
-                              <ProtectedRoute>
-                                <Contacts />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Tasks & Calendar */}
-                          <Route
-                            path="/tasks"
-                            element={
-                              <ProtectedRoute>
-                                <TasksNew />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Calendar from navbar points here */}
-                          <Route
-                            path="/appointments"
-                            element={
-                              <ProtectedRoute>
-                                <Appointments />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* (If you still use the older Tasks page elsewhere) */}
-                          <Route
-                            path="/tasks-legacy"
-                            element={
-                              <ProtectedRoute>
-                                <Tasks />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* ===== Dropdown: Sales ===== */}
-                          <Route
-                            path="/sales-tools"
-                            element={
-                              <ProtectedRoute>
-                                <SalesTools />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/pipeline-intelligence"
-                            element={
-                              <ProtectedRoute>
-                                <PipelineIntelligence />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/deal-risk-monitor"
-                            element={
-                              <ProtectedRoute>
-                                <DealRiskMonitor />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/smart-conversion-insights"
-                            element={
-                              <ProtectedRoute>
-                                <SmartConversionInsights />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/pipeline-health-dashboard"
-                            element={
-                              <ProtectedRoute>
-                                <PipelineHealthDashboard />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/sales-cycle-analytics"
-                            element={
-                              <ProtectedRoute>
-                                <SalesCycleAnalytics />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/lead-automation"
-                            element={
-                              <ProtectedRoute>
-                                <LeadAutomation />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/circle-prospecting"
-                            element={
-                              <ProtectedRoute>
-                                <CircleProspecting />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Appointments already routed to /appointments above */}
-                          <Route
-                            path="/phone-system"
-                            element={
-                              <ProtectedRoute>
-                                <PhoneSystem />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/invoicing"
-                            element={
-                              <ProtectedRoute>
-                                <Invoicing />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Newly added sales pages */}
-                          <Route
-                            path="/win-rate-intelligence"
-                            element={
-                              <ProtectedRoute>
-                                <WinRateIntelligence />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/ai-sales-forecast"
-                            element={
-                              <ProtectedRoute>
-                                <AISalesForecast />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/live-deal-analysis"
-                            element={
-                              <ProtectedRoute>
-                                <LiveDealAnalysis />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/competitor-insights"
-                            element={
-                              <ProtectedRoute>
-                                <CompetitorInsights />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/revenue-intelligence"
-                            element={
-                              <ProtectedRoute>
-                                <RevenueIntelligence />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* ===== Dropdown: Tasks ===== */}
-                          <Route
-                            path="/task-automation"
-                            element={<PlaceholderPage title="Task Automation" />}
-                          />
-                          <Route
-                            path="/project-tracker"
-                            element={<PlaceholderPage title="Project Tracker" />}
-                          />
-                          <Route
-                            path="/time-tracking"
-                            element={<PlaceholderPage title="Time Tracking" />}
-                          />
-                          <Route
-                            path="/workflow-builder"
-                            element={<PlaceholderPage title="Workflow Builder" />}
-                          />
-                          <Route
-                            path="/deadline-manager"
-                            element={<PlaceholderPage title="Deadline Manager" />}
-                          />
-
-                          {/* ===== Dropdown: Communication ===== */}
-                          <Route
-                            path="/video-email"
-                            element={
-                              <ProtectedRoute>
-                                <VideoEmail />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/text-messages"
-                            element={
-                              <ProtectedRoute>
-                                <TextMessages />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* Email Composer goes to Communication page you already have */}
-                          <Route
-                            path="/email-composer"
-                            element={
-                              <ProtectedRoute>
-                                <Communication />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/communication"
-                            element={
-                              <ProtectedRoute>
-                                <CommunicationHub />
-                              </ProtectedRoute>
-                            }
-                          />
-                          {/* New Communication Routes */}
-                          <Route
-                            path="/activity-analytics"
-                            element={
-                              <ProtectedRoute>
-                                <ActivityAnalytics />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/response-intelligence"
-                            element={
-                              <ProtectedRoute>
-                                <ResponseIntelligence />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/channel-sync-hub"
-                            element={
-                              <ProtectedRoute>
-                                <ChannelSyncHub />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/smart-email-optimizer"
-                            element={
-                              <ProtectedRoute>
-                                <SmartEmailOptimizer />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/sentiment-monitor"
-                            element={
-                              <ProtectedRoute>
-                                <SentimentMonitor />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/comm-performance"
-                            element={
-                              <ProtectedRoute>
-                                <CommPerformance />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          <Route
-                            path="/campaigns"
-                            element={<PlaceholderPage title="Campaigns" />}
-                          />
-                          <Route
-                            path="/group-calls"
-                            element={<PlaceholderPage title="Group Calls" />}
-                          />
-                          <Route
-                            path="/call-recording"
-                            element={<PlaceholderPage title="Call Recording" />}
-                          />
-                          <Route
-                            path="/in-call-messaging"
-                            element={<PlaceholderPage title="In-Call Messaging" />}
-                          />
-                          <Route
-                            path="/call-analytics"
-                            element={<PlaceholderPage title="Call Analytics" />}
-                          />
-                          <Route
-                            path="/connection-quality"
-                            element={<PlaceholderPage title="Connection Quality Monitor" />}
-                          />
-
-                          {/* ===== Dropdown: Content ===== */}
-                          <Route
-                            path="/content-library"
-                            element={
-                              <ProtectedRoute>
-                                <ContentLibrary />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/voice-profiles"
-                            element={
-                              <ProtectedRoute>
-                                <VoiceProfiles />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/business-analysis"
-                            element={
-                              <ProtectedRoute>
-                                <BusinessAnalysis />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/image-generator"
-                            element={<PlaceholderPage title="Image Generator" />}
-                          />
-                          <Route
-                            path="/forms"
-                            element={
-                              <ProtectedRoute>
-                                <FormsAndSurveys />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/ai-model-demo"
-                            element={<PlaceholderPage title="AI Model Demo" />}
-                          />
-
-                          {/* ===== Apps dropdown internal links ===== */}
-                          <Route
-                            path="/white-label"
-                            element={
-                              <ProtectedRoute>
-                                <WhiteLabelCustomization />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Misc / Settings */}
-                          <Route
-                            path="/settings"
-                            element={<PlaceholderPage title="Settings" description="Settings page coming soon" />}
-                          />
-                          <Route
-                            path="/ai-goals"
-                            element={
-                              <ProtectedRoute>
-                                <AIGoalsPage />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          {/* Feature showcase routes (optional) */}
-                          <Route path="/features/ai-tools" element={<PlaceholderPage title="AI Tools Features" />} />
-                          <Route path="/features/contacts" element={<PlaceholderPage title="Contact Management Features" />} />
-                          <Route path="/features/pipeline" element={<PlaceholderPage title="Pipeline Features" />} />
-
-                          {/* Fallback */}
-                          <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </div>
-    </DragDropContext>
-  );
+  return [isDark, setIsDark];
 };
 
 function App() {
+  // Initialize universal data sync
+  useEffect(() => {
+    console.log('🚀 Starting Universal Data Sync System');
+    universalDataSync.initialize();
+
+    return () => {
+      universalDataSync.destroy();
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TenantProvider>
-          <RoleProvider>
-            <ThemeProvider>
-              <WhitelabelProvider>
-                <AIToolsProvider>
-                  <ModalsProvider>
-                    <EnhancedHelpProvider>
-                      <VideoCallProvider>
-                        <NavigationProvider>
-                          <DashboardLayoutProvider>
-                            <AIProvider>
-                              <NavbarPositionProvider>
-                                <AppContent />
-                              </NavbarPositionProvider>
-                            </AIProvider>
-                          </DashboardLayoutProvider>
-                        </NavigationProvider>
-                      </VideoCallProvider>
-                    </EnhancedHelpProvider>
-                  </ModalsProvider>
-                </AIToolsProvider>
-              </WhitelabelProvider>
-            </ThemeProvider>
-          </RoleProvider>
-        </TenantProvider>
+        <ThemeProvider>
+          <TenantProvider>
+            <WhitelabelProvider>
+              <AIToolsProvider>
+                <ModalsProvider>
+                  <EnhancedHelpProvider>
+                    <VideoCallProvider>
+                      <NavigationProvider>
+                        <DashboardLayoutProvider>
+                          <AIProvider>
+                            <RoleProvider>
+                              <AppContent />
+                            </RoleProvider>
+                          </AIProvider>
+                        </DashboardLayoutProvider>
+                      </NavigationProvider>
+                    </VideoCallProvider>
+                  </EnhancedHelpProvider>
+                </ModalsProvider>
+              </AIToolsProvider>
+            </WhitelabelProvider>
+          </TenantProvider>
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+// AppContent component with all the routing logic
+function AppContent() {
+  const { user, loading } = useAuth();
+  const [darkMode, setDarkMode] = useDarkMode();
+
+  if (loading) {
+    return <AuthLoadingScreen />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <LinkRedirect />
+      <RemoteAppRefreshManager />
+      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+        <Routes>
+          {/* Landing page as root - no navbar */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Auth pages */}
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/dev-bypass" element={<DevBypassPage />} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/voice-profiles" element={<VoiceProfiles />} />
+
+          {/* Core pages */}
+          <Route
+            path="/system-overview"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <SystemOverview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-integration"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AIIntegration />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* White Label Customization */}
+          <Route
+            path="/white-label"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WhiteLabelCustomization />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* White Label Management Routes */}
+          <Route
+            path="/white-label-management"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WhiteLabelManagementDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/package-builder"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WhiteLabelPackageBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/revenue-sharing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <RevenueSharingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner-dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PartnerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner-onboarding"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PartnerOnboardingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* AI Goals */}
+          <Route
+            path="/ai-goals"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AIGoalsWithRemote />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* AI Tools */}
+          <Route
+            path="/ai-tools"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AITools />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* AI Assistants */}
+          <Route
+            path="/assistants"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AssistantsDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Tasks */}
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TasksNew />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Appointments */}
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Communication */}
+          <Route
+            path="/communication"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Communication />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Analytics Remote Routes */}
+          <Route
+            path="/analytics-remote"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AnalyticsRemotePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Communication and CRM Tools */}
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Appointments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-email"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Video Email" description="Video email functionality coming soon..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/text-messages"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TextMessages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/phone-system"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PhoneSystem />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoicing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <Invoicing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lead-automation"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Lead Automation" description="AI-powered lead automation tools coming soon..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/circle-prospecting"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Circle Prospecting" description="Circle prospecting tools coming soon..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <FormsAndSurveys />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/business-analysis"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-library"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentLibrary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voice-profiles"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VoiceProfiles />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/communication-hub"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CommunicationHub />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Business Intelligence and Remote Apps */}
+          <Route
+            path="/business-intel"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessIntelPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/intel"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <IntelPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wl"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WLPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Sales Intelligence Routes */}
+          <Route
+            path="/pipeline-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Pipeline Intelligence" description="Advanced pipeline analytics and intelligence..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/deal-risk-monitor"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Deal Risk Monitor" description="Monitor and analyze deal risks in real-time..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/smart-conversion-insights"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Smart Conversion Insights" description="AI-powered conversion optimization insights..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipeline-health-dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Pipeline Health Dashboard" description="Comprehensive pipeline health monitoring..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-cycle-analytics"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PlaceholderPage title="Sales Cycle Analytics" description="Analyze and optimize your sales cycles..." />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/win-rate-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <WinRateIntelligence />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-sales-forecast"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AISalesForecast />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/live-deal-analysis"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <LiveDealAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/competitor-insights"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CompetitorInsights />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/revenue-intelligence"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <RevenueIntelligence />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Contacts and Pipeline Routes */}
+          <Route
+            path="/contacts"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContactsWorking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pipeline"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PipelinePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Feature showcase routes */}
+          <Route path="/features/ai-tools" element={<AiToolsFeaturePage />} />
+          <Route path="/features/contacts" element={<ContactsFeaturePage />} />
+          <Route path="/features/pipeline" element={<PipelineFeaturePage />} />
+          <Route path="/features/ai-assistant" element={<AiAssistantFeaturePage />} />
+          <Route path="/features/vision-analyzer" element={<VisionAnalyzerFeaturePage />} />
+          <Route path="/features/image-generator" element={<ImageGeneratorFeaturePage />} />
+          <Route path="/features/function-assistant" element={<FunctionAssistantFeaturePage />} />
+          <Route path="/features/speech-to-text" element={<SemanticSearchFeaturePage />} />
+
+          {/* Remote App Routes */}
+          <Route
+            path="/funnelcraft-ai"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <FunnelCraftPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/smartcrm-closer"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <SmartCRMPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-ai"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentAIPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+      
+      {/* Toaster for notifications */}
+      <Toaster />
+      
+      {/* ElevenLabs widgets removed to prevent performance issues */}
+    </div>
   );
 }
 

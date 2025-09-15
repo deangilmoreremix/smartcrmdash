@@ -76,14 +76,14 @@ const QuickActions = () => {
   const handleActionClick = (action: string) => {
     switch(action) {
       case 'newDeal':
-        // Open a modal or navigate to new deal page
-        console.log('Creating new deal...');
-        navigate('/deals/new');
+        // Navigate to pipeline page where user can create deals
+        console.log('Navigating to pipeline for deal creation...');
+        navigate('/pipeline');
         break;
       case 'addContact':
-        // Open a modal or navigate to new contact page
-        console.log('Adding new contact...');
-        navigate('/contacts/new');
+        // Navigate to contacts page where user can create contacts
+        console.log('Navigating to contacts for contact creation...');
+        navigate('/contacts');
         break;
       case 'scheduleMeeting':
         // Open meeting scheduler

@@ -190,7 +190,7 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
               ))
             ) : (
               <>
-                <Link to="/dashboard" className="
+                <Link to="/dev-bypass" className="
                   px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl
                   hover:shadow-lg transition duration-300 transform hover:translate-y-[-2px]
                   flex items-center

@@ -42,7 +42,12 @@ const defaultSectionOrder = [
   'sales-pipeline-deal-analytics',
   'customer-lead-management', 
   'activities-communications',
-  'integrations-system'
+  'integrations-system',
+  'contacts-section',
+  'pipeline-section',
+  'white-label-section',
+  'product-research-section',
+  'ai-analytics-section'
 ];
 
 // Updated sectionConfigs with GPT-5 enhanced sections
@@ -243,14 +248,50 @@ const sectionConfigs: Record<string, SectionConfig> = {
     icon: 'BarChart3',
     component: null,
     color: 'from-indigo-500 to-purple-500'
+  },
+  'white-label-section': {
+    id: 'white-label-section',
+    title: 'White Label Suite',
+    description: 'Comprehensive white label solutions and customization tools',
+    icon: 'Palette',
+    component: null,
+    color: 'from-indigo-500 to-purple-500'
+  },
+  'product-research-section': {
+    id: 'product-research-section',
+    title: 'Product Research',
+    description: 'Advanced product research and market analysis tools',
+    icon: 'Search',
+    component: null,
+    color: 'from-teal-500 to-cyan-500'
+  },
+  'ai-analytics-section': {
+    id: 'ai-analytics-section',
+    title: 'AI Analytics Dashboard',
+    description: 'Advanced AI-powered analytics and insights',
+    icon: 'BarChart3',
+    component: null,
+    color: 'from-emerald-500 to-green-500'
   }
 };
 
 export const DashboardLayoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
-    // Load from localStorage first, then use default
-    const saved = localStorage.getItem('dashboard-section-order');
-    return saved ? JSON.parse(saved) : defaultSectionOrder;
+    // Ensure we always have sections loaded
+    try {
+      const saved = localStorage.getItem('dashboard-section-order');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load dashboard sections from localStorage:', error);
+      localStorage.removeItem('dashboard-section-order');
+    }
+
+    return [...defaultSectionOrder];
   });
   
   const [isDragging, setIsDragging] = useState(false);

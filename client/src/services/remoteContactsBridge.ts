@@ -1,6 +1,8 @@
 // Remote Contacts Bridge Service
 // Handles communication between remote contacts module and local CRM
 
+import { remoteAssistantBridge } from './remoteAssistantBridge';
+
 export interface RemoteContactMessage {
   type: string;
   data: any;
@@ -130,7 +132,40 @@ export class RemoteContactsBridge {
     return this.isConnected;
   }
 
+  // AI Assistant Integration
+  initializeAssistantForContact(contactId: string) {
+    remoteAssistantBridge.registerIframe(this.iframe!);
+    this.sendMessage('ASSISTANT_AVAILABLE', {
+      contactId,
+      assistantType: 'contact',
+      capabilities: {
+        canChat: true,
+        canAnalyze: true,
+        canSuggest: true,
+        canSocialResearch: true
+      }
+    });
+  }
+
+  sendAssistantResponse(contactId: string, response: any) {
+    this.sendMessage('ASSISTANT_RESPONSE', {
+      contactId,
+      response
+    });
+  }
+
+  requestContactAssistant(contactId: string, action: string, data: any) {
+    this.sendMessage('ASSISTANT_REQUEST', {
+      contactId,
+      action,
+      data
+    });
+  }
+
   disconnect() {
+    if (this.iframe) {
+      remoteAssistantBridge.unregisterIframe(this.iframe);
+    }
     this.isConnected = false;
     this.messageHandlers.clear();
   }

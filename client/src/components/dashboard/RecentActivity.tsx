@@ -41,14 +41,68 @@ const RecentActivity: React.FC = () => {
     }
   ];
 
+  const [batchJobs, setBatchJobs] = React.useState([]);
+  const [aiInsights, setAIInsights] = React.useState(new Map());
+
+  React.useEffect(() => {
+    const checkBatchJobs = async () => {
+      const { batchAPIService } = await import('../../services/openai-batch-api.service');
+      const jobs = batchAPIService.getAllBatchJobs();
+      setBatchJobs(jobs.slice(0, 2)); // Show latest 2 batch jobs
+    };
+    
+    // Background AI processing for all visible deals
+    const processDealsInBackground = async () => {
+      const { aiOrchestrator } = await import('../../services/ai-orchestrator.service');
+      
+      for (const deal of upcomingDeals) {
+        // Generate insights without blocking UI
+        try {
+          const insightId = await aiOrchestrator.submitRequest({
+            type: 'insights_generation',
+            priority: 'low',
+            data: { dealId: deal.id, contactId: deal.contactId },
+            options: { useCache: true }
+          });
+          
+          // Store insight ID for later retrieval
+          setAIInsights(prev => new Map(prev.set(deal.id, insightId)));
+        } catch (error) {
+          console.debug('Background AI processing skipped:', error);
+        }
+      }
+    };
+    
+    checkBatchJobs();
+    processDealsInBackground();
+    
+    const interval = setInterval(() => {
+      checkBatchJobs();
+      processDealsInBackground();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const recentActivities = [
+    ...batchJobs.map(job => ({
+      type: 'batch_job',
+      icon: job.status === 'completed' ? CheckCircle : job.status === 'processing' ? TrendingUp : AlertCircle,
+      title: `Batch ${job.type.replace('_', ' ')}`,
+      description: `${job.itemCount} items - ${job.status}`,
+      time: new Date(job.createdAt).toLocaleTimeString(),
+      color: job.status === 'completed' ? 'text-green-600' : job.status === 'processing' ? 'text-blue-600' : 'text-yellow-600',
+      assistantInsight: `Cost: $${job.estimatedCost.toFixed(4)} - 50% savings with overnight processing`
+    })),
     {
       type: 'deal',
       icon: TrendingUp,
       title: 'Deal moved to negotiation',
       description: 'TechCorp Solutions - $85,000',
       time: '2 hours ago',
-      color: 'text-blue-600'
+      color: 'text-blue-600',
+      assistantInsight: 'Pipeline Bot: Deal velocity 23% above average. Recommend priority follow-up.',
+      assistantThreadId: 'thread_deal_techcorp_001'
     },
     {
       type: 'task',
@@ -119,9 +173,28 @@ const RecentActivity: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right group">
                   <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{deal.value}</p>
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{deal.probability} • {deal.dueDate}</p>
+                  
+                  {/* AI Insights Tooltip - appears on hover */}
+                  <div className={`absolute right-0 top-full mt-2 w-72 p-3 rounded-lg shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto ${
+                    isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'
+                  } border`}>
+                    <div className="text-xs space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                        <span className="font-medium">AI Risk Score: Low (15%)</span>
+                      </div>
+                      <p className="text-xs opacity-75">
+                        Strong engagement signals. Last contact 2 days ago. Recommend follow-up by Friday.
+                      </p>
+                      <div className="flex items-center space-x-1 text-xs font-medium text-blue-400">
+                        <span>🎯</span>
+                        <span>Auto-scheduling follow-up...</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -151,6 +224,17 @@ const RecentActivity: React.FC = () => {
                 <div className="flex-1">
                   <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} text-sm`}>{activity.title}</h4>
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{activity.description}</p>
+                  {activity.assistantInsight && (
+                    <div className={`mt-2 p-2 rounded-md text-xs ${
+                      isDark ? 'bg-blue-400/10 border border-blue-400/20 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-700'
+                    }`}>
+                      <div className="flex items-center space-x-1 mb-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                        <span className="font-medium">Assistant Insight</span>
+                      </div>
+                      {activity.assistantInsight}
+                    </div>
+                  )}
                   <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} mt-1`}>{activity.time}</p>
                 </div>
               </div>

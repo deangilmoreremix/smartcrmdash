@@ -18,13 +18,8 @@ export const useTheme = () => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
-    // Try to get from local storage synchronously to avoid flash of wrong theme
-    // Check localStorage first, then system preference
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-      return saved === 'dark';
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Always start in light mode
+    return false;
   });
 
   // Add a state to track theme transitions

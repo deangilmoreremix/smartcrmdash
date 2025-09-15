@@ -105,8 +105,9 @@ const LeadAutomation: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <header className="mb-8">
+    <div className="h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 overflow-y-auto">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Lead Automation</h1>
         <p className="text-gray-600">Choose an automation to perform common CRM tasks with AI assistance</p>
       </header>
@@ -218,6 +219,7 @@ const LeadAutomation: React.FC = () => {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

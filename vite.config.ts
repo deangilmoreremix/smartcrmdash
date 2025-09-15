@@ -16,12 +16,31 @@ export default defineConfig({
         ]
       : []),
   ],
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    allowedHosts: [
+      "9f38fddb-d049-4cd4-9f57-c41b6a878a9d-00-2xv27ubfspt46.riker.replit.dev",
+      ".replit.dev",
+      ".repl.co", 
+      ".riker.replit.dev",
+      "*.riker.replit.dev",
+      "localhost",
+      "0.0.0.0"
+    ]
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
+  },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    exclude: ['@elevenlabs/convai-widget-embed'],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {

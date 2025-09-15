@@ -17,57 +17,62 @@ const RemotePipeline: React.FC = () => {
   useEffect(() => {
     // Initialize the bridge
     if (!bridgeRef.current) {
-      bridgeRef.current = new RemotePipelineBridge();
+      bridgeRef.current = new RemotePipelineBridge((status) => {
+        setIsConnected(status.isConnected);
+        if (status.errorMessage) {
+          setError(status.errorMessage);
+        }
+      });
       
-      // Set up message handlers
+      // Set up message handlers with callbacks
       bridgeRef.current.onMessage('REMOTE_READY', () => {
         console.log('🎉 Remote pipeline is ready');
         setIsConnected(true);
         setIsLoading(false);
-        
-        // Send initial CRM data
-        if (bridgeRef.current) {
-          bridgeRef.current.initializeCRM({
-            deals: deals,
-            stages: ['Lead', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'],
-            totalValue: deals.reduce((sum, deal) => sum + deal.value, 0),
-            activeDeals: deals.filter(d => !['Closed Won', 'Closed Lost'].includes(d.stage)).length
-          }, {
-            name: 'CRM System',
-            version: '1.0.0'
-          });
-        }
       });
 
-      bridgeRef.current.onMessage('DEAL_CREATED', (data) => {
+      bridgeRef.current.onMessage('DEAL_CREATED', (data: any) => {
         console.log('🆕 Deal created in remote pipeline:', data);
-        // Refresh deals in CRM
         fetchDeals();
       });
 
-      bridgeRef.current.onMessage('DEAL_UPDATED', (data) => {
+      bridgeRef.current.onMessage('DEAL_UPDATED', (data: any) => {
         console.log('✏️ Deal updated in remote pipeline:', data);
-        // Refresh deals in CRM
         fetchDeals();
       });
 
-      bridgeRef.current.onMessage('DEAL_DELETED', (data) => {
+      bridgeRef.current.onMessage('DEAL_DELETED', (data: any) => {
         console.log('🗑️ Deal deleted in remote pipeline:', data);
-        // Refresh deals in CRM
         fetchDeals();
       });
 
       bridgeRef.current.onMessage('REQUEST_PIPELINE_DATA', () => {
         console.log('📊 Remote pipeline requesting CRM data');
+        // Convert deals to CRMDeal format
+        const crmDeals = deals.map(deal => ({
+          id: deal.id,
+          title: deal.title,
+          value: deal.value,
+          stage: deal.stage.toString(),
+          contactId: deal.contactId,
+          contactName: deal.contactName,
+          company: deal.company,
+          probability: deal.probability,
+          expectedCloseDate: deal.expectedCloseDate,
+          notes: deal.notes,
+          createdAt: deal.createdAt,
+          updatedAt: deal.updatedAt
+        }));
         if (bridgeRef.current) {
-          bridgeRef.current.syncDeals(deals);
+          bridgeRef.current.syncDeals(crmDeals);
         }
       });
     }
 
     return () => {
       if (bridgeRef.current) {
-        bridgeRef.current.disconnect();
+        // Cleanup bridge reference
+        bridgeRef.current = null;
       }
     };
   }, [deals, fetchDeals]);
@@ -98,10 +103,11 @@ const RemotePipeline: React.FC = () => {
         
         if (bridgeRef.current) {
           bridgeRef.current.setIframe(iframe);
-          // Try to inject bridge code after a delay
+          // Initialize bridge communication
           setTimeout(() => {
             if (bridgeRef.current) {
-              bridgeRef.current.injectBridgeCode();
+              // Bridge initialization handled in constructor
+              console.log('🔗 Bridge communication initialized');
             }
           }, 2000);
         }

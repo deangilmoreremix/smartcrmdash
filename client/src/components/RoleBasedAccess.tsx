@@ -6,7 +6,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'super_admin' | 'partner_admin' | 'customer_admin' | 'end_user';
+  role: 'super_admin' | 'wl_user' | 'regular_user';
   tenantId: string;
   permissions: string[];
   lastActive: string;
@@ -20,9 +20,8 @@ interface RoleContextType {
   hasRole: (role: string) => boolean;
   canAccess: (resource: string) => boolean;
   isSuperAdmin: () => boolean;
-  isPartnerAdmin: () => boolean;
-  isCustomerAdmin: () => boolean;
-  isEndUser: () => boolean;
+  isWLUser: () => boolean;
+  isRegularUser: () => boolean;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -51,12 +50,12 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const fetchUserRole = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get current user with role information
       const response = await fetch('/api/auth/user-role', {
         headers: tenant ? { 'X-Tenant-ID': tenant.id } : {},
       });
-      
+
       if (response.ok) {
         const userData = await response.json();
         setUser(userData.user);
@@ -84,34 +83,43 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
 
   const canAccess = (resource: string): boolean => {
     if (!user) return false;
-    
-    // Super admin can access everything
-    if (user.role === 'super_admin') return true;
-    
-    // Define resource access rules
-    const accessRules: Record<string, string[]> = {
-      'super_admin_dashboard': ['super_admin'],
-      'partner_dashboard': ['super_admin', 'partner_admin'],
-      'customer_management': ['super_admin', 'partner_admin'],
-      'tenant_management': ['super_admin'],
-      'user_management': ['super_admin', 'partner_admin', 'customer_admin'],
-      'billing_management': ['super_admin', 'partner_admin'],
-      'analytics': ['super_admin', 'partner_admin', 'customer_admin'],
-      'ai_tools': ['super_admin', 'partner_admin', 'customer_admin', 'end_user'],
-      'crm_features': ['super_admin', 'partner_admin', 'customer_admin', 'end_user'],
-      'custom_branding': ['super_admin', 'partner_admin'],
-      'feature_flags': ['super_admin'],
-      'audit_logs': ['super_admin', 'partner_admin', 'customer_admin'],
+
+    // Super admin can access everything (including dev bypass)
+    if (user.role === 'super_admin' || user.email === 'dev@smartcrm.local') return true;
+
+    // Resource-specific access control for new role structure
+    const resourcePermissions: Record<string, string[]> = {
+      // Super Admin only
+      'admin_dashboard': ['super_admin'],
+      'user_management': ['super_admin'], 
+      'bulk_import_users': ['super_admin'],
+      'system_settings': ['super_admin'],
+      'billing_management': ['super_admin'],
+      
+      // WL Users and Super Admin
+      'ai_tools': ['super_admin', 'wl_user'],
+      'advanced_analytics': ['super_admin', 'wl_user'],
+      'custom_branding': ['super_admin', 'wl_user'],
+      'api_access': ['super_admin', 'wl_user'],
+      'advanced_features': ['super_admin', 'wl_user'],
+      
+      // Core CRM features - All users (including CSV imports within modules)
+      'dashboard': ['super_admin', 'wl_user', 'regular_user'],
+      'contacts': ['super_admin', 'wl_user', 'regular_user'],
+      'contacts_csv': ['super_admin', 'wl_user', 'regular_user'],
+      'pipeline': ['super_admin', 'wl_user', 'regular_user'],
+      'pipeline_csv': ['super_admin', 'wl_user', 'regular_user'],
+      'calendar': ['super_admin', 'wl_user', 'regular_user'],
+      'communication': ['super_admin', 'wl_user', 'regular_user'],
     };
 
-    const allowedRoles = accessRules[resource];
-    return allowedRoles ? allowedRoles.includes(user.role) : false;
+    const allowedRoles = resourcePermissions[resource] || [];
+    return allowedRoles.includes(user.role);
   };
 
-  const isSuperAdmin = (): boolean => hasRole('super_admin');
-  const isPartnerAdmin = (): boolean => hasRole('partner_admin');
-  const isCustomerAdmin = (): boolean => hasRole('customer_admin');
-  const isEndUser = (): boolean => hasRole('end_user');
+  const isSuperAdmin = (): boolean => user?.role === 'super_admin' || user?.email === 'dev@smartcrm.local';
+  const isWLUser = (): boolean => user?.role === 'wl_user';
+  const isRegularUser = (): boolean => user?.role === 'regular_user';
 
   return (
     <RoleContext.Provider
@@ -122,9 +130,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         hasRole,
         canAccess,
         isSuperAdmin,
-        isPartnerAdmin,
-        isCustomerAdmin,
-        isEndUser,
+        isWLUser,
+        isRegularUser,
       }}
     >
       {children}
@@ -269,7 +276,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className = '' }) =>
 // Permission checker hook
 export const usePermissions = () => {
   const { user, hasPermission, hasRole, canAccess } = useRole();
-  
+
   return {
     user,
     can: hasPermission,

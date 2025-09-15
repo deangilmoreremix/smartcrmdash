@@ -48,15 +48,15 @@ const GPT5AnalyticsPanel: React.FC = () => {
     return {
       // Deal Metrics
       totalDeals: dealsArray.length,
-      activeDeals: dealsArray.filter(d => d.stage !== 'won' && d.stage !== 'lost').length,
-      wonDeals: dealsArray.filter(d => d.stage === 'won').length,
+      activeDeals: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && !['Won', 'Lost', 'won', 'lost', 'closed-won', 'closed-lost'].includes(d.stage)).length,
+      wonDeals: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage)).length,
       totalValue: dealsArray.reduce((sum, deal) => sum + Number(deal.value || 0), 0),
       avgDealSize: dealsArray.length > 0 ? dealsArray.reduce((sum, deal) => sum + Number(deal.value || 0), 0) / dealsArray.length : 0,
-      winRate: dealsArray.length > 0 ? (dealsArray.filter(d => d.stage === 'won').length / dealsArray.length) * 100 : 0,
+      winRate: dealsArray.length > 0 ? (dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage)).length / dealsArray.length) * 100 : 0,
 
       // Contact Metrics
       totalContacts: contactsArray.length,
-      activeContacts: contactsArray.filter(c => c.status === 'active').length,
+      activeContacts: contactsArray.filter(c => c.status && typeof c.status === 'string' && ['hot', 'warm', 'active'].includes(c.status)).length,
       topIndustries: contactsArray.reduce((acc: any, contact) => {
         const industry = contact.industry || 'Unknown';
         acc[industry] = (acc[industry] || 0) + 1;
@@ -73,7 +73,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
 
       // Time-based Analytics
       recentDeals: dealsArray.filter(d => d.createdAt && new Date(d.createdAt) > thirtyDaysAgo),
-      salesVelocity: dealsArray.filter(d => d.stage === 'won' && d.actualCloseDate && new Date(d.actualCloseDate) > thirtyDaysAgo).length
+      salesVelocity: dealsArray.filter(d => d.stage && typeof d.stage === 'string' && ['Won', 'won', 'closed-won'].includes(d.stage) && d.actualCloseDate && new Date(d.actualCloseDate) > thirtyDaysAgo).length
     };
   };
 
@@ -123,13 +123,13 @@ const GPT5AnalyticsPanel: React.FC = () => {
         ['revenue_growth', 'market_expansion', 'customer_retention']
       );
 
-      if (businessResult.strategic_recommendations) {
+      if (businessResult && typeof businessResult === 'object') {
         setBusinessIntelligence({
-          marketInsights: businessResult.market_insights || [],
-          competitiveAdvantages: businessResult.competitive_advantages || [],
-          riskFactors: businessResult.risk_factors || [],
-          growthOpportunities: businessResult.growth_opportunities || [],
-          strategicRecommendations: businessResult.strategic_recommendations || []
+          marketInsights: Array.isArray(businessResult.market_insights) ? businessResult.market_insights : [],
+          competitiveAdvantages: Array.isArray(businessResult.competitive_advantages) ? businessResult.competitive_advantages : [],
+          riskFactors: Array.isArray(businessResult.risk_factors) ? businessResult.risk_factors : [],
+          growthOpportunities: Array.isArray(businessResult.growth_opportunities) ? businessResult.growth_opportunities : [],
+          strategicRecommendations: Array.isArray(businessResult.strategic_recommendations) ? businessResult.strategic_recommendations : []
         });
       }
 
@@ -137,7 +137,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
       const insights: AnalyticsInsight[] = [
         {
           title: 'Pipeline Health Analysis',
-          insight: kpiResult?.summary || 'Your pipeline shows strong momentum with balanced deal stages.',
+          insight: typeof kpiResult?.summary === 'string' ? kpiResult.summary : 'Your pipeline shows strong momentum with balanced deal stages.',
           confidence: 0.92,
           priority: 'high',
           actionable: true,
@@ -346,7 +346,7 @@ const GPT5AnalyticsPanel: React.FC = () => {
                       {insight.insight}
                     </p>
                     
-                    {insight.recommendations && (
+                    {insight.recommendations && Array.isArray(insight.recommendations) && insight.recommendations.length > 0 && (
                       <div className="space-y-2">
                         <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                           Recommendations:
@@ -387,10 +387,10 @@ const GPT5AnalyticsPanel: React.FC = () => {
                 Growth Opportunities
               </h5>
               <ul className="space-y-1">
-                {businessIntelligence.growthOpportunities.slice(0, 3).map((opp, index) => (
+                {Array.isArray(businessIntelligence.growthOpportunities) && businessIntelligence.growthOpportunities.slice(0, 3).map((opp, index) => (
                   <li key={index} className={`${isDark ? 'text-purple-100' : 'text-purple-700'} flex items-center gap-2`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-purple-300' : 'bg-purple-500'}`} />
-                    {opp}
+                    {typeof opp === 'string' ? opp : typeof opp === 'object' && opp.description ? opp.description : typeof opp === 'object' && opp.action ? opp.action : 'Growth opportunity identified'}
                   </li>
                 ))}
               </ul>
@@ -401,10 +401,10 @@ const GPT5AnalyticsPanel: React.FC = () => {
                 Strategic Recommendations
               </h5>
               <ul className="space-y-1">
-                {businessIntelligence.strategicRecommendations.slice(0, 3).map((rec, index) => (
+                {Array.isArray(businessIntelligence.strategicRecommendations) && businessIntelligence.strategicRecommendations.slice(0, 3).map((rec, index) => (
                   <li key={index} className={`${isDark ? 'text-purple-100' : 'text-purple-700'} flex items-center gap-2`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-purple-300' : 'bg-purple-500'}`} />
-                    {rec}
+                    {typeof rec === 'string' ? rec : typeof rec === 'object' && rec.description ? rec.description : typeof rec === 'object' && rec.action ? rec.action : 'Strategic recommendation available'}
                   </li>
                 ))}
               </ul>

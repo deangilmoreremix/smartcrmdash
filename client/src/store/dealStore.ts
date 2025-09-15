@@ -37,7 +37,7 @@ interface DealStore {
   error: string | null;
   filters: DealFilter;
   sortOption: DealSortOption;
-  
+
   // Actions
   fetchDeals: () => Promise<void>;
   addDeal: (deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
@@ -45,23 +45,23 @@ interface DealStore {
   deleteDeal: (id: string) => Promise<void>;
   moveDeal: (dealId: string, newStageId: string, newIndex?: number) => Promise<void>;
   bulkUpdateDeals: (dealIds: string[], updates: Partial<Deal>) => Promise<void>;
-  
+
   // Pipeline management
   fetchPipelines: () => Promise<void>;
   addPipeline: (pipeline: Omit<Pipeline, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updatePipeline: (id: string, updates: Partial<Pipeline>) => Promise<void>;
   deletePipeline: (id: string) => Promise<void>;
   setActivePipeline: (pipelineId: string) => void;
-  
+
   // Stage management
   updateStage: (pipelineId: string, stageId: string, updates: Partial<DealStage>) => Promise<void>;
   reorderStages: (pipelineId: string, stages: DealStage[]) => Promise<void>;
-  
+
   // Filtering and sorting
   setFilters: (filters: Partial<DealFilter>) => void;
   setSortOption: (sortOption: DealSortOption) => void;
   clearFilters: () => void;
-  
+
   // Computed getters
   getFilteredDeals: () => Deal[];
   getStageValues: () => Record<string, number>;
@@ -164,11 +164,11 @@ export const useDealStore = create<DealStore>((set, get) => ({
       status: 'won',
     }
   ],
-  
+
   pipelines: {
     'default': defaultPipeline
   },
-  
+
   activePipelineId: 'default',
   isLoading: false,
   error: null,
@@ -198,13 +198,16 @@ export const useDealStore = create<DealStore>((set, get) => ({
       attachments: [],
       customFields: dealData.customFields || {},
       tags: dealData.tags || [],
-      status: 'active',
     };
-    
+
     set(state => ({
       deals: [...state.deals, newDeal]
     }));
-    
+    // Emit event for universal sync
+    window.dispatchEvent(new CustomEvent('dealsChanged', { 
+      detail: { deals: get().deals } 
+    }));
+
     return id;
   },
 
@@ -213,6 +216,10 @@ export const useDealStore = create<DealStore>((set, get) => ({
       deals: state.deals.map(deal =>
         deal.id === id ? { ...deal, ...updates, updatedAt: new Date() } : deal
       )
+    }));
+    // Emit event for universal sync
+    window.dispatchEvent(new CustomEvent('dealsChanged', { 
+      detail: { deals: get().deals } 
     }));
   },
 
@@ -226,7 +233,7 @@ export const useDealStore = create<DealStore>((set, get) => ({
     const { pipelines, activePipelineId } = get();
     const pipeline = pipelines[activePipelineId];
     const newStage = pipeline?.stages.find(s => s.id === newStageId);
-    
+
     if (newStage) {
       await get().updateDeal(dealId, { 
         stage: newStage,
@@ -254,11 +261,11 @@ export const useDealStore = create<DealStore>((set, get) => ({
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
+
     set(state => ({
       pipelines: { ...state.pipelines, [id]: newPipeline }
     }));
-    
+
     return id;
   },
 
@@ -367,7 +374,10 @@ export const useDealStore = create<DealStore>((set, get) => ({
     filteredDeals.sort((a, b) => {
       const aValue = a[sortOption.field];
       const bValue = b[sortOption.field];
-      
+
+      if (aValue === undefined && bValue === undefined) return 0;
+      if (aValue === undefined) return 1;
+      if (bValue === undefined) return -1;
       if (aValue < bValue) return sortOption.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortOption.direction === 'asc' ? 1 : -1;
       return 0;
@@ -381,27 +391,27 @@ export const useDealStore = create<DealStore>((set, get) => ({
     const activePipeline = pipelines[activePipelineId];
     const deals = get().deals; // Use all deals, not filtered ones
     const stageValues: Record<string, number> = {};
-    
+
     // Initialize all stage values to 0, fallback to default stages if no active pipeline
     const stages = activePipeline ? activePipeline.stages : defaultStages;
     stages.forEach(stage => {
       stageValues[stage.id] = 0;
     });
-    
+
     // Sum up deal values for each stage
     deals.forEach(deal => {
       if (deal.stage && deal.stage.id) {
         stageValues[deal.stage.id] = (stageValues[deal.stage.id] || 0) + deal.value;
       }
     });
-    
+
     return stageValues;
   },
 
   getTotalPipelineValue: () => {
     const deals = get().deals; // Use all deals instead of filtered
     return deals
-      .filter(deal => deal.status === 'active' && deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
+      .filter(deal => deal.stage.id !== 'closed-won' && deal.stage.id !== 'closed-lost')
       .reduce((total, deal) => total + deal.value, 0);
   },
 
@@ -436,11 +446,16 @@ export const useDealStore = create<DealStore>((set, get) => ({
     const pipelineDeals = deals.filter(d => 
       d.stage.id !== 'closed-won' && d.stage.id !== 'closed-lost'
     );
-    
+
     const totalPipeline = pipelineDeals.reduce((sum, d) => sum + d.value, 0);
     const weightedPipeline = pipelineDeals.reduce((sum, d) => sum + (d.value * d.probability / 100), 0);
-    
+
     return {
+      month: new Date().toISOString().slice(0, 7),
+      forecasted: weightedPipeline,
+      committed: weightedPipeline * 0.8,
+      pipeline: totalPipeline,
+      closed: 0,
       totalPipeline,
       weightedPipeline,
       bestCase: totalPipeline,
@@ -454,25 +469,25 @@ export const useDealStore = create<DealStore>((set, get) => ({
     const { pipelines, activePipelineId } = get();
     const pipeline = pipelines[activePipelineId];
     const rates: Record<string, number> = {};
-    
+
     if (pipeline) {
       pipeline.stages.forEach(stage => {
         rates[stage.id] = stage.probability;
       });
     }
-    
+
     return rates;
   },
 
   getSalesVelocity: () => {
     const deals = get().deals;
     const wonDeals = deals.filter(d => d.stage.id === 'closed-won');
-    
+
     if (wonDeals.length === 0) return 0;
-    
+
     const totalValue = wonDeals.reduce((sum, d) => sum + d.value, 0);
     const avgCycleTime = 30; // placeholder - should calculate from actual data
-    
+
     return totalValue / avgCycleTime;
   },
 

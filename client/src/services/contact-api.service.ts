@@ -1,25 +1,13 @@
-/**
- * Contact API Service
- * RESTful contact management with full CRUD operations
- */
-
-import { httpClient } from './http-client.service';
-import { validationService } from './validation.service';
-import { cacheService } from './cache.service';
-import { logger } from './logger.service';
 import { Contact } from '../types/contact';
-import apiConfig from '../config/api.config';
+import { cacheService } from './cache.service';
+import { logger } from '../utils/logger';
+import { validationService } from './validationService';
 
 export interface ContactFilters {
   search?: string;
-  interestLevel?: string;
   status?: string;
-  industry?: string;
-  sources?: string[];
   tags?: string[];
   hasAIScore?: boolean;
-  scoreRange?: { min: number; max: number };
-  dateRange?: { start: string; end: string };
   limit?: number;
   offset?: number;
   sortBy?: string;
@@ -37,43 +25,49 @@ export interface ContactListResponse {
 export interface ContactStats {
   total: number;
   byStatus: Record<string, number>;
-  byInterestLevel: Record<string, number>;
-  byIndustry: Record<string, number>;
+  byTags: Record<string, number>;
   withAIScore: number;
-  averageScore: number;
+  avgAIScore: number;
+  recentlyUpdated: number;
 }
 
 class ContactAPIService {
   private baseURL: string;
-  private supabaseKey: string | null = null;
+  private supabaseUrl: string;
+  private supabaseKey: string;
   private isBackendAvailable = true;
-  private isMockMode = import.meta.env.DEV || import.meta.env.VITE_ENV === 'development';
+  private isMockMode = false; // Use Supabase Edge Functions by default for remote app compatibility
   
   constructor() {
-    // For contact operations, use direct database access instead of Edge Functions
-    // Edge Functions are more suitable for complex operations like AI enrichment
-    this.baseURL = apiConfig.contactsAPI.baseURL;
-    this.isMockMode = true; // Always use local storage for now
+    // Configure to use Supabase Edge Functions as required by remote apps
+    this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    this.supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    this.baseURL = `${this.supabaseUrl}/functions/v1/contacts`;
     
-    console.log('Using local storage for contact management');
+    // Only fall back to mock mode if Supabase is not configured
+    if (!this.supabaseUrl || !this.supabaseKey) {
+      this.isMockMode = true;
+      console.warn('Supabase not configured - falling back to local storage');
+    } else {
+      this.isMockMode = false;
+      this.isBackendAvailable = true;
+      console.log('Using Supabase Edge Functions for contact management (required by remote apps)');
+    }
   }
   
-  // Get headers for Supabase requests
+  // Get headers for Supabase Edge Function requests
   private getSupabaseHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.supabaseKey}`
     };
-    
-    if (this.supabaseKey) {
-      headers['Authorization'] = `Bearer ${this.supabaseKey}`;
-    }
     
     return headers;
   }
   
   // Check if we should use fallback mode
   private shouldUseFallback(): boolean {
-    return true; // Always use fallback (local storage) for now
+    return this.isMockMode || !this.supabaseUrl || !this.supabaseKey;
   }
   
   // Initialize local storage with sample data if needed
@@ -94,132 +88,20 @@ class ContactAPIService {
         firstName: 'Jane',
         lastName: 'Doe',
         name: 'Jane Doe',
-        email: 'jane.doe@microsoft.com',
-        phone: '+1 425 882 8080',
+        email: 'jane.doe@example.com',
+        phone: '+1 (555) 123-4567',
         title: 'Marketing Director',
-        company: 'Microsoft',
+        company: 'Acme Corp',
         industry: 'Technology',
-        avatarSrc: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['LinkedIn', 'Email'],
-        interestLevel: 'hot',
+        avatarSrc: '',
+        sources: ['Website'],
+        interestLevel: 'high',
         status: 'prospect',
         lastConnected: '2024-01-15',
         aiScore: 85,
-        tags: ['Enterprise', 'High Value'],
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-15T14:30:00Z'
-      },
-      {
-        id: '2',
-        firstName: 'John',
-        lastName: 'Smith',
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        title: 'Developer',
-        company: 'Tech Company',
-        avatarSrc: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['Website'],
-        interestLevel: 'medium',
-        status: 'lead',
-        createdAt: '2024-01-02T00:00:00Z',
-        updatedAt: '2024-01-02T00:00:00Z'
-      },
-      {
-        id: '3',
-        firstName: 'Sarah',
-        lastName: 'Johnson',
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@salesforce.com',
-        phone: '+1 415 901 7000',
-        title: 'VP of Sales',
-        company: 'Salesforce',
-        industry: 'Technology',
-        avatarSrc: 'https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['Conference', 'LinkedIn'],
-        interestLevel: 'hot',
-        status: 'qualified',
-        lastConnected: '2024-01-20',
-        aiScore: 92,
-        tags: ['Enterprise', 'Decision Maker'],
-        createdAt: '2024-01-03T00:00:00Z',
-        updatedAt: '2024-01-20T09:15:00Z'
-      },
-      {
-        id: '4',
-        firstName: 'Michael',
-        lastName: 'Chen',
-        name: 'Michael Chen',
-        email: 'michael.chen@startup.io',
-        title: 'Founder & CEO',
-        company: 'StartupIO',
-        industry: 'Technology',
-        avatarSrc: 'https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['Referral'],
-        interestLevel: 'medium',
-        status: 'lead',
-        lastConnected: '2024-01-18',
-        aiScore: 78,
-        tags: ['Startup', 'Founder'],
-        createdAt: '2024-01-05T00:00:00Z',
-        updatedAt: '2024-01-18T16:45:00Z'
-      },
-      {
-        id: '5',
-        firstName: 'Emily',
-        lastName: 'Rodriguez',
-        name: 'Emily Rodriguez',
-        email: 'emily.rodriguez@enterprise.com',
-        phone: '+1 555 123 4567',
-        title: 'Operations Manager',
-        company: 'Enterprise Corp',
-        industry: 'Manufacturing',
-        avatarSrc: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['Cold Email'],
-        interestLevel: 'warm',
-        status: 'prospect',
-        lastConnected: '2024-01-22',
-        aiScore: 65,
-        tags: ['Manufacturing', 'Operations'],
-        createdAt: '2024-01-08T00:00:00Z',
-        updatedAt: '2024-01-22T11:30:00Z'
-      },
-      {
-        id: '6',
-        firstName: 'David',
-        lastName: 'Kim',
-        name: 'David Kim',
-        email: 'david.kim@consulting.com',
-        title: 'Senior Consultant',
-        company: 'Strategy Consulting',
-        industry: 'Consulting',
-        avatarSrc: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['LinkedIn'],
-        interestLevel: 'cold',
-        status: 'lead',
-        lastConnected: '2024-01-10',
-        tags: ['Consulting'],
-        createdAt: '2024-01-10T00:00:00Z',
-        updatedAt: '2024-01-10T00:00:00Z'
-      },
-      {
-        id: '7',
-        firstName: 'Brooklyn',
-        lastName: 'Martinez',
-        name: 'Brooklyn Martinez',
-        email: 'brooklyn@acmeretail.com',
-        phone: '+1 555 987 6543',
-        title: 'Retail Manager',
-        company: 'ACME Retail',
-        industry: 'Retail',
-        avatarSrc: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        sources: ['Website', 'Email'],
-        interestLevel: 'warm',
-        status: 'prospect',
-        lastConnected: '2024-01-25',
-        aiScore: 73,
-        tags: ['Retail', 'Manager'],
-        createdAt: '2024-01-12T00:00:00Z',
-        updatedAt: '2024-01-25T14:20:00Z'
+        tags: ['enterprise', 'decision-maker'],
+        createdAt: '2024-01-10T10:00:00Z',
+        updatedAt: '2024-01-20T15:30:00Z'
       }
     ];
     
@@ -227,82 +109,244 @@ class ContactAPIService {
     return sampleContacts;
   }
   
-  // Get all contacts from localStorage
+  // Get contacts from local storage
   private getLocalContacts(): Contact[] {
     try {
       const stored = localStorage.getItem('contacts');
-      if (stored) {
-        return JSON.parse(stored);
-      }
+      return stored ? JSON.parse(stored) : this.initializeLocalStorage();
     } catch (e) {
-      // If localStorage is corrupted, reinitialize
+      return this.initializeLocalStorage();
     }
-    return this.initializeLocalStorage();
   }
   
-  // Save contacts to localStorage
+  // Save contacts to local storage
   private saveLocalContacts(contacts: Contact[]): void {
     try {
       localStorage.setItem('contacts', JSON.stringify(contacts));
     } catch (e) {
-      logger.error('Failed to save contacts to localStorage', e as Error);
+      console.warn('Failed to save contacts to localStorage');
     }
   }
-  
+
   // CRUD Operations
-  async createContact(contactData: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>): Promise<Contact> {
-    // Validate input
+  async createContact(contactData: Partial<Contact>): Promise<Contact> {
     const sanitized = validationService.sanitizeContact(contactData);
-    const validation = validationService.validateContact(sanitized);
     
-    if (!validation.isValid) {
-      const errorMessage = Object.values(validation.errors).flat().join(', ');
-      const error = new Error(`Contact validation failed: ${errorMessage}`);
-      logger.error('Contact validation failed', error, validation.errors);
-      throw error;
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact creation');
+      const contacts = this.getLocalContacts();
+      
+      const newContact: Contact = {
+        id: crypto.randomUUID(),
+        firstName: sanitized.firstName || '',
+        lastName: sanitized.lastName || '',
+        name: `${sanitized.firstName || ''} ${sanitized.lastName || ''}`.trim(),
+        email: sanitized.email || '',
+        phone: sanitized.phone || '',
+        title: sanitized.title || '',
+        company: sanitized.company || '',
+        industry: sanitized.industry || '',
+        avatarSrc: sanitized.avatarSrc || '',
+        sources: sanitized.sources || ['Website'],
+        interestLevel: sanitized.interestLevel || 'medium',
+        status: sanitized.status || 'lead',
+        lastConnected: sanitized.lastConnected,
+        aiScore: sanitized.aiScore,
+        tags: sanitized.tags || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts.push(newContact);
+      this.saveLocalContacts(contacts);
+      cacheService.set('contact', newContact.id, newContact, 300, ['contact']);
+      return newContact;
     }
     
-    // Local storage fallback
-    logger.info('Using local storage for contact creation');
-    const contacts = this.getLocalContacts();
-    const newContact: Contact = {
-      ...sanitized as any,
-      id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    contacts.push(newContact);
-    this.saveLocalContacts(contacts);
-    
-    // Cache the new contact
-    cacheService.setContact(newContact.id, newContact);
-    
-    return newContact;
+    try {
+      // Try Edge Function with clean payload for remote app compatibility
+      logger.info('Creating contact via Supabase Edge Function');
+      
+      const edgeFunctionPayload = {
+        firstName: sanitized.firstName,
+        lastName: sanitized.lastName,
+        email: sanitized.email,
+        phone: sanitized.phone,
+        company: sanitized.company,
+        title: sanitized.title,
+        status: sanitized.status,
+        sources: sanitized.sources || ['Website'],
+        aiScore: sanitized.aiScore || null,
+        tags: sanitized.tags || []
+      };
+      
+      const response = await fetch(this.baseURL, {
+        method: 'POST',
+        headers: this.getSupabaseHeaders(),
+        body: JSON.stringify(edgeFunctionPayload)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      // Handle different response formats from Edge Functions
+      let contactData;
+      if (result.contact) {
+        contactData = result.contact;
+      } else if (result.data) {
+        contactData = result.data;
+      } else if (result.id) {
+        contactData = result;
+      } else {
+        throw new Error('Unexpected Edge Function response format');
+      }
+      
+      const newContact: Contact = {
+        id: contactData.id || crypto.randomUUID(),
+        firstName: contactData.firstName || contactData.first_name || '',
+        lastName: contactData.lastName || contactData.last_name || '',
+        name: `${contactData.firstName || contactData.first_name || ''} ${contactData.lastName || contactData.last_name || ''}`.trim(),
+        email: contactData.email || '',
+        phone: contactData.phone || '',
+        title: contactData.title || contactData.position || '',
+        company: contactData.company || '',
+        industry: contactData.industry || '',
+        avatarSrc: contactData.avatarSrc || '',
+        sources: contactData.sources || [contactData.source || 'Website'].filter(Boolean),
+        interestLevel: contactData.interestLevel || 'medium',
+        status: contactData.status || 'lead',
+        lastConnected: contactData.lastConnected || contactData.last_contacted,
+        aiScore: contactData.aiScore || contactData.ai_score || contactData.lead_score,
+        tags: contactData.tags || [],
+        createdAt: contactData.createdAt || contactData.created_at || new Date().toISOString(),
+        updatedAt: contactData.updatedAt || contactData.updated_at || new Date().toISOString()
+      };
+      
+      // Cache the contact
+      cacheService.set('contact', newContact.id, newContact, 300, ['contact']);
+      
+      logger.info('Contact created successfully via Edge Function', { contactId: newContact.id });
+      return newContact;
+    } catch (error) {
+      logger.error('Edge Function unavailable, using localStorage fallback for remote app compatibility', error as Error);
+      
+      // Critical: Use localStorage fallback but maintain Edge Function compatibility for remote apps
+      const contacts = this.getLocalContacts();
+      
+      const newContact: Contact = {
+        id: crypto.randomUUID(),
+        firstName: sanitized.firstName || '',
+        lastName: sanitized.lastName || '',
+        name: `${sanitized.firstName || ''} ${sanitized.lastName || ''}`.trim(),
+        email: sanitized.email || '',
+        phone: sanitized.phone || '',
+        title: sanitized.title || '',
+        company: sanitized.company || '',
+        industry: sanitized.industry || '',
+        avatarSrc: sanitized.avatarSrc || '',
+        sources: sanitized.sources || ['Website'],
+        interestLevel: sanitized.interestLevel || 'medium',
+        status: sanitized.status || 'lead',
+        lastConnected: sanitized.lastConnected,
+        aiScore: sanitized.aiScore,
+        tags: sanitized.tags || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts.push(newContact);
+      this.saveLocalContacts(contacts);
+      cacheService.set('contact', newContact.id, newContact, 300, ['contact']);
+      
+      logger.info('Contact created via localStorage fallback (Edge Function compatibility maintained)');
+      return newContact;
+    }
   }
-  
+
   async getContact(contactId: string): Promise<Contact> {
     // Check cache first
-    const cached = cacheService.getContact(contactId);
+    const cached = cacheService.get('contact', contactId);
     if (cached) {
-      return cached;
+      return cached as Contact;
+    }
+
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact retrieval');
+      const contacts = this.getLocalContacts();
+      const contact = contacts.find(c => c.id === contactId);
+      
+      if (!contact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      cacheService.set('contact', contactId, contact, 300, ['contact']);
+      return contact;
     }
     
-    // Local storage fallback
-    logger.info('Using local storage for contact retrieval');
-    const contacts = this.getLocalContacts();
-    const contact = contacts.find(c => c.id === contactId);
-    
-    if (!contact) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    try {
+      // Use Edge Function for contact retrieval (required by remote apps)
+      const response = await fetch(`${this.baseURL}/${contactId}`, {
+        method: 'GET',
+        headers: this.getSupabaseHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const contactData = result.contact || result.data || result;
+      
+      if (!contactData) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const contact: Contact = {
+        id: contactData.id,
+        firstName: contactData.firstName || contactData.first_name || '',
+        lastName: contactData.lastName || contactData.last_name || '',
+        name: `${contactData.firstName || contactData.first_name || ''} ${contactData.lastName || contactData.last_name || ''}`.trim(),
+        email: contactData.email || '',
+        phone: contactData.phone || '',
+        title: contactData.title || contactData.position || '',
+        company: contactData.company || '',
+        industry: contactData.industry || '',
+        avatarSrc: contactData.avatarSrc || '',
+        sources: contactData.sources || [contactData.source || 'Website'].filter(Boolean),
+        interestLevel: contactData.interestLevel || 'medium',
+        status: contactData.status || 'lead',
+        lastConnected: contactData.lastConnected || contactData.last_contacted,
+        aiScore: contactData.aiScore || contactData.ai_score || contactData.lead_score,
+        tags: contactData.tags || [],
+        createdAt: contactData.createdAt || contactData.created_at,
+        updatedAt: contactData.updatedAt || contactData.updated_at
+      };
+      
+      // Cache the contact
+      cacheService.set('contact', contactId, contact, 300, ['contact']);
+      
+      return contact;
+    } catch (error) {
+      logger.error('Edge Function unavailable, using localStorage fallback', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const contact = contacts.find(c => c.id === contactId);
+      
+      if (!contact) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      cacheService.set('contact', contactId, contact, 300, ['contact']);
+      return contact;
     }
-    
-    // Cache the contact
-    cacheService.setContact(contactId, contact);
-    
-    return contact;
   }
-  
+
   async updateContact(contactId: string, updates: Partial<Contact>): Promise<Contact> {
     // Validate updates
     if (Object.keys(updates).length === 0) {
@@ -311,66 +355,160 @@ class ContactAPIService {
     
     const sanitized = validationService.sanitizeContact(updates);
     
-    // Local storage fallback
-    logger.info('Using local storage for contact update');
-    const contacts = this.getLocalContacts();
-    const contactIndex = contacts.findIndex(c => c.id === contactId);
-    
-    if (contactIndex === -1) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact update');
+      const contacts = this.getLocalContacts();
+      const contactIndex = contacts.findIndex(c => c.id === contactId);
+      
+      if (contactIndex === -1) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const updatedContact: Contact = {
+        ...contacts[contactIndex],
+        ...sanitized as any,
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts[contactIndex] = updatedContact;
+      this.saveLocalContacts(contacts);
+      cacheService.set('contact', contactId, updatedContact, 300, ['contact']);
+      cacheService.set('contactList', 'invalidate', null, 0, ['list']);
+      
+      return updatedContact;
     }
     
-    // Apply updates
-    const updatedContact: Contact = {
-      ...contacts[contactIndex],
-      ...sanitized as any,
-      updatedAt: new Date().toISOString()
-    };
-    
-    contacts[contactIndex] = updatedContact;
-    this.saveLocalContacts(contacts);
-    
-    // Update cache
-    cacheService.setContact(contactId, updatedContact);
-    
-    // Invalidate lists
-    cacheService.deleteByTag('list');
-    
-    logger.info('Contact updated successfully', { contactId, updates: Object.keys(updates) });
-    
-    return updatedContact;
+    try {
+      // Use Edge Function for contact update (required by remote apps)
+      const response = await fetch(`${this.baseURL}/${contactId}`, {
+        method: 'PATCH',
+        headers: this.getSupabaseHeaders(),
+        body: JSON.stringify(sanitized)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const contactData = result.contact || result.data || result;
+      
+      if (!contactData) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const updatedContact: Contact = {
+        id: contactData.id,
+        firstName: contactData.firstName || contactData.first_name || '',
+        lastName: contactData.lastName || contactData.last_name || '',
+        name: `${contactData.firstName || contactData.first_name || ''} ${contactData.lastName || contactData.last_name || ''}`.trim(),
+        email: contactData.email || '',
+        phone: contactData.phone || '',
+        title: contactData.title || contactData.position || '',
+        company: contactData.company || '',
+        industry: contactData.industry || '',
+        avatarSrc: contactData.avatarSrc || '',
+        sources: contactData.sources || [contactData.source || 'Website'].filter(Boolean),
+        interestLevel: contactData.interestLevel || 'medium',
+        status: contactData.status || 'lead',
+        lastConnected: contactData.lastConnected || contactData.last_contacted,
+        aiScore: contactData.aiScore || contactData.ai_score || contactData.lead_score,
+        tags: contactData.tags || [],
+        createdAt: contactData.createdAt || contactData.created_at,
+        updatedAt: contactData.updatedAt || contactData.updated_at || new Date().toISOString()
+      };
+      
+      // Update cache
+      cacheService.set('contact', contactId, updatedContact, 300, ['contact']);
+      cacheService.set('contactList', 'invalidate', null, 0, ['list']);
+      
+      return updatedContact;
+    } catch (error) {
+      logger.error('Edge Function unavailable, using localStorage fallback', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const contactIndex = contacts.findIndex(c => c.id === contactId);
+      
+      if (contactIndex === -1) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      const updatedContact: Contact = {
+        ...contacts[contactIndex],
+        ...sanitized as any,
+        updatedAt: new Date().toISOString()
+      };
+      
+      contacts[contactIndex] = updatedContact;
+      this.saveLocalContacts(contacts);
+      cacheService.set('contact', contactId, updatedContact, 300, ['contact']);
+      cacheService.set('contactList', 'invalidate', null, 0, ['list']);
+      
+      return updatedContact;
+    }
   }
-  
+
   async deleteContact(contactId: string): Promise<void> {
-    // Local storage fallback
-    logger.info('Using local storage for contact deletion');
-    const contacts = this.getLocalContacts();
-    const filteredContacts = contacts.filter(c => c.id !== contactId);
-    
-    if (filteredContacts.length === contacts.length) {
-      throw new Error(`Contact with ID ${contactId} not found`);
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for contact deletion');
+      const contacts = this.getLocalContacts();
+      const filteredContacts = contacts.filter(c => c.id !== contactId);
+      
+      if (filteredContacts.length === contacts.length) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      this.saveLocalContacts(filteredContacts);
+      cacheService.set('contactDelete', contactId, null, 0, ['contact']);
+      return;
     }
     
-    this.saveLocalContacts(filteredContacts);
-    
-    // Remove from cache
-    cacheService.invalidateContact(contactId);
-    
-    logger.info('Contact deleted successfully', { contactId });
+    try {
+      // Use Edge Function for contact deletion (required by remote apps)
+      const response = await fetch(`${this.baseURL}/${contactId}`, {
+        method: 'DELETE',
+        headers: this.getSupabaseHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Edge Function error: ${response.status} ${response.statusText}`);
+      }
+      
+      // Remove from cache
+      cacheService.set('contactDelete', contactId, null, 0, ['contact']);
+      cacheService.set('contactList', 'invalidate', null, 0, ['list']);
+      
+      logger.info('Contact deleted successfully via Edge Function', { contactId });
+    } catch (error) {
+      logger.error('Edge Function unavailable, using localStorage fallback', error as Error);
+      
+      // Fallback to local storage
+      const contacts = this.getLocalContacts();
+      const filteredContacts = contacts.filter(c => c.id !== contactId);
+      
+      if (filteredContacts.length === contacts.length) {
+        throw new Error(`Contact with ID ${contactId} not found`);
+      }
+      
+      this.saveLocalContacts(filteredContacts);
+      cacheService.set('contactDelete', contactId, null, 0, ['contact']);
+    }
   }
-  
+
   // List and Search Operations
   async getContacts(filters: ContactFilters = {}): Promise<ContactListResponse> {
     const cacheKey = JSON.stringify(filters);
     
     // Check cache
-    const cached = cacheService.getContactList(filters);
+    const cached = cacheService.get('contactList', cacheKey);
     if (cached) {
-      return cached;
+      return cached as ContactListResponse;
     }
     
-    // Local storage fallback
-    logger.info('Using local storage for contacts list');
+    // Use local storage for list operations (Edge Functions for individual CRUD)
     let contacts = this.getLocalContacts();
     
     // Apply filters
@@ -383,12 +521,14 @@ class ContactAPIService {
       );
     }
     
-    if (filters.interestLevel && filters.interestLevel !== 'all') {
-      contacts = contacts.filter(c => c.interestLevel === filters.interestLevel);
-    }
-    
     if (filters.status && filters.status !== 'all') {
       contacts = contacts.filter(c => c.status === filters.status);
+    }
+    
+    if (filters.tags && filters.tags.length > 0) {
+      contacts = contacts.filter(c => 
+        filters.tags!.some(tag => c.tags.includes(tag))
+      );
     }
     
     if (filters.hasAIScore !== undefined) {
@@ -423,156 +563,83 @@ class ContactAPIService {
       hasMore: offset + paginatedContacts.length < contacts.length
     };
     
-    // Cache individual contacts
-    paginatedContacts.forEach(contact => {
-      cacheService.setContact(contact.id, contact, 300000);
-    });
-    
-    // Cache the list
-    cacheService.setContactList(filters, result);
+    // Cache the result
+    cacheService.set('contactList', cacheKey, result, 300, ['list']);
     
     return result;
   }
-  
-  async searchContacts(query: string, filters: Partial<ContactFilters> = {}): Promise<ContactListResponse> {
-    const searchFilters = {
-      ...filters,
-      search: query,
-      limit: filters.limit || 50,
-    };
-    
-    return this.getContacts(searchFilters);
-  }
-  
-  // Batch Operations
-  async createContactsBatch(contacts: Array<Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Contact[]> {
-    if (contacts.length === 0) {
-      throw new Error('No contacts provided');
+
+  async getContactStats(): Promise<ContactStats> {
+    // Check cache first
+    const cached = cacheService.get('contactStats', 'all');
+    if (cached) {
+      return cached as ContactStats;
     }
-    
-    if (contacts.length > 100) {
-      throw new Error('Batch size cannot exceed 100 contacts');
-    }
-    
-    // Validate all contacts
-    const validatedContacts: any[] = [];
-    const validationErrors: string[] = [];
-    
-    contacts.forEach((contact, index) => {
-      const sanitized = validationService.sanitizeContact(contact);
-      const validation = validationService.validateContact(sanitized);
-      
-      if (validation.isValid) {
-        validatedContacts.push(sanitized);
-      } else {
-        validationErrors.push(`Contact ${index + 1}: ${Object.values(validation.errors).flat().join(', ')}`);
-      }
-    });
-    
-    if (validationErrors.length > 0) {
-      const error = new Error(`Batch validation failed: ${validationErrors.join('; ')}`);
-      logger.error('Batch contact validation failed', error, { validationErrors });
-      throw error;
-    }
-    
-    // Local storage fallback
-    logger.info('Using local storage for batch contact creation');
-    const existingContacts = this.getLocalContacts();
-    
-    const createdContacts: Contact[] = validatedContacts.map((contact, index) => ({
-      ...contact,
-      id: `batch-${Date.now()}-${index}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-    
-    const allContacts = [...existingContacts, ...createdContacts];
-    this.saveLocalContacts(allContacts);
-    
-    // Cache created contacts
-    createdContacts.forEach(contact => {
-      cacheService.setContact(contact.id, contact);
-    });
-    
-    // Invalidate lists
-    cacheService.deleteByTag('list');
-    
-    return createdContacts;
-  }
-  
-  async updateContactsBatch(updates: Array<{ id: string; data: Partial<Contact> }>): Promise<Contact[]> {
-    if (updates.length === 0) {
-      throw new Error('No updates provided');
-    }
-    
-    if (updates.length > 50) {
-      throw new Error('Batch update size cannot exceed 50 contacts');
-    }
-    
-    // Local storage fallback
-    logger.info('Using local storage for batch contact update');
+
     const contacts = this.getLocalContacts();
-    const updatedContacts: Contact[] = [];
     
-    for (const update of updates) {
-      const contactIndex = contacts.findIndex(c => c.id === update.id);
-      if (contactIndex !== -1) {
-        // Apply updates
-        const updatedContact: Contact = {
-          ...contacts[contactIndex],
-          ...update.data,
-          updatedAt: new Date().toISOString()
-        };
-        
-        contacts[contactIndex] = updatedContact;
-        updatedContacts.push(updatedContact);
-        
-        // Update cache
-        cacheService.setContact(updatedContact.id, updatedContact);
-      }
-    }
-    
-    this.saveLocalContacts(contacts);
-    
-    // Invalidate lists
-    cacheService.deleteByTag('list');
-    
-    return updatedContacts;
-  }
-  
-  // Export Operations
-  async exportContacts(filters: ContactFilters = {}, format: 'csv' | 'json' = 'csv'): Promise<Blob> {
-    // Local storage fallback
-    logger.info('Using local storage for contact export');
-    
-    // Get contacts
-    const result = await this.getContacts(filters);
-    
-    if (format === 'json') {
-      const jsonString = JSON.stringify(result.contacts, null, 2);
-      return new Blob([jsonString], { type: 'application/json' });
-    } else {
-      // CSV export
-      const headers = [
-        'id', 'firstName', 'lastName', 'email', 'phone', 'title', 
-        'company', 'industry', 'interestLevel', 'status', 'aiScore'
-      ];
+    const stats: ContactStats = {
+      total: contacts.length,
+      byStatus: {},
+      byTags: {},
+      withAIScore: 0,
+      avgAIScore: 0,
+      recentlyUpdated: 0
+    };
+
+    let totalAIScore = 0;
+    let aiScoreCount = 0;
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    contacts.forEach(contact => {
+      // Count by status
+      stats.byStatus[contact.status] = (stats.byStatus[contact.status] || 0) + 1;
       
-      const rows = result.contacts.map(contact => {
-        return headers.map(header => {
-          const value = (contact as any)[header];
-          // Handle values that might contain commas or quotes
-          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value !== undefined && value !== null ? value : '';
-        }).join(',');
+      // Count by tags
+      contact.tags.forEach(tag => {
+        stats.byTags[tag] = (stats.byTags[tag] || 0) + 1;
       });
       
-      const csvContent = [headers.join(','), ...rows].join('\n');
-      return new Blob([csvContent], { type: 'text/csv' });
-    }
+      // AI Score stats
+      if (contact.aiScore) {
+        stats.withAIScore++;
+        totalAIScore += contact.aiScore;
+        aiScoreCount++;
+      }
+      
+      // Recently updated
+      if (new Date(contact.updatedAt) > oneWeekAgo) {
+        stats.recentlyUpdated++;
+      }
+    });
+
+    stats.avgAIScore = aiScoreCount > 0 ? totalAIScore / aiScoreCount : 0;
+
+    // Cache the stats
+    cacheService.set('contactStats', 'all', stats, 300, ['stats']);
+
+    return stats;
+  }
+
+  // AI and Enhancement Methods (placeholder for Edge Functions integration)
+  async enrichContact(contactId: string): Promise<Contact> {
+    const contact = await this.getContact(contactId);
+    
+    // This would call ai-enrichment Edge Function
+    // For now, return the contact as-is
+    logger.info('Contact enrichment not implemented yet');
+    return contact;
+  }
+
+  async scoreContact(contactId: string): Promise<Contact> {
+    const contact = await this.getContact(contactId);
+    
+    // This would call smart-score Edge Function
+    // For now, return the contact as-is
+    logger.info('Contact scoring not implemented yet');
+    return contact;
   }
 }
 
-export const contactAPI = new ContactAPIService();
+export const contactAPIService = new ContactAPIService();
+export default contactAPIService;

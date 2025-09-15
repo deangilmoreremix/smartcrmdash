@@ -30,7 +30,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAITools } from '../../components/AIToolsProvider';
-import { aiGoalsData, goalCategories, allGoals } from '../../data/goalsData';
+import { aiGoalsData, GOAL_CATEGORIES as goalCategories } from '../../data/goalsData';
+import { allGoals } from '../../data/completeGoalsData';
 
 // Define context type
 interface AIGoalContext {
