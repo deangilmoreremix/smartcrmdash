@@ -225,6 +225,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
+    console.log('🔧 Dropdown toggled:', dropdown);
     if (e) e.stopPropagation();
     setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
   }, []);
@@ -378,7 +379,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
             {/* Desktop nav pills */}
             <div className="hidden lg:flex flex-1 min-w-0">
-              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+              <div className="w-full overflow-x-auto overflow-y-visible px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
                 <div className="inline-flex items-center gap-1 whitespace-nowrap">
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -425,7 +426,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
                             <button
@@ -453,7 +454,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* Analytics Dropdown */}
                     {tab.id === 'analytics' && activeDropdown === 'analytics' && (
-                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {analyticsOptions.map((option, index) => (
                             <button
@@ -535,7 +536,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                   {/* Other dropdown panels (sales/tasks/communication/content/apps) — keep your existing code */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
-                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {salesTools.map((tool, index) => (
                           <button
@@ -571,7 +572,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'communication' && activeDropdown === 'communication' && (
-                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {communicationTools.map((tool, index) => (
                           <button
@@ -654,7 +655,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-full mt-2 right-0 w-80 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-visible`}>
+                    <div className={`absolute top-full mt-2 right-0 w-80 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-visible`}>
                       <div className="p-3 max-h-[80vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {wlApps.map((app, index) =>
                           app.isExternal ? (
@@ -741,7 +742,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
 
                   {menu.id === 'apps' && activeDropdown === 'apps' && (
-                    <div className={`absolute top-full mt-2 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                    <div className={`absolute top-full mt-2 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {connectedApps.map((app, index) =>
                           app.isExternal ? (
@@ -830,7 +831,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 </button>
 
                 {activeDropdown === 'user' && (
-                  <div className={`absolute top-full mt-2 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[1000] overflow-hidden`}>
+                  <div className={`absolute top-full mt-2 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                     <div className="p-3">
                       <div className="px-3 py-2 border-b border-gray-200/30">
                         <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
