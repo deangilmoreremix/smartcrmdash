@@ -53,7 +53,17 @@ const SmartConversionInsights: React.FC = () => {
     }).format(value);
   };
 
-  // Get initials for avatar
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    const name = `${contact.firstName} ${contact.lastName}`;
+    const initials = `${contact.firstName?.[0] || ''}${contact.lastName?.[0] || ''}`.toUpperCase();
+    return { name, initials };
+  };
+
+  // Get initials for avatar (for contacts)
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -228,7 +238,7 @@ const SmartConversionInsights: React.FC = () => {
                 }`}>
                   <Avatar
                     size="md"
-                    fallback={getInitials((deal as any).contactName || 'UN')}
+                    fallback={getContactInfo(deal.contactId).initials}
                   />
                   <div className="flex-1 min-w-0">
                     <p className={`font-medium text-sm truncate ${
@@ -239,7 +249,7 @@ const SmartConversionInsights: React.FC = () => {
                     <p className={`text-sm truncate ${
                       isDark ? 'text-gray-400' : 'text-gray-500'
                     }`}>
-                      {(deal as any).contactName || 'Unknown'} • {formatCurrency(deal.value)}
+                      {getContactInfo(deal.contactId).name} • {formatCurrency(deal.value)}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">

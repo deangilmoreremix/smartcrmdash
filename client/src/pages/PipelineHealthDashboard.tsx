@@ -26,7 +26,7 @@ const PipelineHealthDashboard: React.FC = () => {
 
   // Calculate pipeline health metrics
   const dealsArray = Object.values(deals);
-  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(d.stage));
+  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(String(d.stage)));
   const totalValue = activeDeals.reduce((sum, deal) => sum + deal.value, 0);
   const avgDealAge = activeDeals.length > 0 ? 
     activeDeals.reduce((sum, deal) => {
@@ -52,7 +52,18 @@ const PipelineHealthDashboard: React.FC = () => {
     }).format(value);
   };
 
-  // Get initials for avatar
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    // Handle both string and number IDs
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    const name = `${contact.firstName} ${contact.lastName}`;
+    const initials = `${contact.firstName?.[0] || ''}${contact.lastName?.[0] || ''}`.toUpperCase();
+    return { name, initials };
+  };
+
+  // Get initials for avatar (for contacts)
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -225,16 +236,15 @@ const PipelineHealthDashboard: React.FC = () => {
                   } transition-colors cursor-pointer`}
                 >
                   <Avatar
-                    name={contact.name}
                     src={contact.avatarSrc}
                     size="md"
-                    fallback={getInitials(contact.name)}
+                    fallback={getInitials(`${contact.firstName} ${contact.lastName}`)}
                   />
                   <div className="flex-1 min-w-0">
                     <p className={`font-medium text-sm truncate ${
                       isDark ? 'text-white' : 'text-gray-900'
                     }`}>
-                      {contact.name}
+                      {`${contact.firstName} ${contact.lastName}`}
                     </p>
                     <p className={`text-sm truncate ${
                       isDark ? 'text-gray-400' : 'text-gray-500'
@@ -265,9 +275,8 @@ const PipelineHealthDashboard: React.FC = () => {
             {activeDeals.slice(0, 5).map((deal) => (
               <div key={deal.id} className="flex items-center space-x-3">
                 <Avatar
-                  name={deal.contactName || 'Unknown'}
                   size="sm"
-                  fallback={getInitials(deal.contactName || 'UN')}
+                  fallback={getContactInfo(deal.contactId).initials}
                 />
                 <div className="flex-1 min-w-0">
                   <p className={`font-medium text-sm truncate ${
@@ -278,7 +287,7 @@ const PipelineHealthDashboard: React.FC = () => {
                   <p className={`text-sm truncate ${
                     isDark ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                    {deal.contactName} • {formatCurrency(deal.value)}
+                    {getContactInfo(deal.contactId).name} • {formatCurrency(deal.value)}
                   </p>
                 </div>
                 <Badge 

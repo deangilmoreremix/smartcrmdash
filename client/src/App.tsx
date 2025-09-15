@@ -71,6 +71,11 @@ import AISalesForecast from './pages/AISalesForecast';
 import LiveDealAnalysis from './pages/LiveDealAnalysis';
 import CompetitorInsights from './pages/CompetitorInsights';
 import RevenueIntelligence from './pages/RevenueIntelligence';
+import PipelineIntelligence from './pages/PipelineIntelligence';
+import DealRiskMonitor from './pages/DealRiskMonitor';
+import SmartConversionInsights from './pages/SmartConversionInsights';
+import PipelineHealthDashboard from './pages/PipelineHealthDashboard';
+import SalesCycleAnalytics from './pages/SalesCycleAnalytics';
 
 // Communication pages
 import ActivityAnalytics from './pages/ActivityAnalytics';
@@ -577,7 +582,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Pipeline Intelligence" description="Advanced pipeline analytics and intelligence..." />
+                <PipelineIntelligence />
               </ProtectedRoute>
             }
           />
@@ -586,7 +591,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Deal Risk Monitor" description="Monitor and analyze deal risks in real-time..." />
+                <DealRiskMonitor />
               </ProtectedRoute>
             }
           />
@@ -595,7 +600,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Smart Conversion Insights" description="AI-powered conversion optimization insights..." />
+                <SmartConversionInsights />
               </ProtectedRoute>
             }
           />
@@ -604,7 +609,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Pipeline Health Dashboard" description="Comprehensive pipeline health monitoring..." />
+                <PipelineHealthDashboard />
               </ProtectedRoute>
             }
           />
@@ -613,7 +618,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Sales Cycle Analytics" description="Analyze and optimize your sales cycles..." />
+                <SalesCycleAnalytics />
               </ProtectedRoute>
             }
           />

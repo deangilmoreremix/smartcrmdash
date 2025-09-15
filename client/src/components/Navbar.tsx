@@ -985,12 +985,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             onClick={() => {
               // Navigate to the sales tool
               const routeMap: { [key: string]: string } = {
-                'deal-pipeline': '/pipeline',
-                'deal-risk': '/deal-risk',
-                'conversion-insights': '/conversion-insights',
-                'pipeline-health': '/pipeline-health',
-                'sales-cycle': '/sales-cycle',
-                'win-rate-analysis': '/win-rate-analysis',
+                'deal-pipeline': '/pipeline-intelligence',
+                'deal-risk': '/deal-risk-monitor',
+                'conversion-insights': '/smart-conversion-insights',
+                'pipeline-health': '/pipeline-health-dashboard',
+                'sales-cycle': '/sales-cycle-analytics',
+                'win-rate-analysis': '/win-rate-intelligence',
                 'ai-sales-forecast': '/ai-sales-forecast',
                 'live-deal-analysis': '/live-deal-analysis',
                 'competitor-insights': '/competitor-insights',

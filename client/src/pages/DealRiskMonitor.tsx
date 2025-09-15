@@ -53,9 +53,15 @@ const DealRiskMonitor: React.FC = () => {
     }).format(value);
   };
 
-  // Get initials for avatar
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    // Handle both string and number IDs
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    const name = `${contact.firstName} ${contact.lastName}`;
+    const initials = `${contact.firstName?.[0] || ''}${contact.lastName?.[0] || ''}`.toUpperCase();
+    return { name, initials };
   };
 
   // Get risk level
@@ -184,9 +190,8 @@ const DealRiskMonitor: React.FC = () => {
                     isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'
                   }`}>
                     <Avatar
-                      name={deal.contactName || 'Unknown'}
                       size="md"
-                      fallback={getInitials(deal.contactName || 'UN')}
+                      fallback={getContactInfo(deal.contactId).initials}
                     />
                     <div className="flex-1 min-w-0">
                       <p className={`font-medium text-sm truncate ${
@@ -197,7 +202,7 @@ const DealRiskMonitor: React.FC = () => {
                       <p className={`text-sm truncate ${
                         isDark ? 'text-gray-400' : 'text-gray-500'
                       }`}>
-                        {deal.contactName} • {formatCurrency(deal.value)}
+                        {getContactInfo(deal.contactId).name} • {formatCurrency(deal.value)}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
@@ -237,9 +242,8 @@ const DealRiskMonitor: React.FC = () => {
               return (
                 <div key={deal.id} className="flex items-center space-x-3">
                   <Avatar
-                    name={deal.contactName || 'Unknown'}
                     size="sm"
-                    fallback={getInitials(deal.contactName || 'UN')}
+                    fallback={getContactInfo(deal.contactId).initials}
                   />
                   <div className="flex-1 min-w-0">
                     <p className={`font-medium text-sm truncate ${
@@ -250,7 +254,7 @@ const DealRiskMonitor: React.FC = () => {
                     <p className={`text-sm truncate ${
                       isDark ? 'text-gray-400' : 'text-gray-500'
                     }`}>
-                      {deal.contactName} • {formatCurrency(deal.value)}
+                      {getContactInfo(deal.contactId).name} • {formatCurrency(deal.value)}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
