@@ -1103,20 +1103,42 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       onClose={closeDropdown}
     >
       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {connectedApps.map((app, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              navigate(app.url);
-              closeDropdown();
-              setIsMobileMenuOpen(false);
-            }}
-            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          >
-            <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
-            <span className="text-sm font-medium">{app.name}</span>
-          </button>
-        ))}
+        {connectedApps.map((app, index) =>
+          app.isExternal ? (
+            <a
+              key={index}
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                closeDropdown();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+              data-testid={`external-app-${app.name.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <div className="flex items-center space-x-3">
+                <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
+                <span className="text-sm font-medium">{app.name}</span>
+              </div>
+              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
+            </a>
+          ) : (
+            <button
+              key={index}
+              onClick={() => {
+                navigate(app.url);
+                closeDropdown();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+              data-testid={`internal-app-${app.name.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
+              <span className="text-sm font-medium">{app.name}</span>
+            </button>
+          )
+        )}
       </div>
     </DropdownPortal>
     </>
