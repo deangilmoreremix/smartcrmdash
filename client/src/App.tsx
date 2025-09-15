@@ -94,6 +94,19 @@ const RevenueSharingPage = lazy(() => import('./pages/RevenueSharingPage'));
 const PartnerDashboard = lazy(() => import('./pages/PartnerDashboard'));
 const PartnerOnboardingPage = lazy(() => import('./pages/PartnerOnboardingPage'));
 
+// Communication Apps
+const AppointmentsDashboard = lazy(() => import('./pages/AppointmentsDashboard'));
+const VideoEmailDashboard = lazy(() => import('./pages/VideoEmailDashboard'));
+const TextMessagingDashboard = lazy(() => import('./pages/TextMessagingDashboard'));
+const PhoneSystemDashboard = lazy(() => import('./pages/PhoneSystemDashboard'));
+const InvoicingDashboard = lazy(() => import('./pages/InvoicingDashboard'));
+const LeadAutomationDashboard = lazy(() => import('./pages/LeadAutomationDashboard'));
+const CircleProspectingDashboard = lazy(() => import('./pages/CircleProspectingDashboard'));
+const FormsSurveysDashboard = lazy(() => import('./pages/FormsSurveysDashboard'));
+const BusinessAnalyzerDashboard = lazy(() => import('./pages/BusinessAnalyzerDashboard'));
+const ContentLibraryDashboard = lazy(() => import('./pages/ContentLibraryDashboard'));
+const VoiceProfilesDashboard = lazy(() => import('./pages/VoiceProfilesDashboard'));
+
 // Connected Apps Remote Pages
 const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
 const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
@@ -433,6 +446,107 @@ function AppContent() {
               <ProtectedRoute>
                 <Navbar />
                 <Appointments />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Communication Apps */}
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AppointmentsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-email"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VideoEmailDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/text-messages"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TextMessagingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/phone-system"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PhoneSystemDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoicing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <InvoicingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lead-automation"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <LeadAutomationDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/circle-prospecting"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CircleProspectingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <FormsSurveysDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/business-analyzer"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessAnalyzerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-library"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentLibraryDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voice-profiles"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VoiceProfilesDashboard />
               </ProtectedRoute>
             }
           />

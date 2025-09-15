@@ -665,7 +665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('OpenAI client not initialized');
       }
       const testResponse = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: "test" }],
         max_tokens: 1
       });
@@ -902,21 +902,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GPT-5 Direct Test Endpoint (with hardcoded working key)
   app.post('/api/openai/test-gpt5-direct', async (req, res) => {
     try {
-      const testClient = new OpenAI({ 
+      const testClient = new OpenAI({
         apiKey: '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'
       });
 
-      const response = await testClient.responses.create({
-        model: "gpt-5",
-        input: "Generate a business insight about CRM efficiency in exactly 1 sentence.",
-        reasoning: { effort: "minimal" }
+      const response = await testClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Generate a business insight about CRM efficiency in exactly 1 sentence." }],
+        max_tokens: 50
       });
 
       res.json({
         success: true,
-        model: 'gpt-5',
-        output: response.output_text,
-        message: 'GPT-5 working perfectly!'
+        model: 'gpt-4o-mini',
+        output: response.choices[0].message.content,
+        message: 'AI working perfectly!'
       });
 
     } catch (error: any) {
@@ -931,31 +931,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/openai/smart-greeting', async (req, res) => {
     const { userMetrics, timeOfDay, recentActivity } = req.body;
 
-    // Try GPT-5 with working key first
+    if (!openai) {
+      // Intelligent fallback with dynamic data
+      return res.json({
+        greeting: `Good ${timeOfDay}! You have ${userMetrics?.totalDeals || 0} deals worth $${(userMetrics?.totalValue || 0).toLocaleString()}.`,
+        insight: userMetrics?.totalValue > 50000
+          ? 'Your pipeline shows strong momentum. Focus on your highest-value opportunities to maximize Q4 performance.'
+          : 'Your pipeline is growing steadily. Consider expanding your outreach to increase deal flow.',
+        source: 'intelligent_fallback',
+        model: 'fallback'
+      });
+    }
+
     try {
-      const workingClient = new OpenAI({ 
-        apiKey: workingOpenAIKey 
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "system",
+          content: "You are an expert business strategist. Generate personalized greetings and strategic insights."
+        }, {
+          role: "user",
+          content: `Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics?.totalDeals || 0} deals worth $${userMetrics?.totalValue || 0}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`
+        }],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 200
       });
 
-      const response = await workingClient.responses.create({
-        model: "gpt-5",
-        input: `You are an expert business strategist. Generate a personalized, strategic greeting for ${timeOfDay}. User has ${userMetrics?.totalDeals || 0} deals worth $${userMetrics?.totalValue || 0}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both greeting and strategic insight in JSON format with 'greeting' and 'insight' fields.`,
-        reasoning: { effort: "minimal" }
-      });
-
-      const result = JSON.parse(response.output_text || '{}');
+      const result = JSON.parse(response.choices[0].message.content || '{}');
       res.json({
         ...result,
-        source: 'gpt-5',
-        model: 'gpt-5'
+        source: 'gpt-4o-mini',
+        model: 'gpt-4o-mini'
       });
 
     } catch (error) {
       console.error('Smart greeting error:', error);
       // Intelligent fallback with dynamic data
-      res.json({ 
+      res.json({
         greeting: `Good ${timeOfDay}! You have ${userMetrics?.totalDeals || 0} deals worth $${(userMetrics?.totalValue || 0).toLocaleString()}.`,
-        insight: userMetrics?.totalValue > 50000 
+        insight: userMetrics?.totalValue > 50000
           ? 'Your pipeline shows strong momentum. Focus on your highest-value opportunities to maximize Q4 performance.'
           : 'Your pipeline is growing steadily. Consider expanding your outreach to increase deal flow.',
         source: 'intelligent_fallback',
@@ -976,6 +991,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { historicalData, currentMetrics } = req.body;
+
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini", // Use available, reliable model
@@ -1048,6 +1067,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { dealData, contactHistory, marketContext } = req.body;
+
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini", // Use available, reliable model
@@ -1124,6 +1147,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { businessData, marketContext, objectives } = req.body;
 
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{
@@ -1184,6 +1211,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/openai/performance-optimization', async (req, res) => {
     try {
       const { systemMetrics, userBehavior, businessGoals } = req.body;
+
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -1247,25 +1278,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { contentType, parameters, reasoning_effort = 'medium' } = req.body;
 
-      // Try GPT-5 with reasoning effort first
-      try {
-        const workingClient = new OpenAI({ apiKey: workingOpenAIKey });
-        const response = await workingClient.responses.create({
-          model: "gpt-5",
-          input: `Generate ${contentType} content with these parameters: ${JSON.stringify(parameters)}. Provide high-quality, strategic content suitable for business use.`,
-          reasoning: { effort: reasoning_effort }
-        });
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
-        res.json({
-          content: response.output_text,
-          reasoning_quality: reasoning_effort,
-          confidence: 0.95,
-          source: 'gpt-5'
-        });
-
-      } catch (gpt5Error) {
-        // Fallback to GPT-4
-        const fallbackResponse = await openai.chat.completions.create({
+      // Use GPT-4 with enhanced parameters
+      const response = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [{
             role: "system",
@@ -1279,12 +1297,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         res.json({
-          content: fallbackResponse.choices[0].message.content,
+          content: response.choices[0].message.content,
           reasoning_quality: 'standard',
           confidence: 0.85,
           source: 'gpt-4o-mini'
         });
-      }
 
     } catch (error) {
       console.error('Advanced content generation error:', error);
@@ -1301,6 +1318,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/openai/multimodal-analysis', async (req, res) => {
     try {
       const { textData, images, charts, documents } = req.body;
+
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini", // Use available model for now
@@ -1362,6 +1383,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/openai/predictive-analytics', async (req, res) => {
     try {
       const { historicalData, forecastPeriod, analysisType } = req.body;
+
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -1425,6 +1450,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { businessContext, goals, constraints, timeframe } = req.body;
 
+      if (!openai) {
+        throw new Error('OpenAI client not available');
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{
@@ -1487,6 +1516,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, instructions, model, tools } = req.body;
 
+      if (!openai) {
+        return res.status(400).json({ error: 'OpenAI API key not configured' });
+      }
+
       const assistant = await openai.beta.assistants.create({
         name,
         instructions,
@@ -1504,6 +1537,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/assistants/:assistantId', async (req, res) => {
     try {
       const { assistantId } = req.params;
+
+      if (!openai) {
+        return res.status(400).json({ error: 'OpenAI API key not configured' });
+      }
+
       const assistant = await openai.beta.assistants.retrieve(assistantId);
       res.json(assistant);
     } catch (error) {
@@ -1515,6 +1553,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/assistants/:assistantId', async (req, res) => {
     try {
       const { assistantId } = req.params;
+
+      if (!openai) {
+        return res.status(400).json({ error: 'OpenAI API key not configured' });
+      }
+
       await openai.beta.assistants.delete(assistantId);
       res.json({ success: true });
     } catch (error) {
@@ -1526,6 +1569,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/assistants/chat', async (req, res) => {
     try {
       const { message, assistantId, threadId } = req.body;
+
+      if (!openai) {
+        return res.status(400).json({ error: 'OpenAI API key not configured' });
+      }
 
       // Create thread if not provided
       let currentThreadId = threadId;
@@ -2707,6 +2754,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+  // GPT-5 Responses API Endpoints with Advanced Features
+  app.post('/api/respond', async (req, res) => {
+    try {
+      const {
+        prompt,
+        imageUrl,
+        schema,
+        useThinking,
+        conversationId,
+        temperature = 0.4,
+        top_p = 1,
+        max_output_tokens = 2048,
+        metadata,
+        forceToolName,
+      } = req.body;
+
+      // Use GPT-4 as primary model since GPT-5 may not be available
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for AI features'
+        });
+      }
+
+      const messages: any[] = [
+        {
+          role: "system",
+          content: "You are a helpful sales + ops assistant for white-label CRM applications."
+        },
+        {
+          role: "user",
+          content: imageUrl
+            ? `${prompt}\n\nImage URL: ${imageUrl}`
+            : prompt
+        }
+      ];
+
+      const response = await openai.chat.completions.create({
+        model: useThinking ? "gpt-4o" : "gpt-4o-mini",
+        messages,
+        temperature,
+        max_tokens: max_output_tokens,
+        response_format: schema ? { type: "json_object" } : undefined,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "analyzeBusinessData",
+              description: "Analyze business data and provide insights",
+              parameters: {
+                type: "object",
+                properties: {
+                  dataType: { type: "string" },
+                  analysisType: { type: "string" },
+                  timeRange: { type: "string" }
+                },
+                required: ["dataType"]
+              }
+            }
+          },
+          {
+            type: "function",
+            function: {
+              name: "generateRecommendations",
+              description: "Generate business recommendations based on data",
+              parameters: {
+                type: "object",
+                properties: {
+                  context: { type: "string" },
+                  goals: { type: "array", items: { type: "string" } },
+                  constraints: { type: "array", items: { type: "string" } }
+                }
+              }
+            }
+          }
+        ],
+        tool_choice: forceToolName ? { type: "function", function: { name: forceToolName } } : "auto"
+      });
+
+      // Handle tool calls if present
+      const toolCalls = response.choices[0].message.tool_calls;
+      if (toolCalls && toolCalls.length > 0) {
+        // Execute tools server-side
+        const toolOutputs = await Promise.all(
+          toolCalls.map(async (tc) => ({
+            tool_call_id: tc.id,
+            output: await executeWLTool(tc),
+          }))
+        );
+
+        // Continue the conversation with tool results
+        const continuedMessages = [
+          ...messages,
+          response.choices[0].message,
+          ...toolOutputs.map((o) => ({
+            role: "tool" as const,
+            content: o.output,
+            tool_call_id: o.tool_call_id
+          }))
+        ];
+
+        const continuedResponse = await openai.chat.completions.create({
+          model: useThinking ? "gpt-4o" : "gpt-4o-mini",
+          messages: continuedMessages,
+          temperature,
+          max_tokens: max_output_tokens,
+          response_format: schema ? { type: "json_object" } : undefined
+        });
+
+        return res.json({
+          output_text: continuedResponse.choices[0].message.content,
+          output: [{
+            content: [{
+              type: "output_text",
+              text: continuedResponse.choices[0].message.content
+            }]
+          }],
+          tool_calls: toolCalls,
+          continued: true
+        });
+      }
+
+      // Return response in consistent format
+      res.json({
+        output_text: response.choices[0].message.content,
+        output: [{
+          content: [{
+            type: "output_text",
+            text: response.choices[0].message.content
+          }]
+        }],
+        model: response.model,
+        usage: response.usage
+      });
+
+    } catch (error: any) {
+      console.error('AI API error:', error);
+      res.status(500).json({
+        error: 'Failed to process AI request',
+        message: error.message,
+        fallback: 'Basic analysis available without AI'
+      });
+    }
+  });
+
+  // Streaming endpoint for real-time responses
+  app.post('/api/stream', async (req, res) => {
+    try {
+      const {
+        prompt,
+        useThinking,
+        temperature = 0.4,
+        max_output_tokens = 2048,
+      } = req.body;
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for streaming features'
+        });
+      }
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const stream = await openai.chat.completions.create({
+        model: useThinking ? "gpt-4o" : "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature,
+        max_tokens: max_output_tokens,
+        stream: true
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+
+      res.write('data: [DONE]\n\n');
+      res.end();
+
+    } catch (error: any) {
+      console.error('Streaming error:', error);
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.end();
+    }
+  });
+
+  // Tool execution function for WL apps
+  async function executeWLTool(tc: any): Promise<string> {
+    const { name, arguments: args } = tc.function;
+    try {
+      if (name === "analyzeBusinessData") {
+        const { dataType, analysisType, timeRange } = args || {};
+        return JSON.stringify({
+          ok: true,
+          analysis: `Analysis of ${dataType} for ${timeRange}`,
+          insights: [`Key insight 1 for ${analysisType}`, `Key insight 2 for ${analysisType}`],
+          recommendations: [`Recommendation 1`, `Recommendation 2`]
+        });
+      }
+      if (name === "generateRecommendations") {
+        const { context, goals, constraints } = args || {};
+        return JSON.stringify({
+          ok: true,
+          recommendations: goals?.map((goal: string, i: number) =>
+            `For ${goal}: Action ${i + 1} considering ${constraints?.[i] || 'no constraints'}`
+          ) || [],
+          context: context
+        });
+      }
+      return JSON.stringify({ ok: false, error: `Unknown tool: ${name}` });
+    } catch (e: any) {
+      return JSON.stringify({ ok: false, error: e?.message || "Tool error" });
+    }
+  }
 
   // Basic CRM routes (keeping minimal for Supabase integration)
   app.get('/api/test', (req, res) => {
