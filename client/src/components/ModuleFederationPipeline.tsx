@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
+import { moduleFederationOrchestrator, useSharedModuleState } from '../utils/moduleFederationOrchestrator';
 
 const PipelineApp: React.FC = () => {
   const [RemotePipeline, setRemotePipeline] = useState<React.ComponentType | null>(null);
@@ -23,7 +24,14 @@ const PipelineApp: React.FC = () => {
         );
         
         const module = await Promise.race([modulePromise, timeoutPromise]);
-        setRemotePipeline(() => (module as any).default || module);
+        const PipelineComponent = (module as any).default || module;
+        setRemotePipeline(() => PipelineComponent);
+        
+        // Register with orchestrator for shared state management
+        moduleFederationOrchestrator.registerModule('pipeline', PipelineComponent, {
+          deals: []
+        });
+        
         console.log('✅ Module Federation Pipeline loaded successfully');
         setIsLoading(false);
       } catch (err) {
@@ -69,8 +77,17 @@ const PipelineApp: React.FC = () => {
     );
   }
 
-  // Pass theme props to Module Federation component
-  return <RemotePipeline theme="light" mode="light" />;
+  // Pass shared state and theme props to Module Federation component
+  const sharedData = useSharedModuleState(state => state.sharedData);
+  
+  return React.createElement(RemotePipeline as any, { 
+    theme: "light", 
+    mode: "light",
+    sharedData,
+    onDataUpdate: (data: any) => {
+      moduleFederationOrchestrator.broadcastToAllModules('PIPELINE_DATA_UPDATE', data);
+    }
+  });
 };
 
 interface ModuleFederationPipelineProps {

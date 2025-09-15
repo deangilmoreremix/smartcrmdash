@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
+import { moduleFederationOrchestrator, useSharedModuleState } from '../utils/moduleFederationOrchestrator';
 
 const CalendarApp: React.FC = () => {
   const [RemoteCalendar, setRemoteCalendar] = useState<React.ComponentType | null>(null);
@@ -23,7 +24,14 @@ const CalendarApp: React.FC = () => {
         );
         
         const module = await Promise.race([modulePromise, timeoutPromise]);
-        setRemoteCalendar(() => (module as any).default || module);
+        const CalendarComponent = (module as any).default || module;
+        setRemoteCalendar(() => CalendarComponent);
+        
+        // Register with orchestrator for shared state management
+        moduleFederationOrchestrator.registerModule('calendar', CalendarComponent, {
+          appointments: []
+        });
+        
         console.log('✅ Module Federation Calendar loaded successfully');
         setIsLoading(false);
       } catch (err) {
@@ -71,8 +79,17 @@ const CalendarApp: React.FC = () => {
     );
   }
 
-  // Pass theme props to Module Federation component
-  return <RemoteCalendar theme="light" mode="light" />;
+  // Pass shared state and theme props to Module Federation component
+  const sharedData = useSharedModuleState(state => state.sharedData);
+  
+  return React.createElement(RemoteCalendar as any, { 
+    theme: "light", 
+    mode: "light",
+    sharedData,
+    onDataUpdate: (data: any) => {
+      moduleFederationOrchestrator.broadcastToAllModules('CALENDAR_DATA_UPDATE', data);
+    }
+  });
 };
 
 interface ModuleFederationCalendarProps {

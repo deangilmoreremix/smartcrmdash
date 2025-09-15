@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
+import { moduleFederationOrchestrator, useSharedModuleState } from '../utils/moduleFederationOrchestrator';
 
 const ContactsApp: React.FC = () => {
   const [RemoteContacts, setRemoteContacts] = useState<React.ComponentType | null>(null);
@@ -23,7 +24,14 @@ const ContactsApp: React.FC = () => {
         );
         
         const module = await Promise.race([modulePromise, timeoutPromise]);
-        setRemoteContacts(() => (module as any).default || module);
+        const ContactsComponent = (module as any).default || module;
+        setRemoteContacts(() => ContactsComponent);
+        
+        // Register with orchestrator for shared state management
+        moduleFederationOrchestrator.registerModule('contacts', ContactsComponent, {
+          contacts: []
+        });
+        
         console.log('✅ Module Federation Contacts loaded successfully');
         setIsLoading(false);
       } catch (err) {
@@ -71,8 +79,17 @@ const ContactsApp: React.FC = () => {
     );
   }
 
-  // Pass theme props to Module Federation component
-  return <RemoteContacts theme="light" mode="light" />;
+  // Pass shared state and theme props to Module Federation component
+  const sharedData = useSharedModuleState(state => state.sharedData);
+  
+  return React.createElement(RemoteContacts as any, { 
+    theme: "light", 
+    mode: "light",
+    sharedData,
+    onDataUpdate: (data: any) => {
+      moduleFederationOrchestrator.broadcastToAllModules('CONTACTS_DATA_UPDATE', data);
+    }
+  });
 };
 
 interface ModuleFederationContactsProps {
