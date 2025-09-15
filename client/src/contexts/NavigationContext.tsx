@@ -85,7 +85,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       case '/contacts':
       case '/tasks':
       case '/settings':
-        routerNavigate(feature);
+        routerNavigate(feature as any);
         break;
       default:
         console.log(`Navigation to ${feature} not implemented`);
@@ -101,7 +101,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     navigationTimeoutRef.current = window.setTimeout(() => {
       setCurrentPath(path);
-      routerNavigate(path, options || {});
+      routerNavigate(path, options as any);
     }, 100);
   }, [currentPath, routerNavigate]);
 

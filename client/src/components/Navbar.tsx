@@ -338,7 +338,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'admin',
       label: 'Admin Panel',
       icon: Shield,
-      action: () => handleNavigation('/admin', 'admin'),
+      action: (e?: React.MouseEvent) => handleNavigation('/admin', 'admin'),
       badge: 0,
       color: 'from-red-500 to-orange-500'
     });
@@ -490,6 +490,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           } else {
                             toggleDropdown(menu.id, e);
                           }
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
                         }}
                         data-dropdown-toggle="true"
                         data-testid={`button-dropdown-${menu.id}`}
