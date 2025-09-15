@@ -390,13 +390,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       color: 'from-emerald-500 to-lime-500'
     },
     {
-      id: 'appointments',
+      id: 'calendar',
       label: 'Calendar',
       icon: Calendar,
-      action: (e?: React.MouseEvent) => toggleDropdown('appointments', e),
+      action: (e?: React.MouseEvent) => handleNavigation('/calendar', 'calendar'),
       badge: 15,
-      color: 'from-cyan-500 to-blue-500',
-      hasDropdown: true
+      color: 'from-cyan-500 to-blue-500'
     }
   ];
 
@@ -1096,42 +1095,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       </div>
     </DropdownPortal>
 
-    {/* Appointments (Calendar) Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'appointments'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        <button
-          onClick={() => {
-            navigate('/calendar');
-            closeDropdown();
-            setIsMobileMenuOpen(false);
-          }}
-          className="w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          data-testid="calendar-remote-moderation"
-        >
-          <div className="flex items-center space-x-3">
-            <Calendar size={16} className="block overflow-visible shrink-0 text-cyan-500" />
-            <span className="text-sm font-medium">Calendar Moderation</span>
-          </div>
-          <div className="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded-full">Remote</div>
-        </button>
-        <button
-          onClick={() => {
-            navigate('/appointments');
-            closeDropdown();
-            setIsMobileMenuOpen(false);
-          }}
-          className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          data-testid="regular-appointments"
-        >
-          <Calendar size={16} className="block overflow-visible shrink-0 text-blue-500" />
-          <span className="text-sm font-medium">Appointments</span>
-        </button>
-      </div>
-    </DropdownPortal>
 
     {/* Apps Dropdown Portal */}
     <DropdownPortal
