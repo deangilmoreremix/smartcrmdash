@@ -57,7 +57,7 @@ const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ sho
   return (
     <div className="h-full w-full flex flex-col">
       {showHeader && (
-        <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-2 mt-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Pipeline Deals</h3>
             <div className="flex items-center text-green-600 text-xs">
