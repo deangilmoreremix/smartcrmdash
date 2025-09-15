@@ -178,24 +178,7 @@ const AuthLoadingScreen = () => (
   </div>
 );
 
-// Dark mode hook
-const useDarkMode = () => {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDark));
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
-
-  return [isDark, setIsDark];
-};
+// Removed conflicting useDarkMode - now using unified ThemeContext
 
 function App() {
   // Initialize universal data sync
@@ -242,7 +225,6 @@ function App() {
 // AppContent component with all the routing logic
 function AppContent() {
   const { user, loading } = useAuth();
-  const [darkMode, setDarkMode] = useDarkMode();
 
   if (loading) {
     return <AuthLoadingScreen />;

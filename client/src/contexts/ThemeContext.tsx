@@ -18,14 +18,49 @@ export const useTheme = () => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
-    // Always start in light mode
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    // First, check localStorage for saved preference (using both keys for compatibility)
+    const savedTheme = localStorage.getItem('theme') || localStorage.getItem('darkMode');
+    if (savedTheme !== null) {
+      return savedTheme === 'dark' || savedTheme === 'true';
+    }
+
+    // Default to light mode
     return false;
   });
 
   // Add a state to track theme transitions
   const [isThemeChanging, setIsThemeChanging] = useState(false);
 
+  // Broadcast theme changes to iframes for white label apps
+  const broadcastThemeToIframes = useCallback((theme: string) => {
+    // Send message to all iframes
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+      try {
+        iframe.contentWindow?.postMessage({
+          type: 'WL_THEME_CHANGE',
+          theme: theme
+        }, '*');
+      } catch (error) {
+        // Ignore cross-origin errors
+      }
+    });
+
+    // Also dispatch a custom event for any listening components
+    window.dispatchEvent(new CustomEvent('wl-theme-change', {
+      detail: { theme }
+    }));
+  }, []);
+
   useEffect(() => {
+    const theme = isDark ? 'dark' : 'light';
+    
+    // Apply theme classes to both documentElement and body for maximum compatibility
     if (isDark) {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark-mode');
@@ -34,11 +69,26 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       document.body.classList.remove('dark-mode');
     }
     
-    // Use localStorage asynchronously to avoid blocking the main thread
-    setTimeout(() => {
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }, 0);
-  }, [isDark]);
+    // Save to localStorage with both keys for compatibility
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('darkMode', isDark.toString());
+    
+    // Broadcast to iframes
+    broadcastThemeToIframes(theme);
+    
+    // Update meta theme-color for mobile browsers
+    let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement('meta');
+      themeColorMeta.setAttribute('name', 'theme-color');
+      document.head.appendChild(themeColorMeta);
+    }
+    
+    themeColorMeta.setAttribute(
+      'content', 
+      isDark ? '#0f172a' : '#ffffff'
+    );
+  }, [isDark, broadcastThemeToIframes]);
 
   // Helper to handle theme transition state
   const handleThemeChange = useCallback(() => {
