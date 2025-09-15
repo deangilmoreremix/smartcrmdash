@@ -245,7 +245,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       { title: 'Function Assistant', id: 'function-assistant', icon: Code },
     ],
     'Real-time Features': [
-      { title: 'Streaming Chat', id: 'ai-assistant-chat', icon: MessageSquare },
+      { title: 'Streaming Chat', id: 'streaming-chat', icon: MessageSquare },
       { title: 'Form Validation', id: 'form-validation', icon: CheckSquare },
       { title: 'Live Deal Analysis', id: 'live-deal-analysis', icon: BarChart3 },
       { title: 'Instant Response', id: 'instant-response', icon: Zap },
@@ -495,7 +495,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
                       <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                          {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
+                          {Object.values(aiToolCategories).flat().map((tool) => (
                             <button
                               key={tool.id}
                               onClick={() => handleAIToolClick(tool.id)}
@@ -965,7 +965,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       onClose={closeDropdown}
     >
       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
+        {Object.values(aiToolCategories).flat().map((tool) => (
           <button
             key={tool.id}
             onClick={() => {
