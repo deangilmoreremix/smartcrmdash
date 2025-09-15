@@ -7,7 +7,7 @@ import { NewContactModal } from './NewContactModal';
 import { useContactStore } from '../../hooks/useContactStore';
 import { Contact } from '../../types/contact';
 import { AIEnhancedContactCard } from '../contacts/AIEnhancedContactCard';
-import { useTheme } from '../../contexts/ThemeContext';
+import { DarkModeToggle } from '../ui/DarkModeToggle';
 import Fuse from 'fuse.js';
 import { 
   X, 
@@ -287,14 +287,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
           </div>
 
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => toggleTheme()}
-              className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200"
-              data-testid="button-theme-toggle"
-            >
-              {isDark ? <Settings className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-              {isDark ? 'Light' : 'Dark'}
-            </button>
+            <DarkModeToggle />
             <ModernButton 
               onClick={onClose}
               variant="ghost" 
