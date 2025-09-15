@@ -63,6 +63,7 @@ const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
+const RemoteCalendar = lazy(() => import('./pages/RemoteCalendar'));
 
 // Sales pages
 import WinRateIntelligence from './pages/WinRateIntelligence';
@@ -405,13 +406,13 @@ function AppContent() {
             }
           />
 
-          {/* Appointments */}
+          {/* Appointments - Remote Calendar */}
           <Route
             path="/appointments"
             element={
               <ProtectedRoute>
                 <Navbar />
-                <Appointments />
+                <RemoteCalendar />
               </ProtectedRoute>
             }
           />
