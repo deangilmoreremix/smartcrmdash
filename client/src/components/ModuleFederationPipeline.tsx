@@ -8,7 +8,7 @@ const PipelineApp: React.FC = () => {
   useEffect(() => {
     const loadRemote = async () => {
       try {
-        console.log('🚀 Loading Module Federation Pipeline...');
+        // Silently attempt Module Federation loading
         
         // Reduced timeout for faster fallback to iframe
         const timeoutPromise = new Promise((_, reject) => {
@@ -25,7 +25,7 @@ const PipelineApp: React.FC = () => {
         setRemotePipeline(() => (module as any).default || module);
         console.log('✅ Module Federation Pipeline loaded successfully');
       } catch (err) {
-        console.warn('❌ Module Federation failed, using iframe fallback:', err);
+        // Module Federation unavailable, using iframe fallback (normal behavior)
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     };

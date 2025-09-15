@@ -65,12 +65,12 @@ class DynamicModuleFederation {
         }
         
         script.src = possibleUrls[currentUrlIndex];
-        console.log(`Trying to load Module Federation script from: ${script.src}`);
+        // Trying to load Module Federation script
         currentUrlIndex++;
       };
       
       script.onload = () => {
-        console.log(`Successfully loaded Module Federation script from: ${script.src}`);
+        // Module Federation script loaded successfully
         resolve();
       };
       
@@ -93,15 +93,14 @@ class DynamicModuleFederation {
     let retries = 0;
     const maxRetries = 20; // 2 seconds max wait
     
-    console.log(`Looking for Module Federation container: ${scope}`);
-    console.log('Available window properties:', Object.keys(window).filter(key => key.includes('App') || key.includes('Contact')));
+    // Looking for Module Federation container silently
     
     while (!window[scope] && retries < maxRetries) {
       await new Promise(resolve => setTimeout(resolve, 100));
       retries++;
       
       if (retries % 10 === 0) {
-        console.log(`Still waiting for container "${scope}", retry ${retries}/${maxRetries}`);
+        // Waiting for container (silent retry)
       }
     }
 
