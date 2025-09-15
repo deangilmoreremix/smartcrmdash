@@ -203,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const connectedApps = [
     { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
     { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
-    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
+    { name: 'ContentAI', url: 'https://social-media-calenda-75j1.bolt.host', icon: FileText, isExternal: true }
   ];
 
   const analyticsOptions = [
@@ -393,9 +393,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'appointments',
       label: 'Calendar',
       icon: Calendar,
-      action: (e?: React.MouseEvent) => handleNavigation('/appointments', 'appointments'),
+      action: (e?: React.MouseEvent) => toggleDropdown('appointments', e),
       badge: 15,
-      color: 'from-cyan-500 to-blue-500'
+      color: 'from-cyan-500 to-blue-500',
+      hasDropdown: true
     }
   ];
 
