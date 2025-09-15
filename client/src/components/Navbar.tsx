@@ -1,5 +1,6 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
@@ -29,8 +30,56 @@ type AITool = {
   category?: string;
 };
 
+// Dropdown positioning type
+type DropdownAnchor = {
+  top: number;
+  left: number;
+  width: number;
+} | null;
+
+// Portal-based dropdown component
+const DropdownPortal: React.FC<{
+  isOpen: boolean;
+  anchor: DropdownAnchor;
+  onClose: () => void;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ isOpen, anchor, onClose, children, className = '' }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !anchor) return null;
+
+  return createPortal(
+    <div
+      ref={dropdownRef}
+      className={`fixed z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 min-w-[280px] max-w-[400px] ${className}`}
+      style={{
+        top: anchor.top,
+        left: Math.max(8, anchor.left - 140), // Center dropdown under button with padding
+      }}
+    >
+      {children}
+    </div>,
+    document.body
+  );
+};
+
 const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [dropdownAnchor, setDropdownAnchor] = useState<DropdownAnchor>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
@@ -212,21 +261,38 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     ]
   };
 
-  // Click outside to close dropdowns only (not mobile menu)
+  // Close dropdowns when pressing escape
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         setActiveDropdown(null);
-        // Don't auto-close mobile menu - only close it explicitly
+        setDropdownAnchor(null);
+        setIsMobileMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // Close dropdown helper
+  const closeDropdown = useCallback(() => {
+    setActiveDropdown(null);
+    setDropdownAnchor(null);
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
     console.log('🔧 Dropdown toggled:', dropdown);
-    if (e) e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+      // Capture button position for portal positioning
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDropdownAnchor({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width
+      });
+    }
     setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
   }, []);
 
@@ -365,6 +431,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   return (
+    <>
     <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
       <div className="max-w-[90rem] mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
@@ -379,7 +446,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
             {/* Desktop nav pills */}
             <div className="hidden lg:flex flex-1 min-w-0">
-              <div className="w-full overflow-x-auto overflow-y-visible px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
                 <div className="inline-flex items-center gap-1 whitespace-nowrap">
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -452,28 +519,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     )}
 
-                    {/* Analytics Dropdown */}
-                    {tab.id === 'analytics' && activeDropdown === 'analytics' && (
-                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
-                        <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                          {analyticsOptions.map((option, index) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                navigate(option.url);
-                                setActiveDropdown(null);
-                                setIsMobileMenuOpen(false);
-                              }}
-                              data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                            >
-                              <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
-                              <span className="text-sm font-medium">{option.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {/* Analytics Dropdown - now rendered via portal */}
                   </div>
                 );
                   })}
@@ -885,6 +931,57 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
         )}
       </div>
     </nav>
+    
+    {/* Portal-rendered Dropdowns */}
+    {/* Analytics Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'analytics'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {analyticsOptions.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              navigate(option.url);
+              closeDropdown();
+              setIsMobileMenuOpen(false);
+            }}
+            data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
+            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+          >
+            <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
+            <span className="text-sm font-medium">{option.name}</span>
+          </button>
+        ))}
+      </div>
+    </DropdownPortal>
+
+    {/* AI Tools Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'ai-tools'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
+          <button
+            key={tool.id}
+            onClick={() => {
+              handleAIToolClick(tool.id);
+              closeDropdown();
+            }}
+            data-testid={`ai-tool-${tool.id}`}
+            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+          >
+            {tool.icon ? <tool.icon size={16} className="block overflow-visible shrink-0 text-pink-500" /> : <Sparkles size={16} className="block overflow-visible shrink-0 text-pink-500" />}
+            <span className="text-sm font-medium">{tool.title}</span>
+          </button>
+        ))}
+      </div>
+    </DropdownPortal>
+    </>
   );
 });
 
