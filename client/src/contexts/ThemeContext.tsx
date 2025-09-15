@@ -23,13 +23,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return false;
     }
 
-    // First, check localStorage for saved preference (using both keys for compatibility)
-    const savedTheme = localStorage.getItem('theme') || localStorage.getItem('darkMode');
-    if (savedTheme !== null) {
-      return savedTheme === 'dark' || savedTheme === 'true';
-    }
+    // TEMPORARY FIX: Force light mode startup - clear any existing dark mode in localStorage
+    localStorage.removeItem('theme');
+    localStorage.removeItem('darkMode');
+    localStorage.setItem('theme', 'light');
+    localStorage.setItem('darkMode', 'false');
 
-    // Default to light mode
+    // Always start in light mode
     return false;
   });
 
