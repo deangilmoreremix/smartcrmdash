@@ -34,7 +34,7 @@ import { TaskDetailsModal } from './TaskDetailsModal';
 const statusColumns = [
   { id: 'pending', title: 'To Do', color: 'bg-gray-100', headerColor: 'bg-gray-50' },
   { id: 'in-progress', title: 'In Progress', color: 'bg-blue-100', headerColor: 'bg-blue-50' },
-  { id: 'cancelled', title: 'On Hold', color: 'bg-yellow-100', headerColor: 'bg-yellow-50' },
+  { id: 'cancelled', title: 'Cancelled', color: 'bg-yellow-100', headerColor: 'bg-yellow-50' },
   { id: 'completed', title: 'Completed', color: 'bg-green-100', headerColor: 'bg-green-50' },
 ] as const;
 
