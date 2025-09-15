@@ -51,16 +51,26 @@ const PipelineApp: React.FC = () => {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://cheery-syrniki-b5b6ca.netlify.app"
+        src="https://cheery-syrniki-b5b6ca.netlify.app?theme=light&mode=light"
         className="w-full h-full border-0"
         title="Remote Pipeline System"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        onLoad={(e) => {
+          // Send theme message to iframe
+          const iframe = e.currentTarget;
+          iframe.contentWindow?.postMessage({
+            type: 'SET_THEME',
+            theme: 'light',
+            mode: 'light'
+          }, '*');
+        }}
       />
     );
   }
 
-  return <RemotePipeline />;
+  // Pass theme props to Module Federation component
+  return <RemotePipeline theme="light" mode="light" />;
 };
 
 interface ModuleFederationPipelineProps {

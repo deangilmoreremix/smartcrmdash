@@ -51,18 +51,28 @@ const ContactsApp: React.FC = () => {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://taupe-sprinkles-83c9ee.netlify.app"
+        src="https://taupe-sprinkles-83c9ee.netlify.app?theme=light&mode=light"
         className="w-full h-full border-0"
         style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
         title="Enhanced Contacts Module"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
         loading="lazy"
+        onLoad={(e) => {
+          // Send theme message to iframe
+          const iframe = e.currentTarget;
+          iframe.contentWindow?.postMessage({
+            type: 'SET_THEME',
+            theme: 'light',
+            mode: 'light'
+          }, '*');
+        }}
       />
     );
   }
 
-  return <RemoteContacts />;
+  // Pass theme props to Module Federation component
+  return <RemoteContacts theme="light" mode="light" />;
 };
 
 interface ModuleFederationContactsProps {
