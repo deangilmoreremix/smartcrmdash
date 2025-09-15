@@ -1,15 +1,17 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw
+  Edit3, ExternalLink, Menu, X, RefreshCw, GripVertical
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useNavbarPosition } from '../contexts/NavbarPositionContext';
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
 import { useTaskStore } from "../store/taskStore";
@@ -32,6 +34,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
+  const { position, isDragging, setIsDragging } = useNavbarPosition();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -298,11 +301,48 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     );
   }, []);
 
+  // Determine navbar dimensions and layout based on position
+  const isVertical = position === 'left' || position === 'right';
+  const navbarWidth = isVertical ? '60px' : '100%';
+  const navbarHeight = isVertical ? '100vh' : 'auto';
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 p-4">
-      <div className="max-w-7xl mx-auto will-change-transform">
-        <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'}`}>
-          <div className="flex items-center justify-between px-4 py-2">
+    <Draggable draggableId="navbar" index={0}>
+      {(provided, snapshot) => (
+        <nav
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={`z-50 p-4 transition-all duration-300 ${
+            snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105' : ''
+          }`}
+          style={{
+            ...provided.draggableProps.style,
+            position: 'absolute',
+            top: position === 'top' ? 0 : position === 'bottom' ? 'auto' : 0,
+            bottom: position === 'bottom' ? 0 : 'auto',
+            left: position === 'left' ? 0 : position === 'right' ? 'auto' : 0,
+            right: position === 'right' ? 0 : 'auto',
+            width: navbarWidth,
+            height: navbarHeight,
+            zIndex: snapshot.isDragging ? 9999 : 50
+          }}
+        >
+          <div className="will-change-transform">
+            <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-2xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} ${
+              isVertical ? 'h-full rounded-2xl' : 'rounded-full'
+            }`}>
+              <div className={`flex ${isVertical ? 'flex-col items-center justify-start py-4 space-y-4' : 'items-center justify-between'} px-4 py-2`}>
+
+                {/* Drag Handle */}
+                <div
+                  {...provided.dragHandleProps}
+                  className={`cursor-move p-2 rounded-lg transition-colors ${
+                    isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
+                  } ${isVertical ? 'mb-2' : 'mr-2'}`}
+                  title="Drag to move navbar"
+                >
+                  <GripVertical className={`h-4 w-4 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+                </div>
 
             {/* Logo */}
             <div className="flex items-center space-x-3">
@@ -600,42 +640,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               <button className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
                 <User size={16} className={isDark ? 'text-white' : 'text-gray-600'} />
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className={`lg:hidden mt-4 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden animate-fade-in`}>
-            <div className="p-4 space-y-3">
-              {mainTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={tab.action}
-                  className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                >
-                  <tab.icon size={18} />
-                  <span className="font-medium">{tab.label}</span>
-                  {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
-                </button>
-              ))}
-
-              <hr className={`${isDark ? 'border-white/20' : 'border-gray-200'}`} />
-
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={toggleTheme}
-                  className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                >
-                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                  <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+        </nav>
+      )}
+    </Draggable>
   );
 });
 

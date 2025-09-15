@@ -2,6 +2,7 @@
 
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -16,7 +17,9 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
+import { NavbarPositionProvider, useNavbarPosition } from './contexts/NavbarPositionContext';
 import Navbar from './components/Navbar';
+import { EdgeZones } from './components/EdgeZones';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
 // Eager pages
@@ -105,26 +108,49 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
 // Simple protected wrapper if/when you add auth
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
-function App() {
+// Inner component that has access to navbar position context
+const AppContent: React.FC = () => {
+  const { position, setPosition } = useNavbarPosition();
+
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source } = result;
+
+    if (!destination) return;
+
+    // If dropped on an edge zone, snap to that position
+    if (destination.droppableId.includes('-edge')) {
+      const newPosition = destination.droppableId.split('-')[0] as 'top' | 'left' | 'right' | 'bottom';
+      setPosition(newPosition);
+    }
+  };
+
+  // Calculate padding based on navbar position
+  const getContentPadding = () => {
+    const isVertical = position === 'left' || position === 'right';
+    const navbarSize = isVertical ? '60px' : '80px'; // Approximate navbar height/width
+
+    switch (position) {
+      case 'top':
+        return { paddingTop: navbarSize };
+      case 'bottom':
+        return { paddingBottom: navbarSize };
+      case 'left':
+        return { paddingLeft: navbarSize };
+      case 'right':
+        return { paddingRight: navbarSize };
+      default:
+        return { paddingTop: navbarSize };
+    }
+  };
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TenantProvider>
-          <RoleProvider>
-            <ThemeProvider>
-              <WhitelabelProvider>
-                <AIToolsProvider>
-                  <ModalsProvider>
-                    <EnhancedHelpProvider>
-                      <VideoCallProvider>
-                        <NavigationProvider>
-                          <DashboardLayoutProvider>
-                            <AIProvider>
-                              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                                <Navbar />
-                                <LinkRedirect />
-                                <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
-                                  <Routes>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900" style={getContentPadding()}>
+        <Navbar />
+        <EdgeZones onDragEnd={handleDragEnd} />
+        <LinkRedirect />
+        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+          <Routes>
                           {/* Redirect root to dashboard */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
@@ -602,23 +628,45 @@ function App() {
 
                           {/* Fallback */}
                           <Route path="*" element={<Navigate to="/" replace />} />
-                          </Routes>
-                                  </Suspense>
-                                </div>
-                              </AIProvider>
-                            </DashboardLayoutProvider>
-                          </NavigationProvider>
-                        </VideoCallProvider>
-                      </EnhancedHelpProvider>
-                    </ModalsProvider>
-                  </AIToolsProvider>
-                </WhitelabelProvider>
-              </ThemeProvider>
+          </Routes>
+        </Suspense>
+      </div>
+    </DragDropContext>
+  );
+};
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TenantProvider>
+          <RoleProvider>
+            <ThemeProvider>
+              <WhitelabelProvider>
+                <AIToolsProvider>
+                  <ModalsProvider>
+                    <EnhancedHelpProvider>
+                      <VideoCallProvider>
+                        <NavigationProvider>
+                          <DashboardLayoutProvider>
+                            <AIProvider>
+                              <NavbarPositionProvider>
+                                <AppContent />
+                              </NavbarPositionProvider>
+                            </AIProvider>
+                          </DashboardLayoutProvider>
+                        </NavigationProvider>
+                      </VideoCallProvider>
+                    </EnhancedHelpProvider>
+                  </ModalsProvider>
+                </AIToolsProvider>
+              </WhitelabelProvider>
+            </ThemeProvider>
           </RoleProvider>
         </TenantProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    );
-  }
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
