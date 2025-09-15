@@ -225,13 +225,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
-    console.log('🔧 toggleDropdown called with:', dropdown, 'event:', !!e);
     if (e) e.stopPropagation();
-    setActiveDropdown(prev => {
-      const newValue = prev === dropdown ? null : dropdown;
-      console.log('🔄 activeDropdown changing from', prev, 'to', newValue);
-      return newValue;
-    });
+    setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
   }, []);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
@@ -298,10 +293,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'analytics',
       label: 'Analytics',
       icon: TrendingUp,
-      action: (e?: React.MouseEvent) => {
-        console.log('📊 Analytics action called, event:', !!e);
-        toggleDropdown('analytics', e);
-      },
+      action: (e?: React.MouseEvent) => toggleDropdown('analytics', e),
       badge: 30,
       color: 'from-blue-500 to-cyan-500',
       hasDropdown: true
@@ -318,10 +310,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Brain,
-      action: (e?: React.MouseEvent) => {
-        console.log('🤖 AI Tools action called, event:', !!e);
-        toggleDropdown('ai-tools', e);
-      },
+      action: (e?: React.MouseEvent) => toggleDropdown('ai-tools', e),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
@@ -436,7 +425,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`} style={{position: 'fixed', top: '70px', right: '300px'}}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
                             <button
@@ -464,7 +453,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* Analytics Dropdown */}
                     {tab.id === 'analytics' && activeDropdown === 'analytics' && (
-                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`} style={{position: 'fixed', top: '70px', right: '20px'}}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {analyticsOptions.map((option, index) => (
                             <button
