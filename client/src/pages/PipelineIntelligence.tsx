@@ -50,7 +50,7 @@ const PipelineIntelligence: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24">
+    <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ const PipelineIntelligence: React.FC = () => {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 Total Pipeline Value
@@ -90,7 +90,7 @@ const PipelineIntelligence: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 Active Deals
@@ -108,7 +108,7 @@ const PipelineIntelligence: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 Average Deal Size
@@ -126,7 +126,7 @@ const PipelineIntelligence: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 Won Deals
@@ -146,7 +146,7 @@ const PipelineIntelligence: React.FC = () => {
         </div>
 
         {/* Pipeline Stages Analysis */}
-        <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <CardHeader>
             <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
@@ -164,7 +164,7 @@ const PipelineIntelligence: React.FC = () => {
                     key={stage}
                     className={`p-4 rounded-lg ${
                       isDark ? 'bg-gray-700' : 'bg-gray-50'
-                    } border ${isDark ? 'border-gray-600' : 'border-gray-200'}`}
+                    }`}
                   >
                     <div className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-2`}>
                       {stage}
@@ -183,7 +183,7 @@ const PipelineIntelligence: React.FC = () => {
         </Card>
 
         {/* Top Performing Contacts */}
-        <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <CardHeader>
             <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <Star className="h-5 w-5 mr-2 text-yellow-500" />
@@ -230,7 +230,7 @@ const PipelineIntelligence: React.FC = () => {
         </Card>
 
         {/* Recent Pipeline Activity */}
-        <Card className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <CardHeader>
             <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <Activity className="h-5 w-5 mr-2 text-orange-500" />
