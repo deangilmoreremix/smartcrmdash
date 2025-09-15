@@ -203,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const connectedApps = [
     { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
     { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
-    { name: 'ContentAI', url: 'https://social-media-calenda-75j1.bolt.host', icon: FileText, isExternal: true }
+    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
   ];
 
   const analyticsOptions = [
