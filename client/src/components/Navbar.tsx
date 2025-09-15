@@ -65,7 +65,7 @@ const DropdownPortal: React.FC<{
   return createPortal(
     <div
       ref={dropdownRef}
-      className={`fixed z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 min-w-[280px] max-w-[400px] ${className}`}
+      className={`fixed z-[9999] bg-white/95 backdrop-blur-2xl border border-gray-200 rounded-2xl shadow-2xl min-w-[280px] max-w-[400px] ${className}`}
       style={{
         top: anchor.top,
         left: Math.max(8, anchor.left - 140), // Center dropdown under button with padding
@@ -604,7 +604,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
-                              setActiveDropdown(null);
+                              closeDropdown();
                               setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -639,7 +639,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
-                              setActiveDropdown(null);
+                              closeDropdown();
                               setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -723,7 +723,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               key={index}
                               onClick={() => {
                                 handleNavigation(app.url, 'white-label');
-                                setActiveDropdown(null);
+                                closeDropdown();
                                 setIsMobileMenuOpen(false);
                               }}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -973,10 +973,147 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               closeDropdown();
             }}
             data-testid={`ai-tool-${tool.id}`}
-            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
           >
             {tool.icon ? <tool.icon size={16} className="block overflow-visible shrink-0 text-pink-500" /> : <Sparkles size={16} className="block overflow-visible shrink-0 text-pink-500" />}
             <span className="text-sm font-medium">{tool.title}</span>
+          </button>
+        ))}
+      </div>
+    </DropdownPortal>
+
+    {/* Sales Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'sales'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {salesTools.map((tool, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              // Navigate to the sales tool
+              const routeMap: { [key: string]: string } = {
+                'deal-pipeline': '/pipeline',
+                'deal-risk': '/deal-risk',
+                'conversion-insights': '/conversion-insights',
+                'pipeline-health': '/pipeline-health',
+                'sales-cycle': '/sales-cycle',
+                'win-rate-analysis': '/win-rate-analysis',
+                'ai-sales-forecast': '/ai-sales-forecast',
+                'live-deal-analysis': '/live-deal-analysis',
+                'competitor-insights': '/competitor-insights',
+                'revenue-intelligence': '/revenue-intelligence'
+              };
+              const route = routeMap[tool.tool] || `/${tool.tool}`;
+              navigate(route);
+              closeDropdown();
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+          >
+            <tool.icon size={16} className="block overflow-visible shrink-0 text-green-500" />
+            <span className="text-sm font-medium">{tool.name}</span>
+          </button>
+        ))}
+      </div>
+    </DropdownPortal>
+
+    {/* Communication Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'communication'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {communicationTools.map((tool, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              const routeMap: { [key: string]: string } = {
+                'appointments': '/appointments',
+                'video-email': '/video-email',
+                'text-messages': '/text-messages',
+                'phone-system': '/phone-system',
+                'invoicing': '/invoicing',
+                'content-library': '/content-library',
+                'forms-and-surveys': '/forms-and-surveys',
+                'voice-profiles': '/voice-profiles',
+                'business-analysis': '/business-analysis'
+              };
+              
+              const route = routeMap[tool.tool] || `/${tool.tool}`;
+              navigate(route);
+              closeDropdown();
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+          >
+            <tool.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
+            <span className="text-sm font-medium">{tool.name}</span>
+          </button>
+        ))}
+      </div>
+    </DropdownPortal>
+
+    {/* WL (White Label) Apps Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'wl'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {wlApps.map((app, index) => (
+          app.isExternal ? (
+            <a
+              key={index}
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+            >
+              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
+              <span className="text-sm font-medium">{app.name}</span>
+              <ExternalLink size={12} className="ml-auto text-gray-400" />
+            </a>
+          ) : (
+            <button
+              key={index}
+              onClick={() => {
+                handleNavigation(app.url, 'white-label');
+                closeDropdown();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+            >
+              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
+              <span className="text-sm font-medium">{app.name}</span>
+            </button>
+          )
+        ))}
+      </div>
+    </DropdownPortal>
+
+    {/* Apps Dropdown Portal */}
+    <DropdownPortal
+      isOpen={activeDropdown === 'apps'}
+      anchor={dropdownAnchor}
+      onClose={closeDropdown}
+    >
+      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {connectedApps.map((app, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              navigate(app.url);
+              closeDropdown();
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+          >
+            <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
+            <span className="text-sm font-medium">{app.name}</span>
           </button>
         ))}
       </div>
