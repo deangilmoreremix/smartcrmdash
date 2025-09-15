@@ -67,11 +67,31 @@ export default function RevenueSharingDashboard() {
   // Enhanced with database connectivity - fetching real data from Supabase
   const { data: analytics, isLoading: analyticsLoading } = useQuery<RevenueAnalytics>({
     queryKey: ['/api/revenue/analytics'],
+    queryFn: async () => {
+      const response = await fetch('/api/revenue/analytics', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     refetchInterval: 30000,
   });
 
   const { data: partners, isLoading: partnersLoading } = useQuery<Partner[]>({
     queryKey: ['/api/partners'],
+    queryFn: async () => {
+      const response = await fetch('/api/partners', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     refetchInterval: 30000,
   });
 
