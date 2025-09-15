@@ -29,8 +29,8 @@ const RevenueIntelligence: React.FC = () => {
 
   // Calculate revenue metrics
   const dealsArray = Object.values(deals);
-  const wonDeals = dealsArray.filter(d => d.stage === 'closed-won');
-  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(d.stage));
+  const wonDeals = dealsArray.filter(d => String(d.stage) === 'closed-won');
+  const activeDeals = dealsArray.filter(d => !['closed-won', 'closed-lost'].includes(String(d.stage)));
   
   const totalRevenue = wonDeals.reduce((sum, deal) => sum + deal.value, 0);
   const projectedRevenue = activeDeals.reduce((sum, deal) => sum + (deal.value * (deal.probability / 100)), 0);
@@ -48,6 +48,17 @@ const RevenueIntelligence: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    return {
+      name: contact.name,
+      initials: contact.name.split(' ').map(n => n[0]).join('').toUpperCase()
+    };
   };
 
   // Get initials for avatar
@@ -218,16 +229,15 @@ const RevenueIntelligence: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Avatar
-                    name={deal.contactName || 'Unknown'}
                     size="sm"
-                    fallback={getInitials(deal.contactName || 'UN')}
+                    fallback={getContactInfo(deal.contactId).initials}
                   />
                   <div>
                     <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {deal.title}
                     </p>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {deal.contactName} • Closed {Math.floor(Math.random() * 30) + 1} days ago
+                      {getContactInfo(deal.contactId).name} • Closed {Math.floor(Math.random() * 30) + 1} days ago
                     </p>
                   </div>
                 </div>

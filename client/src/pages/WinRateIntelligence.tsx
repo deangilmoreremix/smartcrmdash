@@ -29,13 +29,13 @@ const WinRateIntelligence: React.FC = () => {
   // Calculate win rate metrics
   const dealsArray = Object.values(deals);
   const totalDeals = dealsArray.length;
-  const wonDeals = dealsArray.filter(d => d.stage === 'closed-won').length;
-  const lostDeals = dealsArray.filter(d => d.stage === 'closed-lost').length;
+  const wonDeals = dealsArray.filter(d => String(d.stage) === 'closed-won').length;
+  const lostDeals = dealsArray.filter(d => String(d.stage) === 'closed-lost').length;
   const closedDeals = wonDeals + lostDeals;
   const winRate = closedDeals > 0 ? (wonDeals / closedDeals) * 100 : 0;
   
   const wonValue = dealsArray
-    .filter(d => d.stage === 'closed-won')
+    .filter(d => String(d.stage) === 'closed-won')
     .reduce((sum, deal) => sum + deal.value, 0);
   
   const avgWonDealSize = wonDeals > 0 ? wonValue / wonDeals : 0;
@@ -51,6 +51,17 @@ const WinRateIntelligence: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    return {
+      name: contact.name,
+      initials: contact.name.split(' ').map(n => n[0]).join('').toUpperCase()
+    };
   };
 
   // Get initials for avatar
@@ -220,7 +231,6 @@ const WinRateIntelligence: React.FC = () => {
                 } transition-all duration-200 cursor-pointer`}
               >
                 <Avatar
-                  name={contact.name}
                   src={contact.avatarSrc}
                   size="md"
                   fallback={getInitials(contact.name)}
