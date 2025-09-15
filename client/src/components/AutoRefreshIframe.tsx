@@ -21,7 +21,7 @@ const AutoRefreshIframe: React.FC<AutoRefreshIframeProps> = ({
   refreshInterval = 30000,
   onLoad,
   allow = "clipboard-read; clipboard-write; fullscreen; microphone; camera",
-  sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+  sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   

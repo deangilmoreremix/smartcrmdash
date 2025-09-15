@@ -1,0 +1,95 @@
+~/workspace$ git checkout final-sync-1757926956
+git pull origin main
+Already on 'final-sync-1757926956'
+Your branch is up to date with 'origin/final-sync-1757926956'.
+From https://github.com/deangilmoreremix/smartcrmdash
+ * branch            main       -> FETCH_HEAD
+hint: You have divergent branches and need to specify how to reconcile them.
+hint: You can do so by running one of the following commands sometime before
+hint: your next pull:
+hint:
+hint:   git config pull.rebase false  # merge
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint:
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+fatal: Need to specify how to reconcile divergent branches.
+~/workspace$ git config pull.rebase false
+git pull origin main
+From https://github.com/deangilmoreremix/smartcrmdash
+ * branch            main       -> FETCH_HEAD
+Auto-merging client/src/App.tsx
+CONFLICT (content): Merge conflict in client/src/App.tsx
+Auto-merging client/src/components/RoleBasedAccess.tsx
+Auto-merging client/src/components/TaskKanbanBoard.tsx
+Auto-merging client/src/contexts/AuthContext.tsx
+CONFLICT (add/add): Merge conflict in client/src/contexts/AuthContext.tsx
+Auto-merging client/src/lib/queryClient.ts
+CONFLICT (add/add): Merge conflict in client/src/lib/queryClient.ts
+Auto-merging client/src/main.tsx
+CONFLICT (content): Merge conflict in client/src/main.tsx
+CONFLICT (modify/delete): client/src/services/dealService.ts deleted in 3602e87ceb9d8bb355d317c415910613989051d3 and modified in HEAD.  Version HEAD of client/src/services/dealService.ts left in tree.
+CONFLICT (modify/delete): client/src/services/supabaseClient.ts deleted in 3602e87ceb9d8bb355d317c415910613989051d3 and modified in HEAD.  Version HEAD of client/src/services/supabaseClient.ts left in tree.
+Auto-merging client/src/store/taskStore.ts
+CONFLICT (content): Merge conflict in client/src/store/taskStore.ts
+Auto-merging package-lock.json
+CONFLICT (content): Merge conflict in package-lock.json
+Auto-merging package.json
+CONFLICT (content): Merge conflict in package.json
+Auto-merging server/index.ts
+CONFLICT (content): Merge conflict in server/index.ts
+Automatic merge failed; fix conflicts and then commit the result.
+~/workspace$ rm -f .git/index.lock
+~/workspace$ git status
+On branch final-sync-1757926956
+Your branch is up to date with 'origin/final-sync-1757926956'.
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+    modified:   client/src/components/TaskKanbanBoard.tsx
+    deleted:    client/src/hooks/useOpenAIDemoAgent.ts
+    new file:   server/routes/index.ts
+    modified:   server/supabase.ts
+
+Unmerged paths:
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+    both modified:   client/src/App.tsx
+    both added:      client/src/contexts/AuthContext.tsx
+    both added:      client/src/lib/queryClient.ts
+    both modified:   client/src/main.tsx
+    deleted by them: client/src/services/dealService.ts
+    deleted by them: client/src/services/supabaseClient.ts
+    both modified:   client/src/store/taskStore.ts
+    both modified:   package-lock.json
+    both modified:   package.json
+    both modified:   server/index.ts
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+    modified:   client/src/components/AutoRefreshIframe.tsx
+    modified:   client/src/components/AutoRefreshRemoteApp.tsx
+    modified:   client/src/components/ModuleFederationAIGoals.tsx
+    modified:   client/src/components/ModuleFederationAnalytics.tsx
+    modified:   client/src/components/ModuleFederationContacts.tsx
+    modified:   client/src/components/ModuleFederationPipeline.tsx
+    modified:   client/src/components/Navbar.tsx
+    modified:   client/src/components/RemoteAIAnalyticsLoader.tsx
+    modified:   client/src/components/RemotePipelineLoader.tsx
+    modified:   client/src/components/RemoteProductResearchLoader.tsx
+    modified:   client/src/pages/RemotePipeline.tsx
+    modified:   client/src/services/ai-orchestrator.service.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+    attached_assets/Pasted-Unchecked-runtime-lastError-Cannot-create-item-with-duplicate-id-LastPass-URL-Unchecked-runtime-l-1757932768174_1757932768184.txt
+    attached_assets/Pasted-content-topFrameLifeline-js-1-Loading-content-topFrameLifeline-js-content-topFrameLifeline-js-1-CONT-1757932864265_1757932864266.txt
+    attached_assets/Pasted-content-topFrameLifeline-js-1-Loading-content-topFrameLifeline-js-content-topFrameLifeline-js-1-CONT-1757933361356_1757933361366.txt
+    package.fixed
+    package.json.backup

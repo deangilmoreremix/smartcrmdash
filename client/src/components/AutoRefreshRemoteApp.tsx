@@ -20,7 +20,7 @@ const AutoRefreshRemoteApp: React.FC<AutoRefreshRemoteAppProps> = ({
   onClose,
   defaultRefreshInterval = 300, // 5 minutes default
   allowFullscreen = true,
-  sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation",
+  sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation",
   allow = "clipboard-read; clipboard-write; fullscreen; microphone; camera"
 }) => {
   const { isDark } = useTheme();

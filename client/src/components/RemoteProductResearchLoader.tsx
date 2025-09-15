@@ -102,7 +102,7 @@ const RemoteProductResearchLoader: React.FC<RemoteProductResearchLoaderProps> = 
           className="w-full h-full border-0"
           title="Product Research Module"
           allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           loading="lazy"
         />
       </div>

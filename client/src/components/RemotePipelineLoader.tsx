@@ -17,7 +17,7 @@ const RemotePipelineLoader: React.FC<RemotePipelineLoaderProps> = ({
         className="w-full h-full border-0"
         title="Remote Pipeline System"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
       />
     </div>
   );

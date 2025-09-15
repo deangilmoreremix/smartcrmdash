@@ -226,8 +226,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
-  }, []);
+    console.log('🔽 Dropdown clicked:', dropdown, 'Current activeDropdown:', activeDropdown);
+    setActiveDropdown(prev => {
+      const newValue = prev === dropdown ? null : dropdown;
+      console.log('🔽 Setting activeDropdown to:', newValue);
+      return newValue;
+    });
+  }, [activeDropdown]);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
     console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
@@ -364,7 +369,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   return (
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
+    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-[1000] pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
       <div className="max-w-[90rem] mx-auto will-change-transform">
         <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
           <div className="flex items-center justify-between px-6 lg:px-8 py-3">
@@ -378,8 +383,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
             {/* Desktop nav pills */}
             <div className="hidden lg:flex flex-1 min-w-0">
-              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-                <div className="inline-flex items-center gap-1 whitespace-nowrap">
+              <div className={`w-full ${activeDropdown ? 'overflow-visible' : 'overflow-x-auto'} px-1 py-1.5`} style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                <div className={`inline-flex items-center gap-1 whitespace-nowrap ${activeDropdown ? 'overflow-visible' : ''}`}>
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -422,7 +427,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
                             <button
@@ -450,7 +455,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                     {/* Analytics Dropdown */}
                     {tab.id === 'analytics' && activeDropdown === 'analytics' && (
-                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                           {analyticsOptions.map((option, index) => (
                             <button
@@ -529,7 +534,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                   {/* Other dropdown panels (sales/tasks/communication/content/apps) — keep your existing code */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {salesTools.map((tool, index) => (
                           <button
@@ -565,7 +570,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'communication' && activeDropdown === 'communication' && (
-                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {communicationTools.map((tool, index) => (
                           <button
@@ -574,12 +579,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               console.log('Communication tool clicked:', tool.tool, tool.name);
                               const routeMap: { [key: string]: string } = {
                                 'appointments': '/appointments',
-                                'video-email': '/video-profiles',
+                                'video-email': '/voice-profiles',
                                 'text-messages': '/communication-hub',
                                 'phone-system': '/phone-system',
                                 'invoicing': '/invoicing',
-                                'lead-automation': '/lead-automation',
-                                'circle-prospecting': '/circle-prospecting',
+                                'lead-automation': '/tasks', // Redirect to working tasks page
+                                'circle-prospecting': '/communication', // Redirect to working communication page
                                 'forms': '/forms',
                                 'business-analysis': '/business-analysis'
                               };
@@ -600,7 +605,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                    <div className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
                       <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                         <div className="h-full flex flex-col">
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
@@ -629,7 +634,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               title="Business Intelligence Dashboard"
                               frameBorder="0"
                               allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups  allow-top-navigation"
                               onLoad={(e) => {
                                 try {
                                   (e.target as HTMLIFrameElement).contentWindow?.postMessage({
@@ -685,7 +690,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                    <div className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
                       <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                         <div className="h-full flex flex-col">
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
@@ -714,7 +719,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               title="Intel Dashboard"
                               frameBorder="0"
                               allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups  allow-top-navigation"
                               onLoad={(e) => {
                                 try {
                                   (e.target as HTMLIFrameElement).contentWindow?.postMessage({
@@ -735,7 +740,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
 
                   {menu.id === 'apps' && activeDropdown === 'apps' && (
-                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {connectedApps.map((app, index) =>
                           app.isExternal ? (
@@ -824,7 +829,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 </button>
 
                 {activeDropdown === 'user' && (
-                  <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in`}>
+                  <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                     <div className="p-3">
                       <div className="px-3 py-2 border-b border-gray-200/30">
                         <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
