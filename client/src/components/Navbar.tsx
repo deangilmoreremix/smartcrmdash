@@ -325,7 +325,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else if (path === '/pipeline') setActiveTab('pipeline');
     else if (path === '/tasks' || path === '/appointments') setActiveTab('appointments');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
-    else if (path === '/assistants') setActiveTab('assistants'); // Add this line for the new route
     else if (path === '/analytics') setActiveTab('analytics');
     else if (path === '/ai-goals') setActiveTab('ai-goals');
     else setActiveTab('');
@@ -380,14 +379,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       action: (e?: React.MouseEvent) => toggleDropdown('ai-tools', e),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
-    },
-    {
-      id: 'assistants', // New tab for AI Assistants
-      label: 'AI Assistants',
-      icon: Bot,
-      action: (e?: React.MouseEvent) => handleNavigation('/assistants', 'assistants'),
-      badge: 0, // Placeholder for assistant count
-      color: 'from-emerald-500 to-lime-500'
     },
     {
       id: 'calendar',
@@ -481,7 +472,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'ai-tools' ? 'bg-pink-500' :
                         tab.id === 'appointments' ? 'bg-cyan-500' :
                         tab.id === 'analytics' ? 'bg-blue-500' :
-                        tab.id === 'assistants' ? 'bg-emerald-500' : // Color for new assistants tab
                         tab.id === 'admin' ? 'bg-red-500' : // Color for admin tab
                         'bg-blue-500'
                       )}
