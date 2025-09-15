@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWhitelabel } from '../contexts/WhitelabelContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { WhitelabelButton } from '../types/whitelabel';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -31,32 +32,9 @@ import {
 
 const WhiteLabelCustomization: React.FC = () => {
   const { config, updateConfig, resetToDefault, exportConfig, importConfig } = useWhitelabel();
+  const { isDark, toggleTheme } = useTheme(); // Use global theme context
   const [copied, setCopied] = useState(false);
   const [importText, setImportText] = useState('');
-  const [currentTheme, setCurrentTheme] = useState('light'); // Always start in light mode
-
-  // Apply theme immediately
-  useEffect(() => {
-    document.body.className = `theme-${currentTheme}`;
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    
-    if (currentTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    // Always start in light mode
-    if (currentTheme === 'light') {
-      document.body.style.backgroundColor = '#ffffff';
-      document.body.style.color = '#000000';
-    }
-  }, [currentTheme]);
-
-  // Toggle theme function
-  const toggleTheme = () => {
-    setCurrentTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
 
   const handleButtonUpdate = (index: number, updates: Partial<WhitelabelButton>) => {
     const newButtons = [...config.ctaButtons];
@@ -98,16 +76,16 @@ const WhiteLabelCustomization: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${currentTheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="container mx-auto p-6 space-y-8 max-w-6xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`text-3xl font-bold mb-2 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>White Label Customization</h1>
-            <p className={`${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Customize your application's branding and appearance</p>
+            <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>White Label Customization</h1>
+            <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Customize your application's branding and appearance</p>
           </div>
           <div className="flex gap-3">
           <Button variant="outline" onClick={toggleTheme} className="flex items-center">
-            {currentTheme === 'dark' ? (
+            {isDark ? (
               <>
                 <Sun className="h-4 w-4 mr-2" />
                 Light Mode
@@ -132,9 +110,9 @@ const WhiteLabelCustomization: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Company Settings */}
-        <Card className={`transition-colors duration-300 ${currentTheme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`transition-colors duration-300 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <CardHeader>
-            <CardTitle className={`flex items-center ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <Globe className="h-5 w-5 mr-2" />
               Company Information
             </CardTitle>
@@ -180,9 +158,9 @@ const WhiteLabelCustomization: React.FC = () => {
         </Card>
 
         {/* Color Scheme */}
-        <Card className={`transition-colors duration-300 ${currentTheme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`transition-colors duration-300 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <CardHeader>
-            <CardTitle className={`flex items-center ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <Palette className="h-5 w-5 mr-2" />
               Color Scheme
             </CardTitle>
@@ -228,9 +206,9 @@ const WhiteLabelCustomization: React.FC = () => {
         </Card>
 
         {/* CTA Buttons */}
-        <Card className={`lg:col-span-2 transition-colors duration-300 ${currentTheme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`lg:col-span-2 transition-colors duration-300 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <CardHeader>
-            <CardTitle className={`flex items-center justify-between ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <CardTitle className={`flex items-center justify-between ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <div className="flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2" />
                 Call-to-Action Buttons
@@ -244,7 +222,7 @@ const WhiteLabelCustomization: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {config.ctaButtons.map((button, index) => (
-                <div key={button.id} className={`flex items-center space-x-4 p-4 border rounded-lg transition-colors duration-300 ${currentTheme === 'dark' ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
+                <div key={button.id} className={`flex items-center space-x-4 p-4 border rounded-lg transition-colors duration-300 ${isDark ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                       <Label>Button Text</Label>
@@ -293,7 +271,7 @@ const WhiteLabelCustomization: React.FC = () => {
                 </div>
               ))}
               {config.ctaButtons.length === 0 && (
-                <div className={`text-center py-8 ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   No buttons configured. Add your first button to get started.
                 </div>
               )}
@@ -302,9 +280,9 @@ const WhiteLabelCustomization: React.FC = () => {
         </Card>
 
         {/* Import/Export */}
-        <Card className={`lg:col-span-2 transition-colors duration-300 ${currentTheme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <Card className={`lg:col-span-2 transition-colors duration-300 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <CardHeader>
-            <CardTitle className={`flex items-center ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <CardTitle className={`flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
               <Settings className="h-5 w-5 mr-2" />
               Import/Export Configuration
             </CardTitle>
@@ -327,9 +305,9 @@ const WhiteLabelCustomization: React.FC = () => {
                 </Button>
               </div>
             </div>
-            <div className={`pt-4 border-t ${currentTheme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
+            <div className={`pt-4 border-t ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
               <div className="flex items-center justify-between">
-                <span className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Export current configuration</span>
+                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Export current configuration</span>
                 <Button onClick={handleExport} variant="outline">
                   {copied ? (
                     <>
