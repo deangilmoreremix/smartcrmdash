@@ -1,0 +1,265 @@
+content_topFrameLifeline.js:1 Loading content_topFrameLifeline.js
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+index-C_DGsMfH.js:1351 Using dev bypass session: dev@smartcrm.local
+index-C_DGsMfH.js:1544 🚀 Starting Universal Data Sync System
+index-C_DGsMfH.js:1361 🔄 Initializing Universal Data Sync Service
+index-C_DGsMfH.js:1520 Initializing dashboard...
+index.js:1410 [HMR] Waiting for update signal from WDS...
+index-C_DGsMfH.js:1361 GPT5Service: API status checked Object
+index-C_DGsMfH.js:1520 Dashboard initialized successfully
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-navigation' is an invalid sandbox flag.
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Pipeline...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://cheery-syrniki-b5b6ca.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:1361 Starting auto-refresh for wl-remote-iframe every 120000ms
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Analytics...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://resilient-frangipane-6289c8.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:811 Supabase AI service connected successfully
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+index-C_DGsMfH.js:1544 🚨 Suppressed error to prevent runtime overlay: Script error.
+(anonymous) @ index-C_DGsMfH.js:1544
+index-C_DGsMfH.js:1544 🚨 Global onerror caught: Object
+window.onerror @ index-C_DGsMfH.js:1544
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: Script error.
+(anonymous) @ index-C_DGsMfH.js:1544
+index-C_DGsMfH.js:1361 Successfully loaded Module Federation script from: https://cheery-syrniki-b5b6ca.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:1361 Looking for Module Federation container: PipelineApp
+index-C_DGsMfH.js:1361 Available window properties: Array(0)
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+web-client-content-script.js:2 Uncaught TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at HTMLIFrameElement.<anonymous> (web-client-content-script.js:2:535495)
+index-C_DGsMfH.js:1361 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at index-C_DGsMfH.js:1361:82199
+(anonymous) @ index-C_DGsMfH.js:1361
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 10/20
+api/openai/business-intelligence:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/business-intelligence:1  Failed to load resource: the server responded with a status of 500 ()
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 20/20
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:34 Allow attribute will take precedence over 'allowfullscreen'.
+A @ index-C_DGsMfH.js:34
+index-C_DGsMfH.js:1361 Stopped auto-refresh for wl-remote-iframe
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+BusinessIntelPage-CHyKg-XA.js:13 Unable to inject CSS directly into iframe
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: dashboard Dashboard
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1520 Initializing dashboard...
+index-C_DGsMfH.js:1520 Dashboard initialized successfully
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Pipeline...
+index-C_DGsMfH.js:1361 Looking for Module Federation container: PipelineApp
+index-C_DGsMfH.js:1361 Available window properties: Array(0)
+index-C_DGsMfH.js:1361 Starting auto-refresh for wl-remote-iframe every 120000ms
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Analytics...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://resilient-frangipane-6289c8.netlify.app/assets/remoteEntry.js
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+index-C_DGsMfH.js:1351 Tab clicked: contacts Contacts
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1361 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at index-C_DGsMfH.js:1361:82199
+(anonymous) @ index-C_DGsMfH.js:1361
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 10/20
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/kpi-analysis:1  Failed to load resource: the server responded with a status of 500 ()
+index-C_DGsMfH.js:1361 Stopped auto-refresh for wl-remote-iframe
+ContactsWorking-CuedjI6V.js:1 🚀 Loading Module Federation Contacts...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://taupe-sprinkles-83c9ee.netlify.app/assets/remoteEntry.js
+api/openai/business-intelligence:1  Failed to load resource: the server responded with a status of 500 ()
+api/openai/business-intelligence:1  Failed to load resource: the server responded with a status of 500 ()
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 20/20
+ContactsWorking-CuedjI6V.js:1 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at ContactsWorking-CuedjI6V.js:1:268
+(anonymous) @ ContactsWorking-CuedjI6V.js:1
+index-C_DGsMfH.js:1351 Tab clicked: pipeline Pipeline
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Pipeline...
+index-C_DGsMfH.js:1361 Looking for Module Federation container: PipelineApp
+index-C_DGsMfH.js:1361 Available window properties: Array(0)
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 10/20
+index-C_DGsMfH.js:1361 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at index-C_DGsMfH.js:1361:82199
+(anonymous) @ index-C_DGsMfH.js:1361
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 20/20
+index-C_DGsMfH.js:1351 Tab clicked: analytics Analytics
+index-C_DGsMfH.js:1351 Tab clicked: analytics Analytics
+index-C_DGsMfH.js:1351 Tab clicked: ai-goals AI Goals
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+AIGoalsWithRemote-DNERmjHi.js:1 🚀 Loading Module Federation AI Goals...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://tubular-choux-2a9b3c.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+AIGoalsWithRemote-DNERmjHi.js:1 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at AIGoalsWithRemote-DNERmjHi.js:1:276
+(anonymous) @ AIGoalsWithRemote-DNERmjHi.js:1
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: assistants AI Assistants
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1351 Tab clicked: appointments Calendar
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+index-C_DGsMfH.js:1351 Tab clicked: admin Admin Panel
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1351 Tab clicked: dashboard Dashboard
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1520 Initializing dashboard...
+index-C_DGsMfH.js:1520 Dashboard initialized successfully
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Pipeline...
+index-C_DGsMfH.js:1361 Looking for Module Federation container: PipelineApp
+index-C_DGsMfH.js:1361 Available window properties: Array(0)
+index-C_DGsMfH.js:1361 Starting auto-refresh for wl-remote-iframe every 120000ms
+index-C_DGsMfH.js:1361 🚀 Loading Module Federation Analytics...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://resilient-frangipane-6289c8.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ No AI providers available, skipping request: insights_generation
+selectProvider @ ai-orchestrator.service-CdvCWck5.js:2
+ai-orchestrator.service-CdvCWck5.js:2 ⚠️ Skipping AI request due to no providers: insights_generation
+processNextRequest @ ai-orchestrator.service-CdvCWck5.js:2
+index-C_DGsMfH.js:1351 Tab clicked: contacts Contacts
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+index-C_DGsMfH.js:1361 Stopped auto-refresh for wl-remote-iframe
+ContactsWorking-CuedjI6V.js:1 🚀 Loading Module Federation Contacts...
+index-C_DGsMfH.js:1361 Trying to load Module Federation script from: https://taupe-sprinkles-83c9ee.netlify.app/assets/remoteEntry.js
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 10/20
+index-C_DGsMfH.js:1544 🚨 Prevented error overlay: undefined
+(anonymous) @ index-C_DGsMfH.js:1544
+index-C_DGsMfH.js:1361 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at index-C_DGsMfH.js:1361:82199
+(anonymous) @ index-C_DGsMfH.js:1361
+index-C_DGsMfH.js:1361 Still waiting for container "PipelineApp", retry 20/20
+ContactsWorking-CuedjI6V.js:1 ❌ Module Federation failed, using iframe fallback: Error: Module Federation loading timeout
+    at ContactsWorking-CuedjI6V.js:1:268
+(anonymous) @ ContactsWorking-CuedjI6V.js:1
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Tab clicked: ai-tools AI Tools
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+BusinessIntelPage-CHyKg-XA.js:13 Unable to inject CSS directly into iframe
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+index-C_DGsMfH.js:1351 Navigation triggered: Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: TIMEOUT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: CONNECT
+content_topFrameLifeline.js:1 CONTENT <-> SERVICE LIFELINE: MESSAGE Object

@@ -68,6 +68,7 @@ class AIOrchestrator {
   private processing = false;
   private providers: Map<string, AIProvider> = new Map();
   private requestHistory: AIResponse[] = [];
+  private hasLoggedProviderWarning = false;
   
   constructor() {
     this.initializeProviders();
@@ -75,20 +76,33 @@ class AIOrchestrator {
   }
 
   private initializeProviders(): void {
-    // Initialize provider status
+    // Initialize provider status - check for both API key availability and graceful degradation
+    const openAIAvailable = !!import.meta.env.VITE_OPENAI_API_KEY;
+    const geminiAvailable = !!import.meta.env.VITE_GEMINI_API_KEY;
+    
     this.providers.set('openai', {
       name: 'openai',
-      available: !!import.meta.env.VITE_OPENAI_API_KEY,
+      available: openAIAvailable,
       rateLimit: { remaining: 50, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 2000, successRate: 0.95, costPer1kTokens: 0.002 }
     });
 
     this.providers.set('gemini', {
       name: 'gemini',
-      available: !!import.meta.env.VITE_GEMINI_API_KEY,
+      available: geminiAvailable,
       rateLimit: { remaining: 60, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 1500, successRate: 0.92, costPer1kTokens: 0.0005 }
     });
+
+    // Log provider initialization status for debugging
+    if (!openAIAvailable && !geminiAvailable) {
+      console.warn('⚠️ No AI API keys configured - AI features will be disabled');
+    } else {
+      console.log('✅ AI providers initialized:', { 
+        openai: openAIAvailable, 
+        gemini: geminiAvailable 
+      });
+    }
   }
 
   private startQueueProcessor(): void {
@@ -122,7 +136,11 @@ class AIOrchestrator {
       
       // Silently handle "No AI providers available" to prevent runtime errors
       if (errorMsg.includes('No AI providers available')) {
-        console.warn('⚠️ Skipping AI request due to no providers:', request.type);
+        // Only log once per session to avoid spam
+        if (!this.hasLoggedProviderWarning) {
+          console.warn('⚠️ AI providers not configured - add VITE_OPENAI_API_KEY or VITE_GEMINI_API_KEY to .env file');
+          this.hasLoggedProviderWarning = true;
+        }
       }
     } finally {
       this.processing = false;
@@ -198,9 +216,8 @@ class AIOrchestrator {
       .filter(p => p.available && p.rateLimit.remaining > 0);
 
     if (availableProviders.length === 0) {
-      // Silently skip requests when no providers are available instead of throwing
-      console.warn('⚠️ No AI providers available, skipping request:', request.type);
-      throw new Error('No AI providers available');
+      // Return a graceful degradation response instead of throwing an error
+      throw new Error('No AI providers available - ensure VITE_OPENAI_API_KEY or VITE_GEMINI_API_KEY is configured');
     }
 
     // Auto-select based on request type and urgency
