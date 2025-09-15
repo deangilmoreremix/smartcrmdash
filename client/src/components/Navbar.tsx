@@ -269,7 +269,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'dashboard',
       label: 'Dashboard',
       icon: BarChart3,
-      action: () => handleNavigation('/dashboard', 'dashboard'),
+      action: (e?: React.MouseEvent) => handleNavigation('/dashboard', 'dashboard'),
       badge: 1,
       color: 'from-indigo-500 to-purple-500'
     },
@@ -277,7 +277,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
-      action: () => handleNavigation('/contacts', 'contacts'),
+      action: (e?: React.MouseEvent) => handleNavigation('/contacts', 'contacts'),
       badge: 10,
       color: 'from-purple-500 to-indigo-500'
     },
@@ -285,7 +285,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'pipeline',
       label: 'Pipeline',
       icon: Briefcase,
-      action: () => handleNavigation('/pipeline', 'pipeline'),
+      action: (e?: React.MouseEvent) => handleNavigation('/pipeline', 'pipeline'),
       badge: 5,
       color: 'from-green-500 to-emerald-500'
     },
@@ -293,7 +293,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'analytics',
       label: 'Analytics',
       icon: TrendingUp,
-      action: () => toggleDropdown('analytics'),
+      action: (e?: React.MouseEvent) => toggleDropdown('analytics', e),
       badge: 30,
       color: 'from-blue-500 to-cyan-500',
       hasDropdown: true
@@ -302,7 +302,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-goals',
       label: 'AI Goals',
       icon: Target,
-      action: () => handleNavigation('/ai-goals', 'ai-goals'),
+      action: (e?: React.MouseEvent) => handleNavigation('/ai-goals', 'ai-goals'),
       badge: 58,
       color: 'from-purple-500 to-pink-500'
     },
@@ -310,7 +310,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Brain,
-      action: () => toggleDropdown('ai-tools'),
+      action: (e?: React.MouseEvent) => toggleDropdown('ai-tools', e),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
@@ -318,7 +318,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'assistants', // New tab for AI Assistants
       label: 'AI Assistants',
       icon: Bot,
-      action: () => handleNavigation('/assistants', 'assistants'),
+      action: (e?: React.MouseEvent) => handleNavigation('/assistants', 'assistants'),
       badge: 0, // Placeholder for assistant count
       color: 'from-emerald-500 to-lime-500'
     },
@@ -326,7 +326,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'appointments',
       label: 'Calendar',
       icon: Calendar,
-      action: () => handleNavigation('/appointments', 'appointments'),
+      action: (e?: React.MouseEvent) => handleNavigation('/appointments', 'appointments'),
       badge: 15,
       color: 'from-cyan-500 to-blue-500'
     }
@@ -386,7 +386,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   <div key={tab.id} className="relative shrink-0">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action();
+                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action(e);
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
                       }}
                       data-testid={`nav-tab-${tab.id}`}
                       className={`
