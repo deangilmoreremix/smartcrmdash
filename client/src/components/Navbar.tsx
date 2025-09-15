@@ -225,8 +225,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
+    console.log('🔧 toggleDropdown called with:', dropdown, 'event:', !!e);
     if (e) e.stopPropagation();
-    setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
+    setActiveDropdown(prev => {
+      const newValue = prev === dropdown ? null : dropdown;
+      console.log('🔄 activeDropdown changing from', prev, 'to', newValue);
+      return newValue;
+    });
   }, []);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
@@ -293,7 +298,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'analytics',
       label: 'Analytics',
       icon: TrendingUp,
-      action: (e?: React.MouseEvent) => toggleDropdown('analytics', e),
+      action: (e?: React.MouseEvent) => {
+        console.log('📊 Analytics action called, event:', !!e);
+        toggleDropdown('analytics', e);
+      },
       badge: 30,
       color: 'from-blue-500 to-cyan-500',
       hasDropdown: true
@@ -310,7 +318,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Brain,
-      action: (e?: React.MouseEvent) => toggleDropdown('ai-tools', e),
+      action: (e?: React.MouseEvent) => {
+        console.log('🤖 AI Tools action called, event:', !!e);
+        toggleDropdown('ai-tools', e);
+      },
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
