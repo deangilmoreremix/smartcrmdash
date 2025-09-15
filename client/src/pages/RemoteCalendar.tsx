@@ -1,97 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff, Calendar } from 'lucide-react';
-import { useAppointmentStore } from '../store/appointmentStore';
+import { useAppointmentStore, Appointment } from '../store/appointmentStore';
+import { RemoteCalendarBridge, CRMAppointment, RemoteCalendarStatus } from '../services/remoteCalendarBridge';
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';
-
-// Bridge for calendar moderation communication
-class RemoteCalendarBridge {
-  private iframe: HTMLIFrameElement | null = null;
-  private messageHandlers: Map<string, (data: any) => void> = new Map();
-  private isInitialized = false;
-
-  constructor() {
-    this.setupMessageListener();
-  }
-
-  setIframe(iframe: HTMLIFrameElement) {
-    this.iframe = iframe;
-    this.initializeBridge();
-  }
-
-  private setupMessageListener() {
-    window.addEventListener('message', (event) => {
-      // Accept messages from the calendar moderation app
-      if (event.origin !== 'https://ai-calendar-applicat-qshp.bolt.host') {
-        return;
-      }
-
-      const { type, data } = event.data;
-      console.log('📨 Calendar bridge received:', type, data);
-
-      const handler = this.messageHandlers.get(type);
-      if (handler) {
-        handler(data);
-      }
-    });
-  }
-
-  private initializeBridge() {
-    if (!this.iframe || this.isInitialized) return;
-
-    console.log('🚀 Initializing calendar moderation bridge');
-    
-    // Wait for iframe to load then initialize
-    setTimeout(() => {
-      this.sendMessage('CRM_INIT', {
-        origin: window.location.origin,
-        crmInfo: {
-          name: 'SmartCRM Calendar Integration',
-          version: '1.0.0',
-          features: ['appointments', 'calendar', 'moderation', 'navigation']
-        }
-      });
-      
-      this.isInitialized = true;
-    }, 2000);
-  }
-
-  sendMessage(type: string, data: any) {
-    if (this.iframe?.contentWindow) {
-      this.iframe.contentWindow.postMessage(
-        { type, data },
-        'https://ai-calendar-applicat-qshp.bolt.host'
-      );
-      console.log('📤 Calendar bridge sent:', type, data);
-    }
-  }
-
-  onMessage(type: string, handler: (data: any) => void) {
-    this.messageHandlers.set(type, handler);
-  }
-
-  disconnect() {
-    this.messageHandlers.clear();
-    this.isInitialized = false;
-  }
-
-  // Calendar-specific methods
-  syncAppointments(appointments: any[]) {
-    this.sendMessage('APPOINTMENTS_SYNC', { appointments });
-  }
-
-  notifyAppointmentCreated(appointment: any) {
-    this.sendMessage('APPOINTMENT_CREATED', appointment);
-  }
-
-  notifyAppointmentUpdated(appointment: any) {
-    this.sendMessage('APPOINTMENT_UPDATED', appointment);
-  }
-
-  notifyAppointmentDeleted(appointmentId: string) {
-    this.sendMessage('APPOINTMENT_DELETED', { id: appointmentId });
-  }
-}
 
 const RemoteCalendar: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -99,15 +11,41 @@ const RemoteCalendar: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bridgeStatus, setBridgeStatus] = useState<RemoteCalendarStatus | null>(null);
   
   const { appointments, fetchAppointments, createAppointment, updateAppointment, deleteAppointment } = useAppointmentStore();
 
   const REMOTE_URL = 'https://ai-calendar-applicat-qshp.bolt.host';
 
+  // Convert Appointment to CRMAppointment format
+  const convertToCRMAppointment = (appointment: Appointment): CRMAppointment => ({
+    id: appointment.id,
+    title: appointment.title,
+    contactId: appointment.contactId,
+    contactName: appointment.contactName,
+    contactEmail: appointment.contactEmail,
+    contactPhone: appointment.contactPhone,
+    date: appointment.date.toISOString(),
+    endDate: appointment.endDate.toISOString(),
+    duration: appointment.duration,
+    type: appointment.type,
+    status: appointment.status,
+    location: appointment.location,
+    notes: appointment.notes,
+    createdAt: appointment.createdAt.toISOString(),
+    updatedAt: appointment.updatedAt.toISOString()
+  });
+
   useEffect(() => {
-    // Initialize the bridge
+    // Initialize the bridge with status callback
     if (!bridgeRef.current) {
-      bridgeRef.current = new RemoteCalendarBridge();
+      bridgeRef.current = new RemoteCalendarBridge((status: RemoteCalendarStatus) => {
+        setBridgeStatus(status);
+        setIsConnected(status.isConnected);
+        if (status.errorMessage) {
+          setError(status.errorMessage);
+        }
+      });
       
       // Register with universal manager
       remoteAppManager.registerBridge('calendar', bridgeRef.current);
@@ -138,7 +76,8 @@ const RemoteCalendar: React.FC = () => {
       bridgeRef.current.onMessage('REQUEST_APPOINTMENTS', () => {
         console.log('📊 Remote calendar requesting CRM appointments');
         if (bridgeRef.current) {
-          bridgeRef.current.syncAppointments(Object.values(appointments));
+          const crmAppointments = Object.values(appointments).map(convertToCRMAppointment);
+          bridgeRef.current.syncAppointments(crmAppointments);
         }
       });
 
@@ -178,12 +117,36 @@ const RemoteCalendar: React.FC = () => {
       const handleLoad = () => {
         console.log('📺 Remote calendar iframe loaded');
         
+        // Check if content actually loaded (not a 404 page)
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc && iframeDoc.title === 'Page not found') {
+            console.error('❌ Remote calendar app not found - 404 error');
+            setError('The remote calendar app is not available at this URL. Please check if the app is properly deployed.');
+            setIsLoading(false);
+            setIsConnected(false);
+            return;
+          }
+        } catch (e) {
+          // Cross-origin restrictions prevent document access - this is normal
+          console.log('📝 Cross-origin calendar iframe loaded (expected)');
+        }
+        
         setError(null);
         setIsLoading(false);
         
         if (bridgeRef.current) {
           bridgeRef.current.setIframe(iframe);
           console.log('🔗 Calendar bridge communication initialized');
+          
+          // Initialize CRM connection after iframe loads
+          setTimeout(() => {
+            if (bridgeRef.current) {
+              const crmAppointments = Object.values(appointments).map(convertToCRMAppointment);
+              bridgeRef.current.syncAppointments(crmAppointments);
+              bridgeRef.current.sendNavigationCapabilities();
+            }
+          }, 2000);
         }
       };
 
@@ -202,12 +165,13 @@ const RemoteCalendar: React.FC = () => {
         iframe.removeEventListener('error', handleError);
       };
     }
-  }, []);
+  }, [appointments]);
 
   // Sync appointments when they change
   useEffect(() => {
-    if (bridgeRef.current && isConnected) {
-      bridgeRef.current.syncAppointments(Object.values(appointments));
+    if (bridgeRef.current && isConnected && appointments) {
+      const crmAppointments = Object.values(appointments).map(convertToCRMAppointment);
+      bridgeRef.current.syncAppointments(crmAppointments);
     }
   }, [appointments, isConnected]);
 
@@ -238,17 +202,22 @@ const RemoteCalendar: React.FC = () => {
           
           <div className="flex items-center space-x-2">
             <div className="text-sm bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full">
-              ✓ Remote Module
+              ✓ Module Federation
             </div>
             {isConnected ? (
               <div className="flex items-center text-green-600 text-sm bg-green-100 px-3 py-1 rounded-full">
                 <Wifi className="w-4 h-4 mr-1" />
-                CRM Connected
+                Bridge Connected
               </div>
             ) : (
               <div className="flex items-center text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full">
                 <WifiOff className="w-4 h-4 mr-1" />
                 {isLoading ? 'Connecting...' : 'Disconnected'}
+              </div>
+            )}
+            {bridgeStatus && bridgeStatus.connectionAttempts > 0 && (
+              <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                Attempts: {bridgeStatus.connectionAttempts}
               </div>
             )}
           </div>
@@ -325,16 +294,22 @@ const RemoteCalendar: React.FC = () => {
         <div className="flex items-center space-x-4">
           <span>Remote URL: {REMOTE_URL}</span>
           {isConnected && (
-            <span className="text-green-600">● Bridge Active</span>
+            <span className="text-green-600">● Module Federation Bridge Active</span>
           )}
           {error && (
-            <span className="text-red-600">● Connection Failed</span>
+            <span className="text-red-600">● Bridge Connection Failed</span>
+          )}
+          {bridgeStatus && (
+            <span className="text-blue-600">
+              Appointments: {bridgeStatus.appointmentCount} | 
+              {bridgeStatus.lastSync ? ` Last Sync: ${bridgeStatus.lastSync.toLocaleTimeString()}` : ' No Sync'}
+            </span>
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <span>Calendar Moderation v1.0</span>
+          <span>Calendar Moderation Module Federation v1.0</span>
           {!isLoading && !error && !isConnected && (
-            <span className="text-yellow-600">● Checking...</span>
+            <span className="text-yellow-600">● Initializing Bridge...</span>
           )}
         </div>
       </div>
