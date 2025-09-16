@@ -189,6 +189,7 @@ export const profilesRelations = relations(profiles, ({ many, one }) => ({
   documents: many(documents),
   automationRules: many(automationRules),
   aiQueries: many(aiQueries),
+  generatedImages: many(userGeneratedImages), // Add generated images relation
   entitlement: one(entitlements, {
     fields: [profiles.id],
     references: [entitlements.userId],
@@ -742,6 +743,35 @@ export const insertPartnerWLConfigSchema = createInsertSchema(partnerWLConfigs).
 export type User = Profile;
 export type InsertUser = InsertProfile;
 
+// User Generated Images table for AI image storage
+export const userGeneratedImages = pgTable("user_generated_images", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => profiles.id).notNull(),
+  filename: text("filename").notNull(),
+  storagePath: text("storage_path").notNull(),
+  publicUrl: text("public_url").notNull(),
+  promptText: text("prompt_text"),
+  feature: text("feature"), // SmartCRM feature: 'Enhanced Contacts', 'Pipeline Deals', etc.
+  format: text("format"), // Format: 'Poster', 'Flyer', 'Product Mock', etc.
+  aspectRatio: text("aspect_ratio"), // Aspect ratio: '1:1', '16:9', etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: json("metadata"), // Additional metadata like seeds, variants, etc.
+});
+
+// Relations for user generated images
+export const userGeneratedImagesRelations = relations(userGeneratedImages, ({ one }) => ({
+  user: one(profiles, {
+    fields: [userGeneratedImages.userId],
+    references: [profiles.id],
+  }),
+}));
+
+// Insert schema for user generated images
+export const insertUserGeneratedImageSchema = createInsertSchema(userGeneratedImages).omit({
+  id: true,
+  createdAt: true,
+});
+
 // White Label types
 export type TenantConfig = typeof tenantConfigs.$inferSelect;
 export type InsertTenantConfig = z.infer<typeof insertTenantConfigSchema>;
@@ -751,6 +781,10 @@ export type UserWLSettings = typeof userWLSettings.$inferSelect;
 export type InsertUserWLSettings = z.infer<typeof insertUserWLSettingsSchema>;
 export type PartnerWLConfig = typeof partnerWLConfigs.$inferSelect;
 export type InsertPartnerWLConfig = z.infer<typeof insertPartnerWLConfigSchema>;
+
+// User Generated Images types
+export type UserGeneratedImage = typeof userGeneratedImages.$inferSelect;
+export type InsertUserGeneratedImage = z.infer<typeof insertUserGeneratedImageSchema>;
 
 // Export partner types
 export type Partner = typeof partners.$inferSelect;
