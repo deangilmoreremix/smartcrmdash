@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Package, Plus, Minus, Check, Star, Zap, Shield, Globe, Users, Upload, Save, Eye, Edit, Trash2, UserPlus, FileText, AlertCircle, CheckCircle, Settings, Palette } from 'lucide-react';
+import { Package, Plus, Minus, Check, Star, Zap, Shield, Globe, Users, Upload, Save, Eye, Edit, Trash2, UserPlus, FileText, AlertCircle, CheckCircle, Settings, Palette, Sun, Moon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +45,7 @@ interface PackageUser {
 }
 
 const WhiteLabelPackageBuilder: React.FC = () => {
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('builder');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [packageName, setPackageName] = useState('');
@@ -183,7 +183,7 @@ const WhiteLabelPackageBuilder: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with Action Buttons */}
         <div className="mb-8">
@@ -197,6 +197,16 @@ const WhiteLabelPackageBuilder: React.FC = () => {
               </p>
             </div>
             <div className="flex gap-3">
+              <Button
+                onClick={toggleTheme}
+                variant="outline"
+                className="flex items-center gap-2"
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                data-testid="button-theme-toggle"
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDark ? 'Light' : 'Dark'}
+              </Button>
               <Button
                 onClick={() => setShowBulkUserModal(true)}
                 variant="outline"

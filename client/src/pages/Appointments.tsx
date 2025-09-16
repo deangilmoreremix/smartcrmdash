@@ -4,25 +4,27 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { GlassCard } from '../components/ui/GlassCard';
 import { ModernButton } from '../components/ui/ModernButton';
-import { 
-  Clock, 
-  User, 
-  Check, 
-  Video, 
-  Phone, 
-  MapPin, 
-  Plus, 
-  Calendar as CalendarIcon, 
-  AlertOctagon, 
-  ChevronRight, 
-  ChevronLeft, 
-  Mail, 
+import GeminiImageModal from '../components/GeminiImageModal';
+import {
+  Clock,
+  User,
+  Check,
+  Video,
+  Phone,
+  MapPin,
+  Plus,
+  Calendar as CalendarIcon,
+  AlertOctagon,
+  ChevronRight,
+  ChevronLeft,
+  Mail,
   X,
   RefreshCw,
   Search,
   AlertCircle,
   Copy,
-  Link
+  Link,
+  Image
 } from 'lucide-react';
 import { useAppointmentStore, Appointment, AppointmentType, AppointmentStatus } from '../store/appointmentStore';
 // @ts-ignore
@@ -51,6 +53,7 @@ const Appointments: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [appointmentTypes, setAppointmentTypes] = useState<string[]>([]);
+  const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
   
   // Form data for creating/editing appointments
   const [formData, setFormData] = useState<Partial<Appointment>>({
@@ -961,7 +964,18 @@ const Appointments: React.FC = () => {
               </div>
               
               <div className="mb-4">
-                <h5 className="text-sm font-medium text-gray-700 mb-2">Contact Information</h5>
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="text-sm font-medium text-gray-700">Contact Information</h5>
+                  <ModernButton
+                    onClick={() => setShowAvatarGenerator(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-emerald-600 hover:text-emerald-700"
+                  >
+                    <Image size={14} className="mr-1" />
+                    Generate Avatar
+                  </ModernButton>
+                </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center mb-1">
                     <User size={16} className="text-gray-400 mr-2" />
@@ -1081,6 +1095,14 @@ const Appointments: React.FC = () => {
             </div>
           </GlassCard>
         </div>
+      )}
+
+      {/* Avatar Generator Modal */}
+      {showAvatarGenerator && appointmentDetail && (
+        <GeminiImageModal
+          open={showAvatarGenerator}
+          onClose={() => setShowAvatarGenerator(false)}
+        />
       )}
     </div>
   );

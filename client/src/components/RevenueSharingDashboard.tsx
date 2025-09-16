@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit, Award, Upload, X, FileText, AlertCircle, CheckCircle, Save } from 'lucide-react';
+import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit, Award, Upload, X, FileText, AlertCircle, CheckCircle, Save, Sun, Moon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -60,7 +60,7 @@ interface RevenueAnalytics {
 }
 
 export default function RevenueSharingDashboard() {
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -168,7 +168,7 @@ export default function RevenueSharingDashboard() {
   const currentPartners = partners || [];
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900">
+    <div className={`h-full ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Header - Matching original design pattern */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,6 +182,15 @@ export default function RevenueSharingDashboard() {
               </p>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={toggleTheme}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                data-testid="button-theme-toggle"
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDark ? 'Light' : 'Dark'}
+              </button>
               <button
                 onClick={() => setShowBulkImportModal(true)}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"

@@ -30,12 +30,14 @@ import {
   Shield,
   Zap,
   Users,
-  BarChart3
+  BarChart3,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 const WhiteLabelCustomization: React.FC = () => {
   const { config, updateConfig, resetToDefault, exportConfig, importConfig } = useWhitelabel();
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const [copied, setCopied] = useState(false);
   const [importText, setImportText] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
@@ -347,7 +349,7 @@ const WhiteLabelCustomization: React.FC = () => {
   };
 
   return (
-    <main className={`w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <main className={`w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Dashboard Header - Always visible */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -356,6 +358,15 @@ const WhiteLabelCustomization: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400 mt-2">Customize your application's branding and appearance</p>
           </div>
           <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={toggleTheme}
+              className="flex items-center gap-2"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {isDark ? 'Light' : 'Dark'}
+            </Button>
             <Button variant="outline" onClick={resetToDefault}>
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset

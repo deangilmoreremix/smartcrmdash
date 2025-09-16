@@ -85,6 +85,7 @@ import ReasoningSocialContent from './aiTools/ReasoningSocialContent';
 import AgentWorkflowChat from './aiTools/AgentWorkflowChat';
 // Placeholder for ReasoningContentGenerator - assuming it exists or will be created
 import ReasoningContentGenerator from './aiTools/ReasoningContentGenerator';
+import ImageGallery from './ImageGallery';
 
 
 export type AIToolType = 
@@ -137,7 +138,8 @@ export type AIToolType =
   | 'reasoning-content'
   | 'subject-line'
   | 'voice-tone'
-  | 'visual-content';
+  | 'visual-content'
+  | 'image-gallery';
 
 interface AIToolsContextProps {
   openTool: (tool: AIToolType) => void;
@@ -459,6 +461,12 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
           icon: <Image size={24} />,
           component: <VisualContentGeneratorContent />
         };
+      case 'image-gallery':
+        return {
+          title: 'My Image Gallery',
+          icon: <Image size={24} />,
+          component: <ImageGallery userId="demo-user" />
+        };
 
       default:
         return {
@@ -476,10 +484,11 @@ export const AIToolsProvider: React.FC<AIToolsProviderProps> = ({ children }) =>
       {children}
 
       {isToolOpen && currentTool && (
-        <AIToolModal 
+        <AIToolModal
           isOpen={isToolOpen}
           onClose={closeTool}
           title={toolInfo?.title || 'AI Tool'}
+          icon={toolInfo?.icon}
         >
           {toolInfo?.component}
         </AIToolModal>

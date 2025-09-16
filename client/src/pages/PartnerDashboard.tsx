@@ -5,17 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useTheme } from '../contexts/ThemeContext';
-import { 
-  DollarSign, 
-  Users, 
-  TrendingUp, 
+import {
+  DollarSign,
+  Users,
+  TrendingUp,
   Calendar,
   ArrowUpRight,
   Target,
   Award,
   CreditCard,
   CheckCircle,
-  Clock
+  Clock,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -40,7 +42,7 @@ interface Commission {
 }
 
 export default function PartnerDashboard() {
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   // In a real app, this would be the logged-in partner's ID
@@ -115,7 +117,7 @@ export default function PartnerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6" data-testid="partner-dashboard">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'} p-6 space-y-6`} data-testid="partner-dashboard">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -123,6 +125,17 @@ export default function PartnerDashboard() {
           <p className="text-gray-600 dark:text-gray-300 mt-1">Monitor your performance and earnings</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            data-testid="button-theme-toggle"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <span className="text-sm font-medium">
+              {isDark ? 'Light' : 'Dark'}
+            </span>
+          </button>
           {partnerStats && (
             <div className="flex items-center gap-2">
               <Badge className={getTierBadgeColor(partnerStats.tier)}>

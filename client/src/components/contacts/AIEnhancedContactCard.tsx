@@ -7,16 +7,17 @@ import { useContactStore } from '../../store/contactStore';
 import { aiEnrichmentService } from '../../services/aiEnrichmentService';
 import { cacheService } from '../../services/cache.service';
 import { httpClient } from '../../services/http-client.service';
-import { 
-  Edit, 
+import GeminiImageModal from '../GeminiImageModal';
+import {
+  Edit,
   AlertCircle,
   Loader2,
-  MoreHorizontal, 
-  Mail, 
-  Phone, 
-  User, 
-  BarChart, 
-  ThumbsUp, 
+  MoreHorizontal,
+  Mail,
+  Phone,
+  User,
+  BarChart,
+  ThumbsUp,
   ThumbsDown,
   ExternalLink,
   Star,
@@ -26,7 +27,8 @@ import {
   Zap,
   Camera,
   MessageSquare,
-  Search
+  Search,
+  Image
 } from 'lucide-react';
 import { gpt5SocialResearchService } from '../../services/gpt5SocialResearchService';
 
@@ -82,6 +84,7 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
   const [localAnalyzing, setLocalAnalyzing] = useState(false);
   const [isMultimodalEnriching, setIsMultimodalEnriching] = useState(false);
   const [isLoadingSocial, setIsLoadingSocial] = useState(false);
+  const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
   // State for AI Score Explanation Tooltip
   const [showScoreExplanation, setShowScoreExplanation] = useState(false);
   const [scoreExplanation, setScoreExplanation] = useState<string | null>(null);
@@ -292,6 +295,18 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
             )}
           </button>
         )}
+
+        {/* Avatar Generation Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowAvatarGenerator(true);
+          }}
+          className="p-2 rounded-lg transition-all duration-200 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+          title="Generate Professional Avatar"
+        >
+          <Image className="w-4 h-4" />
+        </button>
 
         <button 
           onClick={(e) => {
@@ -526,6 +541,14 @@ export const AIEnhancedContactCard: React.FC<AIEnhancedContactCardProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Avatar Generator Modal */}
+      {showAvatarGenerator && (
+        <GeminiImageModal
+          open={showAvatarGenerator}
+          onClose={() => setShowAvatarGenerator(false)}
+        />
+      )}
     </div>
   );
 };
