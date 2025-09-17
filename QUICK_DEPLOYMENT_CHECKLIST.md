@@ -1,7 +1,7 @@
 # Quick Deployment Checklist ✅
 
 ## Step 1: Go to Supabase Dashboard
-🔗 **URL**: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/functions
+🔗 **URL**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions
 
 ## Step 2: Deploy `contacts` Function
 1. ✅ Click **"Create a new function"**
@@ -22,14 +22,14 @@ Test these URLs in your browser or Postman:
 
 **Contacts Test:**
 ```
-GET https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts
-Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4
+GET https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts
+Headers: Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 ```
 
 **Deals Test:**
 ```
-GET https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/deals  
-Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4
+GET https://YOUR_PROJECT_REF.supabase.co/functions/v1/deals  
+Headers: Authorization: Bearer YOUR_SUPABASE_ANON_KEY
 ```
 
 ## Step 5: Verify in Your CRM

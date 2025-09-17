@@ -3,7 +3,7 @@
 ## Quick Methods to Clear Cache
 
 ### Method 1: Dashboard Schema Refresh (Easiest)
-1. Go to **Table Editor**: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/editor
+1. Go to **Table Editor**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/editor
 2. Click on the **deals** table
 3. Click the **Refresh** icon (🔄) in the top right
 4. Wait 30 seconds, then redeploy your Edge Function
@@ -17,7 +17,7 @@ COMMENT ON TABLE contacts IS 'Schema cache refresh';
 ```
 
 ### Method 3: Restart Edge Functions
-1. Go to **Edge Functions**: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/functions
+1. Go to **Edge Functions**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions
 2. Click on **deals** function
 3. Click **Deploy** (redeploy without changes)
 4. Wait 1-2 minutes for cache to clear

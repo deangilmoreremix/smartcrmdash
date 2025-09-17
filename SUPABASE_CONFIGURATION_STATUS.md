@@ -20,15 +20,15 @@
 {
   "status": "success",
   "message": "Supabase connection successful",
-  "url": "https://gadedbrnqzpfqtsdfzcg.supabase.co"
+  "url": "https://YOUR_PROJECT_REF.supabase.co"
 }
 ```
 
 **Frontend Configuration:**
 ```json
 {
-  "url": "https://gadedbrnqzpfqtsdfzcg.supabase.co",
-  "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "url": "https://YOUR_PROJECT_REF.supabase.co",
+  "anonKey": "YOUR_SUPABASE_ANON_KEY
 }
 ```
 

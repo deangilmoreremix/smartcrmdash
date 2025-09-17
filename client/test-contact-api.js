@@ -1,7 +1,7 @@
 // Test Contact API Service integration with Supabase
 const ContactAPIService = {
-  baseURL: 'https://gadedbrnqzpfqtsdfzcg.supabase.co/rest/v1',
-  apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4',
+  baseURL: 'https://YOUR_PROJECT_REF.supabase.co/rest/v1',
+  apiKey: 'YOUR_SUPABASE_ANON_KEY
   
   getHeaders() {
     return {

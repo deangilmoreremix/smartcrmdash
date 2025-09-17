@@ -142,7 +142,7 @@ describe('ContactAPIService', () => {
       const result = await contactAPIService.createContact(contactData);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts',
+        'https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -269,7 +269,7 @@ describe('ContactAPIService', () => {
       const result = await contactAPIService.getContact('1');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts/1',
+        'https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts/1',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -337,7 +337,7 @@ describe('ContactAPIService', () => {
       const result = await contactAPIService.updateContact('1', updates);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts/1',
+        'https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts/1',
         expect.objectContaining({
           method: 'PATCH',
           body: expect.stringContaining('"firstName":"Jane"'),
@@ -391,7 +391,7 @@ describe('ContactAPIService', () => {
       await contactAPIService.deleteContact('1');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts/1',
+        'https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts/1',
         expect.objectContaining({
           method: 'DELETE',
         })

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function deployFunction(functionName, code) {
-  const projectRef = 'gadedbrnqzpfqtsdfzcg';
+  const projectRef = 'YOUR_PROJECT_REF';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4';
   
   // Note: This would require service role key for Management API, not anon key
@@ -30,7 +30,7 @@ async function main() {
     console.log(`✓ deals: ${dealsCode.length} characters`);
     
     console.log('\n📋 For deployment, please follow the manual steps:');
-    console.log('1. Go to: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/functions');
+    console.log('1. Go to: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions');
     console.log('2. Create function "contacts" with the contacts code');
     console.log('3. Create function "deals" with the deals code');
     console.log('4. Both functions are ready to deploy!');

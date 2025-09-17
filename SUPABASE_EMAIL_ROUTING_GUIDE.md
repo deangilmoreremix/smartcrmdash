@@ -54,7 +54,7 @@
 
 ### Step 1: Update Supabase Auth Templates
 
-1. **Go to**: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/auth/templates
+1. **Go to**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/auth/templates
 
 2. **Create Role-Based Templates:**
 
@@ -228,7 +228,7 @@ app.post('/api/auth-webhook', async (req, res) => {
 
 ### Test Super Admin Email:
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -243,7 +243,7 @@ curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
 
 ### Test WL User Email:
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -258,7 +258,7 @@ curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
 
 ### Test Regular User Email:
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{

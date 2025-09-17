@@ -1,6 +1,6 @@
 // Test different payload formats for Edge Functions
-const baseURL = 'https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1';
-const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4';
+const baseURL = 'https://YOUR_PROJECT_REF.supabase.co/functions/v1';
+const apiKey = 'YOUR_SUPABASE_ANON_KEY
 
 const headers = {
   'Content-Type': 'application/json',

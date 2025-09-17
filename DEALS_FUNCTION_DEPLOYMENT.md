@@ -7,7 +7,7 @@ The error "Entrypoint path does not exist" happens when Supabase tries to deploy
 ## Step-by-Step Fix:
 
 ### 1. Go to Supabase Dashboard
-https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/functions
+https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions
 
 ### 2. Click on your existing "deals" function
 

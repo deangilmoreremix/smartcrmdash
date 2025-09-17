@@ -1,7 +1,7 @@
 # Supabase Functions Status Report
 **Generated:** $(date)
 **Project:** SmartCRM Multi-Tenant Application
-**Supabase Instance:** gadedbrnqzpfqtsdfzcg.supabase.co
+**Supabase Instance:** YOUR_PROJECT_REF.supabase.co
 
 ## 📊 Function Testing Results
 

@@ -15,7 +15,7 @@ Since CLI authentication isn't available in this environment, here are the manua
 ## Method 1: Supabase Dashboard (Recommended)
 
 ### Deploy `contacts` Function
-1. Go to https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/functions
+1. Go to https://supabase.com/dashboard/project/YOUR_PROJECT_REF/functions
 2. Click **"Create a new function"**
 3. Name: `contacts`
 4. Copy the entire content from `supabase/functions/contacts/index.ts` 
@@ -35,11 +35,11 @@ If you have local CLI access with authentication:
 
 ```bash
 # Link your project (one time)
-supabase link --project-ref gadedbrnqzpfqtsdfzcg
+supabase link --project-ref YOUR_PROJECT_REF
 
 # Deploy both functions
-supabase functions deploy contacts --project-ref gadedbrnqzpfqtsdfzcg
-supabase functions deploy deals --project-ref gadedbrnqzpfqtsdfzcg
+supabase functions deploy contacts --project-ref YOUR_PROJECT_REF
+supabase functions deploy deals --project-ref YOUR_PROJECT_REF
 ```
 
 ## Method 3: GitHub Actions (For Future Automation)
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      PROJECT_REF: gadedbrnqzpfqtsdfzcg
+      PROJECT_REF: YOUR_PROJECT_REF
     steps:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1
@@ -69,20 +69,20 @@ jobs:
 Once deployed, these URLs should work:
 
 ### Contacts Function
-- **URL**: https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts
+- **URL**: https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts
 - **Methods**: GET, POST, PATCH, DELETE
 - **Test**: 
   ```bash
-  curl https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts \
+  curl https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts \
     -H "Authorization: Bearer YOUR_ANON_KEY"
   ```
 
 ### Deals Function  
-- **URL**: https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/deals
+- **URL**: https://YOUR_PROJECT_REF.supabase.co/functions/v1/deals
 - **Methods**: GET, POST, PATCH, DELETE  
 - **Test**:
   ```bash
-  curl https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/deals \
+  curl https://YOUR_PROJECT_REF.supabase.co/functions/v1/deals \
     -H "Authorization: Bearer YOUR_ANON_KEY"
   ```
 
