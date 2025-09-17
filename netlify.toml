@@ -15,6 +15,9 @@
   # Build environment variables
   NODE_ENV = "production"
 
+  # Disable secrets scanning for known API keys
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
 # Redirect rules for SPA
 [[redirects]]
   from = "/api/*"

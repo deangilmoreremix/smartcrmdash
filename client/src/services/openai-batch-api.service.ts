@@ -506,14 +506,14 @@ Provide: likely social media platforms, professional interests, content engageme
   // Data fetching methods (integrate with your existing services)
   private async getContactsById(contactIds: string[]): Promise<any[]> {
     // Use your existing contact service
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
     const contacts = [];
     for (const id of contactIds) {
       try {
-        const contact = await contactAPI.getContact(id);
+        const contact = await contactAPIService.getContact(id);
         contacts.push(contact);
       } catch (error) {
-        logger.warn(`Could not fetch contact ${id}`, { error });
+        logger.warn(`Could not fetch contact ${id}`, { error: (error as Error).message });
       }
     }
     return contacts;
@@ -522,7 +522,16 @@ Provide: likely social media platforms, professional interests, content engageme
   private async getDealsById(dealIds: string[]): Promise<any[]> {
     // Use your existing deal service
     const { dealService } = await import('./dealService-updated');
-    return await dealService.getDealsById(dealIds);
+    const deals = [];
+    for (const id of dealIds) {
+      try {
+        const deal = await dealService.getDeal(id);
+        deals.push(deal);
+      } catch (error) {
+        logger.warn(`Could not fetch deal ${id}`, { error: (error as Error).message });
+      }
+    }
+    return deals;
   }
 
   // Result processing methods
@@ -594,14 +603,20 @@ Provide: likely social media platforms, professional interests, content engageme
         try {
           const analysis = JSON.parse(result.response.choices[0].message.content);
 
+          // Get the current deal to access its customFields
+          const deal = await dealService.getDeal(dealId);
+
           await dealService.updateDeal(dealId, {
-            aiAnalysis: analysis,
-            riskScore: analysis.riskScore,
-            nextActions: analysis.nextActions,
-            lastAnalyzed: new Date().toISOString()
+            customFields: {
+              ...deal.customFields,
+              aiAnalysis: analysis,
+              riskScore: analysis.riskScore,
+              nextActions: analysis.nextActions,
+              lastAnalyzed: new Date().toISOString()
+            }
           });
         } catch (error) {
-          logger.error(`Failed to parse or update deal ${dealId} with analysis data`, { customId, error });
+          logger.error(`Failed to parse or update deal ${dealId} with analysis data: ${(error as Error).message}`, { customId });
         }
       }
     }
