@@ -165,6 +165,9 @@ const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomizati
 // Landing page import
 import LandingPage from './pages/LandingPage';
 
+// Dashboard embed import
+import DashboardEmbed from './pages/DashboardEmbed';
+
 import './styles/design-system.css';
 // ElevenLabs widgets removed to prevent performance issues
 // import VoiceAgentWidget from './components/VoiceAgentWidget';
@@ -289,6 +292,9 @@ function AppContent() {
         <Routes>
           {/* Landing page as root - no navbar */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Dashboard embed - no navbar */}
+          <Route path="/dashboard-embed" element={<DashboardEmbed />} />
 
           {/* Auth pages */}
           <Route path="/auth/login" element={<Login />} />
@@ -452,7 +458,7 @@ function AppContent() {
 
           {/* Communication Apps */}
           <Route
-            path="/appointments"
+            path="/appointments-dashboard"
             element={
               <ProtectedRoute>
                 <Navbar />
@@ -575,7 +581,7 @@ function AppContent() {
 
           {/* Communication and CRM Tools */}
           <Route
-            path="/appointments"
+            path="/appointments-basic"
             element={
               <ProtectedRoute>
                 <Navbar />
@@ -584,7 +590,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/video-email"
+            path="/video-email-basic"
             element={
               <ProtectedRoute>
                 <Navbar />

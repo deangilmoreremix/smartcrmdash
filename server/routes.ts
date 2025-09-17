@@ -564,6 +564,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Debug environment variables endpoint
+  app.get('/api/debug/env', (req, res) => {
+    res.json({
+      SUPABASE_URL: process.env.SUPABASE_URL ? 'configured' : 'missing',
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? 'configured' : 'missing',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configured' : 'missing',
+      DATABASE_URL: process.env.DATABASE_URL ? 'configured' : 'missing',
+      NODE_ENV: process.env.NODE_ENV,
+      hasDotenv: typeof process.env.SUPABASE_URL !== 'undefined'
+    });
+  });
+
   // Development bypass endpoint - Only works in development
   app.post('/api/auth/dev-bypass', (req, res) => {
     if (process.env.NODE_ENV !== 'development') {

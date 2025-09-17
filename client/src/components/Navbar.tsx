@@ -1,7 +1,6 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
@@ -372,26 +371,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const navbarHeight = isVertical ? '100vh' : 'auto';
 
   return (
-    <Draggable draggableId="navbar" index={0}>
-      {(provided, snapshot) => (
-        <nav
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          className={`z-50 p-4 transition-all duration-300 ${
-            snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105' : ''
-          }`}
-          style={{
-            ...provided.draggableProps.style,
-            position: 'absolute',
-            top: position === 'top' ? 0 : position === 'bottom' ? 'auto' : 0,
-            bottom: position === 'bottom' ? 0 : 'auto',
-            left: position === 'left' ? 0 : position === 'right' ? 'auto' : 0,
-            right: position === 'right' ? 0 : 'auto',
-            width: navbarWidth,
-            height: navbarHeight,
-            zIndex: snapshot.isDragging ? 9999 : 50
-          }}
-        >
+    <nav
+      className={`z-50 p-4 transition-all duration-300`}
+      style={{
+        position: 'absolute',
+        top: position === 'top' ? 0 : position === 'bottom' ? 'auto' : 0,
+        bottom: position === 'bottom' ? 0 : 'auto',
+        left: position === 'left' ? 0 : position === 'right' ? 'auto' : 0,
+        right: position === 'right' ? 0 : 'auto',
+        width: navbarWidth,
+        height: navbarHeight,
+        zIndex: 50
+      }}
+    >
           <div className="will-change-transform">
             <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-2xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} ${
               isVertical ? 'h-full rounded-2xl' : 'rounded-full'
@@ -400,7 +392,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                 {/* Drag Handle */}
                 <div
-                  {...provided.dragHandleProps}
                   className={`cursor-move p-2 rounded-lg transition-colors ${
                     isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'
                   } ${isVertical ? 'mb-2' : 'mr-2'}`}
@@ -918,8 +909,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
         )}
       </div>
     </nav>
-      )}
-    </Draggable>
   );
 });
 

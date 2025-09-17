@@ -53,7 +53,86 @@ export const useOpenAIEmbeddings = () => {
     }
   };
 
-  return { createEmbedding, semanticSearch };
+  const createContactEmbeddings = async (contacts: any[]) => {
+    const embeddings = [];
+    for (const contact of contacts) {
+      try {
+        const text = `${contact.name} ${contact.email} ${contact.company} ${contact.position} ${contact.notes || ''} ${contact.industry || ''} ${contact.location || ''}`;
+        const embedding = await createEmbedding(text);
+        embeddings.push({
+          contactId: contact.id,
+          embedding
+        });
+      } catch (error) {
+        console.warn(`Failed to create embedding for contact ${contact.id}:`, error);
+        // Continue with other contacts
+      }
+    }
+    return embeddings;
+  };
+
+  const createDealEmbeddings = async (deals: any[]) => {
+    const embeddings = [];
+    for (const deal of deals) {
+      try {
+        const text = `${deal.title} ${deal.company} ${deal.contact} ${deal.stage} ${deal.priority} ${deal.value}`;
+        const embedding = await createEmbedding(text);
+        embeddings.push({
+          dealId: deal.id,
+          embedding
+        });
+      } catch (error) {
+        console.warn(`Failed to create embedding for deal ${deal.id}:`, error);
+        // Continue with other deals
+      }
+    }
+    return embeddings;
+  };
+
+  const searchContacts = async (query: string, contactEmbeddings: any[], contactsById: any) => {
+    const queryEmbedding = await createEmbedding(query);
+    const results = [];
+
+    for (const contactEmb of contactEmbeddings) {
+      const contact = contactsById[contactEmb.contactId];
+      if (contact) {
+        const similarity = cosineSimilarity(queryEmbedding, contactEmb.embedding);
+        results.push({
+          contact,
+          score: similarity
+        });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  };
+
+  const searchDeals = async (query: string, dealEmbeddings: any[], dealsById: any) => {
+    const queryEmbedding = await createEmbedding(query);
+    const results = [];
+
+    for (const dealEmb of dealEmbeddings) {
+      const deal = dealsById[dealEmb.dealId];
+      if (deal) {
+        const similarity = cosineSimilarity(queryEmbedding, dealEmb.embedding);
+        results.push({
+          deal,
+          score: similarity
+        });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  };
+
+  return {
+    createEmbedding,
+    semanticSearch,
+    createContactEmbeddings,
+    createDealEmbeddings,
+    searchContacts,
+    searchDeals
+  };
 };
 
 // Helper function to calculate cosine similarity
