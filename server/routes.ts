@@ -26,13 +26,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize AI clients with fallback strategy
   const userOpenAIKey = process.env.OPENAI_API_KEY;
-  const workingOpenAIKey = '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';
   const googleAIKey = process.env.GOOGLE_AI_API_KEY;
 
   try {
 
   // Use working key as fallback for production reliability
-  const openaiApiKey = userOpenAIKey || workingOpenAIKey;
+  const openaiApiKey = userOpenAIKey || process.env.OPENAI_API_KEY_FALLBACK;
   if (openaiApiKey) {
     openai = new OpenAI({ apiKey: openaiApiKey });
     console.log('✅ OpenAI client initialized');
@@ -911,12 +910,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GPT-5 Direct Test Endpoint (with hardcoded working key)
+  // GPT-5 Direct Test Endpoint (uses configured API key)
   app.post('/api/openai/test-gpt5-direct', async (req, res) => {
     try {
-      const testClient = new OpenAI({
-        apiKey: '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'
-      });
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for testing'
+        });
+      }
+
+      const testClient = openai;
 
       const response = await testClient.chat.completions.create({
         model: "gpt-4o-mini",

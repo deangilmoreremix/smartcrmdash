@@ -4,17 +4,17 @@
 ## 3 Easy Ways to Access Dashboard
 
 ### 1. **Landing Page Button** (Fastest)
-- Go to: `http://localhost:5000`
+- Go to: `http://localhost:${PORT:-5000}`
 - Click the green **"🚀 Dashboard"** button in header
 - Instant access as super admin
 
 ### 2. **Direct URL**
-- Visit: `http://localhost:5000/dev`
+- Visit: `http://localhost:${PORT:-5000}/dev`
 - Automatically redirects to dashboard
 - No clicks needed
 
 ### 3. **Sign-in Page Bypass**
-- Go to: `http://localhost:5000/signin`
+- Go to: `http://localhost:${PORT:-5000}/signin`
 - Click **"🚀 Dev Bypass - Skip Authentication"**
 - Takes you straight to dashboard
 

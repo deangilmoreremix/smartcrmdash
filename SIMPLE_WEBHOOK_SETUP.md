@@ -9,8 +9,8 @@
 ### 2. **Basic Configuration Section**
 **What you see:**
 - Method: POST ✅ (already correct)
-- URL: Your Replit URL ✅ (already correct) 
-- Timeout: 5000ms ✅ (already correct)
+- URL: Your Replit URL ✅ (already correct)
+- Timeout: ${WEBHOOK_TIMEOUT:-5000}ms ✅ (already correct)
 
 ### 3. **Table and Events Section** (This is what you're missing!)
 **What you'll see:** A section that asks:
