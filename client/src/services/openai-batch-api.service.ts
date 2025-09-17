@@ -521,7 +521,7 @@ Provide: likely social media platforms, professional interests, content engageme
 
   private async getDealsById(dealIds: string[]): Promise<any[]> {
     // Use your existing deal service
-    const { dealService } = await import('./dealService');
+    const { dealService } = await import('./dealService-updated');
     return await dealService.getDealsById(dealIds);
   }
 
@@ -578,7 +578,7 @@ Provide: likely social media platforms, professional interests, content engageme
   }
 
   private async updateDealsWithAnalysis(results: any[]): Promise<void> {
-    const { dealService } = await import('./dealService');
+    const { dealService } = await import('./dealService-updated');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
