@@ -18,6 +18,9 @@
   # Disable secrets scanning for known API keys
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
+  # Omit specific environment variables from secrets scanning
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "VITE_OPENAI_API_KEY,VITE_GEMINI_API_KEY,VITE_ELEVENLABS_API_KEY,VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_URL"
+
 # Redirect rules for SPA
 [[redirects]]
   from = "/api/*"
