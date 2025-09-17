@@ -44,7 +44,7 @@ export function APIKeyStatus() {
 
   if (loading) {
     return (
-      <Card className="glass-card border-accent/20">
+      <Card className="glass-card">
         <CardContent className="p-6">
           <div className="animate-pulse">
             <div className="h-4 bg-accent/20 rounded w-1/3 mb-2"></div>
@@ -74,7 +74,7 @@ export function APIKeyStatus() {
   };
 
   return (
-    <Card className="glass-card border-accent/20">
+    <Card className="glass-card">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold text-white/90 flex items-center justify-between">
           OpenAI API Status
