@@ -536,7 +536,7 @@ Provide: likely social media platforms, professional interests, content engageme
 
   // Result processing methods
   private async updateContactsWithEnrichment(results: any[]): Promise<void> {
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
@@ -554,12 +554,14 @@ Provide: likely social media platforms, professional interests, content engageme
           const enrichmentData = JSON.parse(result.response.choices[0].message.content);
 
           // Update contact with enrichment data
-          await contactAPI.updateContact(contactId, {
-            [`ai_${analysisType}_analysis`]: enrichmentData,
-            lastEnriched: new Date().toISOString()
+          await contactAPIService.updateContact(contactId, {
+            customFields: {
+              [`ai_${analysisType}_analysis`]: enrichmentData,
+              lastEnriched: new Date().toISOString()
+            }
           });
         } catch (error) {
-          logger.error(`Failed to parse or update contact ${contactId} with enrichment data`, { customId, error });
+          logger.error(`Failed to parse or update contact ${contactId} with enrichment data: ${(error as Error).message}`);
         }
       }
     }
@@ -616,14 +618,14 @@ Provide: likely social media platforms, professional interests, content engageme
             }
           });
         } catch (error) {
-          logger.error(`Failed to parse or update deal ${dealId} with analysis data: ${(error as Error).message}`, { customId });
+          logger.error(`Failed to parse or update deal ${dealId} with analysis data: ${(error as Error).message}`);
         }
       }
     }
   }
 
   private async updateContactsWithSocialInsights(results: any[]): Promise<void> {
-    const { contactAPI } = await import('./contact-api.service');
+    const { contactAPIService } = await import('./contact-api.service');
 
     for (const result of results) {
       if (result.response?.choices?.[0]?.message?.content) {
@@ -639,12 +641,14 @@ Provide: likely social media platforms, professional interests, content engageme
         try {
           const socialInsights = JSON.parse(result.response.choices[0].message.content);
 
-          await contactAPI.updateContact(contactId, {
-            socialInsights: socialInsights,
-            lastSocialResearch: new Date().toISOString()
+          await contactAPIService.updateContact(contactId, {
+            customFields: {
+              socialInsights: socialInsights,
+              lastSocialResearch: new Date().toISOString()
+            }
           });
         } catch (error) {
-          logger.error(`Failed to parse or update contact ${contactId} with social insights`, { customId, error });
+          logger.error(`Failed to parse or update contact ${contactId} with social insights: ${(error as Error).message}`);
         }
       }
     }

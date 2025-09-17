@@ -1,6 +1,6 @@
 // Test Edge Functions Deployment
-const SUPABASE_URL = 'https://gadedbrnqzpftsdmfzcg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZGVkYnJucXpwZnF0c2RmemNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NjYxMTUsImV4cCI6MjA1ODE0MjExNX0.bpsk8yRpwQQnYaY4qY3hsW5ExrQe_8JA3UZ51mlQ1e4';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'your_supabase_anon_key';
 
 const headers = {
   'Content-Type': 'application/json',
