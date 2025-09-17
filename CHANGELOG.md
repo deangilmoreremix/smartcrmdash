@@ -2,6 +2,30 @@
 
 All notable changes to the Smart CRM Dashboard project will be documented in this file.
 
+## [2.1.0] - 2025-09-17
+
+### Added - Dashboard Embed & Security Enhancements
+- **Dashboard Embed Functionality**: New embeddable dashboard component for landing pages
+- **Embeddable Dashboard Page**: Standalone dashboard embed at `/dashboard-embed` route
+- **Responsive Embed Design**: Mobile-optimized embed with professional styling
+- **Real-time Metrics Display**: Live KPI cards showing deals, pipeline value, contacts, and conversion rates
+- **Secure Environment Configuration**: Fixed exposed secrets issue for Netlify deployment
+- **Environment Variable Optimization**: Proper VITE_ prefixing for client-side variables
+- **Git History Cleanup**: Removed sensitive data from repository history
+- **Deployment Security**: Enhanced security for production deployments
+
+### Security Improvements
+- **Environment Variable Security**: Removed sensitive .env file from repository
+- **Netlify Deployment Security**: Proper environment variable configuration for secure deployments
+- **Git History Sanitization**: Cleaned repository of any accidentally committed secrets
+- **Build Security**: Eliminated exposed secrets warnings in Netlify builds
+
+### Technical Enhancements
+- **Embeddable Components**: New reusable dashboard components for external integration
+- **CSS Architecture**: Dedicated embed styling with responsive design patterns
+- **Route Configuration**: Added embed routes with proper navigation handling
+- **Component Architecture**: Modular embeddable dashboard with configurable options
+
 ## [2.0.0] - 2025-08-18
 
 ### Added - GPT-5 Integration

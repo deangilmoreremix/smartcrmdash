@@ -19,6 +19,9 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - **Real-time Updates**: Live data refresh and notification system
 - **Customizable Timeframes**: Flexible time period selection and comparison
 - **AI Recommendations**: Personalized suggestions based on CRM data patterns
+- **Dashboard Embed**: Embeddable dashboard for landing pages and external websites
+- **Responsive Embed Design**: Mobile-optimized embed with professional styling
+- **Real-time Embed Metrics**: Live KPI display for external integrations
 
 ### **Contacts** - AI-Enhanced Contact Management
 - **AI-Enhanced Contact Cards**: Smart contact profiles with AI-generated insights
@@ -530,6 +533,61 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - Research collaboration and team features
 - Research analytics and performance metrics
 
+## 📺 Dashboard Embed Functionality
+
+### **Embeddable Dashboard**
+SmartCRM now supports embedding your dashboard directly into landing pages and external websites. This feature provides visitors with a live preview of your CRM's capabilities while maintaining security and performance.
+
+### **Key Features**
+- **Real-time Metrics Display**: Live KPI cards showing deals, pipeline value, contacts, and conversion rates
+- **Responsive Design**: Mobile-optimized embed that works on all screen sizes
+- **Secure Integration**: Iframe-based embedding with proper cross-origin security
+- **Professional Styling**: Gradient backgrounds and modern UI components
+- **Call-to-Action Integration**: Direct links to signup and full dashboard access
+- **Loading States**: Smooth loading animations and error handling
+- **Auto-refresh**: Real-time data updates without page reload
+
+### **Integration Options**
+
+#### **Direct Route Access**
+```
+https://your-domain.com/dashboard-embed
+```
+
+#### **Iframe Embedding**
+```html
+<iframe
+  src="https://your-domain.com/dashboard-embed"
+  width="100%"
+  height="600"
+  frameborder="0"
+  style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+  title="CRM Dashboard Preview"
+></iframe>
+```
+
+#### **React Component Integration**
+```tsx
+import EmbeddableDashboard from './components/EmbeddableDashboard';
+
+function LandingPage() {
+  return (
+    <div>
+      <EmbeddableDashboard
+        apiUrl="https://your-api-endpoint.com"
+        tenantId="your-tenant-id"
+      />
+    </div>
+  );
+}
+```
+
+### **Security & Performance**
+- **Cross-origin Security**: Proper iframe security with origin validation
+- **Data Isolation**: Embedded dashboard uses read-only data access
+- **Performance Optimized**: Lightweight components with efficient data fetching
+- **Mobile Responsive**: Optimized for all device sizes and orientations
+
 ## 🏗️ Technical Architecture
 
 ### **Frontend Stack**
@@ -560,6 +618,9 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - **OAuth 2.0** for secure third-party authentication
 - **Module federation** for micro-frontend architecture
 - **WebSocket connections** for real-time features
+- **Dashboard Embed API** for external website integration
+- **Iframe Integration** for secure cross-origin embedding
+- **Responsive Embed Components** for mobile-optimized displays
 
 ## 🚀 Getting Started
 
