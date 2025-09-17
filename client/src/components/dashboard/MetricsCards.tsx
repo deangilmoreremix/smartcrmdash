@@ -52,7 +52,7 @@ const MetricsCards: React.FC = () => {
         <div
           key={index}
           onClick={() => navigateToFeature(kpi.feature)}
-          className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}
+          className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6 shadow-sm hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}
         >
           <div className="flex items-center justify-between mb-4">
             <div className={`p-3 rounded-xl bg-gradient-to-r ${kpi.color} shadow-lg`}>

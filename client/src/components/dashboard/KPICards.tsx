@@ -26,7 +26,7 @@ const KPICards: React.FC = () => {
   // Get active deals with their contacts
   const getActiveDealsWithContacts = () => {
     const activeDeals = Object.values(deals).filter(deal => 
-      deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
     );
     
     return activeDeals.map(deal => ({
@@ -38,7 +38,7 @@ const KPICards: React.FC = () => {
   // Get won deals with their contacts
   const getWonDealsWithContacts = () => {
     const wonDeals = Object.values(deals).filter(deal => 
-      deal.stage === 'closed-won'
+String(deal.stage) === 'closed-won'
     );
     
     return wonDeals.map(deal => ({
@@ -58,12 +58,12 @@ const KPICards: React.FC = () => {
     let wonValue = 0;
     
     dealsArray.forEach(deal => {
-      if (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost') {
+      if (String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost') {
         totalActiveDeals++;
         totalValue += deal.value;
       }
       
-      if (deal.stage === 'closed-won') {
+      if (String(deal.stage) === 'closed-won') {
         wonValue += deal.value;
       }
     });
@@ -72,7 +72,7 @@ const KPICards: React.FC = () => {
       totalActiveDeals,
       totalValue,
       avgDealSize: totalActiveDeals > 0 ? totalValue / totalActiveDeals : 0,
-      wonDeals: Object.values(deals).filter(d => d.stage === 'closed-won').length
+      wonDeals: Object.values(deals).filter(d => String(d.stage) === 'closed-won').length
     };
   };
   
@@ -103,12 +103,12 @@ const KPICards: React.FC = () => {
                 alt={deal.contact.name}
                 size="sm"
                 fallback={getInitials(deal.contact.name)}
-                className="border-2 border-white dark:border-gray-900"
+className="shadow-sm"
               />
             </div>
           ))}
           {extraCount > 0 && (
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shadow-sm ${
               isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
             }`}>
               +{extraCount}
