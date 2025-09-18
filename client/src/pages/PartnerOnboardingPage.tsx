@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Building2, Users, Palette, Globe, Mail, Phone, FileText, Star, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { Building2, Users, Palette, Globe, Mail, Phone, FileText, Star, Sun, Moon } from 'lucide-react';
 
 // Simple navigation function
 const navigate = (path: string) => {
@@ -28,7 +28,7 @@ const partnerOnboardingSchema = z.object({
 type PartnerOnboardingForm = z.infer<typeof partnerOnboardingSchema>;
 
 export default function PartnerOnboardingPage() {
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } = useTheme(); // Use global theme context
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -101,9 +101,9 @@ export default function PartnerOnboardingPage() {
   ];
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header with Theme Toggle */}
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -113,18 +113,16 @@ export default function PartnerOnboardingPage() {
               Join our partner program and offer Smart CRM to your customers with your own branding
             </p>
           </div>
-          <div className="ml-4">
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              <span className="text-sm font-medium">
-                {isDark ? 'Light' : 'Dark'}
-              </span>
-            </button>
-          </div>
+          
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm"
+            data-testid="button-theme-toggle"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? 'Light' : 'Dark'}
+          </button>
         </div>
 
         {/* Progress Steps */}

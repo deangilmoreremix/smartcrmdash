@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
+import { moduleFederationOrchestrator, useSharedModuleState } from '../utils/moduleFederationOrchestrator';
 
 const ContactsApp: React.FC = () => {
   const [RemoteContacts, setRemoteContacts] = useState<React.ComponentType | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadRemote = async () => {
       try {
-        console.log('🚀 Loading Module Federation Contacts...');
+        console.log('🚀 Attempting Module Federation for Contacts...');
         
-        // Reduced timeout for faster fallback to iframe
+        // Try Module Federation first
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Module Federation loading timeout')), 2000);
+          setTimeout(() => reject(new Error('Module Federation timeout - remote app may need MF configuration')), 3000);
         });
         
         const modulePromise = loadRemoteComponent(
@@ -22,33 +24,72 @@ const ContactsApp: React.FC = () => {
         );
         
         const module = await Promise.race([modulePromise, timeoutPromise]);
-        setRemoteContacts(() => (module as any).default || module);
+        const ContactsComponent = (module as any).default || module;
+        setRemoteContacts(() => ContactsComponent);
+        
+        // Register with orchestrator for shared state management
+        moduleFederationOrchestrator.registerModule('contacts', ContactsComponent, {
+          contacts: []
+        });
+        
         console.log('✅ Module Federation Contacts loaded successfully');
+        setIsLoading(false);
       } catch (err) {
-        console.warn('❌ Module Federation failed, using iframe fallback:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.log('📺 Module Federation not available, using iframe fallback (remote app needs MF configuration)');
+        setError('Remote app needs Module Federation configuration');
+        setIsLoading(false);
       }
     };
 
     loadRemote();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Contacts Module...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !RemoteContacts) {
-    // Fallback to iframe
+    // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://taupe-sprinkles-83c9ee.netlify.app"
+        src="https://taupe-sprinkles-83c9ee.netlify.app?theme=light&mode=light"
         className="w-full h-full border-0"
         style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
         title="Enhanced Contacts Module"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
         loading="lazy"
+        onLoad={(e) => {
+          // Send theme message to iframe
+          const iframe = e.currentTarget;
+          iframe.contentWindow?.postMessage({
+            type: 'SET_THEME',
+            theme: 'light',
+            mode: 'light'
+          }, '*');
+        }}
       />
     );
   }
 
-  return <RemoteContacts />;
+  // Pass shared state and theme props to Module Federation component
+  const sharedData = useSharedModuleState(state => state.sharedData);
+  
+  return React.createElement(RemoteContacts as any, { 
+    theme: "light", 
+    mode: "light",
+    sharedData,
+    onDataUpdate: (data: any) => {
+      moduleFederationOrchestrator.broadcastToAllModules('CONTACTS_DATA_UPDATE', data);
+    }
+  });
 };
 
 interface ModuleFederationContactsProps {

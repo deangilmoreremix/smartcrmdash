@@ -323,6 +323,81 @@ class DealService {
     }
   }
 
+  async getDealsById(dealIds: string[]): Promise<Deal[]> {
+    if (!dealIds.length) {
+      return [];
+    }
+
+    // Check cache first for any cached deals
+    const cachedDeals: Deal[] = [];
+    const uncachedIds: string[] = [];
+    
+    for (const id of dealIds) {
+      const cached = cacheService.get('deal', id);
+      if (cached) {
+        cachedDeals.push(cached);
+      } else {
+        uncachedIds.push(id);
+      }
+    }
+
+    if (uncachedIds.length === 0) {
+      return cachedDeals;
+    }
+
+    if (this.shouldUseFallback()) {
+      // Local storage fallback
+      logger.info('Using local storage for bulk deal fetch');
+      const deals = this.getLocalDeals();
+      const foundDeals = deals.filter(d => uncachedIds.includes(d.id));
+      
+      // Cache found deals
+      for (const deal of foundDeals) {
+        cacheService.set('deal', deal.id, deal, 300, ['deal']);
+      }
+      
+      return [...cachedDeals, ...foundDeals];
+    }
+
+    try {
+      // Use Supabase REST API to fetch multiple deals
+      logger.info(`Fetching ${uncachedIds.length} deals via Supabase REST API`);
+      const idsParam = uncachedIds.join(',');
+      const response = await fetch(`${this.baseURL}/deals?id=in.(${idsParam})`, {
+        method: 'GET',
+        headers: this.getSupabaseHeaders()
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      const foundDeals = (Array.isArray(result) ? result : [result])
+        .map(supabaseDeal => this.mapSupabaseDeal(supabaseDeal));
+      
+      // Cache the found deals
+      for (const deal of foundDeals) {
+        cacheService.set('deal', deal.id, deal, 300, ['deal']);
+      }
+      
+      return [...cachedDeals, ...foundDeals];
+    } catch (error) {
+      logger.error('Failed to get deals via Supabase, falling back to local storage', error as Error);
+      
+      // Fallback to local storage
+      const deals = this.getLocalDeals();
+      const foundDeals = deals.filter(d => uncachedIds.includes(d.id));
+      
+      // Cache found deals
+      for (const deal of foundDeals) {
+        cacheService.set('deal', deal.id, deal, 300, ['deal']);
+      }
+      
+      return [...cachedDeals, ...foundDeals];
+    }
+  }
+
   async updateDeal(dealId: string, updates: Partial<Deal>): Promise<Deal> {
     // Validate updates
     if (Object.keys(updates).length === 0) {

@@ -66,6 +66,7 @@ const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
 const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
+const RemoteCalendar = lazy(() => import('./pages/RemoteCalendar'));
 
 // Sales pages
 import WinRateIntelligence from './pages/WinRateIntelligence';
@@ -73,6 +74,11 @@ import AISalesForecast from './pages/AISalesForecast';
 import LiveDealAnalysis from './pages/LiveDealAnalysis';
 import CompetitorInsights from './pages/CompetitorInsights';
 import RevenueIntelligence from './pages/RevenueIntelligence';
+import PipelineIntelligence from './pages/PipelineIntelligence';
+import DealRiskMonitor from './pages/DealRiskMonitor';
+import SmartConversionInsights from './pages/SmartConversionInsights';
+import PipelineHealthDashboard from './pages/PipelineHealthDashboard';
+import SalesCycleAnalytics from './pages/SalesCycleAnalytics';
 
 // Communication pages
 import ActivityAnalytics from './pages/ActivityAnalytics';
@@ -196,24 +202,7 @@ const AuthLoadingScreen = () => (
   </div>
 );
 
-// Dark mode hook
-const useDarkMode = () => {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDark));
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
-
-  return [isDark, setIsDark];
-};
+// Removed conflicting useDarkMode - now using unified ThemeContext
 
 function App() {
   // Initialize universal data sync
@@ -262,7 +251,6 @@ function App() {
 // AppContent component with all the routing logic
 function AppContent() {
   const { user, loading } = useAuth();
-  const [darkMode, setDarkMode] = useDarkMode();
   const { setPosition } = useNavbarPosition();
 
   // Handle navbar drag end
@@ -445,13 +433,13 @@ function AppContent() {
             }
           />
 
-          {/* Appointments */}
+          {/* Calendar - Remote Calendar Moderation */}
           <Route
-            path="/appointments"
+            path="/calendar"
             element={
               <ProtectedRoute>
                 <Navbar />
-                <Appointments />
+                <RemoteCalendar />
               </ProtectedRoute>
             }
           />
@@ -735,7 +723,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Pipeline Intelligence" description="Advanced pipeline analytics and intelligence..." />
+                <PipelineIntelligence />
               </ProtectedRoute>
             }
           />
@@ -744,7 +732,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Deal Risk Monitor" description="Monitor and analyze deal risks in real-time..." />
+                <DealRiskMonitor />
               </ProtectedRoute>
             }
           />
@@ -753,7 +741,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Smart Conversion Insights" description="AI-powered conversion optimization insights..." />
+                <SmartConversionInsights />
               </ProtectedRoute>
             }
           />
@@ -762,7 +750,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Pipeline Health Dashboard" description="Comprehensive pipeline health monitoring..." />
+                <PipelineHealthDashboard />
               </ProtectedRoute>
             }
           />
@@ -771,7 +759,7 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Navbar />
-                <PlaceholderPage title="Sales Cycle Analytics" description="Analyze and optimize your sales cycles..." />
+                <SalesCycleAnalytics />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
 import { useNavigate as reactNavigate } from 'react-router-dom';
-import { useAITools } from '../components/AIToolsProvider';
+import { useAITools, AIToolType } from '../components/AIToolsProvider';
 
 interface NavigationContextType {
   scrollToSection: (sectionId: string) => void;
@@ -23,7 +23,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [currentPath, setCurrentPath] = React.useState('');
 
   // Safe access to AITools with error handling
-  let openTool: ((toolName: string) => void) | null = null;
+  let openTool: ((tool: AIToolType) => void) | null = null;
   try {
     const aiTools = useAITools();
     openTool = aiTools?.openTool || null;
@@ -45,7 +45,8 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const openAITool = (toolName: string) => {
     if (openTool) {
-      openTool(toolName);
+      // Cast string to AIToolType for compatibility
+      openTool(toolName as AIToolType);
     }
   };
 
@@ -84,7 +85,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       case '/contacts':
       case '/tasks':
       case '/settings':
-        routerNavigate(feature);
+        routerNavigate(feature as any);
         break;
       default:
         console.log(`Navigation to ${feature} not implemented`);
@@ -95,21 +96,23 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (path === currentPath) return;
 
     // Debounce navigation to prevent rapid fire
-    clearTimeout(navigationTimeoutRef.current);
-    navigationTimeoutRef.current = setTimeout(() => {
+    if (navigationTimeoutRef.current) {
+      window.clearTimeout(navigationTimeoutRef.current);
+    }
+    navigationTimeoutRef.current = window.setTimeout(() => {
       setCurrentPath(path);
-      routerNavigate(path, options);
+      routerNavigate(path, options as any);
     }, 100);
   }, [currentPath, routerNavigate]);
 
   // Add ref for timeout
-  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const navigationTimeoutRef = useRef<number | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
+        window.clearTimeout(navigationTimeoutRef.current);
       }
     };
   }, []);

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Package, Plus, Minus, Check, Star, Zap, Shield, Globe, Users, Upload, Save, Eye, Edit, Trash2, UserPlus, FileText, AlertCircle, CheckCircle, Settings, Palette, Sun, Moon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -79,6 +79,9 @@ const WhiteLabelPackageBuilder: React.FC = () => {
     email: '',
     role: 'user'
   });
+
+  // WhiteLabelPackageBuilder respects global theme but starts optimized for light mode UI
+  // Users can toggle via the theme button if they prefer dark mode
 
   const features: PackageFeature[] = [
     {
@@ -183,7 +186,7 @@ const WhiteLabelPackageBuilder: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with Action Buttons */}
         <div className="mb-8">
@@ -197,15 +200,18 @@ const WhiteLabelPackageBuilder: React.FC = () => {
               </p>
             </div>
             <div className="flex gap-3">
-              <Button
-                onClick={toggleTheme}
-                variant="outline"
-                className="flex items-center gap-2"
-                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                data-testid="button-theme-toggle"
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {isDark ? 'Light' : 'Dark'}
+              <Button variant="outline" onClick={toggleTheme} className="flex items-center">
+                {isDark ? (
+                  <>
+                    <Sun className="h-4 w-4 mr-2" />
+                    Light Mode
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-4 w-4 mr-2" />
+                    Dark Mode
+                  </>
+                )}
               </Button>
               <Button
                 onClick={() => setShowBulkUserModal(true)}

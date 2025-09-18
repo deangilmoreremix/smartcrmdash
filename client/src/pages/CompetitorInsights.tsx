@@ -52,13 +52,24 @@ const CompetitorInsights: React.FC = () => {
     }).format(value);
   };
 
+  // Get contact info from contactId
+  const getContactInfo = (contactId: number | string | null) => {
+    if (!contactId) return { name: 'Unknown Contact', initials: 'UC' };
+    const contact = contacts[contactId];
+    if (!contact) return { name: 'Unknown Contact', initials: 'UC' };
+    return {
+      name: contact.name,
+      initials: contact.name.split(' ').map(n => n[0]).join('').toUpperCase()
+    };
+  };
+
   // Get initials for avatar
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   return (
-    <main className="h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 overflow-y-auto max-w-7xl mx-auto">
+    <main className="min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 pt-24 max-w-7xl mx-auto bg-white dark:bg-gray-900">
       <div className="space-y-8">
         {/* Dashboard Header */}
         <DashboardHeader 
@@ -237,16 +248,15 @@ const CompetitorInsights: React.FC = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Avatar
-                    name={deal.contactName || 'Unknown'}
                     size="sm"
-                    fallback={getInitials(deal.contactName || 'UN')}
+                    fallback={getContactInfo(deal.contactId).initials}
                   />
                   <div>
                     <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {deal.title}
                     </p>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {deal.contactName} • vs. {competitors[Math.floor(Math.random() * competitors.length)].name}
+                      {getContactInfo(deal.contactId).name} • vs. {competitors[Math.floor(Math.random() * competitors.length)].name}
                     </p>
                   </div>
                 </div>

@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 import { moduleFederationOrchestrator, useSharedModuleState } from '../utils/moduleFederationOrchestrator';
 
-const PipelineApp: React.FC = () => {
-  const [RemotePipeline, setRemotePipeline] = useState<React.ComponentType | null>(null);
+const CalendarApp: React.FC = () => {
+  const [RemoteCalendar, setRemoteCalendar] = useState<React.ComponentType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadRemote = async () => {
       try {
-        console.log('🚀 Attempting Module Federation for Pipeline...');
+        console.log('🚀 Attempting Module Federation for Calendar...');
         
         // Try Module Federation first
         const timeoutPromise = new Promise((_, reject) => {
@@ -18,21 +18,21 @@ const PipelineApp: React.FC = () => {
         });
         
         const modulePromise = loadRemoteComponent(
-          'https://cheery-syrniki-b5b6ca.netlify.app',
-          'PipelineApp',
-          './PipelineApp'
+          'https://ai-calendar-applicat-qshp.bolt.host',
+          'CalendarApp',
+          './CalendarApp'
         );
         
         const module = await Promise.race([modulePromise, timeoutPromise]);
-        const PipelineComponent = (module as any).default || module;
-        setRemotePipeline(() => PipelineComponent);
+        const CalendarComponent = (module as any).default || module;
+        setRemoteCalendar(() => CalendarComponent);
         
         // Register with orchestrator for shared state management
-        moduleFederationOrchestrator.registerModule('pipeline', PipelineComponent, {
-          deals: []
+        moduleFederationOrchestrator.registerModule('calendar', CalendarComponent, {
+          appointments: []
         });
         
-        console.log('✅ Module Federation Pipeline loaded successfully');
+        console.log('✅ Module Federation Calendar loaded successfully');
         setIsLoading(false);
       } catch (err) {
         console.log('📺 Module Federation not available, using iframe fallback (remote app needs MF configuration)');
@@ -48,22 +48,24 @@ const PipelineApp: React.FC = () => {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading Pipeline Module...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Calendar Module...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !RemotePipeline) {
+  if (error || !RemoteCalendar) {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://cheery-syrniki-b5b6ca.netlify.app?theme=light&mode=light"
+        src="https://ai-calendar-applicat-qshp.bolt.host?theme=light&mode=light"
         className="w-full h-full border-0"
-        title="Remote Pipeline System"
+        style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
+        title="Calendar Moderation System"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        loading="lazy"
         onLoad={(e) => {
           // Send theme message to iframe
           const iframe = e.currentTarget;
@@ -80,27 +82,27 @@ const PipelineApp: React.FC = () => {
   // Pass shared state and theme props to Module Federation component
   const sharedData = useSharedModuleState(state => state.sharedData);
   
-  return React.createElement(RemotePipeline as any, { 
+  return React.createElement(RemoteCalendar as any, { 
     theme: "light", 
     mode: "light",
     sharedData,
     onDataUpdate: (data: any) => {
-      moduleFederationOrchestrator.broadcastToAllModules('PIPELINE_DATA_UPDATE', data);
+      moduleFederationOrchestrator.broadcastToAllModules('CALENDAR_DATA_UPDATE', data);
     }
   });
 };
 
-interface ModuleFederationPipelineProps {
+interface ModuleFederationCalendarProps {
   showHeader?: boolean;
 }
 
-const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ showHeader = false }) => {
+const ModuleFederationCalendar: React.FC<ModuleFederationCalendarProps> = ({ showHeader = false }) => {
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-full w-full flex flex-col" style={{ margin: 0, padding: 0 }}>
       {showHeader && (
-        <div className="flex items-center justify-between p-2 mt-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Pipeline Deals</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Calendar Moderation</h3>
             <div className="flex items-center text-green-600 text-xs">
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -110,11 +112,11 @@ const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ sho
           </div>
         </div>
       )}
-      <div className="flex-1 h-full">
-        <PipelineApp />
+      <div className="flex-1 w-full h-full" style={{ margin: 0, padding: 0 }}>
+        <CalendarApp />
       </div>
     </div>
   );
 };
 
-export default ModuleFederationPipeline;
+export default ModuleFederationCalendar;

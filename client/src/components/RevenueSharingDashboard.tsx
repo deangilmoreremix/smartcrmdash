@@ -67,11 +67,31 @@ export default function RevenueSharingDashboard() {
   // Enhanced with database connectivity - fetching real data from Supabase
   const { data: analytics, isLoading: analyticsLoading } = useQuery<RevenueAnalytics>({
     queryKey: ['/api/revenue/analytics'],
+    queryFn: async () => {
+      const response = await fetch('/api/revenue/analytics', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     refetchInterval: 30000,
   });
 
   const { data: partners, isLoading: partnersLoading } = useQuery<Partner[]>({
     queryKey: ['/api/partners'],
+    queryFn: async () => {
+      const response = await fetch('/api/partners', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     refetchInterval: 30000,
   });
 
@@ -168,7 +188,7 @@ export default function RevenueSharingDashboard() {
   const currentPartners = partners || [];
 
   return (
-    <div className={`h-full ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className="h-full bg-gray-50 dark:bg-gray-900">
       {/* Header - Matching original design pattern */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -184,8 +204,7 @@ export default function RevenueSharingDashboard() {
             <div className="flex gap-3">
               <button
                 onClick={toggleTheme}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200"
                 data-testid="button-theme-toggle"
               >
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
