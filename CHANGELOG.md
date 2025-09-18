@@ -2,6 +2,23 @@
 
 All notable changes to the Smart CRM Dashboard project will be documented in this file.
 
+## [2.2.1] - 2025-09-18
+
+### Security Improvements
+- Enhanced environment variable configuration and security
+- API endpoint security fixes and validation improvements
+- Updated .env.example with secure defaults
+
+### Added
+- New API endpoints in server routes for enhanced functionality
+- Improved integrations system components
+- Enhanced AI service orchestrator capabilities
+
+### Technical Enhancements
+- Updated Netlify configuration for better deployment security
+- Service layer improvements across multiple modules
+- Component architecture refinements
+
 ## [2.2.0] - 2025-09-18
 
 ### Added - Unified Services & Enhanced Integration
