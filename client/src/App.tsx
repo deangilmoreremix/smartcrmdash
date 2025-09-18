@@ -121,6 +121,7 @@ const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 import FormPublic from './pages/FormPublic';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import UserManagement from './pages/UserManagement';
+import DemoDashboard from './pages/DemoDashboard';
 import PartnerManagementPage from './pages/PartnerManagementPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import LeadCapture from './pages/LeadCapture';
@@ -252,6 +253,9 @@ function AppContent() {
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/voice-profiles" element={<VoiceProfiles />} />
+          
+          {/* Demo Dashboard - Public access for sales page embedding */}
+          <Route path="/demo-dashboard" element={<DemoDashboard />} />
 
           {/* Core pages */}
           <Route
