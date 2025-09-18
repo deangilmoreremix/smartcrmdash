@@ -61,16 +61,14 @@ export interface SocialMonitoringAlert {
 
 class GPT5SocialResearchService {
   private apiUrl: string;
-  private gpt5ApiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  private isMockMode = import.meta.env.DEV || !this.gpt5ApiKey;
+  private isMockMode = import.meta.env.DEV;
 
   constructor() {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
     this.apiUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/gpt5-social-research` : '/api/gpt5-social-research';
-    
-    if (!this.gpt5ApiKey) {
-      console.warn('GPT-5 API key not configured. Using mock data for social research.');
-    }
+
+    // API key availability is checked server-side
+    console.log('GPT-5 Social Research Service initialized');
   }
 
   private generateMockSocialData(contact: Contact): SocialResearchResult {
@@ -181,7 +179,7 @@ class GPT5SocialResearchService {
       );
 
       console.log(`GPT-5 social research completed for ${contact.name}`);
-      return response.data;
+      return response.data as SocialResearchResult;
     } catch (error) {
       console.error('GPT-5 social research failed:', error);
       // Return mock data as fallback
@@ -214,7 +212,7 @@ class GPT5SocialResearchService {
         { timeout: 30000 }
       );
 
-      return response.data;
+      return response.data as { isValid: boolean; confidence: number; reasoning: string[] };
     } catch (error) {
       console.error('Profile validation failed:', error);
       return {
@@ -270,7 +268,7 @@ class GPT5SocialResearchService {
         { timeout: 45000 }
       );
 
-      return response.data;
+      return response.data as { traits: Record<string, string>; communicationPreferences: string[]; optimalApproach: string; riskFactors: string[]; opportunities: string[]; };
     } catch (error) {
       console.error('Personality insights generation failed:', error);
       throw error;
@@ -298,7 +296,7 @@ class GPT5SocialResearchService {
         { timeout: 30000 }
       );
 
-      return response.data;
+      return response.data as { success: boolean; monitoringId: string };
     } catch (error) {
       console.error('Social monitoring setup failed:', error);
       throw error;

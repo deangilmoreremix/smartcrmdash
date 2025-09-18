@@ -6,7 +6,7 @@
   publish = "dist/client"
 
   # Functions directory for serverless functions
-  functions = "dist/server"
+  functions = "server"
 
 [build.environment]
   # Node version

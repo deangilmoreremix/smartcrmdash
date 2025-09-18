@@ -983,6 +983,241 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OpenAI Image Generation Endpoint
+  app.post('/api/openai/images/generate', async (req, res) => {
+    try {
+      const { prompt, model = 'dall-e-3', size = '1024x1024', quality = 'standard', style = 'vivid', n = 1 } = req.body;
+
+      if (!prompt) {
+        return res.status(400).json({
+          error: 'Prompt is required for image generation'
+        });
+      }
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for image generation'
+        });
+      }
+
+      const response = await openai.images.generate({
+        model: model,
+        prompt: prompt,
+        size: size as any,
+        quality: quality as any,
+        style: style as any,
+        n: n
+      });
+
+      res.json({
+        success: true,
+        data: response.data,
+        model: model,
+        usage: response.data?.length || 0
+      });
+
+    } catch (error: any) {
+      console.error('Image generation error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to generate image'
+      });
+    }
+  });
+
+  // OpenAI Image Variation Endpoint
+  app.post('/api/openai/images/variation', async (req, res) => {
+    try {
+      const { image, n = 1, size = '1024x1024' } = req.body;
+
+      if (!image) {
+        return res.status(400).json({
+          error: 'Image is required for variation generation'
+        });
+      }
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for image variation'
+        });
+      }
+
+      const response = await openai.images.createVariation({
+        image: image,
+        n: n,
+        size: size as any
+      });
+
+      res.json({
+        success: true,
+        data: response.data,
+        model: 'dall-e-2',
+        usage: response.data?.length || 0
+      });
+
+    } catch (error: any) {
+      console.error('Image variation error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to generate image variation'
+      });
+    }
+  });
+
+  // OpenAI Image Edit Endpoint
+  app.post('/api/openai/images/edit', async (req, res) => {
+    try {
+      const { image, prompt, mask, n = 1, size = '1024x1024' } = req.body;
+
+      if (!image || !prompt) {
+        return res.status(400).json({
+          error: 'Image and prompt are required for image editing'
+        });
+      }
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for image editing'
+        });
+      }
+
+      const editParams: any = {
+        image: image,
+        prompt: prompt,
+        n: n,
+        size: size as any
+      };
+
+      if (mask) {
+        editParams.mask = mask;
+      }
+
+      const response = await openai.images.edit(editParams);
+
+      res.json({
+        success: true,
+        data: response.data,
+        model: 'dall-e-2',
+        usage: response.data?.length || 0
+      });
+
+    } catch (error: any) {
+      console.error('Image edit error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to edit image'
+      });
+    }
+  });
+
+  // OpenAI Assistant Thread Creation Endpoint
+  app.post('/api/openai/assistants/threads', async (req, res) => {
+    try {
+      const { entityType, entityId, context } = req.body;
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for assistant threads'
+        });
+      }
+
+      const thread = await openai.beta.threads.create({
+        metadata: {
+          entityType,
+          entityId,
+          ...context
+        }
+      });
+
+      res.json({
+        success: true,
+        threadId: thread.id,
+        created: true
+      });
+
+    } catch (error: any) {
+      console.error('Assistant thread creation error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to create assistant thread'
+      });
+    }
+  });
+
+  // OpenAI Assistant Chat Endpoint
+  app.post('/api/openai/assistants/chat', async (req, res) => {
+    try {
+      const { message, assistantId, threadId, context } = req.body;
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for assistant chat'
+        });
+      }
+
+      // Create thread if not provided
+      let currentThreadId = threadId;
+      if (!currentThreadId) {
+        const thread = await openai.beta.threads.create();
+        currentThreadId = thread.id;
+      }
+
+      // Add user message
+      await openai.beta.threads.messages.create(currentThreadId, {
+        role: 'user',
+        content: message
+      });
+
+      // Create and run
+      const run = await openai.beta.threads.runs.create(currentThreadId, {
+        assistant_id: assistantId
+      });
+
+      // Wait for completion with polling
+      let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+        thread_id: currentThreadId
+      });
+      while (runStatus.status === 'in_progress' || runStatus.status === 'queued') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+          thread_id: currentThreadId
+        });
+      }
+
+      if (runStatus.status === 'completed') {
+        const messages = await openai.beta.threads.messages.list(currentThreadId, { limit: 1 });
+        const lastMessage = messages.data[0];
+        const content = Array.isArray(lastMessage.content) && lastMessage.content[0]?.type === 'text'
+          ? lastMessage.content[0].text.value
+          : 'No response available';
+
+        res.json({
+          success: true,
+          response: content,
+          threadId: currentThreadId,
+          runId: run.id
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          error: `Run failed with status: ${runStatus.status}`
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Assistant chat error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to process assistant chat'
+      });
+    }
+  });
+
   // Advanced AI Smart Greeting Generation (with intelligent fallback)
   app.post('/api/openai/smart-greeting', async (req, res) => {
     const { userMetrics, timeOfDay, recentActivity } = req.body;

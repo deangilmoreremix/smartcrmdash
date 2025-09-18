@@ -20,54 +20,88 @@ const GPT5FeatureStatus: React.FC = () => {
 
   useEffect(() => {
     // Check API key configuration and feature status
-    const checkFeatureStatus = () => {
-      // Simulate checking if API key is configured
-      const hasApiKey = import.meta.env.VITE_OPENAI_API_KEY && 
-                       import.meta.env.VITE_OPENAI_API_KEY !== 'your_openai_api_key' &&
-                       import.meta.env.VITE_OPENAI_API_KEY.length > 10;
+    const checkFeatureStatus = async () => {
+      try {
+        // Check server-side availability
+        const response = await fetch('/api/openai/status');
+        const hasApiKey = response.ok && (await response.json()).configured === true;
 
-      setApiKeyStatus(hasApiKey ? 'configured' : 'missing');
+        setApiKeyStatus(hasApiKey ? 'configured' : 'missing');
 
-      const gpt5Features: GPT5Feature[] = [
-        {
-          name: 'Smart Greeting Generation',
-          description: 'Personalized dashboard greetings with strategic insights',
-          status: hasApiKey ? 'active' : 'needs_config',
-          icon: Sparkles,
-          apiCalls: 12,
-          successRate: 96,
-          lastUsed: '2 min ago'
-        },
-        {
-          name: 'Advanced KPI Analysis',
-          description: 'Expert-level business metrics with 94.6% AIME accuracy',
-          status: hasApiKey ? 'active' : 'needs_config',
-          icon: TrendingUp,
-          apiCalls: 8,
-          successRate: 92,
-          lastUsed: '5 min ago'
-        },
-        {
-          name: 'Deal Intelligence',
-          description: 'Win probability scoring and strategic recommendations',
-          status: hasApiKey ? 'active' : 'needs_config',
-          icon: Brain,
-          apiCalls: 15,
-          successRate: 89,
-          lastUsed: '1 min ago'
-        },
-        {
-          name: 'Business Intelligence',
-          description: 'Expert-level strategic analysis across 40+ domains',
-          status: hasApiKey ? 'active' : 'needs_config',
-          icon: Activity,
-          apiCalls: 6,
-          successRate: 94,
-          lastUsed: '8 min ago'
-        }
-      ];
+        const gpt5Features: GPT5Feature[] = [
+          {
+            name: 'Smart Greeting Generation',
+            description: 'Personalized dashboard greetings with strategic insights',
+            status: hasApiKey ? 'active' : 'needs_config',
+            icon: Sparkles,
+            apiCalls: 12,
+            successRate: 96,
+            lastUsed: '2 min ago'
+          },
+          {
+            name: 'Advanced KPI Analysis',
+            description: 'Expert-level business metrics with 94.6% AIME accuracy',
+            status: hasApiKey ? 'active' : 'needs_config',
+            icon: TrendingUp,
+            apiCalls: 8,
+            successRate: 92,
+            lastUsed: '5 min ago'
+          },
+          {
+            name: 'Deal Intelligence',
+            description: 'Win probability scoring and strategic recommendations',
+            status: hasApiKey ? 'active' : 'needs_config',
+            icon: Brain,
+            apiCalls: 15,
+            successRate: 89,
+            lastUsed: '1 min ago'
+          },
+          {
+            name: 'Business Intelligence',
+            description: 'Expert-level strategic analysis across 40+ domains',
+            status: hasApiKey ? 'active' : 'needs_config',
+            icon: Activity,
+            apiCalls: 6,
+            successRate: 94,
+            lastUsed: '8 min ago'
+          }
+        ];
 
-      setFeatures(gpt5Features);
+        setFeatures(gpt5Features);
+      } catch (error) {
+        console.warn('Failed to check API key status:', error);
+        setApiKeyStatus('missing');
+
+        // Set features with needs_config status
+        const gpt5Features: GPT5Feature[] = [
+          {
+            name: 'Smart Greeting Generation',
+            description: 'Personalized dashboard greetings with strategic insights',
+            status: 'needs_config',
+            icon: Sparkles
+          },
+          {
+            name: 'Advanced KPI Analysis',
+            description: 'Expert-level business metrics with 94.6% AIME accuracy',
+            status: 'needs_config',
+            icon: TrendingUp
+          },
+          {
+            name: 'Deal Intelligence',
+            description: 'Win probability scoring and strategic recommendations',
+            status: 'needs_config',
+            icon: Brain
+          },
+          {
+            name: 'Business Intelligence',
+            description: 'Expert-level strategic analysis across 40+ domains',
+            status: 'needs_config',
+            icon: Activity
+          }
+        ];
+
+        setFeatures(gpt5Features);
+      }
     };
 
     checkFeatureStatus();

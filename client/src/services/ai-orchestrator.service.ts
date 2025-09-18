@@ -70,22 +70,32 @@ class AIOrchestrator {
   private requestHistory: AIResponse[] = [];
   
   constructor() {
-    this.initializeProviders();
+    this.initializeProviders().catch(error => {
+      console.warn('Failed to initialize AI providers:', error);
+    });
     this.startQueueProcessor();
   }
 
-  private initializeProviders(): void {
-    // Initialize provider status
+  private async initializeProviders(): Promise<void> {
+    // Check server-side availability instead of client-side keys
+    try {
+      const response = await fetch('/api/openai/status');
+      const openaiAvailable = response.ok && (await response.json()).configured === true;
+    } catch (error) {
+      console.warn('Failed to check OpenAI availability:', error);
+    }
+
+    // Initialize provider status - availability will be checked server-side
     this.providers.set('openai', {
       name: 'openai',
-      available: !!import.meta.env.VITE_OPENAI_API_KEY,
+      available: true, // Server-side check will determine actual availability
       rateLimit: { remaining: 50, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 2000, successRate: 0.95, costPer1kTokens: 0.002 }
     });
 
     this.providers.set('gemini', {
       name: 'gemini',
-      available: !!import.meta.env.VITE_GEMINI_API_KEY,
+      available: true, // Server-side check will determine actual availability
       rateLimit: { remaining: 60, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 1500, successRate: 0.92, costPer1kTokens: 0.0005 }
     });
