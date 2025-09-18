@@ -11,8 +11,8 @@ export default defineConfig({
     },
   },
   build: {
-    // write to repo-root/dist/client (what Netlify expects)
-    outDir: "../dist/client",
+    // write to repo-root/dist (what Netlify expects)
+    outDir: "../dist",
     emptyOutDir: true,
   },
 });
