@@ -243,7 +243,7 @@ const AIInsightsPanel = () => {
   };
 
   return (
-    <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6 mb-8`}>
+    <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6 mb-8`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
@@ -274,7 +274,7 @@ const AIInsightsPanel = () => {
 
       {error && (
         <div className={`p-4 mb-4 rounded-lg ${
-          isDark ? 'bg-red-500/10 border-red-500/20 border' : 'bg-red-50 border-red-200 border'
+          isDark ? 'bg-red-500/10' : 'bg-red-50'
         }`}>
           <div className="flex items-start">
             <Info className={`h-5 w-5 mt-0.5 ${isDark ? 'text-red-400' : 'text-red-500'}`} />
@@ -298,7 +298,7 @@ const AIInsightsPanel = () => {
           <div
             key={index}
             className={`${
-              isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-100'
+              isDark ? 'bg-white/5' : 'bg-white'
             } rounded-xl p-4 hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all group cursor-pointer`}
             onClick={() => {
               // Open the corresponding AI tool based on insight type

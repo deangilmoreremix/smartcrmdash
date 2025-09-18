@@ -199,7 +199,7 @@ const TasksAndFunnel: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Tasks Schedule */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Tasks Schedule</h3>
           <div className="flex space-x-2">
@@ -283,7 +283,7 @@ const TasksAndFunnel: React.FC = () => {
       </div>
 
       {/* Stage Funnel */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Stage Funnel</h3>
           <div className="flex space-x-2">
