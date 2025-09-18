@@ -41,20 +41,22 @@ class OpenAIService {
   private defaultModel: string = 'gpt-4o-mini';
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || import.meta.env.VITE_OPENAI_API_KEY || '';
+    // API key is now handled server-side only
+    this.apiKey = apiKey || '';
   }
 
   /**
-   * Check if API key is valid (not a placeholder)
+   * Check if server-side API is available
    */
-  private isValidApiKey(): boolean {
-    return !!(this.apiKey && 
-           this.apiKey.length > 10 && 
-           !this.apiKey.includes('your_openai_api_key') &&
-           !this.apiKey.includes('your_ope') &&
-           !this.apiKey.includes('placeholder') &&
-           !this.apiKey.startsWith('your_') &&
-           this.apiKey !== 'your_openai_api_key');
+  private async isServerAvailable(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/openai/status');
+      const data = await response.json();
+      return data.configured === true;
+    } catch (error) {
+      console.warn('Failed to check server availability:', error);
+      return false;
+    }
   }
 
   /**
@@ -85,28 +87,23 @@ class OpenAIService {
   }
 
   /**
-   * Generate content using OpenAI API
+   * Generate content using server-side OpenAI API
    */
   async generateContent(request: GenerateRequest): Promise<GenerateResponse> {
-    if (!this.isValidApiKey()) {
-      throw new Error('OpenAI API key is required and must be properly configured. Please check your environment variables.');
-    }
-
     const startTime = Date.now();
     const model = request.model || this.defaultModel;
-    
+
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const response = await fetch('/api/respond', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          prompt: request.messages.map(m => m.content).join('\n'),
           model,
-          messages: request.messages,
           temperature: request.temperature ?? 0.7,
-          max_tokens: request.maxTokens ?? 1000,
+          maxTokens: request.maxTokens ?? 1000,
           ...(request.functions ? { functions: request.functions } : {}),
           ...(request.functionCall ? { function_call: request.functionCall } : {})
         })
@@ -114,36 +111,28 @@ class OpenAIService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`AI API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
       const responseTime = Date.now() - startTime;
-      
-      // Extract function calls if any
-      let functionCalls;
-      let content;
-      
-      if (data.choices[0]?.message?.function_call) {
-        functionCalls = [data.choices[0].message.function_call];
-        content = '';
-      } else {
-        content = data.choices[0]?.message?.content || '';
-        // Always strip markdown code blocks from the content before returning
-        content = this.stripMarkdownCodeBlocks(content);
-      }
+
+      // Extract content from server response format
+      let content = data.output_text || data.content || '';
+      // Always strip markdown code blocks from the content before returning
+      content = this.stripMarkdownCodeBlocks(content);
 
       const result: GenerateResponse = {
         content,
-        model,
+        model: data.model || model,
         usage: {
           promptTokens: data.usage?.prompt_tokens || 0,
           completionTokens: data.usage?.completion_tokens || 0,
           totalTokens: data.usage?.total_tokens || 0,
         },
-        finishReason: data.choices[0]?.finish_reason || 'stop',
+        finishReason: 'stop', // Server doesn't provide finish reason
         responseTime,
-        ...(functionCalls ? { functionCalls } : {})
+        ...(data.tool_calls ? { functionCalls: data.tool_calls } : {})
       };
 
       // Log usage to Supabase (gracefully handle failures)
@@ -230,11 +219,12 @@ class OpenAIService {
     tone?: 'formal' | 'casual' | 'friendly';
     context?: string;
   }, customerId?: string, model?: string): Promise<{ subject: string; body: string }> {
-    if (!this.isValidApiKey()) {
-      console.warn('OpenAI API key not configured, returning fallback email');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      console.warn('AI service not available, returning fallback email');
       return {
         subject: `Following up: ${context.purpose}`,
-        body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[Please configure OpenAI API key to enable AI-generated content]\n\nBest regards`
+        body: `Dear ${context.recipient},\n\nI hope this email finds you well.\n\n[AI service temporarily unavailable - please try again later]\n\nBest regards`
       };
     }
     
@@ -289,14 +279,15 @@ class OpenAIService {
    * Generate deal insights
    */
   async generateDealInsights(dealData: any, customerId?: string, model?: string): Promise<any> {
-    if (!this.isValidApiKey()) {
-      console.warn('OpenAI API key not configured, returning fallback insights');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      console.warn('AI service not available, returning fallback insights');
       return {
         riskLevel: "unknown",
-        keyInsights: ["API key not configured - unable to generate AI insights"],
-        recommendedActions: ["Please configure OpenAI API key"],
+        keyInsights: ["AI service temporarily unavailable"],
+        recommendedActions: ["Please try again later"],
         winProbability: 0,
-        potentialBlockers: ["Set up API keys to enable AI analysis"]
+        potentialBlockers: ["AI analysis unavailable"]
       };
     }
     
@@ -354,13 +345,14 @@ class OpenAIService {
    * Generate pipeline health analysis
    */
   async analyzePipelineHealth(pipelineData: any, customerId?: string, model?: string): Promise<any> {
-    if (!this.isValidApiKey()) {
-      console.warn('OpenAI API key not configured, returning fallback analysis');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      console.warn('AI service not available, returning fallback analysis');
       return {
         healthScore: 0,
-        keyInsights: ["API key not configured - unable to generate AI insights"],
-        bottlenecks: ["Please configure OpenAI API key"],
-        opportunities: ["Set up API keys to enable AI analysis"],
+        keyInsights: ["AI service temporarily unavailable"],
+        bottlenecks: ["Please try again later"],
+        opportunities: ["AI analysis unavailable"],
         forecastAccuracy: 0
       };
     }
@@ -425,8 +417,9 @@ class OpenAIService {
     duration: number;
     previousNotes?: string;
   }, customerId?: string, model?: string): Promise<any> {
-    if (!this.isValidApiKey()) {
-      console.warn('OpenAI API key not configured, returning fallback agenda');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      console.warn('AI service not available, returning fallback agenda');
       return {
         title: context.meetingTitle,
         objective: context.purpose,
@@ -438,7 +431,7 @@ class OpenAIService {
             description: "Welcome and meeting objectives"
           }
         ],
-        notes: "API key not configured - please set up OpenAI API key to enable AI-generated agendas."
+        notes: "AI service temporarily unavailable - please try again later."
       };
     }
     

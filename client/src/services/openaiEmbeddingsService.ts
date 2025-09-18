@@ -1,23 +1,14 @@
-import { useApiStore } from '../store/apiStore';
-
 export const useOpenAIEmbeddings = () => {
-  const { apiKeys } = useApiStore();
-  
   const createEmbedding = async (text: string) => {
-    if (!apiKeys.openai) {
-      throw new Error('OpenAI API key is not set');
-    }
-
     try {
-      const response = await fetch('https://api.openai.com/v1/embeddings', {
+      const response = await fetch('/api/openai/embeddings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKeys.openai}`,
         },
         body: JSON.stringify({
+          text: text,
           model: "text-embedding-3-small",
-          input: text,
         }),
       });
 
@@ -26,7 +17,7 @@ export const useOpenAIEmbeddings = () => {
       }
 
       const data = await response.json();
-      return data.data[0].embedding;
+      return data.embedding;
     } catch (error) {
       throw error;
     }

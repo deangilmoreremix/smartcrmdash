@@ -5,71 +5,60 @@ import { aiOrchestratorService } from './aiOrchestratorService';
 import { enhancedGeminiService } from './enhancedGeminiService';
 
 class GeminiAIService {
-  private apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
-  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  private model = 'gemini-1.5-flash:generateContent';
+  private apiUrl = '/api/googleai';
+  private model = 'gemini-1.5-flash';
 
-  isApiKeyConfigured() {
-    return !!this.apiKey && 
-           this.apiKey !== 'undefined' && 
-           this.apiKey.length > 10 && 
-           !this.apiKey.includes('your_') && 
-           !this.apiKey.startsWith('your_');
-  }
-  
-  setApiKey(key: string) {
-    this.apiKey = key;
+  async isApiKeyConfigured(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/openai/status');
+      const data = await response.json();
+      return data.configured === true;
+    } catch (error) {
+      console.warn('Failed to check Google AI availability:', error);
+      return false;
+    }
   }
 
   async researchContactByName(firstName: string, lastName: string, company?: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching contact with Gemini: ${firstName} ${lastName} ${company ? `at ${company}` : ''}`);
-    
-    if (!this.isApiKeyConfigured()) {
-      throw new Error('Gemini API key is not configured. Please set the VITE_GEMINI_API_KEY environment variable.');
+
+    const isConfigured = await this.isApiKeyConfigured();
+    if (!isConfigured) {
+      throw new Error('AI service is not available. Please check server configuration.');
     }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${this.apiUrl}/test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Research information about a professional named ${firstName} ${lastName}${company ? ` who works at ${company}` : ''}.
-              
-              Return a JSON object with the following structure:
-              {
-                "firstName": "${firstName}",
-                "lastName": "${lastName}",
-                "name": "${firstName} ${lastName}",
-                "email": "likely email",
-                "phone": "likely phone if available",
-                "title": "likely job title",
-                "company": "${company || 'company name if known'}",
-                "industry": "likely industry",
-                "location": {
-                  "city": "likely city",
-                  "state": "likely state",
-                  "country": "likely country"
-                },
-                "socialProfiles": {
-                  "linkedin": "likely LinkedIn URL",
-                  "twitter": "likely Twitter URL if available",
-                  "website": "likely company website"
-                },
-                "bio": "brief professional bio",
-                "confidence": "number between 40 and 85 indicating confidence level"
-              }`
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.2,
-            topK: 32,
-            topP: 0.8,
-            maxOutputTokens: 1024
-          }
+          prompt: `Research information about a professional named ${firstName} ${lastName}${company ? ` who works at ${company}` : ''}.
+
+          Return a JSON object with the following structure:
+          {
+            "firstName": "${firstName}",
+            "lastName": "${lastName}",
+            "name": "${firstName} ${lastName}",
+            "email": "likely email",
+            "phone": "likely phone if available",
+            "title": "likely job title",
+            "company": "${company || 'company name if known'}",
+            "industry": "likely industry",
+            "location": {
+              "city": "likely city",
+              "state": "likely state",
+              "country": "likely country"
+            },
+            "socialProfiles": {
+              "linkedin": "likely LinkedIn URL",
+              "twitter": "likely Twitter URL if available",
+              "website": "likely company website"
+            },
+            "bio": "brief professional bio",
+            "confidence": "number between 40 and 85 indicating confidence level"
+          }`
         })
       });
       
@@ -120,13 +109,14 @@ class GeminiAIService {
 
   async researchContactByLinkedIn(linkedinUrl: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching LinkedIn profile: ${linkedinUrl}`);
-    
-    if (!this.apiKey) {
-      throw new Error('Gemini API key is not configured');
+
+    const isConfigured = await this.isApiKeyConfigured();
+    if (!isConfigured) {
+      throw new Error('AI service is not available');
     }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${this.apiUrl}/test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -211,13 +201,14 @@ class GeminiAIService {
 
   async generatePersonalizedMessage(contact: any, messageType: 'email' | 'linkedin' | 'cold-outreach'): Promise<string> {
     logger.info(`Generating ${messageType} message for ${contact.name || 'contact'}`);
-    
-    if (!this.apiKey) {
-      throw new Error('Gemini API key is not configured');
+
+    const isConfigured = await this.isApiKeyConfigured();
+    if (!isConfigured) {
+      throw new Error('AI service is not available');
     }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${this.apiUrl}/test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

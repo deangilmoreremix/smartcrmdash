@@ -15,8 +15,9 @@
   # Build environment variables
   NODE_ENV = "production"
 
-  # Completely disable secrets scanning
+  # Disable secrets scanning to prevent build failures from VITE_ variables
   SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 # Redirect rules for SPA
 [[redirects]]

@@ -943,6 +943,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OpenAI Embeddings Endpoint
+  app.post('/api/openai/embeddings', async (req, res) => {
+    try {
+      const { text, model = "text-embedding-3-small" } = req.body;
+
+      if (!text) {
+        return res.status(400).json({
+          error: 'Text is required for embedding generation'
+        });
+      }
+
+      if (!openai) {
+        return res.status(400).json({
+          error: 'OpenAI API key not configured',
+          message: 'Please configure OpenAI API key for embeddings'
+        });
+      }
+
+      const response = await openai.embeddings.create({
+        model: model,
+        input: text,
+        encoding_format: "float",
+      });
+
+      res.json({
+        success: true,
+        embedding: response.data[0].embedding,
+        model: model,
+        usage: response.usage
+      });
+
+    } catch (error: any) {
+      console.error('Embeddings error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to generate embeddings'
+      });
+    }
+  });
+
   // Advanced AI Smart Greeting Generation (with intelligent fallback)
   app.post('/api/openai/smart-greeting', async (req, res) => {
     const { userMetrics, timeOfDay, recentActivity } = req.body;
