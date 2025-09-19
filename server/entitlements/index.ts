@@ -1,7 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 import { getUserEntitlement, isUserActive, handleSuccessfulPurchase } from '../entitlements-utils.js';
 import { db } from '../db.js';
-import { entitlements } from '@shared/schema';
+// Inline schema definition to avoid bundling issues
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, uuid } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
+
+const entitlements = pgTable("entitlements", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").notNull(),
+  status: text("status").notNull().default("active"),
+  productType: text("product_type"),
+  revokeAt: timestamp("revoke_at", { withTimezone: true }),
+  lastInvoiceStatus: text("last_invoice_status"),
+  delinquencyCount: integer("delinquency_count").default(0),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  stripeCustomerId: text("stripe_customer_id"),
+  zaxaaSubscriptionId: text("zaxaa_subscription_id"),
+  planName: text("plan_name"),
+  planAmount: decimal("plan_amount", { precision: 10, scale: 2 }),
+  currency: text("currency").default("USD"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
