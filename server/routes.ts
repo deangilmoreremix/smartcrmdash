@@ -7,7 +7,7 @@ import { handleStripeWebhook } from './stripe-webhook';
 import { handleZaxaaWebhook } from './zaxaa-webhook';
 import { getUserEntitlement, isUserActive, handleSuccessfulPurchase } from './entitlements-utils';
 import { db } from './db';
-import { entitlements } from '@shared/schema';
+import { entitlements } from '../shared/schema.js';
 import { createClient } from '@supabase/supabase-js';
 import { handleAuthWebhook, createUserMetadata, determineUserRole } from './email-routing';
 import { supabase, isSupabaseConfigured } from './supabase';
