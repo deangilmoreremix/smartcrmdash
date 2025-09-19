@@ -14,5 +14,8 @@ export default defineConfig({
     // write to repo-root/dist (what Netlify expects)
     outDir: "../dist",
     emptyOutDir: true,
+    rollupOptions: {
+      external: ["@shared/schema"]
+    }
   },
 });
