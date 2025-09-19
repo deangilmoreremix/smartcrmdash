@@ -1,11 +1,86 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // server/partners/index.ts
 import { createClient } from "@supabase/supabase-js";
 
 // shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  aiQueries: () => aiQueries,
+  aiQueriesRelations: () => aiQueriesRelations,
+  appointments: () => appointments,
+  appointmentsRelations: () => appointmentsRelations,
+  automationRules: () => automationRules,
+  automationRulesRelations: () => automationRulesRelations,
+  commissions: () => commissions,
+  commissionsRelations: () => commissionsRelations,
+  communications: () => communications,
+  communicationsRelations: () => communicationsRelations,
+  contacts: () => contacts,
+  contactsRelations: () => contactsRelations,
+  deals: () => deals,
+  dealsRelations: () => dealsRelations,
+  documents: () => documents,
+  documentsRelations: () => documentsRelations,
+  entitlements: () => entitlements,
+  entitlementsRelations: () => entitlementsRelations,
+  featurePackages: () => featurePackages,
+  insertAiQuerySchema: () => insertAiQuerySchema,
+  insertAppointmentSchema: () => insertAppointmentSchema,
+  insertAutomationRuleSchema: () => insertAutomationRuleSchema,
+  insertCommissionSchema: () => insertCommissionSchema,
+  insertCommunicationSchema: () => insertCommunicationSchema,
+  insertContactSchema: () => insertContactSchema,
+  insertDealSchema: () => insertDealSchema,
+  insertDocumentSchema: () => insertDocumentSchema,
+  insertEntitlementSchema: () => insertEntitlementSchema,
+  insertFeaturePackageSchema: () => insertFeaturePackageSchema,
+  insertNoteSchema: () => insertNoteSchema,
+  insertPartnerCustomerSchema: () => insertPartnerCustomerSchema,
+  insertPartnerMetricsSchema: () => insertPartnerMetricsSchema,
+  insertPartnerSchema: () => insertPartnerSchema,
+  insertPartnerTierSchema: () => insertPartnerTierSchema,
+  insertPartnerWLConfigSchema: () => insertPartnerWLConfigSchema,
+  insertPayoutSchema: () => insertPayoutSchema,
+  insertProfileSchema: () => insertProfileSchema,
+  insertTaskSchema: () => insertTaskSchema,
+  insertTenantConfigSchema: () => insertTenantConfigSchema,
+  insertUserGeneratedImageSchema: () => insertUserGeneratedImageSchema,
+  insertUserWLSettingsSchema: () => insertUserWLSettingsSchema,
+  insertWhiteLabelPackageSchema: () => insertWhiteLabelPackageSchema,
+  notes: () => notes,
+  notesRelations: () => notesRelations,
+  partnerCustomers: () => partnerCustomers,
+  partnerCustomersRelations: () => partnerCustomersRelations,
+  partnerMetrics: () => partnerMetrics,
+  partnerMetricsRelations: () => partnerMetricsRelations,
+  partnerTiers: () => partnerTiers,
+  partnerTiersRelations: () => partnerTiersRelations,
+  partnerWLConfigs: () => partnerWLConfigs,
+  partners: () => partners,
+  partnersRelations: () => partnersRelations,
+  payouts: () => payouts,
+  payoutsRelations: () => payoutsRelations,
+  profiles: () => profiles,
+  profilesRelations: () => profilesRelations,
+  tasks: () => tasks,
+  tasksRelations: () => tasksRelations,
+  tenantConfigs: () => tenantConfigs,
+  userGeneratedImages: () => userGeneratedImages,
+  userGeneratedImagesRelations: () => userGeneratedImagesRelations,
+  userRoles: () => userRoles,
+  userWLSettings: () => userWLSettings,
+  whiteLabelPackages: () => whiteLabelPackages
+});
 import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+var userRoles = ["super_admin", "wl_user", "regular_user"];
 var profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
   username: text("username").unique(),
@@ -713,7 +788,6 @@ import { eq, desc, sql as sql2 } from "drizzle-orm";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
-import * as schema from "@shared/schema";
 neonConfig.webSocketConstructor = ws;
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -721,7 +795,7 @@ if (!process.env.DATABASE_URL) {
   );
 }
 var pool = new Pool({ connectionString: process.env.DATABASE_URL });
-var db = drizzle({ client: pool, schema });
+var db = drizzle({ client: pool, schema: schema_exports });
 
 // server/storage.ts
 var DatabaseStorage = class {

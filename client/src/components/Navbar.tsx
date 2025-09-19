@@ -405,10 +405,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-    { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-    { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'communications', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
+    { id: 'intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
-    { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
+    { id: 'intel-page', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
     { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
@@ -450,7 +450,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       onMouseDown={(e) => {
                         e.stopPropagation();
                       }}
-                      data-testid={`nav-tab-${tab.id}`}
+                      data-testid={`nav-${tab.id}`}
                       className={`
                         relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                         transition-all duration-300 transform hover:scale-105 text-xs
@@ -520,10 +520,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (menu.id === 'business-intel') {
-                            handleNavigation('/business-intel', 'business-intel');
-                          } else if (menu.id === 'intel') {
-                            handleNavigation('/intel', 'intel');
+                          if (menu.id === 'intel') {
+                            handleNavigation('/business-intel', 'intel');
+                          } else if (menu.id === 'intel-page') {
+                            handleNavigation('/intel', 'intel-page');
                           } else {
                             toggleDropdown(menu.id, e);
                           }
@@ -532,7 +532,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           e.stopPropagation();
                         }}
                         data-dropdown-toggle="true"
-                        data-testid={`button-dropdown-${menu.id}`}
+                        data-testid={`nav-${menu.id}`}
                         className={`
                           relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                           transition-all duration-300 transform hover:scale-105

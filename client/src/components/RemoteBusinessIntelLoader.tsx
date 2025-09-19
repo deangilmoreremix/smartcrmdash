@@ -59,7 +59,7 @@ const RemoteBusinessIntelLoader: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full h-full bg-white" style={{ paddingTop: '80px' }}>
+    <div className="w-full h-full bg-white" style={{ paddingTop: '80px' }} data-testid="business-intel">
       <iframe
         ref={iframeRef}
         src="https://ai-powered-analytics-fibd.bolt.host"

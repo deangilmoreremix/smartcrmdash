@@ -306,11 +306,11 @@ export default function Communication() {
           </TabsContent>
 
           <TabsContent value="email">
-            <EmailDashboard />
+            <div data-testid="video-email"><EmailDashboard /></div>
           </TabsContent>
 
           <TabsContent value="calls">
-            <CallsList />
+            <div data-testid="voip-dialer"><CallsList /></div>
           </TabsContent>
 
           <TabsContent value="meetings">
