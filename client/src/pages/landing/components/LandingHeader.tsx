@@ -116,14 +116,8 @@ const LandingHeader = () => {
             <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors">
               Sign In
             </Link>
-            <Link 
-              to="/dev-bypass" 
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              🚀 Dashboard
-            </Link>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Get Started
@@ -170,14 +164,8 @@ const LandingHeader = () => {
             <Link to="/signin" className="text-gray-700 hover:text-blue-600 transition-colors py-2">
               Sign In
             </Link>
-            <Link 
-              to="/dev-bypass" 
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg font-medium transition-all w-fit"
-            >
-              🚀 Dashboard
-            </Link>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg w-fit"
             >
               Get Started

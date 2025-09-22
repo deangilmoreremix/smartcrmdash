@@ -37,82 +37,6 @@ const SignInPage: React.FC = () => {
     }
   };
 
-  const handleDevBypass = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('🚀 Starting dev bypass...');
-      
-      // Clear any existing auth data first
-      localStorage.removeItem('sb-supabase-auth-token');
-      localStorage.removeItem('dev-user-session');
-      localStorage.removeItem('smartcrm-dev-mode');
-      localStorage.removeItem('smartcrm-dev-user');
-      
-      const response = await fetch('/api/auth/dev-bypass', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
-      console.log('Dev bypass API response:', data);
-      
-      if (response.ok && data.success) {
-        // Store dev session in localStorage for the auth context
-        localStorage.setItem('sb-supabase-auth-token', JSON.stringify({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at,
-          user: data.user
-        }));
-        
-        // Store additional dev user data
-        localStorage.setItem('dev-user-session', JSON.stringify(data.user));
-        localStorage.setItem('smartcrm-dev-mode', 'true');
-        localStorage.setItem('smartcrm-dev-user', JSON.stringify(data.user));
-        
-        console.log('✅ Dev session stored, redirecting...');
-        
-        // Force immediate redirect with replace to avoid auth loops
-        window.location.href = '/dashboard';
-      } else {
-        setError(data.message || 'Development bypass failed');
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Dev bypass error:', error);
-      
-      // Create fallback dev session directly
-      const fallbackUser = {
-        id: 'dev-user-12345',
-        email: 'dev@smartcrm.local',
-        username: 'developer',
-        firstName: 'Development',
-        lastName: 'User',
-        role: 'super_admin',
-        app_context: 'smartcrm'
-      };
-
-      const fallbackSession = {
-        access_token: 'dev-bypass-token-fallback',
-        refresh_token: 'dev-bypass-refresh-fallback',
-        expires_at: Date.now() + (24 * 60 * 60 * 1000),
-        user: fallbackUser
-      };
-
-      localStorage.setItem('dev-user-session', JSON.stringify(fallbackUser));
-      localStorage.setItem('sb-supabase-auth-token', JSON.stringify(fallbackSession));
-      localStorage.setItem('smartcrm-dev-mode', 'true');
-      localStorage.setItem('smartcrm-dev-user', JSON.stringify(fallbackUser));
-
-      console.log('✅ Fallback dev session created');
-      window.location.href = '/dashboard';
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -221,21 +145,6 @@ const SignInPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Development Bypass Button - Always visible for testing */}
-          <div className="mt-4">
-            <button
-              onClick={handleDevBypass}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-              data-testid="button-dev-bypass"
-            >
-              🚀 Dev Bypass - Skip Authentication
-            </button>
-            <p className="text-xs text-center mt-2 text-gray-500">
-              Development mode - bypasses authentication ({window.location.hostname})
-            </p>
-          </div>
-          
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Don't have an account?{' '}
