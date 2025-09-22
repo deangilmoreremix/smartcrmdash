@@ -2,6 +2,18 @@
 
 All notable changes to the Smart CRM Dashboard project will be documented in this file.
 
+## [2.2.2] - 2025-09-22
+
+### Security & UX Improvements
+- **Removed Development Bypass Button**: Eliminated the "Try it for Free" button on landing page that linked to `/dev-bypass`
+- **Replaced with Proper Sign-In Button**: Added "Sign In to SmartCRM" button linking to `/signin` page
+- **Cleaned Up Auth Pages**: Confirmed dev buttons were already removed from sign-in and sign-up pages
+- **Enhanced User Experience**: Proper authentication flow without development shortcuts
+
+### Changes
+- Modified `client/src/components/landing/ParallaxHero.tsx` to remove dev bypass functionality
+- Landing page now directs users to proper sign-in flow instead of development bypass
+
 ## [2.2.1] - 2025-09-18
 
 ### Security Improvements
