@@ -12,6 +12,8 @@ All notable changes to the Smart CRM Dashboard project will be documented in thi
 
 ### Changes
 - Modified `client/src/components/landing/ParallaxHero.tsx` to remove dev bypass functionality
+- Removed dev bypass button from `client/src/pages/landing/components/LandingHeader.tsx`
+- Cleaned up dev bypass functions from `client/src/pages/SignInPage.tsx`
 - Landing page now directs users to proper sign-in flow instead of development bypass
 
 ## [2.2.1] - 2025-09-18
