@@ -25,6 +25,11 @@ const SignInPage: React.FC = () => {
                        window.location.hostname.includes('replit.io');
 
   const from = location.state?.from?.pathname || '/dashboard';
+  // Only show dev bypass in development environments - CRITICAL SECURITY FIX
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                       window.location.hostname.includes('.replit.dev') ||
+                       window.location.hostname.includes('replit.io');
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +53,10 @@ const SignInPage: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
+  const handleDevBypass = () => {
+    navigate('/dashboard', { replace: true });
+  };
+
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center p-4`}>
@@ -149,6 +158,23 @@ const SignInPage: React.FC = () => {
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
+          {/* Development Bypass Button - Only visible in development environments */}
+          {isDevelopment && (
+            <div className="mt-4">
+              <button
+                onClick={handleDevBypass}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+                data-testid="button-dev-bypass"
+              >
+                🚀 Dev Bypass - Skip Authentication
+              </button>
+              <p className={`text-xs text-center mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Development mode - bypasses authentication ({window.location.hostname})
+              </p>
+            </div>
+          )}
+
 
 <<<<<<< HEAD
           {/* Development Bypass Button - Only visible in development environments */}

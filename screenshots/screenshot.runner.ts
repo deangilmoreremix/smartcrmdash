@@ -38,9 +38,9 @@ async function ensureDir(dir: string) {
 async function runNavSteps(page: any, steps: NavStep[] = []) {
   for (const step of steps) {
     if ("click" in step) {
-      await page.click(step.click, { timeout: 8000 });
+      await page.click(step.click, { timeout: 15000 });
     } else if ("waitFor" in step) {
-      await page.waitForSelector(step.waitFor, { state: "visible", timeout: step.timeout ?? 8000 });
+      await page.waitForSelector(step.waitFor, { state: "visible", timeout: step.timeout ?? 15000 });
     } else if ("eval" in step) {
       await page.evaluate(step.eval);
       await page.waitForLoadState("networkidle").catch(() => {});
@@ -69,10 +69,12 @@ async function runNavSteps(page: any, steps: NavStep[] = []) {
 
           if (target.url) {
             // Direct URL (remote apps)
-            await page.goto(target.url, { waitUntil: "networkidle" });
+            await page.goto(target.url, { waitUntil: "networkidle", timeout: 30000 });
           } else if (target.baseUrl) {
             // SPA entry + nav steps
-            await page.goto(target.baseUrl, { waitUntil: "networkidle" });
+            await page.goto(target.baseUrl, { waitUntil: "networkidle", timeout: 30000 });
+            // Wait a bit more for SPA to hydrate
+            await page.waitForTimeout(3000);
             await runNavSteps(page, target.navigate);
           } else {
             continue;
