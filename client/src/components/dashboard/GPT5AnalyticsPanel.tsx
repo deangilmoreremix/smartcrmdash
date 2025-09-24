@@ -197,10 +197,10 @@ const GPT5AnalyticsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* GPT-5 Analytics Header */}
-      <div className={`p-4 rounded-xl border ${
+      <div className={`p-4 rounded-xl ${
         isDark 
-          ? 'border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-purple-500/10' 
-          : 'border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50'
+          ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' 
+          : 'bg-gradient-to-r from-blue-50 to-purple-50'
       }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -242,8 +242,8 @@ const GPT5AnalyticsPanel: React.FC = () => {
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-lg border ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'
+        <div className={`p-4 rounded-lg ${
+          isDark ? 'bg-white/5' : 'bg-white'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded ${isDark ? 'bg-green-500/20' : 'bg-green-100'}`}>
@@ -258,8 +258,8 @@ const GPT5AnalyticsPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-4 rounded-lg border ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'
+        <div className={`p-4 rounded-lg ${
+          isDark ? 'bg-white/5' : 'bg-white'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
@@ -274,8 +274,8 @@ const GPT5AnalyticsPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-4 rounded-lg border ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'
+        <div className={`p-4 rounded-lg ${
+          isDark ? 'bg-white/5' : 'bg-white'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded ${isDark ? 'bg-purple-500/20' : 'bg-purple-100'}`}>
@@ -290,8 +290,8 @@ const GPT5AnalyticsPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className={`p-4 rounded-lg border ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'
+        <div className={`p-4 rounded-lg ${
+          isDark ? 'bg-white/5' : 'bg-white'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded ${isDark ? 'bg-orange-500/20' : 'bg-orange-100'}`}>
@@ -371,8 +371,8 @@ const GPT5AnalyticsPanel: React.FC = () => {
 
       {/* Business Intelligence Panel */}
       {businessIntelligence && (
-        <div className={`p-4 rounded-lg border ${
-          isDark ? 'border-purple-500/30 bg-purple-500/10' : 'border-purple-200 bg-purple-50'
+        <div className={`p-4 rounded-lg ${
+          isDark ? 'bg-purple-500/10' : 'bg-purple-50'
         }`}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className={`h-4 w-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />

@@ -130,10 +130,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
       
       {/* GPT-5 Enhanced KPI Summary */}
-      <div className={`mt-6 p-4 rounded-xl border ${
+      <div className={`mt-6 p-4 rounded-xl ${
         isDark 
-          ? 'border-white/10 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10' 
-          : 'border-blue-100 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50'
+          ? 'bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10' 
+          : 'bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50'
       }`}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center">

@@ -54,7 +54,7 @@ const ConnectedApps: React.FC = () => {
   ];
 
   return (
-    <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'} backdrop-blur-xl border rounded-2xl p-6 mb-6`}>
+    <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6 mb-6`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <div className={`p-2 rounded-lg ${isDark ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400' : 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600'} mr-3`}>
@@ -77,7 +77,7 @@ const ConnectedApps: React.FC = () => {
             href={app.url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className={`group p-4 rounded-lg border bg-gradient-to-br ${app.color} transition-all duration-200`}
+            className={`group p-4 rounded-lg bg-gradient-to-br ${app.color} transition-all duration-200`}
           >
             <div className="flex items-start justify-between mb-3">
               <div className={`p-2 rounded-lg ${app.iconColor} transition-colors`}>

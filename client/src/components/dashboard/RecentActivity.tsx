@@ -133,7 +133,7 @@ const RecentActivity: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Upcoming Deals Section */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Upcoming Deals</h3>
           <Link 
@@ -179,8 +179,8 @@ const RecentActivity: React.FC = () => {
                   
                   {/* AI Insights Tooltip - appears on hover */}
                   <div className={`absolute right-0 top-full mt-2 w-72 p-3 rounded-lg shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto ${
-                    isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'
-                  } border`}>
+                    isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+                  }`}>
                     <div className="text-xs space-y-2">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 rounded-full bg-green-400"></div>
@@ -203,7 +203,7 @@ const RecentActivity: React.FC = () => {
       </div>
 
       {/* Recent Activity Feed */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Recent Activity</h3>
           <div className="flex items-center space-x-2">

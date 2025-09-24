@@ -25,7 +25,7 @@ const CustomerProfile: React.FC = () => {
   const { isDark } = useTheme();
   
   return (
-    <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6 mb-6`}>
+    <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6 mb-6`}>
       <div className="flex items-center justify-between mb-6">
         <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Customer Profile</h3>
         <div className="flex space-x-2">
@@ -40,36 +40,36 @@ const CustomerProfile: React.FC = () => {
 
       <div className="text-center mb-6">
         <div className="relative inline-block mb-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
+          <div className="w-20 h-20 rounded-full overflow-hidden shadow-lg">
             <img 
               src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2"
               alt="Eva Robinson"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full"></div>
         </div>
         <h4 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>Eva Robinson</h4>
         <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>CEO, Inc. Alabama Machinery & Supply</p>
       </div>
 
       <div className="flex justify-center space-x-3 mb-8">
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Edit className="w-4 h-4" />
         </button>
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Mail className="w-4 h-4" />
         </button>
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Phone className="w-4 h-4" />
         </button>
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Plus className="w-4 h-4" />
         </button>
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <FileText className="w-4 h-4" />
         </button>
-        <button className={`p-2 rounded-lg border ${isDark ? 'border-white/10 hover:bg-white/5 text-gray-400' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}>
+        <button className={`p-2 rounded-lg ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Calendar className="w-4 h-4" />
         </button>
       </div>
@@ -89,7 +89,7 @@ const CustomerProfile: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} rounded-full flex items-center justify-center`}>
                   <User className="w-4 h-4" />
@@ -104,7 +104,7 @@ const CustomerProfile: React.FC = () => {
               </button>
             </div>
 
-            <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'} rounded-full flex items-center justify-center`}>
                   <User className="w-4 h-4" />
@@ -119,7 +119,7 @@ const CustomerProfile: React.FC = () => {
               </button>
             </div>
 
-            <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} rounded-full flex items-center justify-center`}>
                   <Mail className="w-4 h-4" />
@@ -134,7 +134,7 @@ const CustomerProfile: React.FC = () => {
               </button>
             </div>
 
-            <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-yellow-500/20 text-yellow-400' : 'bg-yellow-100 text-yellow-600'} rounded-full flex items-center justify-center`}>
                   <Phone className="w-4 h-4" />
@@ -149,7 +149,7 @@ const CustomerProfile: React.FC = () => {
               </button>
             </div>
 
-            <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} rounded-full flex items-center justify-center`}>
                   <Globe className="w-4 h-4" />
@@ -177,7 +177,7 @@ const CustomerProfile: React.FC = () => {
               </button>
             </div>
 
-            <div className={`flex items-center justify-between py-3 ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+            <div className={`flex items-center justify-between py-3 ${isDark ? '' : ''}`}>
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 ${isDark ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} rounded-full flex items-center justify-center`}>
                   <Clock className="w-4 h-4" />

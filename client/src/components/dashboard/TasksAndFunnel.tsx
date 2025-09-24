@@ -107,7 +107,7 @@ const TaskAssignees: React.FC<{
         );
       })}
       {remainingCount > 0 && (
-        <div className={`relative z-10 w-7 h-7 rounded-full ${isDark ? 'bg-gray-700 text-white border-gray-900' : 'bg-gray-200 text-gray-700 border-white'} flex items-center justify-center text-xs font-medium border-2 shadow-sm`}>
+        <div className={`relative z-10 w-7 h-7 rounded-full ${isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'} flex items-center justify-center text-xs font-medium shadow-sm`}>
           +{remainingCount}
         </div>
       )}
@@ -199,7 +199,7 @@ const TasksAndFunnel: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Tasks Schedule */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Tasks Schedule</h3>
           <div className="flex space-x-2">
@@ -257,7 +257,7 @@ const TasksAndFunnel: React.FC = () => {
 
         {/* Selected Day Details */}
         {selectedDay && (
-          <div className={`mt-4 p-4 ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'} rounded-lg border`}>
+          <div className={`mt-4 p-4 ${isDark ? 'bg-blue-500/10' : 'bg-blue-50'} rounded-lg`}>
             <div className="flex items-center justify-between mb-2">
               <h5 className={`font-semibold ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>October {selectedDay}</h5>
               <button className={`p-1 ${isDark ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-100'} rounded`}>
@@ -283,7 +283,7 @@ const TasksAndFunnel: React.FC = () => {
       </div>
 
       {/* Stage Funnel */}
-      <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-6`}>
+      <div className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Stage Funnel</h3>
           <div className="flex space-x-2">
@@ -321,7 +321,7 @@ const TasksAndFunnel: React.FC = () => {
         </div>
 
         {/* Added Team Overview */}
-        <div className={`mt-4 p-4 ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-100'} rounded-lg border`}>
+        <div className={`mt-4 p-4 ${isDark ? 'bg-blue-500/10' : 'bg-blue-50'} rounded-lg`}>
           <div className="flex items-center justify-between mb-3">
             <h4 className={`font-semibold ${isDark ? 'text-blue-300' : 'text-blue-900'} flex items-center`}>
               <Users className="w-4 h-4 mr-2" />

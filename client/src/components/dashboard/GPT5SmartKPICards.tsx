@@ -177,8 +177,8 @@ const GPT5SmartKPICards: React.FC = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((n) => (
-          <div key={n} className={`p-4 rounded-xl border animate-pulse ${
-            isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-gray-50'
+          <div key={n} className={`p-4 rounded-xl animate-pulse ${
+            isDark ? 'bg-white/5' : 'bg-gray-50'
           }`}>
             <div className="flex items-center justify-between">
               <div className="space-y-2">
@@ -237,10 +237,10 @@ const GPT5SmartKPICards: React.FC = () => {
       {/* Smart KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric, index) => (
-          <div key={index} className={`group p-4 rounded-xl border transition-all duration-200 hover:shadow-lg ${
+          <div key={index} className={`group p-4 rounded-xl transition-all duration-200 hover:shadow-lg ${
             isDark 
-              ? 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10' 
-              : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
+              ? 'bg-white/5 hover:bg-white/10' 
+              : 'bg-white hover:shadow-xl'
           }`}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
@@ -295,8 +295,8 @@ const GPT5SmartKPICards: React.FC = () => {
             {metric.aiInsight && (
               <div className={`p-2 rounded-lg text-xs ${
                 isDark 
-                  ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20' 
-                  : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200'
+                  ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' 
+                  : 'bg-gradient-to-r from-blue-50 to-purple-50'
               }`}>
                 <div className="flex items-center gap-1 mb-1">
                   <Brain className={`h-3 w-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
@@ -309,8 +309,8 @@ const GPT5SmartKPICards: React.FC = () => {
                 </p>
                 
                 {metric.prediction && (
-                  <div className={`mt-1 pt-1 border-t ${
-                    isDark ? 'border-blue-500/20' : 'border-blue-200'
+                  <div className={`mt-1 pt-1 ${
+                    isDark ? '' : ''
                   }`}>
                     <p className={`${isDark ? 'text-purple-200' : 'text-purple-600'} font-medium`}>
                       {metric.prediction}

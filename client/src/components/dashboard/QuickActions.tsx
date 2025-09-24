@@ -19,7 +19,7 @@ const QuickActions = () => {
   
   // Get active deals
   const activeDeals = Object.values(deals).filter(deal => 
-    deal.stage !== 'closed-won' && deal.stage !== 'closed-lost'
+String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
   );
   
   // Get deals with contacts for avatar display
@@ -53,13 +53,13 @@ const QuickActions = () => {
                   alt={contact.name}
                   size="sm"
                   fallback={getInitials(contact.name)}
-                  className="border-2 border-white dark:border-transparent"
+className="shadow-sm"
                 />
               </div>
             );
           })}
           {remainingCount > 0 && (
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-transparent ${
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shadow-sm ${
               isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
             }`}>
               +{remainingCount}
@@ -88,7 +88,7 @@ const QuickActions = () => {
       case 'scheduleMeeting':
         // Open meeting scheduler
         console.log('Scheduling meeting...');
-        openTool('meeting-scheduler');
+        openTool('meeting-agenda');
         break;
       case 'sendEmail':
         // Open email composer
