@@ -75,12 +75,29 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
   },
   resolve: {
-    alias: {
-      events: 'events',
-      util: 'util',
-      stream: 'stream-browserify',
-      buffer: 'buffer',
-    },
+    alias: [
+      {
+        find: '@/',
+        replacement: '/src/'
+      },
+      {
+        find: '@components/',
+        replacement: '/src/components/'
+      },
+      {
+        find: '@store/',
+        replacement: '/src/store/'
+      },
+      {
+        find: '@utils/',
+        replacement: '/src/utils/'
+      },
+      // Keep existing Node polyfills
+      { find: 'events', replacement: 'events' },
+      { find: 'util', replacement: 'util' },
+      { find: 'stream', replacement: 'stream-browserify' },
+      { find: 'buffer', replacement: 'buffer' }
+    ],
   },
   build: {
     rollupOptions: {
