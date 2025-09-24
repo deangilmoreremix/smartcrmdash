@@ -7,7 +7,7 @@ import { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  root: "client",
+  root: "client",                // tell Vite where index.html is
   plugins: [react()],
   resolve: {
     alias: {
@@ -15,6 +15,7 @@ export default defineConfig({
     },
   },
   build: {
+    // write to repo-root/dist (what Netlify expects)
     outDir: "../dist",
     emptyOutDir: true,
     rollupOptions: {
