@@ -115,7 +115,7 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.55.1",
     "@replit/vite-plugin-cartographer": "^0.2.5",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
     "@tailwindcss/typography": "^0.5.15",
@@ -139,7 +139,7 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^4.1.13",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.1",
+    "tsx": "^4.20.5",
     "typescript": "^5.6.3",
     "vite": "^7.1.4",
     "vitest": "^3.2.4"
