@@ -179,8 +179,8 @@ const RecentActivity: React.FC = () => {
                   
                   {/* AI Insights Tooltip - appears on hover */}
                   <div className={`absolute right-0 top-full mt-2 w-72 p-3 rounded-lg shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto ${
-                    isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'
-                  } border`}>
+                    isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+                  }`}>
                     <div className="text-xs space-y-2">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 rounded-full bg-green-400"></div>

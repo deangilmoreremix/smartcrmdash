@@ -76,12 +76,12 @@ const ChartsSection: React.FC = () => {
                 alt={contact.name}
                 size="sm"
                 fallback={getInitials(contact.name)}
-                className="border-2 border-white dark:border-gray-900"
+className=""
               />
             </div>
           ))}
           {remainingCount > 0 && (
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white dark:border-gray-900 ${
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
               isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'
             }`}>
               +{remainingCount}
@@ -133,7 +133,7 @@ const ChartsSection: React.FC = () => {
         
         <div className="flex items-center space-x-4">
           {/* Chart Type Tabs */}
-          <div className="flex border rounded-lg overflow-hidden">
+          <div className="flex rounded-lg overflow-hidden">
             <button
               onClick={() => setActiveTab('performance')}
               className={`flex items-center px-3 py-1.5 text-sm ${
