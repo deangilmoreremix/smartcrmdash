@@ -208,7 +208,7 @@ const AuthLoadingScreen = () => (
 function App() {
   // Initialize universal data sync
   useEffect(() => {
-    console.log('🚀 Starting Universal Data Sync System');
+    // Starting Universal Data Sync System
     universalDataSync.initialize();
 
     return () => {

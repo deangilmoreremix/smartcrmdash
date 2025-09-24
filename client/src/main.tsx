@@ -34,7 +34,6 @@ window.addEventListener('error', (event) => {
       error?.message?.includes('loading') ||
       !error ||
       !message) {
-    console.warn('🚨 Suppressed error to prevent runtime overlay:', message || error?.message || 'Unknown error');
     event.preventDefault();
     return false;
   }
@@ -52,7 +51,6 @@ window.addEventListener('unhandledrejection', (event) => {
       reason.includes('Failed to load') ||
       !event.reason ||
       !reason) {
-    console.warn('🚨 Suppressed promise rejection to prevent runtime overlay:', reason || 'Unknown rejection');
     event.preventDefault();
     return false;
   }
@@ -60,7 +58,6 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // Additional global error handler for non-error objects
 window.onerror = function(message, source, lineno, colno, error) {
-  console.warn('🚨 Global onerror caught:', { message, source, error });
   return true; // Prevent default error handling
 };
 
@@ -76,7 +73,6 @@ console.error = function(...args) {
       message.includes('No AI providers') ||
       message.includes('loading') ||
       message.includes('timeout')) {
-    console.warn('🚨 Suppressed console.error to prevent runtime overlay:', ...args);
     return;
   }
   originalError.apply(console, args);
@@ -86,13 +82,11 @@ console.error = function(...args) {
 if (typeof window !== 'undefined') {
   // Prevent all runtime error overlays by suppressing uncaught exceptions
   window.addEventListener('unhandledrejection', (event) => {
-    console.warn('🚨 Prevented unhandledrejection overlay:', event.reason);
     event.preventDefault();
     return false;
   }, true);
   
   window.addEventListener('error', (event) => {
-    console.warn('🚨 Prevented error overlay:', event.error || event.message);
     event.preventDefault(); 
     event.stopPropagation();
     return false;

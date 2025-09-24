@@ -8,7 +8,7 @@ const DevBypassPage = () => {
   useEffect(() => {
     const performDevBypass = async () => {
       try {
-        console.log('Performing dev bypass...');
+        // Performing dev bypass...
 
         // Call the dev bypass API endpoint
         const response = await fetch('/api/auth/dev-bypass', {
@@ -24,7 +24,6 @@ const DevBypassPage = () => {
         }
 
         const data = await response.json();
-        console.log('Dev bypass API response:', data);
 
         if (data.success && data.user && data.session) {
           // Store the dev session in localStorage
@@ -35,7 +34,7 @@ const DevBypassPage = () => {
           localStorage.setItem('smartcrm-dev-mode', 'true');
           localStorage.setItem('smartcrm-dev-user', JSON.stringify(data.user));
           
-          console.log('Dev session stored successfully');
+          // Dev session stored successfully
 
           // Force immediate redirect with replace to avoid back button issues
           window.location.href = '/dashboard';
