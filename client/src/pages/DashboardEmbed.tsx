@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 import EmbeddableDashboard from '../components/EmbeddableDashboard';
 import '../styles/dashboard-embed.css';
 
 const DashboardEmbed: React.FC = () => {
+  const { isDark } = useTheme();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+    <div className={`min-h-screen p-4 ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-purple-50 to-blue-50'}`}>
       <div className="max-w-6xl mx-auto">
         <div className="embed-container">
           <div className="embed-header">

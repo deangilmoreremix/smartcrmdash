@@ -1,7 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { HashLink } from 'react-router-hash-link';
 import { 
   Brain, 
@@ -56,6 +56,7 @@ import VideoCallDemo from '../components/landing/VideoCallDemo';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   // Function to handle page initialization only once
   useEffect(() => {
@@ -78,7 +79,7 @@ const LandingPage = () => {
   }, []);  // Empty dependency array ensures this only runs once
   
   return (
-    <div className="bg-white content-stable">
+    <div className={`bg-white dark:bg-gray-900 content-stable`}>
       <LandingHeader />
       
       {/* Main Content Area */}
@@ -111,8 +112,8 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-in">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">The Impact of Smart CRM</h2>
-              <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>The Impact of Smart CRM</h2>
+              <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                 Real results from businesses using our AI-powered CRM platform
               </p>
             </div>
@@ -159,12 +160,12 @@ const LandingPage = () => {
       </section>
       
       {/* Interactive Dashboard Demo Section */}
-        <section className="landing-section py-16 bg-white overflow-hidden">
+        <section className={`landing-section py-16 overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Experience Your CRM Dashboard</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Experience Your CRM Dashboard</h2>
+              <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Try our fully interactive dashboard demo with real-time data and AI-powered insights
               </p>
             </div>
@@ -195,12 +196,12 @@ const LandingPage = () => {
       </section>
       
       {/* Video Call Demo Section */}
-      <section className="landing-section py-16 bg-white overflow-hidden">
+      <section className={`landing-section py-16 overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Integrated Video Calling</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Integrated Video Calling</h2>
+              <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Connect with clients and team members through built-in HD video calls with AI-powered features
               </p>
             </div>
@@ -213,12 +214,12 @@ const LandingPage = () => {
       </section>
       
       {/* Additional Product Demo Section */}
-        <section className="landing-section py-16 bg-gray-50 overflow-hidden">
+        <section className={`landing-section py-16 overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">More Features to Explore</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>More Features to Explore</h2>
+              <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Discover additional capabilities of our AI-powered CRM platform
               </p>
             </div>
@@ -238,10 +239,10 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 All the Features You Need to Succeed
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Smart CRM combines powerful sales tools with advanced AI capabilities to streamline your workflow and boost your results.
               </p>
             </div>
@@ -343,10 +344,10 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 AI-Powered Features
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Discover our cutting-edge AI tools designed specifically for sales professionals
               </p>
             </div>
@@ -401,12 +402,12 @@ const LandingPage = () => {
       </section>
       
       {/* Testimonials */}
-      <section className="py-20 bg-white">
+      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>What Our Customers Say</h2>
+              <p className={`text-xl max-w-3xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Hear from sales teams who've transformed their results with Smart CRM
               </p>
             </div>
@@ -450,12 +451,12 @@ const LandingPage = () => {
       </section>
       
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+      <section id="pricing" className={`py-20 ${isDark ? 'bg-gradient-to-br from-gray-700 to-blue-900' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
         <div className="container mx-auto px-4">
           <ScrollAnimationWrapper animation="fade-up">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Simple, Transparent Pricing</h2>
+              <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Choose the plan that fits your team size and needs. All plans include our core CRM features.
               </p>
             </div>
