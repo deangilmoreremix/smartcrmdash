@@ -1,23 +1,14 @@
-import { useApiStore } from '../store/apiStore';
-
 export const useOpenAIEmbeddings = () => {
-  const { apiKeys } = useApiStore();
-  
   const createEmbedding = async (text: string) => {
-    if (!apiKeys.openai) {
-      throw new Error('OpenAI API key is not set');
-    }
-
     try {
-      const response = await fetch('https://api.openai.com/v1/embeddings', {
+      const response = await fetch('/api/openai/embeddings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKeys.openai}`,
         },
         body: JSON.stringify({
+          text: text,
           model: "text-embedding-3-small",
-          input: text,
         }),
       });
 
@@ -26,7 +17,7 @@ export const useOpenAIEmbeddings = () => {
       }
 
       const data = await response.json();
-      return data.data[0].embedding;
+      return data.embedding;
     } catch (error) {
       throw error;
     }
@@ -53,7 +44,86 @@ export const useOpenAIEmbeddings = () => {
     }
   };
 
-  return { createEmbedding, semanticSearch };
+  const createContactEmbeddings = async (contacts: any[]) => {
+    const embeddings = [];
+    for (const contact of contacts) {
+      try {
+        const text = `${contact.name} ${contact.email} ${contact.company} ${contact.position} ${contact.notes || ''} ${contact.industry || ''} ${contact.location || ''}`;
+        const embedding = await createEmbedding(text);
+        embeddings.push({
+          contactId: contact.id,
+          embedding
+        });
+      } catch (error) {
+        console.warn(`Failed to create embedding for contact ${contact.id}:`, error);
+        // Continue with other contacts
+      }
+    }
+    return embeddings;
+  };
+
+  const createDealEmbeddings = async (deals: any[]) => {
+    const embeddings = [];
+    for (const deal of deals) {
+      try {
+        const text = `${deal.title} ${deal.company} ${deal.contact} ${deal.stage} ${deal.priority} ${deal.value}`;
+        const embedding = await createEmbedding(text);
+        embeddings.push({
+          dealId: deal.id,
+          embedding
+        });
+      } catch (error) {
+        console.warn(`Failed to create embedding for deal ${deal.id}:`, error);
+        // Continue with other deals
+      }
+    }
+    return embeddings;
+  };
+
+  const searchContacts = async (query: string, contactEmbeddings: any[], contactsById: any) => {
+    const queryEmbedding = await createEmbedding(query);
+    const results = [];
+
+    for (const contactEmb of contactEmbeddings) {
+      const contact = contactsById[contactEmb.contactId];
+      if (contact) {
+        const similarity = cosineSimilarity(queryEmbedding, contactEmb.embedding);
+        results.push({
+          contact,
+          score: similarity
+        });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  };
+
+  const searchDeals = async (query: string, dealEmbeddings: any[], dealsById: any) => {
+    const queryEmbedding = await createEmbedding(query);
+    const results = [];
+
+    for (const dealEmb of dealEmbeddings) {
+      const deal = dealsById[dealEmb.dealId];
+      if (deal) {
+        const similarity = cosineSimilarity(queryEmbedding, dealEmb.embedding);
+        results.push({
+          deal,
+          score: similarity
+        });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  };
+
+  return {
+    createEmbedding,
+    semanticSearch,
+    createContactEmbeddings,
+    createDealEmbeddings,
+    searchContacts,
+    searchDeals
+  };
 };
 
 // Helper function to calculate cosine similarity

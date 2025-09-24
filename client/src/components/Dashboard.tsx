@@ -195,7 +195,7 @@ const Dashboard: React.FC = React.memo(() => {
         return <MetricsCards />;
 
       case 'kpi-cards-section':
-        return <KPICards />;
+        return <div data-testid="kpi-cards"><KPICards /></div>;
 
       case 'gpt5-smart-kpi-section':
         return <GPT5SmartKPICards />;
@@ -230,10 +230,10 @@ const Dashboard: React.FC = React.memo(() => {
         return <CustomerProfile />;
 
       case 'recent-activity-section':
-        return <RecentActivity />;
+        return <div data-testid="recent-activity"><RecentActivity /></div>;
 
       case 'tasks-and-funnel-section':
-        return <TasksAndFunnel />;
+        return <div data-testid="tasks-and-funnel"><TasksAndFunnel /></div>;
 
       case 'charts-section':
         return <ChartsSection />;

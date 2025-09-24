@@ -2,6 +2,78 @@
 
 All notable changes to the Smart CRM Dashboard project will be documented in this file.
 
+## [2.2.2] - 2025-09-22
+
+### Security & UX Improvements
+- **Removed Development Bypass Button**: Eliminated the "Try it for Free" button on landing page that linked to `/dev-bypass`
+- **Replaced with Proper Sign-In Button**: Added "Sign In to SmartCRM" button linking to `/signin` page
+- **Cleaned Up Auth Pages**: Confirmed dev buttons were already removed from sign-in and sign-up pages
+- **Enhanced User Experience**: Proper authentication flow without development shortcuts
+
+### Changes
+- Modified `client/src/components/landing/ParallaxHero.tsx` to remove dev bypass functionality
+- Removed dev bypass button from `client/src/pages/landing/components/LandingHeader.tsx`
+- Cleaned up dev bypass functions from `client/src/pages/SignInPage.tsx`
+- Landing page now directs users to proper sign-in flow instead of development bypass
+
+## [2.2.1] - 2025-09-18
+
+### Security Improvements
+- Enhanced environment variable configuration and security
+- API endpoint security fixes and validation improvements
+- Updated .env.example with secure defaults
+
+### Added
+- New API endpoints in server routes for enhanced functionality
+- Improved integrations system components
+- Enhanced AI service orchestrator capabilities
+
+### Technical Enhancements
+- Updated Netlify configuration for better deployment security
+- Service layer improvements across multiple modules
+- Component architecture refinements
+
+## [2.2.0] - 2025-09-18
+
+### Added - Unified Services & Enhanced Integration
+- **Unified API Client**: New unifiedApiClient service for centralized API management
+- **Unified Event System**: Event-driven architecture with broadcast channels and WebSocket support
+- **Enhanced Remote App Context**: Improved context for remote application integration
+- **Service Architecture**: Modular service layer with utilities and testing framework
+- **Store Management**: Zustand-based stores for analytics, auth, communication, contacts, deals, goals, mobile, and tasks
+- **Advanced App Integration Guide**: Comprehensive documentation for app integration
+
+### Technical Enhancements
+- **Broadcast Channel Manager**: Cross-tab communication capabilities
+- **Shared Worker Manager**: Background processing and data synchronization
+- **WebSocket Manager**: Real-time communication infrastructure
+- **Service Utilities**: Common utilities for service operations
+- **Testing Framework**: Comprehensive test suite for unified systems
+
+## [2.1.0] - 2025-09-17
+
+### Added - Dashboard Embed & Security Enhancements
+- **Dashboard Embed Functionality**: New embeddable dashboard component for landing pages
+- **Embeddable Dashboard Page**: Standalone dashboard embed at `/dashboard-embed` route
+- **Responsive Embed Design**: Mobile-optimized embed with professional styling
+- **Real-time Metrics Display**: Live KPI cards showing deals, pipeline value, contacts, and conversion rates
+- **Secure Environment Configuration**: Fixed exposed secrets issue for Netlify deployment
+- **Environment Variable Optimization**: Proper VITE_ prefixing for client-side variables
+- **Git History Cleanup**: Removed sensitive data from repository history
+- **Deployment Security**: Enhanced security for production deployments
+
+### Security Improvements
+- **Environment Variable Security**: Removed sensitive .env file from repository
+- **Netlify Deployment Security**: Proper environment variable configuration for secure deployments
+- **Git History Sanitization**: Cleaned repository of any accidentally committed secrets
+- **Build Security**: Eliminated exposed secrets warnings in Netlify builds
+
+### Technical Enhancements
+- **Embeddable Components**: New reusable dashboard components for external integration
+- **CSS Architecture**: Dedicated embed styling with responsive design patterns
+- **Route Configuration**: Added embed routes with proper navigation handling
+- **Component Architecture**: Modular embeddable dashboard with configurable options
+
 ## [2.0.0] - 2025-08-18
 
 ### Added - GPT-5 Integration

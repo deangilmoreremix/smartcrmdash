@@ -6,12 +6,12 @@ You're missing the core `contacts` and `deals` Edge Functions that your remote a
 
 ### ✅ contacts
 - **Path**: `supabase/functions/contacts/index.ts`  
-- **URL**: Will be `https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts`
+- **URL**: Will be `https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts`
 - **Features**: Full CRUD operations, filtering, pagination, proper field mapping
 
 ### ✅ deals  
 - **Path**: `supabase/functions/deals/index.ts`
-- **URL**: Will be `https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/deals`
+- **URL**: Will be `https://YOUR_PROJECT_REF.supabase.co/functions/v1/deals`
 - **Features**: Full CRUD operations, filtering, pagination, proper field mapping
 
 ## How to Deploy
@@ -26,7 +26,7 @@ npm install -g supabase
 supabase login
 
 # Link your project
-supabase link --project-ref gadedbrnqzpfqtsdfzcg
+supabase link --project-ref YOUR_PROJECT_REF
 
 # Deploy the new functions
 supabase functions deploy contacts
@@ -74,13 +74,13 @@ After deployment, test with:
 
 ```bash
 # Test contacts
-curl -X POST https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/contacts \
+curl -X POST https://YOUR_PROJECT_REF.supabase.co/functions/v1/contacts \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{"firstName":"Test","lastName":"User","email":"test@example.com"}'
 
 # Test deals  
-curl -X POST https://gadedbrnqzpfqtsdfzcg.supabase.co/functions/v1/deals \
+curl -X POST https://YOUR_PROJECT_REF.supabase.co/functions/v1/deals \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{"title":"Test Deal","value":10000}'

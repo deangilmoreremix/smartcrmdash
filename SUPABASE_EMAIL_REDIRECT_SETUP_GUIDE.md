@@ -5,11 +5,11 @@ This guide will help you configure Supabase email redirects to work perfectly wi
 
 ## Current Configuration Status
 ✅ **Your redirect URLs are correctly configured in Supabase:**
-- `https://smart-crm.videoremix.io` (Production)
-- `https://smart-crm.videoremix.io/auth/callback`
-- `https://smart-crm.videoremix.io/dashboard`
-- `http://localhost:3000` (Development)
-- `http://localhost:5173` (Development)
+- `${SITE_URL}` (Production)
+- `${SITE_URL}/auth/callback`
+- `${SITE_URL}/dashboard`
+- `http://localhost:${PORT:-5000}` (Development)
+- `http://localhost:${VITE_PORT:-5173}` (Development)
 - `https://*.replit.app` (Replit environments)
 - `https://*.replit.dev` (Replit environments)
 
@@ -30,20 +30,20 @@ This guide will help you configure Supabase email redirects to work perfectly wi
 ### 2. Configure Site URL
 In the **General Settings** section:
 ```
-Site URL: https://smart-crm.videoremix.io
+Site URL: ${SITE_URL}
 ```
 *This is the main URL where users will be redirected after authentication*
 
 ### 3. Configure Redirect URLs
 In the **Redirect URLs** section, add these URLs:
 ```
-https://smart-crm.videoremix.io/auth/callback
-https://smart-crm.videoremix.io/auth/confirm
-https://smart-crm.videoremix.io/auth/recovery
-https://smart-crm.videoremix.io/dashboard
-http://localhost:5000/auth/callback
-http://localhost:5000/auth/confirm
-http://localhost:5000/auth/recovery
+${SITE_URL}/auth/callback
+${SITE_URL}/auth/confirm
+${SITE_URL}/auth/recovery
+${SITE_URL}/dashboard
+http://localhost:${PORT:-5000}/auth/callback
+http://localhost:${PORT:-5000}/auth/confirm
+http://localhost:${PORT:-5000}/auth/recovery
 https://*.replit.app
 https://*.replit.dev
 ```
@@ -120,7 +120,7 @@ All templates can use these variables:
 # In browser console or API client
 const { data, error } = await supabase.auth.resetPasswordForEmail(
   'test@example.com',
-  { redirectTo: 'https://smart-crm.videoremix.io/auth/recovery' }
+  { redirectTo: '${SITE_URL}/auth/recovery' }
 );
 ```
 
@@ -131,7 +131,7 @@ const { data, error } = await supabase.auth.signUp({
   email: 'test@example.com',
   password: 'password123',
   options: {
-    emailRedirectTo: 'https://smart-crm.videoremix.io/auth/callback'
+    emailRedirectTo: '${SITE_URL}/auth/callback'
   }
 });
 ```
@@ -142,7 +142,7 @@ const { data, error } = await supabase.auth.signUp({
 const { data, error } = await supabase.auth.signInWithOtp({
   email: 'test@example.com',
   options: {
-    emailRedirectTo: 'https://smart-crm.videoremix.io/auth/callback'
+    emailRedirectTo: '${SITE_URL}/auth/callback'
   }
 });
 ```
@@ -168,7 +168,7 @@ const { data, error } = await supabase.auth.signInWithOtp({
 
 #### **Development environment issues?**
 1. Add localhost URLs to redirect URLs list
-2. Update Site URL for development: `http://localhost:5000`
+2. Update Site URL for development: `http://localhost:${PORT:-5000}`
 3. Test with Replit URLs: `https://*.replit.app`
 
 ## Security Notes

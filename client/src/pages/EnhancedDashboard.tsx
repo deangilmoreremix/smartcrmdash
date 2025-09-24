@@ -11,6 +11,7 @@ import AIToolsCard from '../components/Dashboard/AIToolsCard';
 import DealAnalytics from '../components/DealAnalytics';
 import HelpTooltip from '../components/ui/HelpTooltip';
 import { useEnhancedHelp } from '../contexts/EnhancedHelpContext';
+import GeminiImageModal from '../components/GeminiImageModal';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -93,6 +94,7 @@ const Dashboard: React.FC = () => {
     efficiency: 32,
     qualityScore: 87
   });
+  const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
   
   useEffect(() => {
     // Fetch all data when component mounts
@@ -808,11 +810,11 @@ const Dashboard: React.FC = () => {
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <HelpTooltip 
+              <HelpTooltip
                 content="Click here to go to the deals page where you can create a new deal opportunity."
                 placement="top"
               >
-                <Link 
+                <Link
                   id="new-deal-btn"
                   to="/deals"
                   className="p-3 text-center bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 transition-colors duration-200 no-underline"
@@ -821,12 +823,12 @@ const Dashboard: React.FC = () => {
                   <span className="text-sm">New Deal</span>
                 </Link>
               </HelpTooltip>
-              
-              <HelpTooltip 
+
+              <HelpTooltip
                 content="Click here to go to the contacts page where you can add a new contact to your CRM."
                 placement="top"
               >
-                <Link 
+                <Link
                   id="new-contact-btn"
                   to="/contacts"
                   className="p-3 text-center bg-green-50 hover:bg-green-100 rounded-lg text-green-700 transition-colors duration-200 no-underline"
@@ -835,12 +837,12 @@ const Dashboard: React.FC = () => {
                   <span className="text-sm">New Contact</span>
                 </Link>
               </HelpTooltip>
-              
-              <HelpTooltip 
+
+              <HelpTooltip
                 content="Opens the AI meeting scheduler to help you organize and plan meetings with contacts."
                 placement="bottom"
               >
-                <button 
+                <button
                   id="schedule-btn"
                   onClick={() => openTool('meeting-agenda')}
                   className="p-3 text-center bg-purple-50 hover:bg-purple-100 rounded-lg text-purple-700 transition-colors duration-200"
@@ -849,18 +851,31 @@ const Dashboard: React.FC = () => {
                   <span className="text-sm">Schedule</span>
                 </button>
               </HelpTooltip>
-              
-              <HelpTooltip 
+
+              <HelpTooltip
                 content="Opens the AI email composer to help you write personalized emails using AI."
                 placement="bottom"
               >
-                <button 
+                <button
                   id="send-email-btn"
                   onClick={() => openTool('email-composer')}
                   className="p-3 text-center bg-amber-50 hover:bg-amber-100 rounded-lg text-amber-700 transition-colors duration-200"
                 >
                   <Mail size={20} className="mx-auto mb-1" />
                   <span className="text-sm">Send Email</span>
+                </button>
+              </HelpTooltip>
+
+              <HelpTooltip
+                content="Generate professional avatars for contacts and team members using AI."
+                placement="bottom"
+              >
+                <button
+                  onClick={() => setShowAvatarGenerator(true)}
+                  className="p-3 text-center bg-emerald-50 hover:bg-emerald-100 rounded-lg text-emerald-700 transition-colors duration-200"
+                >
+                  <img src="/api/placeholder/20/20" alt="Avatar" className="mx-auto mb-1 w-5 h-5" />
+                  <span className="text-sm">Generate Avatar</span>
                 </button>
               </HelpTooltip>
             </div>
@@ -872,7 +887,15 @@ const Dashboard: React.FC = () => {
       <div data-tour="pipeline-overview">
         <DealAnalytics />
       </div>
-      
+
+      {/* Avatar Generator Modal */}
+      {showAvatarGenerator && (
+        <GeminiImageModal
+          open={showAvatarGenerator}
+          onClose={() => setShowAvatarGenerator(false)}
+        />
+      )}
+
       {/* Dashboard Tour - Temporarily disabled for syntax fix */}
     </div>
   );

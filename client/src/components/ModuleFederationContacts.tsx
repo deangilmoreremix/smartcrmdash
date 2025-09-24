@@ -98,7 +98,7 @@ interface ModuleFederationContactsProps {
 
 const ModuleFederationContacts: React.FC<ModuleFederationContactsProps> = ({ showHeader = false }) => {
   return (
-    <div className="h-full w-full flex flex-col" style={{ margin: 0, padding: 0 }}>
+    <div className="h-full w-full flex flex-col" style={{ margin: 0, padding: 0 }} data-testid="contacts-list">
       {showHeader && (
         <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">

@@ -135,24 +135,20 @@ class AIOrchestratorService {
   }
 
   /**
-   * Check if any required API keys are available
+   * Check if any required API providers are available (server-side check)
    */
-  private hasAvailableProvider(): boolean {
-    // Check for Google AI API key
-    const googleKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
-    const googleKeyValid = googleKey && 
-                          googleKey.length > 10 && 
-                          !googleKey.includes('your_google_ai_api_key') &&
-                          !googleKey.startsWith('your_');
-    
-    // Check for OpenAI API key                      
-    const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const openaiKeyValid = openaiKey && 
-                          openaiKey.length > 10 && 
-                          !openaiKey.includes('your_openai_api_key') &&
-                          !openaiKey.startsWith('your_');
-                          
-    return googleKeyValid || openaiKeyValid;
+  private async hasAvailableProvider(): Promise<boolean> {
+    try {
+      // Check server-side availability
+      const response = await fetch('/api/openai/status');
+      const openaiAvailable = response.ok && (await response.json()).configured === true;
+
+      // For now, assume Gemini is available if OpenAI is (they use the same status endpoint)
+      return openaiAvailable;
+    } catch (error) {
+      console.warn('Failed to check provider availability:', error);
+      return false;
+    }
   }
 
   /**
@@ -164,8 +160,8 @@ class AIOrchestratorService {
       return context.modelId;
     }
 
-    // Get model recommendations
-    const modelType = 
+    // Get model recommendations based on feature type
+    const modelType =
       feature === 'email_generation' ? 'email_generation' :
       feature === 'pipeline_analysis' ? 'business_analysis' :
       feature === 'deal_insights' ? 'business_analysis' :
@@ -173,39 +169,34 @@ class AIOrchestratorService {
       feature === 'contact_scoring' ? 'contact_scoring' :
       feature === 'content_creation' ? 'content_creation' :
       feature === 'quick_response' ? 'categorization' :
-      feature === 'lead_qualification' ? 'lead_qualification' : 
+      feature === 'lead_qualification' ? 'lead_qualification' :
       'categorization';
 
-    // Check which providers are available
-    const googleKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
-    const googleKeyValid = googleKey && 
-                          googleKey.length > 10 && 
-                          !googleKey.includes('your_google_ai_api_key') &&
-                          !googleKey.startsWith('your_');
-    
-    const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const openaiKeyValid = openaiKey && 
-                          openaiKey.length > 10 && 
-                          !openaiKey.includes('your_openai_api_key') &&
-                          !openaiKey.startsWith('your_');
-    
-    // Based on available providers, choose appropriate model
-    if (googleKeyValid) {
-      // If Google AI is available, use it for most tasks
-      if (context.priority === 'speed') {
-        return 'gemma-2-2b-it';
-      } else if (context.priority === 'quality' && feature === 'business_analysis') {
-        return openaiKeyValid ? 'gpt-4o-mini' : 'gemini-2.5-flash';
-      } else {
-        return 'gemini-2.5-flash';
+    // Check server-side availability to determine which models to use
+    try {
+      const response = await fetch('/api/openai/status');
+      const status = await response.json();
+
+      if (status.configured) {
+        // If OpenAI is available, prefer it for quality tasks
+        if (context.priority === 'quality' && feature === 'business_analysis') {
+          return 'gpt-4o-mini';
+        } else if (context.priority === 'cost') {
+          return 'gpt-3.5-turbo';
+        } else {
+          return 'gpt-4o-mini';
+        }
       }
-    } else if (openaiKeyValid) {
-      // If only OpenAI is available
-      return context.priority === 'cost' ? 'gpt-3.5-turbo' : 'gpt-4o-mini';
+    } catch (error) {
+      console.warn('Failed to check server availability for model selection:', error);
     }
-    
-    // No valid API keys, return a default
-    return 'gemini-2.5-flash';
+
+    // Default to Gemini models if OpenAI is not available or on error
+    if (context.priority === 'speed') {
+      return 'gemma-2-2b-it';
+    } else {
+      return 'gemini-2.5-flash';
+    }
   }
 
   /**
@@ -257,7 +248,7 @@ class AIOrchestratorService {
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
     // Check if any provider is available
-    if (!this.hasAvailableProvider()) {
+    if (!(await this.hasAvailableProvider())) {
       return {
         content: {
           subject: `Following up: ${context.purpose}`,
@@ -317,7 +308,7 @@ class AIOrchestratorService {
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
     // Check if any provider is available
-    if (!this.hasAvailableProvider()) {
+    if (!(await this.hasAvailableProvider())) {
       return {
         content: {
           healthScore: 0,
@@ -403,7 +394,7 @@ class AIOrchestratorService {
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
     // Check if any provider is available
-    if (!this.hasAvailableProvider()) {
+    if (!(await this.hasAvailableProvider())) {
       return {
         content: {
           title: context.meetingTitle,
@@ -553,7 +544,7 @@ class AIOrchestratorService {
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
     // Check if any provider is available
-    if (!this.hasAvailableProvider()) {
+    if (!(await this.hasAvailableProvider())) {
       return {
         content: {
           riskLevel: "unknown",
@@ -663,7 +654,7 @@ class AIOrchestratorService {
     taskContext: TaskContext = {}
   ): Promise<ServiceResponse> {
     // Check if any provider is available
-    if (!this.hasAvailableProvider()) {
+    if (!(await this.hasAvailableProvider())) {
       return {
         content: {
           highValueContacts: [],

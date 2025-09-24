@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Grid3X3, Settings, Cpu } from 'lucide-react';
 import ConnectedApps from '../dashboard/ConnectedApps';
@@ -6,15 +6,35 @@ import AIModelSelector from '../AIModelSelector';
 
 const IntegrationsSystem: React.FC = () => {
   const { isDark } = useTheme();
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [isOpenAIConnected, setIsOpenAIConnected] = useState(false);
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
-  // Check for API keys
-  const googleApiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
-  const openAiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  
-  const isGoogleConnected = !!googleApiKey && googleApiKey.length > 10 && !googleApiKey.includes('your_');
-  const isOpenAIConnected = !!openAiApiKey && openAiApiKey.length > 10 && !openAiApiKey.includes('your_');
-  const isSupabaseConnected = !!supabaseUrl && supabaseUrl.includes('supabase.co');
+  useEffect(() => {
+    // Check server-side API availability
+    const checkConnections = async () => {
+      try {
+        // Check OpenAI status
+        const openaiResponse = await fetch('/api/openai/status');
+        const openaiStatus = await openaiResponse.json();
+        setIsOpenAIConnected(openaiStatus.configured === true);
+
+        // Check Supabase connection
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        setIsSupabaseConnected(!!supabaseUrl && supabaseUrl.includes('supabase.co'));
+
+        // For Google AI, assume it's available if OpenAI is (they use the same status endpoint)
+        setIsGoogleConnected(openaiStatus.configured === true);
+      } catch (error) {
+        console.warn('Failed to check API connections:', error);
+        setIsGoogleConnected(false);
+        setIsOpenAIConnected(false);
+        setIsSupabaseConnected(false);
+      }
+    };
+
+    checkConnections();
+  }, []);
 
   return (
     <div className="mb-10">

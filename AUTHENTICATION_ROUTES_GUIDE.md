@@ -108,15 +108,15 @@ Your SmartCRM application now has properly connected authentication flows throug
 
 ### **Supabase Email Redirects**
 Your email templates are configured to redirect to:
-- **Password Recovery** → `https://smart-crm.videoremix.io/auth/recovery`
-- **Email Confirmation** → `https://smart-crm.videoremix.io/auth/callback`
-- **Magic Links** → `https://smart-crm.videoremix.io/auth/callback`
-- **Team Invitations** → `https://smart-crm.videoremix.io/auth/callback`
+- **Password Recovery** → `${SITE_URL}/auth/recovery`
+- **Email Confirmation** → `${SITE_URL}/auth/callback`
+- **Magic Links** → `${SITE_URL}/auth/callback`
+- **Team Invitations** → `${SITE_URL}/auth/callback`
 
 ### **Development Redirects**
 For local development, also configured:
-- `http://localhost:5000/auth/recovery`
-- `http://localhost:5000/auth/callback`
+- `http://localhost:${PORT}/auth/recovery`
+- `http://localhost:${PORT}/auth/callback`
 - `https://*.replit.app`
 - `https://*.replit.dev`
 

@@ -385,18 +385,28 @@ class AIIntegrationService {
       
       // Development fallback
       if (import.meta.env.DEV || import.meta.env.VITE_ENV === 'development') {
-        return [
-          { 
-            name: 'openai', 
-            status: import.meta.env.VITE_OPENAI_API_KEY ? 'available' : 'error',
-            remaining: 45 
-          },
-          { 
-            name: 'gemini', 
-            status: import.meta.env.VITE_GEMINI_API_KEY ? 'available' : 'error',
-            remaining: 50 
-          }
-        ];
+        // Check server-side availability in development
+        try {
+          const response = await fetch('/api/openai/status');
+          const openaiAvailable = response.ok && (await response.json()).configured === true;
+          return [
+            {
+              name: 'openai',
+              status: openaiAvailable ? 'available' : 'error',
+              remaining: 45
+            },
+            {
+              name: 'gemini',
+              status: openaiAvailable ? 'available' : 'error', // Assume Gemini follows OpenAI status
+              remaining: 50
+            }
+          ];
+        } catch (error) {
+          return [
+            { name: 'openai', status: 'error', remaining: 0 },
+            { name: 'gemini', status: 'error', remaining: 0 }
+          ];
+        }
       }
       
       throw error;

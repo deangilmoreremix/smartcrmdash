@@ -96,7 +96,7 @@ interface ModuleFederationPipelineProps {
 
 const ModuleFederationPipeline: React.FC<ModuleFederationPipelineProps> = ({ showHeader = false }) => {
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-full w-full flex flex-col" data-testid="kanban-board">
       {showHeader && (
         <div className="flex items-center justify-between p-2 mt-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">

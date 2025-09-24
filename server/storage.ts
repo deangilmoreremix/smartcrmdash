@@ -1,4 +1,4 @@
-import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, partnerMetrics, partnerCustomers, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage, contacts, tenantConfigs, type TenantConfig, type InsertTenantConfig, userWLSettings, type UserWLSettings, type InsertUserWLSettings, partnerWLConfigs, type PartnerWLConfig, type InsertPartnerWLConfig, whiteLabelPackages, type WhiteLabelPackage } from "@shared/schema";
+import { profiles, type Profile, type InsertProfile, partners, type Partner, type InsertPartner, partnerTiers, type PartnerTier, partnerMetrics, partnerCustomers, commissions, type Commission, payouts, type Payout, featurePackages, type FeaturePackage, contacts, tenantConfigs, type TenantConfig, type InsertTenantConfig, userWLSettings, type UserWLSettings, type InsertUserWLSettings, partnerWLConfigs, type PartnerWLConfig, type InsertPartnerWLConfig, whiteLabelPackages, type WhiteLabelPackage } from "../shared/schema.js";
 import { eq, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 

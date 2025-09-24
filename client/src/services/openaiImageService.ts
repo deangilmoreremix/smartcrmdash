@@ -20,44 +20,45 @@ interface ImageGenerationResult {
 }
 
 class OpenAIImageService {
-  private apiKey: string;
   private baseUrl: string = 'https://api.openai.com/v1';
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || import.meta.env.VITE_OPENAI_API_KEY || '';
+    // API key is now handled server-side only
+    // Client no longer needs direct access to sensitive keys
   }
 
   /**
-   * Check if API key is valid (not a placeholder)
+   * Check if server-side API is available
    */
-  private isValidApiKey(): boolean {
-    return !!(this.apiKey && 
-           this.apiKey.length > 10 && 
-           !this.apiKey.includes('your_openai_api_key') &&
-           !this.apiKey.includes('your_ope') &&
-           !this.apiKey.includes('placeholder') &&
-           !this.apiKey.startsWith('your_') &&
-           this.apiKey !== 'your_openai_api_key');
+  private async isServerAvailable(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/openai/status');
+      const data = await response.json();
+      return data.configured === true;
+    } catch (error) {
+      console.warn('Failed to check server availability:', error);
+      return false;
+    }
   }
 
   /**
-   * Generate an image using DALL-E
+   * Generate an image using DALL-E via server endpoint
    */
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResult> {
-    if (!this.isValidApiKey()) {
-      throw new Error('OpenAI API key is required for image generation. Please check your environment variables.');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      throw new Error('Image generation service is not available. Please check server configuration.');
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/images/generations`, {
+      const response = await fetch('/api/openai/images/generate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: options.model || 'dall-e-3',
           prompt: options.prompt,
+          model: options.model || 'dall-e-3',
           size: options.size || '1024x1024',
           quality: options.quality || 'standard',
           style: options.style || 'vivid',
@@ -67,10 +68,14 @@ class OpenAIImageService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`OpenAI Image API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Image generation error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Image generation failed');
+      }
+
       const imageData = data.data[0];
 
       const result: ImageGenerationResult = {
@@ -86,15 +91,13 @@ class OpenAIImageService {
       if (options.customerId) {
         try {
           await supabaseAIService.logUsage({
-            customerId: options.customerId,
-            provider: 'openai',
-            model: result.model,
-            feature: 'image-generation',
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 1, // Count as 1 token for image generation
+            customer_id: options.customerId,
+            model_id: result.model,
+            feature_used: 'image-generation',
+            tokens_used: 1, // Count as 1 token for image generation
             cost: this.calculateImageCost(result.model, result.size),
-            responseTime: 0
+            response_time_ms: 0,
+            success: true
           });
         } catch (logError) {
           console.warn('Failed to log AI usage:', logError);
@@ -103,7 +106,7 @@ class OpenAIImageService {
 
       return result;
     } catch (error) {
-      console.error('OpenAI Image generation failed:', error);
+      console.error('Image generation failed:', error);
       throw error;
     }
   }
@@ -130,36 +133,38 @@ class OpenAIImageService {
   }
 
   /**
-   * Create image variation using DALL-E 2
+   * Create image variation using DALL-E 2 via server endpoint
    */
   async createVariation(
-    imageFile: File, 
+    imageFile: File,
     options?: Partial<ImageGenerationOptions>
   ): Promise<ImageGenerationResult> {
-    if (!this.isValidApiKey()) {
-      throw new Error('OpenAI API key is required for image variation. Please check your environment variables.');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      throw new Error('Image variation service is not available. Please check server configuration.');
     }
 
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    formData.append('n', String(options?.n || 1));
-    formData.append('size', options?.size || '1024x1024');
-
     try {
-      const response = await fetch(`${this.baseUrl}/images/variations`, {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('n', String(options?.n || 1));
+      formData.append('size', options?.size || '1024x1024');
+
+      const response = await fetch('/api/openai/images/variation', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        },
         body: formData
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`OpenAI Image Variation API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Image variation error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Image variation failed');
+      }
+
       const imageData = data.data[0];
 
       return {
@@ -169,13 +174,13 @@ class OpenAIImageService {
         quality: 'standard'
       };
     } catch (error) {
-      console.error('OpenAI Image variation failed:', error);
+      console.error('Image variation failed:', error);
       throw error;
     }
   }
 
   /**
-   * Edit an image using DALL-E 2
+   * Edit an image using DALL-E 2 via server endpoint
    */
   async editImage(
     imageFile: File,
@@ -183,34 +188,36 @@ class OpenAIImageService {
     prompt: string,
     options?: Partial<ImageGenerationOptions>
   ): Promise<ImageGenerationResult> {
-    if (!this.isValidApiKey()) {
-      throw new Error('OpenAI API key is required for image editing. Please check your environment variables.');
+    const serverAvailable = await this.isServerAvailable();
+    if (!serverAvailable) {
+      throw new Error('Image editing service is not available. Please check server configuration.');
     }
-
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    if (maskFile) {
-      formData.append('mask', maskFile);
-    }
-    formData.append('prompt', prompt);
-    formData.append('n', String(options?.n || 1));
-    formData.append('size', options?.size || '1024x1024');
 
     try {
-      const response = await fetch(`${this.baseUrl}/images/edits`, {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      if (maskFile) {
+        formData.append('mask', maskFile);
+      }
+      formData.append('prompt', prompt);
+      formData.append('n', String(options?.n || 1));
+      formData.append('size', options?.size || '1024x1024');
+
+      const response = await fetch('/api/openai/images/edit', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        },
         body: formData
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`OpenAI Image Edit API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Image edit error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Image edit failed');
+      }
+
       const imageData = data.data[0];
 
       return {
@@ -220,7 +227,7 @@ class OpenAIImageService {
         quality: 'standard'
       };
     } catch (error) {
-      console.error('OpenAI Image edit failed:', error);
+      console.error('Image edit failed:', error);
       throw error;
     }
   }

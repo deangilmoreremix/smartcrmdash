@@ -55,19 +55,30 @@ export class AssistantThreadManager {
     entityId: string,
     context?: Record<string, any>
   ): Promise<AssistantThread> {
-    // Integration with OpenAI Assistants API
-    const openaiClient = new OpenAI({ apiKey: process.env.VITE_OPENAI_API_KEY });
-
-    const thread = await openaiClient.beta.threads.create({
-      metadata: {
+    // Use server-side endpoint for thread creation
+    const response = await fetch('/api/openai/assistants/threads', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         entityType,
         entityId,
-        ...context
-      }
+        context
+      })
     });
 
+    if (!response.ok) {
+      throw new Error(`Failed to create assistant thread: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to create assistant thread');
+    }
+
     return {
-      id: thread.id,
+      id: data.threadId,
       type: entityType as any,
       entityId,
       assistantId: this.getAssistantIdForEntity(entityType),
@@ -110,31 +121,36 @@ export class AssistantThreadManager {
     return assistantMap[entityType as keyof typeof assistantMap] || 'default_assistant';
   }
 
-  private async callAssistantThread(provider: AIProvider, request: AIRequest): Promise<any> {
-    const { useOpenAIAssistants } = await import('./openaiAssistantsService');
-    const assistants = useOpenAIAssistants();
-
-    const threadId = request.context?.assistantThreadId;
-    const assistantId = this.getAssistantIdForEntity(request.type);
-
-    if (!assistantId) {
-      throw new Error(`No assistant configured for request type: ${request.type}`);
-    }
-
+  private async callAssistantThread(message: string, assistantId: string, threadId?: string, context?: any): Promise<any> {
     try {
-      const result = await assistants.chatWithAssistant(
-        JSON.stringify(request.data),
-        assistantId,
-        threadId,
-        request.context
-      );
+      const response = await fetch('/api/openai/assistants/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message,
+          assistantId,
+          threadId,
+          context
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Assistant chat failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Assistant chat failed');
+      }
 
       return {
-        result: result.response,
+        result: data.response,
         model: 'gpt-4o-assistant',
         confidence: 90,
-        threadId: result.threadId,
-        runId: result.runId
+        threadId: data.threadId,
+        runId: data.runId
       };
     } catch (error) {
       console.error('Assistant thread call failed:', error);

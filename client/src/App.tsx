@@ -2,6 +2,7 @@
 
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -16,7 +17,9 @@ import { DashboardLayoutProvider } from './contexts/DashboardLayoutContext';
 import { AIProvider } from './contexts/AIContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { RoleProvider } from './components/RoleBasedAccess';
+import { NavbarPositionProvider, useNavbarPosition } from './contexts/NavbarPositionContext';
 import Navbar from './components/Navbar';
+import { EdgeZones } from './components/EdgeZones';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
@@ -97,6 +100,19 @@ const RevenueSharingPage = lazy(() => import('./pages/RevenueSharingPage'));
 const PartnerDashboard = lazy(() => import('./pages/PartnerDashboard'));
 const PartnerOnboardingPage = lazy(() => import('./pages/PartnerOnboardingPage'));
 
+// Communication Apps
+const AppointmentsDashboard = lazy(() => import('./pages/AppointmentsDashboard'));
+const VideoEmailDashboard = lazy(() => import('./pages/VideoEmailDashboard'));
+const TextMessagingDashboard = lazy(() => import('./pages/TextMessagingDashboard'));
+const PhoneSystemDashboard = lazy(() => import('./pages/PhoneSystemDashboard'));
+const InvoicingDashboard = lazy(() => import('./pages/InvoicingDashboard'));
+const LeadAutomationDashboard = lazy(() => import('./pages/LeadAutomationDashboard'));
+const CircleProspectingDashboard = lazy(() => import('./pages/CircleProspectingDashboard'));
+const FormsSurveysDashboard = lazy(() => import('./pages/FormsSurveysDashboard'));
+const BusinessAnalyzerDashboard = lazy(() => import('./pages/BusinessAnalyzerDashboard'));
+const ContentLibraryDashboard = lazy(() => import('./pages/ContentLibraryDashboard'));
+const VoiceProfilesDashboard = lazy(() => import('./pages/VoiceProfilesDashboard'));
+
 // Connected Apps Remote Pages
 const FunnelCraftPage = lazy(() => import('./pages/FunnelCraftPage'));
 const SmartCRMPage = lazy(() => import('./pages/SmartCRMPage'));
@@ -156,6 +172,9 @@ const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomizati
 // Landing page import
 import LandingPage from './pages/LandingPage';
 
+// Dashboard embed import
+import DashboardEmbed from './pages/DashboardEmbed';
+
 import './styles/design-system.css';
 // ElevenLabs widgets removed to prevent performance issues
 // import VoiceAgentWidget from './components/VoiceAgentWidget';
@@ -211,7 +230,9 @@ function App() {
                         <DashboardLayoutProvider>
                           <AIProvider>
                             <RoleProvider>
-                              <AppContent />
+                              <NavbarPositionProvider>
+                                <AppContent />
+                              </NavbarPositionProvider>
                             </RoleProvider>
                           </AIProvider>
                         </DashboardLayoutProvider>
@@ -231,19 +252,38 @@ function App() {
 // AppContent component with all the routing logic
 function AppContent() {
   const { user, loading } = useAuth();
+  const { setPosition } = useNavbarPosition();
+
+  // Handle navbar drag end
+  const handleNavbarDragEnd = (result: DropResult) => {
+    const { destination, source } = result;
+
+    if (!destination) return;
+
+    // If dropped on an edge zone, snap to that position
+    if (destination.droppableId.includes('-edge')) {
+      const position = destination.droppableId.split('-')[0] as 'top' | 'left' | 'right' | 'bottom';
+      setPosition(position);
+    }
+  };
 
   if (loading) {
     return <AuthLoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <LinkRedirect />
-      <RemoteAppRefreshManager />
-      <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+    <DragDropContext onDragEnd={handleNavbarDragEnd}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <EdgeZones />
+        <LinkRedirect />
+        <RemoteAppRefreshManager />
+        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
         <Routes>
           {/* Landing page as root - no navbar */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Dashboard embed - no navbar */}
+          <Route path="/dashboard-embed" element={<DashboardEmbed />} />
 
           {/* Auth pages */}
           <Route path="/auth/login" element={<Login />} />
@@ -408,6 +448,107 @@ function AppContent() {
             }
           />
 
+          {/* Communication Apps */}
+          <Route
+            path="/appointments-dashboard"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <AppointmentsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-email"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VideoEmailDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/text-messages"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <TextMessagingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/phone-system"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <PhoneSystemDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoicing"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <InvoicingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lead-automation"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <LeadAutomationDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/circle-prospecting"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <CircleProspectingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <FormsSurveysDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/business-analyzer"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <BusinessAnalyzerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-library"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <ContentLibraryDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voice-profiles"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <VoiceProfilesDashboard />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Communication */}
           <Route
             path="/communication"
@@ -432,7 +573,7 @@ function AppContent() {
 
           {/* Communication and CRM Tools */}
           <Route
-            path="/appointments"
+            path="/appointments-basic"
             element={
               <ProtectedRoute>
                 <Navbar />
@@ -441,7 +582,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/video-email"
+            path="/video-email-basic"
             element={
               <ProtectedRoute>
                 <Navbar />
@@ -735,12 +876,13 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-      
+
       {/* Toaster for notifications */}
       <Toaster />
-      
+
       {/* ElevenLabs widgets removed to prevent performance issues */}
     </div>
+    </DragDropContext>
   );
 }
 

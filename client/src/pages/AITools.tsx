@@ -52,13 +52,14 @@ import CallScriptContent from '../components/aiTools/CallScriptContent';
 import EmailResponseContent from '../components/aiTools/EmailResponseContent';
 import MeetingAgendaContent from '../components/aiTools/MeetingAgendaContent';
 import CustomerPersonaContent from '../components/aiTools/CustomerPersonaContent';
-import ImageGeneratorContent from '../components/aiTools/ImageGeneratorContent';
+import GeminiImageModal from '../components/GeminiImageModal';
 import FunctionAssistantContent from '../components/aiTools/FunctionAssistantContent';
 import ObjectionHandlerContent from '../components/aiTools/ObjectionHandlerContent';
 import ProposalGenerator from '../components/aiTools/ProposalGenerator';
 import MeetingSummaryContent from '../components/aiTools/MeetingSummaryContent';
 import SocialMediaGenerator from '../components/aiTools/SocialMediaGenerator';
 import AgentWorkflowChat from '../components/aiTools/AgentWorkflowChat';
+import ImageGallery from '../components/ImageGallery';
 
 const AITools: React.FC = () => {
   const { openTool } = useAITools();
@@ -214,8 +215,8 @@ const AITools: React.FC = () => {
       new: true
     },
     {
-      title: "Image Generator",
-      description: "Create professional images for presentations, proposals, and marketing materials",
+      title: "SmartCRM Image Generator",
+      description: "Create branded marketing materials with SmartCRM templates, history tracking, and drag-and-drop seed images",
       icon: <Image className="h-6 w-6 text-emerald-600" />,
       id: "image-generator" as const,
       categories: ['vision', 'content'],
@@ -369,6 +370,14 @@ const AITools: React.FC = () => {
       id: "reasoning-social" as const,
       categories: ['content', 'reasoning'],
       new: true
+    },
+    {
+      title: "My Image Gallery",
+      description: "View and manage all your AI-generated images stored in the cloud",
+      icon: <Image className="h-6 w-6 text-purple-600" />,
+      id: "image-gallery" as const,
+      categories: ['vision', 'content'],
+      new: true
     }
   ];
 
@@ -415,7 +424,7 @@ const AITools: React.FC = () => {
       case 'function-assistant':
         return <FunctionAssistantContent />;
       case 'image-generator':
-        return <ImageGeneratorContent />;
+        return <GeminiImageModal open={true} onClose={() => {}} />;
       case 'instant-response':
         return <InstantAIResponseGenerator />;
       case 'meeting-agenda':

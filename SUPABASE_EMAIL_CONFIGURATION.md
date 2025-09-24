@@ -15,7 +15,7 @@ Your role-based email routing system is now active and working! Here's how to co
 
 ### Step 1: Configure Auth Settings
 
-1. **Go to**: https://supabase.com/dashboard/project/gadedbrnqzpfqtsdfzcg/auth/settings
+1. **Go to**: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/auth/settings
 2. **Update Site URL**: `https://smart-crm.videoremix.io`
 3. **Set Redirect URLs**: 
    - `https://smart-crm.videoremix.io/auth/callback`
@@ -98,7 +98,7 @@ metadata: {
 
 ### Test 1: Super Admin Email
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -113,7 +113,7 @@ curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
 
 ### Test 2: WL User Email
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -129,7 +129,7 @@ curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
 
 ### Test 3: Regular User Email  
 ```bash
-curl -X POST "https://gadedbrnqzpfqtsdfzcg.supabase.co/auth/v1/signup" \
+curl -X POST "https://YOUR_PROJECT_REF.supabase.co/auth/v1/signup" \
   -H "apikey: YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
