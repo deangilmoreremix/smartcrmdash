@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
-import { Entitlement, InsertEntitlement } from "@shared/schema";
+import { Entitlement, InsertEntitlement } from "../shared/schema";
 import { db } from "./db";
-import { entitlements } from "@shared/schema";
+import { entitlements } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
 // Compute revocation boundaries in America/New_York, then convert to UTC

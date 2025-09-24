@@ -1,9 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  root: "client",                // tell Vite where index.html is
+  root: "client",
   plugins: [react()],
   resolve: {
     alias: {
@@ -11,7 +15,6 @@ export default defineConfig({
     },
   },
   build: {
-    // write to repo-root/dist (what Netlify expects)
     outDir: "../dist",
     emptyOutDir: true,
     rollupOptions: {
