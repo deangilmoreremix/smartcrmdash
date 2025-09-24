@@ -2,6 +2,17 @@
 
 All notable changes to the Smart CRM Dashboard project will be documented in this file.
 
+## [2.2.3] - 2025-09-24
+
+### Development Enhancements
+- **Added Conditional Development Bypass**: Reintroduced dev bypass button on sign-in page, visible only in development environments (localhost, .replit.dev, replit.io)
+- **Security Maintained**: Bypass functionality restricted to development hosts for testing purposes
+- **Merged Git Conflict**: Resolved merge conflict by combining dev bypass and sign-up features
+
+### Changes
+- Updated `client/src/pages/SignInPage.tsx` to include conditional dev bypass button
+- Added `isDevelopment` check and `handleDevBypass` function for development environments
+
 ## [2.2.2] - 2025-09-22
 
 ### Security & UX Improvements
