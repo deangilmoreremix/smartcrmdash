@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
-  TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
+  TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
   Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
@@ -409,7 +409,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { id: 'intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
     { id: 'intel-page', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
-    { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
+    { id: 'apps', label: 'Apps', icon: Grid, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
   const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
@@ -548,7 +548,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
                         {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
                         {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'apps' && <Grid3X3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'apps' && <Grid size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
 
                         <span className="text-xs font-medium">
                           {menu.id === 'sales' ? 'Sales'

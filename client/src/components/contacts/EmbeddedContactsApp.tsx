@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Plus, 
   Search, 
-  Grid3X3, 
+  Grid, 
   List, 
   Users, 
   Brain,
@@ -313,7 +313,7 @@ const EmbeddedContactsApp: React.FC<EmbeddedContactsAppProps> = ({
                 onClick={() => setViewMode('grid')}
                 className={`p-2 ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
               >
-                <Grid3X3 className="h-4 w-4" />
+                <Grid className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}

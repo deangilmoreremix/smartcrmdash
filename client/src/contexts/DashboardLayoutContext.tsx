@@ -131,7 +131,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
     id: 'integrations-system',
     title: 'Integrations & System',
     description: 'Connected apps and system settings',
-    icon: 'Grid3X3',
+    icon: 'Grid',
     component: null,
     color: 'from-gray-500 to-gray-700'
   },
@@ -229,7 +229,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
     id: 'apps-section',
     title: 'Connected Apps & Integrations',
     description: 'Access your entire business toolkit',
-    icon: 'Grid3X3',
+    icon: 'Grid',
     component: null,
     color: 'from-purple-500 to-indigo-500'
   },

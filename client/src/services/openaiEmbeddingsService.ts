@@ -3,3 +3,8 @@ export const openaiEmbeddingsService = {
     return { data: null, error: 'Not implemented' };
   },
 };
+
+// Hook for React components
+export function useOpenAIEmbeddings() {
+  return openaiEmbeddingsService;
+}

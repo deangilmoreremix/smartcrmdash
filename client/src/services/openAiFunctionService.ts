@@ -3,3 +3,8 @@ export const openAiFunctionService = {
     return { data: null, error: 'Not implemented' };
   },
 };
+
+// Hook for React components
+export function useOpenAIFunctions() {
+  return openAiFunctionService;
+}

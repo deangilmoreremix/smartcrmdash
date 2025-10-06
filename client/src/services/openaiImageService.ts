@@ -3,3 +3,8 @@ export const openaiImageService = {
     return { data: null, error: 'Not implemented' };
   },
 };
+
+// Hook for React components
+export function useOpenAIImage() {
+  return openaiImageService;
+}

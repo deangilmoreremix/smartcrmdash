@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import DealAnalytics from '../DealAnalytics';
-import ChartsSection from '../dashboard/ChartsSection';
+import { ChartsSection } from '../dashboard/ChartsSection';
 
 const SalesPipelineDealAnalytics: React.FC = () => {
   const { isDark } = useTheme();

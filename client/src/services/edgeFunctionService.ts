@@ -14,3 +14,28 @@ export const edgeFunctionService = {
     }
   },
 };
+
+// Export helper functions for specific edge functions
+export async function analyzeCustomerEmail(emailText: string) {
+  return edgeFunctionService.callFunction('analyze-email', { emailText });
+}
+
+export async function generateMeetingSummary(transcript: string) {
+  return edgeFunctionService.callFunction('meeting-summary', { transcript });
+}
+
+export async function analyzeMarketTrends(industry: string, query: string) {
+  return edgeFunctionService.callFunction('market-trends', { industry, query });
+}
+
+export async function analyzeCompetitor(competitorName: string, industry: string) {
+  return edgeFunctionService.callFunction('competitor-analysis', { competitorName, industry });
+}
+
+export async function generateSalesInsights(dealData: any) {
+  return edgeFunctionService.callFunction('sales-insights', { dealData });
+}
+
+export async function generateSalesForecast(historicalData: any) {
+  return edgeFunctionService.callFunction('sales-forecast', { historicalData });
+}

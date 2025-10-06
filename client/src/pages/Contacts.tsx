@@ -5,7 +5,7 @@ import {
   Plus,
   Search,
   Brain,
-  Grid3X3,
+  Grid,
   List,
   ChevronDown,
   Users,
@@ -413,7 +413,7 @@ const ContactsEnhanced: React.FC = () => {
                     : 'text-gray-600 hover:bg-gray-50 border-r border-gray-300'
                 }`}
               >
-                <Grid3X3 size={16} />
+                <Grid size={16} />
               </button>
               <button
                 onClick={() => setViewMode('list')}

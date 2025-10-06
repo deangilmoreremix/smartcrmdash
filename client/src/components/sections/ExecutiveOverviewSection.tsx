@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import DashboardHeader from '../dashboard/DashboardHeader';
-import KPICards from '../dashboard/KPICards';
-import QuickActions from '../dashboard/QuickActions';
+import { DashboardHeader } from '../dashboard/DashboardHeader';
+import { KPICards } from '../dashboard/KPICards';
+import { QuickActions } from '../dashboard/QuickActions';
 import AIGoalsCard from '../AIGoalsCard'; // Import the new AIGoalsCard component
-import MetricsCards from '../dashboard/MetricsCards';
+import { MetricsCards } from '../dashboard/MetricsCards';
 
 const ExecutiveOverviewSection: React.FC = () => {
   const { isDark } = useTheme();

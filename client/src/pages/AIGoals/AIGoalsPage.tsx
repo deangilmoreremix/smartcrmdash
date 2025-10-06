@@ -23,7 +23,7 @@ import {
   Search,
   Filter,
   ChevronDown,
-  Grid3X3,
+  Grid,
   List,
   Clock,
   Play
@@ -303,7 +303,7 @@ const AIGoalsPage: React.FC = () => {
                   viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
                 }`}
               >
-                <Grid3X3 className="h-5 w-5" />
+                <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}

@@ -252,3 +252,8 @@ class GeminiAIService {
 }
 
 export const geminiService = new GeminiAIService();
+
+// Hook for React components
+export function useGemini() {
+  return geminiService;
+}

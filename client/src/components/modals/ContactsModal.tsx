@@ -23,7 +23,7 @@ import {
   Upload,
   Zap,
   CheckCheck,
-  Grid3X3,
+  Grid,
   List,
   ArrowUp,
   ArrowDown,
@@ -412,7 +412,7 @@ export const ContactsModal: React.FC<ContactsModalProps> = ({ isOpen, onClose })
                   size="sm"
                   className="rounded-r-none border-r-0"
                 >
-                  <Grid3X3 className="w-4 h-4" />
+                  <Grid className="w-4 h-4" />
                 </ModernButton>
                 <ModernButton
                   onClick={() => setViewMode('table')}

@@ -3,9 +3,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { CheckSquare, Calendar, MessageSquare } from 'lucide-react';
 import TasksSection from '../TasksSection';
 import AppointmentWidget from '../AppointmentWidget';
-import InteractionHistory from '../dashboard/InteractionHistory';
-import TasksAndFunnel from '../dashboard/TasksAndFunnel';
-import RecentActivity from '../dashboard/RecentActivity';
+import { InteractionHistory } from '../dashboard/InteractionHistory';
+import { TasksAndFunnel } from '../dashboard/TasksAndFunnel';
+import { RecentActivity } from '../dashboard/RecentActivity';
 
 const ActivitiesCommunications: React.FC = () => {
   const { isDark } = useTheme();

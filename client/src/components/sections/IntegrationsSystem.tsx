@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { LayoutGrid, Settings, Cpu } from 'lucide-react';
-import ConnectedApps from '../dashboard/ConnectedApps';
+import { ConnectedApps } from '../dashboard/ConnectedApps';
 import AIModelSelector from '../AIModelSelector';
 
 const IntegrationsSystem: React.FC = () => {

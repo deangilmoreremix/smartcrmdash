@@ -3,3 +3,8 @@ export const openaiAssistantsService = {
     return { data: null, error: 'Not implemented' };
   },
 };
+
+// Hook for React components
+export function useOpenAIAssistants() {
+  return openaiAssistantsService;
+}

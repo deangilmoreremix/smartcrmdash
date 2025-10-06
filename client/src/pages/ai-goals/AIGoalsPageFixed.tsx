@@ -5,7 +5,7 @@ import InteractiveGoalCard from '../../components/InteractiveGoalCardComplete';
 import GoalExecutionModal from '../../components/GoalExecutionModalComplete';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Brain, Info, Lightbulb, ArrowLeft, Sparkles, Zap, Target, Users, BarChart3, Bot, Activity, Search, Filter, Grid3X3, List, Play, Eye, Clock, TrendingUp, ChevronDown } from 'lucide-react';
+import { Brain, Info, Lightbulb, ArrowLeft, Sparkles, Zap, Target, Users, BarChart3, Bot, Activity, Search, Filter, Grid, List, Play, Eye, Clock, TrendingUp, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Define context type
@@ -275,7 +275,7 @@ const AIGoalsPageFixed: React.FC = () => {
                       viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200'
                     }`}
                   >
-                    <Grid3X3 className="h-4 w-4" />
+                    <Grid className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}

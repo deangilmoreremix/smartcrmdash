@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useOpenAIImage } from '../../services/openaiImageService';
 import AIToolContent from '../shared/AIToolContent';
-import { Image, Camera, RefreshCw, Download, Copy, Check, Lightbulb, Grid3X3, Layout } from 'lucide-react';
+import { Image, Camera, RefreshCw, Download, Copy, Check, Lightbulb, Grid, Layout } from 'lucide-react';
 
 const ImageGeneratorContent: React.FC = () => {
   const imageService = useOpenAIImage();
@@ -127,7 +127,7 @@ const ImageGeneratorContent: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                <Grid3X3 size={16} className="mr-1 text-gray-500" />
+                <Grid size={16} className="mr-1 text-gray-500" />
                 Image Size
               </label>
               <select
