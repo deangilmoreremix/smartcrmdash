@@ -96,4 +96,4 @@ export const AIInsightsPanel: React.FC = () => {
       )}
     </GlassCard>
   );
-};
+};export default AIInsightsPanel;

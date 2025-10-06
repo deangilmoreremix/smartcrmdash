@@ -79,4 +79,4 @@ export const QuickActions: React.FC = () => {
   {/* <EmailComposerModal isOpen={isEmailModalOpen} onClose={() => setEmailModalOpen(false)} /> */}
     </>
   );
-};
+};export default QuickActions;

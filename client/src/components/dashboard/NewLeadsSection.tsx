@@ -115,4 +115,4 @@ export const NewLeadsSection: React.FC = () => {
       </div>
     </div>
   );
-};
+};export default NewLeadsSection;

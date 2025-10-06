@@ -67,4 +67,4 @@ export const KPICards: React.FC = () => {
       })}
     </div>
   );
-};
+};export default KPICards;
