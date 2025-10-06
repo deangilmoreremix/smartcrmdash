@@ -104,29 +104,56 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Vendor chunks
+          // Core vendor chunks
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
             return 'react-vendor';
           }
           if (id.includes('node_modules/lucide-react') || id.includes('node_modules/@headlessui')) {
             return 'ui-vendor';
           }
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/react-big-calendar')) {
-            return 'chart-vendor';
+          if (id.includes('node_modules/recharts')) {
+            return 'charts';
           }
-          
-          // AI Tools - let Vite handle automatic chunking for lazy-loaded components
+          if (id.includes('node_modules/react-big-calendar')) {
+            return 'calendar';
+          }
+
+          // Split large service files
+          if (id.includes('src/services/openai')) {
+            return 'openai-services';
+          }
+          if (id.includes('src/services/gemini') || id.includes('src/services/gpt5')) {
+            return 'ai-providers';
+          }
+          if (id.includes('src/services/') && !id.includes('openai') && !id.includes('gemini')) {
+            return 'core-services';
+          }
+
+          // Split AI tools into smaller chunks
           if (id.includes('src/components/aiTools/')) {
             return 'ai-tools';
           }
-          
-          // Services
-          if (id.includes('src/services/')) {
-            return 'services';
+
+          // Analytics and reporting
+          if (id.includes('src/pages/Analytics') || id.includes('src/components/analytics')) {
+            return 'analytics';
+          }
+
+          // Communication features
+          if (id.includes('src/components/communications') || id.includes('src/pages/Communication')) {
+            return 'communications';
           }
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 800,
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 });
