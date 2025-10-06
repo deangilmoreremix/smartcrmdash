@@ -54,13 +54,11 @@ export const AIResearchButton: React.FC<AIResearchButtonProps> = ({
                          searchQuery.linkedinUrl || 
                          (searchQuery.firstName && searchQuery.company);
 
-  // Log available API keys for debugging
+  // Log available API configuration for debugging
   React.useEffect(() => {
     if (disabled) return;
-    
-    console.log("AI Research Button - Environment variables check:");
-    console.log("- VITE_OPENAI_API_KEY present:", !!import.meta.env.VITE_OPENAI_API_KEY);
-    console.log("- VITE_GEMINI_API_KEY present:", !!import.meta.env.VITE_GEMINI_API_KEY);
+
+    console.log("AI Research Button - AI APIs configured via Supabase Edge Functions");
   }, [disabled]);
 
   const handleSearch = async () => {
@@ -192,12 +190,6 @@ export const AIResearchButton: React.FC<AIResearchButtonProps> = ({
 
   const ButtonIcon = getButtonIcon();
 
-  // Check if any API keys are configured
-  const noApiKeysConfigured = !import.meta.env.VITE_OPENAI_API_KEY && !import.meta.env.VITE_GEMINI_API_KEY;
-
-  // Only show warning in development mode
-  const showApiWarning = noApiKeysConfigured && import.meta.env.DEV;
-
   return (
     <div className="relative">
       {/* Main Research Button */}
@@ -205,7 +197,7 @@ export const AIResearchButton: React.FC<AIResearchButtonProps> = ({
         variant={variant}
         size={size}
         onClick={handleSearch}
-        disabled={isSearching || disabled || !hasMinimumData || noApiKeysConfigured}
+        disabled={isSearching || disabled || !hasMinimumData}
         className={`flex items-center space-x-2 ${className}`}
       >
         <ButtonIcon className={`w-4 h-4 ${isSearching ? 'animate-spin' : ''}`} />

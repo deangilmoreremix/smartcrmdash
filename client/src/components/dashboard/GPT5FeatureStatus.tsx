@@ -177,9 +177,9 @@ const GPT5FeatureStatus: React.FC = () => {
             ? isDark ? 'text-green-200' : 'text-green-600'
             : isDark ? 'text-orange-200' : 'text-orange-600'
         }`}>
-          {apiKeyStatus === 'configured' 
+          {apiKeyStatus === 'configured'
             ? 'All GPT-5 features are operational with expert-level capabilities'
-            : 'Configure VITE_OPENAI_API_KEY to enable GPT-5 enhanced features'
+            : 'AI features available via Supabase Edge Functions'
           }
         </p>
       </div>

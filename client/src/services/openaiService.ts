@@ -10,22 +10,20 @@ interface ContactAnalysisResult {
   opportunities: string[];
 }
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 export const useOpenAI = () => {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  
   const analyzeContact = async (contact: any): Promise<ContactAnalysisResult> => {
     logger.info(`Analyzing contact with OpenAI: ${contact.name}`);
-    
-    if (!apiKey) {
-      throw new Error('OpenAI API key is not configured. Please set the VITE_OPENAI_API_KEY environment variable.');
-    }
-    
+
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/openai-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
           model: 'gpt-4o-mini',
@@ -85,16 +83,13 @@ export const useOpenAI = () => {
   };
 
   const generateEmailTemplate = async (contact: any, purpose: string) => {
-    if (!apiKey) {
-      throw new Error('OpenAI API key is not configured');
-    }
-    
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/openai-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -135,17 +130,14 @@ export const useOpenAI = () => {
 
   const researchContactByEmail = async (email: string): Promise<ContactEnrichmentData> => {
     logger.info(`Researching contact by email: ${email}`);
-    
-    if (!apiKey) {
-      throw new Error('OpenAI API key is not configured');
-    }
-    
+
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/openai-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
           model: 'gpt-4o-mini',

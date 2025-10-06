@@ -72,17 +72,17 @@ class AIOrchestrator {
   }
 
   private initializeProviders(): void {
-    // Initialize provider status
+    // Initialize provider status - APIs are now available via Supabase Edge Functions
     this.providers.set('openai', {
       name: 'openai',
-      available: !!import.meta.env.VITE_OPENAI_API_KEY,
+      available: true,
       rateLimit: { remaining: 50, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 2000, successRate: 0.95, costPer1kTokens: 0.002 }
     });
 
     this.providers.set('gemini', {
       name: 'gemini',
-      available: !!import.meta.env.VITE_GEMINI_API_KEY,
+      available: true,
       rateLimit: { remaining: 60, resetTime: Date.now() + 60000 },
       performance: { avgResponseTime: 1500, successRate: 0.92, costPer1kTokens: 0.0005 }
     });

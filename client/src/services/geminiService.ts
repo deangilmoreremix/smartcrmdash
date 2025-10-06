@@ -2,29 +2,25 @@
 import { ContactEnrichmentData } from './aiEnrichmentService';
 import { logger } from './logger.service';
 
-class GeminiAIService {
-  private apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-  private model = 'gemini-1.5-flash:generateContent';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  setApiKey(key: string) {
-    this.apiKey = key;
-  }
+class GeminiAIService {
+  private model = 'gemini-2.5-flash';
 
   async researchContactByName(firstName: string, lastName: string, company?: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching contact with Gemini: ${firstName} ${lastName} ${company ? `at ${company}` : ''}`);
-    
-    if (!this.apiKey) {
-      throw new Error('Gemini API key is not configured. Please set the VITE_GEMINI_API_KEY environment variable.');
-    }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
+          model: this.model,
           contents: [{
             parts: [{
               text: `Research information about a professional named ${firstName} ${lastName}${company ? ` who works at ${company}` : ''}.
@@ -110,18 +106,17 @@ class GeminiAIService {
 
   async researchContactByLinkedIn(linkedinUrl: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching LinkedIn profile: ${linkedinUrl}`);
-    
-    if (!this.apiKey) {
-      throw new Error('Gemini API key is not configured');
-    }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
+          model: this.model,
           contents: [{
             parts: [{
               text: `Research a professional from this LinkedIn URL: ${linkedinUrl}.
@@ -201,18 +196,17 @@ class GeminiAIService {
 
   async generatePersonalizedMessage(contact: any, messageType: 'email' | 'linkedin' | 'cold-outreach'): Promise<string> {
     logger.info(`Generating ${messageType} message for ${contact.name}`);
-    
-    if (!this.apiKey) {
-      throw new Error('Gemini API key is not configured');
-    }
-    
+
     try {
-      const response = await fetch(`${this.apiUrl}/${this.model}?key=${this.apiKey}`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
+          model: this.model,
           contents: [{
             parts: [{
               text: `Generate a personalized ${messageType} message for a contact with the following information:

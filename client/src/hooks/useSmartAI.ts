@@ -40,15 +40,12 @@ export const useSmartAI = () => {
       // Call the Supabase Edge Function directly
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-      const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
       // Debug logging
       console.log('Smart scoring - Environment check:');
       console.log('- VITE_SUPABASE_URL:', supabaseUrl ? 'present' : 'missing');
       console.log('- VITE_SUPABASE_ANON_KEY:', supabaseKey ? 'present (truncated)' : 'missing');
-      console.log('- VITE_OPENAI_API_KEY:', openaiApiKey ? 'present (truncated)' : 'missing');
-      console.log('- VITE_GEMINI_API_KEY:', geminiApiKey ? 'present (truncated)' : 'missing');
+      console.log('- AI APIs configured via Supabase Edge Functions');
       
       if (!supabaseUrl || !supabaseKey) {
         console.warn('Supabase environment variables not defined, using fallback mode');

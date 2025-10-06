@@ -383,18 +383,18 @@ class AIIntegrationService {
     } catch (error) {
       logger.error('Failed to get AI provider status', error as Error);
       
-      // Development fallback
+      // Development fallback - APIs available via Supabase Edge Functions
       if (import.meta.env.DEV || import.meta.env.VITE_ENV === 'development') {
         return [
-          { 
-            name: 'openai', 
-            status: import.meta.env.VITE_OPENAI_API_KEY ? 'available' : 'error',
-            remaining: 45 
+          {
+            name: 'openai',
+            status: 'available',
+            remaining: 45
           },
-          { 
-            name: 'gemini', 
-            status: import.meta.env.VITE_GEMINI_API_KEY ? 'available' : 'error',
-            remaining: 50 
+          {
+            name: 'gemini',
+            status: 'available',
+            remaining: 50
           }
         ];
       }
