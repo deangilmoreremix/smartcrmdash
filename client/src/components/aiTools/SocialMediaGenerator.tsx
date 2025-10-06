@@ -208,7 +208,7 @@ Readability Score: ${post.readability}/100
                   <div className="text-xs opacity-75">
                     {getCharacterLimit(platform.value)} chars
                   </div>
-                </motion.button>
+                </button>
               ))}
             </div>
           </motion.div>

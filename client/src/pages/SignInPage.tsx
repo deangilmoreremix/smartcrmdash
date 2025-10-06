@@ -20,15 +20,11 @@ const SignInPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Only show dev bypass in development environments - CRITICAL SECURITY FIX
-  const isDevelopment = window.location.hostname === 'localhost' || 
+  const isDevelopment = window.location.hostname === 'localhost' ||
                        window.location.hostname.includes('.replit.dev') ||
                        window.location.hostname.includes('replit.io');
 
   const from = location.state?.from?.pathname || '/dashboard';
-  // Only show dev bypass in development environments - CRITICAL SECURITY FIX
-  const isDevelopment = window.location.hostname === 'localhost' || 
-                       window.location.hostname.includes('.replit.dev') ||
-                       window.location.hostname.includes('replit.io');
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,27 +171,6 @@ const SignInPage: React.FC = () => {
             </div>
           )}
 
-
-<<<<<<< HEAD
-          {/* Development Bypass Button - Only visible in development environments */}
-          {isDevelopment && (
-            <div className="mt-4">
-              <button
-                onClick={handleDevBypass}
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-                data-testid="button-dev-bypass"
-              >
-                🚀 Dev Bypass - Skip Authentication
-              </button>
-              <p className="text-xs text-center mt-2 text-gray-500">
-                Development mode - bypasses authentication ({window.location.hostname})
-              </p>
-            </div>
-          )}
-          
-=======
->>>>>>> 102e1c65a35ef43f994925a512909cb7889d5594
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Don't have an account?{' '}
