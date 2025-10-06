@@ -74,4 +74,4 @@ export const MetricsCards: React.FC = () => {
       })}
     </div>
   );
-};
+};export default MetricsCards;

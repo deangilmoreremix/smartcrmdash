@@ -58,4 +58,4 @@ export const ConnectedApps: React.FC = () => {
       </div>
     </GlassCard>
   );
-};
+};export default ConnectedApps;

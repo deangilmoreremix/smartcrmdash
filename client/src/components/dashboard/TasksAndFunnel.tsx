@@ -348,4 +348,4 @@ export const TasksAndFunnel: React.FC = () => {
       </GlassCard>
     </div>
   );
-};
+};export default TasksAndFunnel;

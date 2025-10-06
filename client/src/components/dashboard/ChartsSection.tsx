@@ -93,4 +93,4 @@ export const ChartsSection: React.FC = () => {
       </GlassCard>
     </div>
   );
-};
+};export default ChartsSection;

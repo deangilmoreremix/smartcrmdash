@@ -194,4 +194,4 @@ export const CustomerProfile: React.FC = () => {
       </div>
     </GlassCard>
   );
-};
+};export default CustomerProfile;

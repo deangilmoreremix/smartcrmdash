@@ -151,4 +151,4 @@ export const InteractionHistory: React.FC = () => {
       </div>
     </div>
   );
-};
+};export default InteractionHistory;
