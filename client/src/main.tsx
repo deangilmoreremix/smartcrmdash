@@ -93,7 +93,7 @@ if (typeof window !== 'undefined') {
   }, true);
 
   // Disable Vite's runtime error overlay specifically
-  if (import.meta.env.DEV) {
+  if (import.meta.env.MODE === 'development') {
     // Override Vite's error overlay by preventing it from being created
     const style = document.createElement('style');
     style.textContent = `
