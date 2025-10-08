@@ -199,11 +199,18 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
   ];
 
-  // General connected apps
+  // General connected apps - now sales tools
   const connectedApps = [
-    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
-    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
-    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
+    { name: "Pipeline Intelligence", url: '/pipeline-intelligence', icon: BarChart3, isExternal: false },
+    { name: "Deal Risk Monitor", url: '/deal-risk-monitor', icon: Shield, isExternal: false },
+    { name: "Smart Conversion Insights", url: '/smart-conversion-insights', icon: Zap, isExternal: false },
+    { name: "Pipeline Health Dashboard", url: '/pipeline-health-dashboard', icon: Activity, isExternal: false },
+    { name: "Sales Cycle Analytics", url: '/sales-cycle-analytics', icon: Clock, isExternal: false },
+    { name: "Win Rate Intelligence", url: '/win-rate-intelligence', icon: TrendingUp, isExternal: false },
+    { name: "AI Sales Forecast", url: '/ai-sales-forecast', icon: LineChart, isExternal: false },
+    { name: "Live Deal Analysis", url: '/live-deal-analysis', icon: Briefcase, isExternal: false },
+    { name: "Competitor Insights", url: '/competitor-insights', icon: Target, isExternal: false },
+    { name: "Revenue Intelligence", url: '/revenue-intelligence', icon: DollarSign, isExternal: false }
   ];
 
   const analyticsOptions = [

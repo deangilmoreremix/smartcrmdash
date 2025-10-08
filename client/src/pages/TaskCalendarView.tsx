@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTaskStore } from '../store/taskStore';
-import TaskCalendar from '../components/TaskCalendar';
-import { Task } from '../types';
-import { 
-  Plus, 
-  List, 
-  CheckSquare, 
+import { TaskCalendar } from '../components/TaskCalendar';
+import { Task } from '../types/task';
+import {
+  Plus,
+  List,
+  CheckSquare,
   Calendar,
   Users,
   Briefcase,
@@ -19,18 +19,16 @@ import {
   MessageSquare
 } from 'lucide-react';
 import Select from 'react-select';
-import ReactMarkdown from 'react-markdown';
 
 const TaskCalendarView: React.FC = () => {
-  const { 
-    tasks, 
-    createTask, 
-    updateTask, 
-    deleteTask, 
-    markTaskComplete, 
-    selectTask,
-    selectedTask
+  const {
+    tasks,
+    addTask,
+    updateTask,
+    deleteTask
   } = useTaskStore();
+
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
   
   const [showTaskDetail, setShowTaskDetail] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -78,9 +76,9 @@ const TaskCalendarView: React.FC = () => {
         await updateTask(selectedTask, formData);
       } else {
         // Create new task
-        await createTask(formData);
+        await addTask(formData);
       }
-      
+
       // Close forms and reset
       setShowTaskDetail(false);
       setIsEditing(false);

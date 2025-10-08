@@ -1,15 +1,17 @@
 // Remote Contacts Page - Embedded Module with CRM Integration
 import React, { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Link, Wifi, WifiOff } from 'lucide-react';
+import { ExternalLink, Link, Wifi, WifiOff, MessageSquare } from 'lucide-react';
 import { useContactStore } from '../hooks/useContactStore';
 import { RemoteContactsBridge, CRMContact } from '../services/remoteContactsBridge';
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';
+import SmsComposer from '../components/SmsComposer';
 
 const ContactsWithRemote: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<RemoteContactsBridge | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [showSmsComposer, setShowSmsComposer] = useState(false);
   const { contacts, addContact, updateContact, deleteContact, fetchContacts } = useContactStore();
 
   // Convert Contact to CRMContact format
@@ -345,13 +347,20 @@ const ContactsWithRemote: React.FC = () => {
               ✓ Remote Module
             </div>
             <div className={`text-sm px-3 py-1 rounded-full flex items-center gap-1 ${
-              isConnected 
+              isConnected
                 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
                 : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200'
             }`}>
               {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
               {isConnected ? 'CRM Connected' : 'Connecting...'}
             </div>
+            <button
+              onClick={() => setShowSmsComposer(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-medium shadow-sm transition-all duration-200"
+            >
+              <MessageSquare size={16} className="mr-2" />
+              Send SMS
+            </button>
           </div>
         </div>
       </div>
@@ -373,6 +382,25 @@ const ContactsWithRemote: React.FC = () => {
           onLoad={handleIframeLoad}
         />
       </div>
+
+      {/* SMS Composer Modal */}
+      {showSmsComposer && (
+        <SmsComposer
+          contacts={Object.values(contacts).map(contact => ({
+            id: contact.id,
+            name: contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim(),
+            email: contact.email,
+            phone: contact.phone,
+            company: contact.company
+          }))}
+          onClose={() => setShowSmsComposer(false)}
+          onSuccess={(result) => {
+            console.log('SMS sent:', result);
+            setShowSmsComposer(false);
+            // Could add toast notification here
+          }}
+        />
+      )}
     </div>
   );
 };
