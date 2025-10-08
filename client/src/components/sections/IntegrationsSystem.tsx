@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Grid3X3, Settings, Cpu } from 'lucide-react';
-import ConnectedApps from '../dashboard/ConnectedApps';
+import { LayoutGrid, Settings, Cpu } from 'lucide-react';
+import { ConnectedApps } from '../dashboard/ConnectedApps';
 import AIModelSelector from '../AIModelSelector';
 
 const IntegrationsSystem: React.FC = () => {
@@ -40,7 +40,7 @@ const IntegrationsSystem: React.FC = () => {
     <div className="mb-10">
       <div className="flex items-center mb-6">
         <div className="p-2 bg-gradient-to-r from-gray-500 to-gray-700 rounded-xl mr-3">
-          <Grid3X3 className="h-6 w-6 text-white" />
+          <LayoutGrid className="h-6 w-6 text-white" />
         </div>
         <div>
           <h2 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Integrations & System</h2>

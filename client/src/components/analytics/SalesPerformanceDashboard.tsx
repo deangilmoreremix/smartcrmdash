@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import DashboardHeader from '../dashboard/DashboardHeader';
-import KPICards from '../dashboard/KPICards';
-import MetricsCards from '../dashboard/MetricsCards';
+import { DashboardHeader } from '../dashboard/DashboardHeader';
+import { KPICards } from '../dashboard/KPICards';
+import { MetricsCards } from '../dashboard/MetricsCards';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

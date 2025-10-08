@@ -35,7 +35,7 @@ import {
   Plus,
   Search,
   ExternalLink,
-  Grid3X3,
+  Grid,
   Megaphone,
   FileText,
   Settings,
@@ -543,7 +543,7 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <div className="p-2 rounded-full bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-600 mr-3">
-              <Grid3X3 size={20} />
+              <Grid size={20} />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Connected Apps</h2>

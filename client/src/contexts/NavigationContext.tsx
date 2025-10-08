@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useCallback, useEffect, useRef } from 'react';
-import { useNavigate as reactNavigate } from 'react-router-dom';
-import { useAITools, AIToolType } from '../components/AIToolsProvider';
+import React, { createContext, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAITools } from '../components/AIToolsProvider';
+import { getRouteForTool, isToolRoutable } from '../utils/routeMapping';
 
 interface NavigationContextType {
   scrollToSection: (sectionId: string) => void;
   openAITool: (toolName: string) => void;
   navigateToFeature: (feature: string) => void;
+  navigateToTool: (toolId: string) => void;
 }
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -19,24 +21,14 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const routerNavigate = reactNavigate;
-  const [currentPath, setCurrentPath] = React.useState('');
-
-  // Safe access to AITools with error handling
-  let openTool: ((tool: AIToolType) => void) | null = null;
-  try {
-    const aiTools = useAITools();
-    openTool = aiTools?.openTool || null;
-  } catch (error) {
-    // AIToolsProvider not available - continue without AI tools
-    openTool = null;
-  }
+  const { openTool } = useAITools();
+  const navigate = useNavigate();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
         block: 'start',
         inline: 'nearest'
       });
@@ -44,81 +36,73 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const openAITool = (toolName: string) => {
-    if (openTool) {
-      // Cast string to AIToolType for compatibility
-      openTool(toolName as AIToolType);
+    openTool(toolName);
+  };
+
+  // Navigate to a tool based on its ID
+  const navigateToTool = (toolId: string) => {
+    if (isToolRoutable(toolId)) {
+      // If the tool has a dedicated route, navigate to it
+      const route = getRouteForTool(toolId);
+      if (route) {
+        navigate(route);
+      } else {
+        console.warn(`No route defined for tool: ${toolId}`);
+      }
+    } else {
+      // If it's an AI tool that opens in a panel/modal
+      openAITool(toolId);
     }
   };
 
   const navigateToFeature = (feature: string) => {
+    // First check if it's a tool we can navigate to
+    if (feature.startsWith('/')) {
+      navigate(feature);
+      return;
+    }
+    
+    // Otherwise handle special dashboard sections
     switch (feature) {
       case 'dashboard':
         try {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          navigate('/dashboard');
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
         } catch (error) {
-          console.error("Error scrolling to top:", error);
+          console.error("Error navigating to dashboard:", error);
         }
         break;
       case 'contacts':
-        try {
-          scrollToSection('customer-lead-management');
-        } catch (error) {
-          console.error("Error navigating to contacts:", error);
-        }
+        navigate('/contacts');
         break;
       case 'pipeline':
-        scrollToSection('pipeline-section');
+        navigate('/pipeline');
         break;
       case 'ai-tools':
-        scrollToSection('ai-smart-features-hub');
+        navigate('/ai-tools');
         break;
       case 'tasks':
-        scrollToSection('tasks-section');
+        navigate('/tasks');
         break;
       case 'analytics':
-        scrollToSection('analytics-section');
+        navigate('/analytics');
         break;
       case 'apps':
-        scrollToSection('apps-section');
-        break;
-      case '/deals':
-      case '/contacts':
-      case '/tasks':
-      case '/settings':
-        routerNavigate(feature as any);
+        navigate('/dashboard');
+        setTimeout(() => {
+          scrollToSection('apps-section');
+        }, 100);
         break;
       default:
-        console.log(`Navigation to ${feature} not implemented`);
+        // Try to navigate to it as a tool
+        navigateToTool(feature);
     }
   };
 
-  const navigate = useCallback((path: string, options?: any) => {
-    if (path === currentPath) return;
-
-    // Debounce navigation to prevent rapid fire
-    if (navigationTimeoutRef.current) {
-      window.clearTimeout(navigationTimeoutRef.current);
-    }
-    navigationTimeoutRef.current = window.setTimeout(() => {
-      setCurrentPath(path);
-      routerNavigate(path, options as any);
-    }, 100);
-  }, [currentPath, routerNavigate]);
-
-  // Add ref for timeout
-  const navigationTimeoutRef = useRef<number | null>(null);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (navigationTimeoutRef.current) {
-        window.clearTimeout(navigationTimeoutRef.current);
-      }
-    };
-  }, []);
-
   return (
-    <NavigationContext.Provider value={{ scrollToSection, openAITool, navigateToFeature }}>
+    <NavigationContext.Provider value={{ scrollToSection, openAITool, navigateToFeature, navigateToTool }}>
       {children}
     </NavigationContext.Provider>
   );

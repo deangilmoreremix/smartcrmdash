@@ -1,64 +1,61 @@
 // Gemini AI service for contact research and enhancement
 import { ContactEnrichmentData } from './aiEnrichmentService';
 import { logger } from './logger.service';
-import { aiOrchestratorService } from './aiOrchestratorService';
-import { enhancedGeminiService } from './enhancedGeminiService';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 class GeminiAIService {
-  private apiUrl = '/api/googleai';
-  private model = 'gemini-1.5-flash';
-
-  async isApiKeyConfigured(): Promise<boolean> {
-    try {
-      const response = await fetch('/api/openai/status');
-      const data = await response.json();
-      return data.configured === true;
-    } catch (error) {
-      console.warn('Failed to check Google AI availability:', error);
-      return false;
-    }
-  }
+  private model = 'gemini-2.5-flash';
 
   async researchContactByName(firstName: string, lastName: string, company?: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching contact with Gemini: ${firstName} ${lastName} ${company ? `at ${company}` : ''}`);
 
-    const isConfigured = await this.isApiKeyConfigured();
-    if (!isConfigured) {
-      throw new Error('AI service is not available. Please check server configuration.');
-    }
-
     try {
-      const response = await fetch(`${this.apiUrl}/test`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          prompt: `Research information about a professional named ${firstName} ${lastName}${company ? ` who works at ${company}` : ''}.
-
-          Return a JSON object with the following structure:
-          {
-            "firstName": "${firstName}",
-            "lastName": "${lastName}",
-            "name": "${firstName} ${lastName}",
-            "email": "likely email",
-            "phone": "likely phone if available",
-            "title": "likely job title",
-            "company": "${company || 'company name if known'}",
-            "industry": "likely industry",
-            "location": {
-              "city": "likely city",
-              "state": "likely state",
-              "country": "likely country"
-            },
-            "socialProfiles": {
-              "linkedin": "likely LinkedIn URL",
-              "twitter": "likely Twitter URL if available",
-              "website": "likely company website"
-            },
-            "bio": "brief professional bio",
-            "confidence": "number between 40 and 85 indicating confidence level"
-          }`
+          model: this.model,
+          contents: [{
+            parts: [{
+              text: `Research information about a professional named ${firstName} ${lastName}${company ? ` who works at ${company}` : ''}.
+              
+              Return a JSON object with the following structure:
+              {
+                "firstName": "${firstName}",
+                "lastName": "${lastName}",
+                "name": "${firstName} ${lastName}",
+                "email": "likely email",
+                "phone": "likely phone if available",
+                "title": "likely job title",
+                "company": "${company || 'company name if known'}",
+                "industry": "likely industry",
+                "location": {
+                  "city": "likely city",
+                  "state": "likely state",
+                  "country": "likely country"
+                },
+                "socialProfiles": {
+                  "linkedin": "likely LinkedIn URL",
+                  "twitter": "likely Twitter URL if available",
+                  "website": "likely company website"
+                },
+                "bio": "brief professional bio",
+                "confidence": "number between 40 and 85 indicating confidence level"
+              }`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.2,
+            topK: 32,
+            topP: 0.8,
+            maxOutputTokens: 1024
+          }
         })
       });
       
@@ -110,18 +107,16 @@ class GeminiAIService {
   async researchContactByLinkedIn(linkedinUrl: string): Promise<ContactEnrichmentData> {
     logger.info(`Researching LinkedIn profile: ${linkedinUrl}`);
 
-    const isConfigured = await this.isApiKeyConfigured();
-    if (!isConfigured) {
-      throw new Error('AI service is not available');
-    }
-
     try {
-      const response = await fetch(`${this.apiUrl}/test`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
+          model: this.model,
           contents: [{
             parts: [{
               text: `Research a professional from this LinkedIn URL: ${linkedinUrl}.
@@ -200,20 +195,18 @@ class GeminiAIService {
   }
 
   async generatePersonalizedMessage(contact: any, messageType: 'email' | 'linkedin' | 'cold-outreach'): Promise<string> {
-    logger.info(`Generating ${messageType} message for ${contact.name || 'contact'}`);
-
-    const isConfigured = await this.isApiKeyConfigured();
-    if (!isConfigured) {
-      throw new Error('AI service is not available');
-    }
+    logger.info(`Generating ${messageType} message for ${contact.name}`);
 
     try {
-      const response = await fetch(`${this.apiUrl}/test`, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/gemini-proxy`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
+          model: this.model,
           contents: [{
             parts: [{
               text: `Generate a personalized ${messageType} message for a contact with the following information:
@@ -241,14 +234,10 @@ class GeminiAIService {
       logger.error('Message generation failed', error as Error);
       
       // Return a fallback message
-      const firstName = contact.firstName || (contact.name ? contact.name.split(' ')[0] : 'there');
-      const company = contact.company || 'your company';
-      const industry = contact.industry || 'your industry';
-      
       const templates = {
-        email: `Hi ${firstName},\n\nI hope this message finds you well. I noticed your profile and was impressed by your work at ${company}.\n\nI'd love to connect and discuss how we might be able to help with your current initiatives.\n\nBest regards,\n[Your Name]`,
-        linkedin: `Hi ${firstName}, I noticed we share interests in ${industry}. Your experience at ${company} is impressive! I'd love to connect.`,
-        'cold-outreach': `Hello ${firstName},\n\nI hope this message finds you well. I've been researching leaders in ${industry} and your work at ${company} caught my attention.\n\nI'd love to schedule a brief call to discuss how we might be able to help with your goals.\n\nBest,\n[Your Name]`
+        email: `Hi ${contact.firstName || contact.name.split(' ')[0]},\n\nI hope this message finds you well. I noticed your profile and was impressed by your work at ${contact.company}.\n\nI'd love to connect and discuss how we might be able to help with your current initiatives.\n\nBest regards,\n[Your Name]`,
+        linkedin: `Hi ${contact.firstName || contact.name.split(' ')[0]}, I noticed we share interests in ${contact.industry || 'your industry'}. Your experience at ${contact.company} is impressive! I'd love to connect.`,
+        'cold-outreach': `Hello ${contact.firstName || contact.name.split(' ')[0]},\n\nI hope this message finds you well. I've been researching leaders in ${contact.industry || 'your industry'} and your work at ${contact.company} caught my attention.\n\nI'd love to schedule a brief call to discuss how we might be able to help with your goals.\n\nBest,\n[Your Name]`
       };
       
       return templates[messageType];
@@ -256,192 +245,9 @@ class GeminiAIService {
   }
 }
 
-// Create singleton instance
 export const geminiService = new GeminiAIService();
 
-// Create a useGemini hook that wraps the new services but provides the old interface
-export const useGemini = () => {
-  return {
-    generateContent: async (request: any) => {
-      try {
-        if (request.prompt) {
-          // For backward compatibility, if a prompt is provided, use enhancedGeminiService
-          return await enhancedGeminiService.generateContent({
-            prompt: request.prompt,
-            model: request.model,
-            temperature: request.temperature,
-            maxTokens: request.maxTokens,
-            systemInstruction: request.systemInstruction,
-            customerId: request.customerId,
-            featureUsed: request.featureUsed
-          });
-        } else {
-          // Return a compatible object for the old interface
-          const content = await geminiService.generatePersonalizedMessage(
-            request,
-            'email'
-          );
-          return { content, model: 'gemini-1.5-flash', provider: 'Google' };
-        }
-      } catch (error) {
-        console.error("Error in useGemini.generateContent:", error);
-        return { 
-          content: "I'm sorry, I'm having trouble processing that request.",
-          model: "fallback", 
-          provider: "fallback" 
-        };
-      }
-    },
-
-    analyzeDeal: async (dealData: any, options: any = {}) => {
-      try {
-        const content = await geminiService.generatePersonalizedMessage(
-          { ...dealData, analysisType: 'deal' },
-          'email'
-        );
-        
-        // Return in the format expected by components
-        return {
-          content: {
-            riskLevel: "medium",
-            keyInsights: [content.substring(0, 100) + "..."],
-            recommendedActions: ["Review the deal details"],
-            winProbability: 65,
-            potentialBlockers: []
-          },
-          model: "gemini-1.5-flash",
-          provider: "Google",
-          responseTime: 1000,
-          success: true
-        };
-      } catch (error) {
-        console.error("Error in useGemini.analyzeDeal:", error);
-        return {
-          content: null,
-          success: false,
-          error: error instanceof Error ? error.message : "Unknown error"
-        };
-      }
-    },
-
-    analyzePipelineHealth: async (pipelineData: any, options: any = {}) => {
-      try {
-        const content = await geminiService.generatePersonalizedMessage(
-          { ...pipelineData, analysisType: 'pipeline' },
-          'email'
-        );
-        
-        // Return in the format expected by components
-        return {
-          content: {
-            healthScore: 75,
-            keyInsights: [content.substring(0, 100) + "..."],
-            bottlenecks: [],
-            opportunities: [],
-            forecastAccuracy: 80
-          },
-          model: "gemini-1.5-flash",
-          provider: "Google",
-          responseTime: 1000,
-          success: true
-        };
-      } catch (error) {
-        console.error("Error in useGemini.analyzePipelineHealth:", error);
-        return {
-          content: null,
-          success: false,
-          error: error instanceof Error ? error.message : "Unknown error"
-        };
-      }
-    },
-
-    // Stub for other methods used by components
-    generateEmail: async (context: any, customerId?: string, model?: string) => {
-      try {
-        const content = await geminiService.generatePersonalizedMessage(
-          context,
-          'email'
-        );
-        return {
-          subject: `About: ${context.purpose || 'Your inquiry'}`,
-          body: content
-        };
-      } catch (error) {
-        console.error("Error in useGemini.generateEmail:", error);
-        return {
-          subject: `About: ${context.purpose || 'Your inquiry'}`,
-          body: "I'm sorry, I couldn't generate an email at this time."
-        };
-      }
-    },
-
-    getAvailableModels: async () => {
-      return [
-        {
-          id: 'gemini-1.5-flash',
-          name: 'Gemini 1.5 Flash',
-          provider: 'gemini',
-          capabilities: ['text-generation']
-        }
-      ];
-    },
-
-    getRecommendedModel: async (useCase: string) => {
-      return {
-        id: 'gemini-1.5-flash',
-        name: 'Gemini 1.5 Flash',
-        provider: 'gemini'
-      };
-    },
-
-    validateFormField: async (fieldLabel: string, fieldValue: string, context: string) => {
-      try {
-        const content = await enhancedGeminiService.generateContent({
-          prompt: `Validate this ${fieldLabel} field value: "${fieldValue}" in the context of a ${context} form. 
-          
-          Check for:
-          - Appropriateness for the field type
-          - Professional tone if applicable
-          - Completeness and clarity
-          - Any suggestions for improvement
-          
-          Return a JSON object with:
-          {
-            "valid": boolean,
-            "message": "validation message or suggestion"
-          }`,
-          temperature: 0.3,
-          maxTokens: 200
-        });
-
-        // Try to parse the JSON response
-        try {
-          const jsonMatch = content.content.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const result = JSON.parse(jsonMatch[0]);
-            return {
-              valid: result.valid !== false, // Default to true if not explicitly false
-              message: result.message || (result.valid ? 'Valid input' : 'Please check your input')
-            };
-          }
-        } catch (parseError) {
-          // If JSON parsing fails, fall back to simple validation
-        }
-
-        // Fallback validation
-        return {
-          valid: fieldValue.trim().length > 0,
-          message: fieldValue.trim().length > 0 ? 'Valid input' : 'This field is required'
-        };
-      } catch (error) {
-        console.error("Error in validateFormField:", error);
-        return {
-          valid: fieldValue.trim().length > 0,
-          message: fieldValue.trim().length > 0 ? 'Valid input' : 'This field is required'
-        };
-      }
-    }
-  };
-};
-
-export default geminiService;
+// Hook for React components
+export function useGemini() {
+  return geminiService;
+}

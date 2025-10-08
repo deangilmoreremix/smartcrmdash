@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Users, UserPlus } from 'lucide-react';
 import LeadsSection from '../LeadsSection';
-import NewLeadsSection from '../dashboard/NewLeadsSection';
-import CustomerProfile from '../dashboard/CustomerProfile';
+import { NewLeadsSection } from '../dashboard/NewLeadsSection';
+import { CustomerProfile } from '../dashboard/CustomerProfile';
 import ProfessionalContactModal from '../contacts/ProfessionalContactModal';
 import { Contact } from '../../types/contact';
 

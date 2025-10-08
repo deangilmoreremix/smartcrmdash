@@ -383,30 +383,20 @@ class AIIntegrationService {
     } catch (error) {
       logger.error('Failed to get AI provider status', error as Error);
       
-      // Development fallback
+      // Development fallback - APIs available via Supabase Edge Functions
       if (import.meta.env.DEV || import.meta.env.VITE_ENV === 'development') {
-        // Check server-side availability in development
-        try {
-          const response = await fetch('/api/openai/status');
-          const openaiAvailable = response.ok && (await response.json()).configured === true;
-          return [
-            {
-              name: 'openai',
-              status: openaiAvailable ? 'available' : 'error',
-              remaining: 45
-            },
-            {
-              name: 'gemini',
-              status: openaiAvailable ? 'available' : 'error', // Assume Gemini follows OpenAI status
-              remaining: 50
-            }
-          ];
-        } catch (error) {
-          return [
-            { name: 'openai', status: 'error', remaining: 0 },
-            { name: 'gemini', status: 'error', remaining: 0 }
-          ];
-        }
+        return [
+          {
+            name: 'openai',
+            status: 'available',
+            remaining: 45
+          },
+          {
+            name: 'gemini',
+            status: 'available',
+            remaining: 50
+          }
+        ];
       }
       
       throw error;

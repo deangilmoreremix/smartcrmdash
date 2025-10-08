@@ -1,82 +1,77 @@
 import React from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { TrendingUp, TrendingDown, DollarSign, Target, Award, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { useNavigation } from '../../contexts/NavigationContext';
+import { GlassCard } from '../ui/GlassCard';
+import { TrendingUp, Users, Calendar, DollarSign } from 'lucide-react';
 
-const MetricsCards: React.FC = () => {
-  const { isDark } = useTheme();
-  const { navigateToFeature } = useNavigation();
+const metrics = [
+  {
+    icon: DollarSign,
+    label: 'Won from Deals This Month',
+    value: '1,980,130',
+    change: '+11% vs last month',
+    changeLabel: '+11% vs last month',
+    color: 'bg-yellow-500',
+    trend: 'up',
+    badge: '+11% vs last month'
+  },
+  {
+    icon: Users,
+    label: 'New Customer for Week',
+    value: '89',
+    change: '+12.5%',
+    changeLabel: '+12.5%',
+    color: 'bg-blue-500',
+    trend: 'up',
+    badge: '+12 vs last month'
+  },
+  {
+    icon: Calendar,
+    label: 'New Tasks for Week',
+    value: '31',
+    change: '+4 today',
+    changeLabel: '+4 today',
+    color: 'bg-gray-600',
+    trend: 'up',
+    badge: '+4 today'
+  }
+];
 
-  const kpis = [
-    {
-      title: 'Active Deals',
-      value: '34',
-      change: '+12%',
-      trend: 'up',
-      icon: Target,
-      color: 'from-blue-500 to-cyan-500',
-      feature: 'pipeline-section'
-    },
-    {
-      title: 'Pipeline Value',
-      value: '$247K',
-      change: '+8%',
-      trend: 'up',
-      icon: DollarSign,
-      color: 'from-green-500 to-emerald-500',
-      feature: 'pipeline-section'
-    },
-    {
-      title: 'Won Deals',
-      value: '20',
-      change: '+15%',
-      trend: 'up',
-      icon: Award,
-      color: 'from-purple-500 to-pink-500',
-      feature: 'analytics-section'
-    },
-    {
-      title: 'Avg Deal Size',
-      value: '$12.3K',
-      change: '-3%',
-      trend: 'down',
-      icon: BarChart3,
-      color: 'from-orange-500 to-red-500',
-      feature: 'analytics-section'
-    }
-  ];
-
+export const MetricsCards: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {kpis.map((kpi, index) => (
-        <div
-          key={index}
-          onClick={() => navigateToFeature(kpi.feature)}
-          className={`${isDark ? 'bg-white/5' : 'bg-white'} backdrop-blur-xl rounded-2xl p-6 shadow-sm hover:${isDark ? 'bg-white/10' : 'bg-gray-50'} transition-all duration-300 group`}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className={`p-3 rounded-xl bg-gradient-to-r ${kpi.color} shadow-lg`}>
-              <kpi.icon className="h-6 w-6 text-white" />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {metrics.map((metric, index) => {
+        const Icon = metric.icon;
+        return (
+          <GlassCard key={index} className="p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`${metric.color} p-3 rounded-lg shadow-md`}>
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
-            <div className={`flex items-center ${kpi.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-              {kpi.trend === 'up' ? (
-                <ArrowUpRight className="h-4 w-4 mr-1" />
-              ) : (
-                <ArrowDownRight className="h-4 w-4 mr-1" />
-              )}
-              <span className="text-sm font-medium">{kpi.change}</span>
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                {index === 0 && (
+                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md text-xs font-semibold">
+                    +11% vs last month
+                  </span>
+                )}
+                {index === 1 && (
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-semibold">
+                    +12 vs last month
+                  </span>
+                )}
+                {index === 2 && (
+                  <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-xs font-semibold">
+                    +4 today
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">{metric.label}</p>
             </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className={`text-2xl font-bold ${isDark ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>
-              {kpi.value}
-            </h3>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{kpi.title}</p>
-          </div>
-        </div>
-      ))}
+          </GlassCard>
+        );
+      })}
     </div>
   );
-};
-
-export default MetricsCards;
+};export default MetricsCards;

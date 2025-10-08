@@ -1,30 +1,35 @@
 import { Router } from 'express';
-import OpenAI from 'openai';
+import { aiOrchestrator } from '../services/ai-orchestrator.service';
+import { logger } from '../services/logger.service';
+import {
+  SmartGreetingSchema,
+  KPIAnalysisSchema,
+  DealIntelligenceSchema,
+  BusinessIntelligenceSchema,
+  validateRequest
+} from '../validation/ai-schemas';
+import { aiRateLimiter } from '../middleware/rate-limiter';
 
 const router = Router();
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 // Check API key status
-router.get('/api/openai/status', (req, res) => {
-  const hasApiKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10;
+router.get('/api/openai/status', aiRateLimiter, (req, res) => {
+  const status = aiOrchestrator.getProviderStatus();
   res.json({
-    configured: hasApiKey,
+    configured: status.openai || status.gemini,
     model: 'gpt-4o', // Using latest available model
-    status: hasApiKey ? 'ready' : 'needs_configuration'
+    status: (status.openai || status.gemini) ? 'ready' : 'needs_configuration',
+    providers: status
   });
 });
 
 // GPT-5 Enhanced Greeting Generation
-router.post('/api/openai/smart-greeting', async (req, res) => {
+router.post('/api/openai/smart-greeting', aiRateLimiter, validateRequest(SmartGreetingSchema), async (req, res) => {
   try {
     const { userMetrics, timeOfDay, recentActivity } = req.body;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // Using the latest available model
+    const request = {
+      model: "gpt-4o",
       messages: [{
         role: "system",
         content: "You are an expert business advisor with access to advanced analytics. Generate personalized, strategic greetings that provide actionable insights based on user data. Focus on key opportunities and strategic recommendations."
@@ -32,17 +37,25 @@ router.post('/api/openai/smart-greeting', async (req, res) => {
         role: "user",
         content: `Generate a smart greeting for ${timeOfDay}. User metrics: ${JSON.stringify(userMetrics)}. Recent activity: ${JSON.stringify(recentActivity)}. Provide both a greeting and a strategic insight.`
       }],
-      response_format: { type: "json_object" },
+      response_format: { type: "json_object" as const },
       temperature: 0.7,
       max_tokens: 300
+    };
+
+    const response = await aiOrchestrator.executeRequest(request);
+    const result = JSON.parse(response.content || '{}');
+    
+    res.json({
+      ...result,
+      _metadata: {
+        provider: response.provider,
+        latency: response.latency
+      }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    res.json(result);
-
   } catch (error) {
-    console.error('Smart greeting error:', error);
-    res.status(500).json({ 
+    logger.error('Smart greeting error:', error);
+    res.status(500).json({
       error: 'Failed to generate smart greeting',
       greeting: `Good ${req.body.timeOfDay}! Your pipeline shows strong momentum.`,
       insight: 'Focus on your highest-value opportunities for maximum impact.'
@@ -51,11 +64,11 @@ router.post('/api/openai/smart-greeting', async (req, res) => {
 });
 
 // GPT-5 Enhanced KPI Analysis
-router.post('/api/openai/kpi-analysis', async (req, res) => {
+router.post('/api/openai/kpi-analysis', aiRateLimiter, validateRequest(KPIAnalysisSchema), async (req, res) => {
   try {
     const { historicalData, currentMetrics } = req.body;
 
-    const response = await openai.chat.completions.create({
+    const request = {
       model: "gpt-4o",
       messages: [{
         role: "system",
@@ -64,16 +77,24 @@ router.post('/api/openai/kpi-analysis', async (req, res) => {
         role: "user",
         content: `Analyze these KPI trends: Historical: ${JSON.stringify(historicalData)}, Current: ${JSON.stringify(currentMetrics)}. Provide summary, trends, predictions, and recommendations in JSON format.`
       }],
-      response_format: { type: "json_object" },
+      response_format: { type: "json_object" as const },
       temperature: 0.3,
       max_tokens: 800
+    };
+
+    const response = await aiOrchestrator.executeRequest(request);
+    const result = JSON.parse(response.content || '{}');
+    
+    res.json({
+      ...result,
+      _metadata: {
+        provider: response.provider,
+        latency: response.latency
+      }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    res.json(result);
-
   } catch (error) {
-    console.error('KPI analysis error:', error);
+    logger.error('KPI analysis error:', error);
     res.status(500).json({
       error: 'Failed to analyze KPIs',
       summary: 'Your KPI trends show steady performance with opportunities for optimization.',
@@ -83,11 +104,11 @@ router.post('/api/openai/kpi-analysis', async (req, res) => {
 });
 
 // GPT-5 Deal Intelligence
-router.post('/api/openai/deal-intelligence', async (req, res) => {
+router.post('/api/openai/deal-intelligence', aiRateLimiter, validateRequest(DealIntelligenceSchema), async (req, res) => {
   try {
     const { dealData, contactHistory, marketContext } = req.body;
 
-    const response = await openai.chat.completions.create({
+    const request = {
       model: "gpt-4o",
       messages: [{
         role: "system",
@@ -96,16 +117,24 @@ router.post('/api/openai/deal-intelligence', async (req, res) => {
         role: "user",
         content: `Analyze this deal: ${JSON.stringify(dealData)}. Contact history: ${JSON.stringify(contactHistory)}. Market context: ${JSON.stringify(marketContext)}. Provide probability_score, risk_level, key_factors, recommendations, confidence_level, estimated_close_days, and value_optimization in JSON format.`
       }],
-      response_format: { type: "json_object" },
+      response_format: { type: "json_object" as const },
       temperature: 0.2,
       max_tokens: 600
+    };
+
+    const response = await aiOrchestrator.executeRequest(request);
+    const result = JSON.parse(response.content || '{}');
+    
+    res.json({
+      ...result,
+      _metadata: {
+        provider: response.provider,
+        latency: response.latency
+      }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    res.json(result);
-
   } catch (error) {
-    console.error('Deal intelligence error:', error);
+    logger.error('Deal intelligence error:', error);
     res.status(500).json({
       error: 'Failed to analyze deal',
       probability_score: 65,
@@ -120,11 +149,11 @@ router.post('/api/openai/deal-intelligence', async (req, res) => {
 });
 
 // Business Intelligence Generation
-router.post('/api/openai/business-intelligence', async (req, res) => {
+router.post('/api/openai/business-intelligence', aiRateLimiter, validateRequest(BusinessIntelligenceSchema), async (req, res) => {
   try {
     const { businessData, marketContext, objectives } = req.body;
 
-    const response = await openai.chat.completions.create({
+    const request = {
       model: "gpt-4o",
       messages: [{
         role: "system",
@@ -133,16 +162,24 @@ router.post('/api/openai/business-intelligence', async (req, res) => {
         role: "user",
         content: `Generate business intelligence for: ${JSON.stringify(businessData)}. Market context: ${JSON.stringify(marketContext)}. Objectives: ${JSON.stringify(objectives)}. Provide market_insights, competitive_advantages, risk_factors, growth_opportunities, and strategic_recommendations in JSON format.`
       }],
-      response_format: { type: "json_object" },
+      response_format: { type: "json_object" as const },
       temperature: 0.4,
       max_tokens: 1000
+    };
+
+    const response = await aiOrchestrator.executeRequest(request);
+    const result = JSON.parse(response.content || '{}');
+    
+    res.json({
+      ...result,
+      _metadata: {
+        provider: response.provider,
+        latency: response.latency
+      }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    res.json(result);
-
   } catch (error) {
-    console.error('Business intelligence error:', error);
+    logger.error('Business intelligence error:', error);
     res.status(500).json({
       error: 'Failed to generate business intelligence',
       market_insights: ['Digital transformation accelerating', 'Customer expectations rising'],

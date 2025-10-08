@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
+import { logger } from './config/logger.config';
 
 // Fix for "global is not defined" error in browser
 if (typeof global === 'undefined') {
@@ -22,9 +23,9 @@ if (typeof process === 'undefined') {
 window.addEventListener('error', (event) => {
   const message = event.message || '';
   const error = event.error;
-  
+
   // Suppress ALL development/third-party errors that cause runtime overlay
-  if (message.includes('Script error') || 
+  if (message.includes('Script error') ||
       message.includes('Module') ||
       message.includes('stream') ||
       message.includes('Loading') ||
@@ -34,7 +35,7 @@ window.addEventListener('error', (event) => {
       error?.message?.includes('loading') ||
       !error ||
       !message) {
-    console.warn('🚨 Suppressed error to prevent runtime overlay:', message || error?.message || 'Unknown error');
+    logger.warn('Suppressed error to prevent runtime overlay:', message || error?.message || 'Unknown error');
     event.preventDefault();
     return false;
   }

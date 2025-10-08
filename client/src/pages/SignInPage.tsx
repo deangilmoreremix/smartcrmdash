@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -9,7 +10,7 @@ const SignInPage: React.FC = () => {
   const location = useLocation();
   const { isDark } = useTheme();
   const { signIn } = useAuth();
-
+  
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -18,10 +19,12 @@ const SignInPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const from = location.state?.from?.pathname || '/dashboard';
-
   // Only show dev bypass in development environments - CRITICAL SECURITY FIX
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = window.location.hostname === 'localhost' ||
+                       window.location.hostname.includes('.replit.dev') ||
+                       window.location.hostname.includes('replit.io');
+
+  const from = location.state?.from?.pathname || '/dashboard';
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +33,7 @@ const SignInPage: React.FC = () => {
     setError(null);
 
     const { error } = await signIn(formData.email, formData.password);
-
+    
     if (error) {
       // Show standard error message since email verification is disabled
       setError(error.message);
@@ -47,34 +50,7 @@ const SignInPage: React.FC = () => {
     });
   };
   const handleDevBypass = () => {
-    // Set up dev session in localStorage
-    const devUser = {
-      id: 'dev-user-12345',
-      email: 'dev@smartcrm.local',
-      username: 'developer',
-      firstName: 'Development',
-      lastName: 'User',
-      role: 'super_admin',
-      app_context: 'smartcrm',
-      created_at: new Date().toISOString()
-    };
-
-    const devSession = {
-      access_token: 'dev-bypass-token',
-      refresh_token: 'dev-bypass-refresh',
-      expires_at: Date.now() + (24 * 60 * 60 * 1000),
-      user: devUser
-    };
-
-    localStorage.setItem('dev-user-session', JSON.stringify(devUser));
-    localStorage.setItem('sb-supabase-auth-token', JSON.stringify(devSession));
-    localStorage.setItem('smartcrm-dev-mode', 'true');
-    localStorage.setItem('smartcrm-dev-user', JSON.stringify(devUser));
-
-    console.log('✅ Dev bypass session created from sign-in page');
-
-    // Force page reload to trigger auth context update
-    window.location.href = '/dashboard';
+    navigate('/dashboard', { replace: true });
   };
 
 
@@ -89,7 +65,7 @@ const SignInPage: React.FC = () => {
             Sign in to your account
           </p>
         </div>
-
+        
         <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur-xl border rounded-2xl p-8 shadow-lg`}>
           {error && (
             <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border flex items-center space-x-2`}>
@@ -97,7 +73,7 @@ const SignInPage: React.FC = () => {
               <span className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</span>
             </div>
           )}
-
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'} mb-2`}>
@@ -109,7 +85,7 @@ const SignInPage: React.FC = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-lg ${
-                  isDark
+                  isDark 
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -118,7 +94,7 @@ const SignInPage: React.FC = () => {
                 disabled={loading}
               />
             </div>
-
+            
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'} mb-2`}>
                 Password
@@ -130,7 +106,7 @@ const SignInPage: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                    isDark
+                    isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -150,7 +126,7 @@ const SignInPage: React.FC = () => {
                 </button>
               </div>
             </div>
-
+            
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
@@ -169,7 +145,7 @@ const SignInPage: React.FC = () => {
                 Forgot password?
               </Link>
             </div>
-
+            
             <button
               type="submit"
               disabled={loading}

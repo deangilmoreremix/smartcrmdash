@@ -35,7 +35,7 @@ import {
   DollarSign,
   AlertCircle,
   Loader,
-  Grid3X3,
+  Grid,
   List
 } from 'lucide-react';
 

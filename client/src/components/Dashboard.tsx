@@ -29,18 +29,18 @@ import ActivitiesCommunications from './sections/ActivitiesCommunications';
 import IntegrationsSystem from './sections/IntegrationsSystem';
 
 // Keep legacy components for backward compatibility
-import MetricsCards from './dashboard/MetricsCards';
-import InteractionHistory from './dashboard/InteractionHistory';
-import TasksAndFunnel from './dashboard/TasksAndFunnel';
-import CustomerProfile from './dashboard/CustomerProfile';
-import RecentActivity from './dashboard/RecentActivity';
-import DashboardHeader from './dashboard/DashboardHeader';
-import ChartsSection from './dashboard/ChartsSection';
-import ConnectedApps from './dashboard/ConnectedApps';
-import AIInsightsPanel from './dashboard/AIInsightsPanel';
-import NewLeadsSection from './dashboard/NewLeadsSection';
-import KPICards from './dashboard/KPICards';
-import QuickActions from './dashboard/QuickActions';
+import { MetricsCards } from './dashboard/MetricsCards';
+import { InteractionHistory } from './dashboard/InteractionHistory';
+import { TasksAndFunnel } from './dashboard/TasksAndFunnel';
+import { CustomerProfile } from './dashboard/CustomerProfile';
+import { RecentActivity } from './dashboard/RecentActivity';
+import { DashboardHeader } from './dashboard/DashboardHeader';
+import { ChartsSection } from './dashboard/ChartsSection';
+import { ConnectedApps } from './dashboard/ConnectedApps';
+import { AIInsightsPanel } from './dashboard/AIInsightsPanel';
+import { NewLeadsSection } from './dashboard/NewLeadsSection';
+import { KPICards } from './dashboard/KPICards';
+import { QuickActions } from './dashboard/QuickActions';
 
 // GPT-5 Enhanced Components
 import GPT5AnalyticsPanel from './dashboard/GPT5AnalyticsPanel';

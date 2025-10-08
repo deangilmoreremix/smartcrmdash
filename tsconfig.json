@@ -13,8 +13,9 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["./shared/*"]
-    }
+      "@shared/*": ["shared/*"]
+    },
+    "types": ["node"]
   },
   "ts-node": {
     "esm": false
@@ -22,7 +23,8 @@
   "include": [
     "*.ts",
     "screenshot.runner.ts",
-    "test-screenshot.ts"
+    "test-screenshot.ts",
+    "drizzle.config.ts"
   ],
   "exclude": [
     "node_modules",

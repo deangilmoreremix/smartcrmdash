@@ -1,30 +1,18 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useWhitelabel } from '../../contexts/WhitelabelContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const LinkRedirect: React.FC = () => {
-  const navigate = useNavigate();
+const LinkRedirect = () => {
   const location = useLocation();
-  const { config } = useWhitelabel();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const currentPath = location.pathname;
-
-    // Check if current path has a redirect mapping
-    if (config.redirectMappings[currentPath]) {
-      const redirectUrl = config.redirectMappings[currentPath];
-
-      // If it's an external URL, redirect to external site
-      if (redirectUrl.startsWith('http://') || redirectUrl.startsWith('https://')) {
-        window.location.href = redirectUrl;
-      } else {
-        // If it's an internal path, navigate within the app
-        navigate(redirectUrl);
-      }
+    const hash = location.hash;
+    if (hash && hash.startsWith('#/')) {
+      const path = hash.substring(1);
+      navigate(path, { replace: true });
     }
-  }, [location.pathname, config.redirectMappings, navigate]);
+  }, [location, navigate]);
 
-  // This component doesn't render anything
   return null;
 };
 
