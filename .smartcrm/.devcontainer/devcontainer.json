@@ -1,0 +1,13 @@
+{
+  "name": "smartcrm-playwright",
+  "workspaceFolder": "/workspaces/smartcrmdash",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
+  },
+  "postCreateCommand": "npm i -D @playwright/test ffmpeg-static && npx playwright install --with-deps",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-playwright.playwright", "dbaeumer.vscode-eslint"]
+    }
+  }
+}

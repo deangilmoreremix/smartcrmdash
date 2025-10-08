@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../hooks/useContactStore';
 import { useGemini } from '../services/geminiService';
@@ -15,7 +15,10 @@ import RemoteWhiteLabelLoader from './RemoteWhiteLabelLoader';
 import RemoteProductResearchLoader from './RemoteProductResearchLoader';
 import ModuleFederationAnalytics from './ModuleFederationAnalytics';
 import RemoteAIGoalsLoader from './RemoteAIGoalsLoader';
+import DetailedContactsModule from './DetailedContactsModule';
 import AssistantStatusWidget from './ui/AssistantStatusWidget';
+import AdvancedTooltip from './ui/AdvancedTooltip';
+import AdvancedWalkthrough from './ui/AdvancedWalkthrough';
 
 // Import section components
 import ExecutiveOverviewSection from './sections/ExecutiveOverviewSection';
@@ -78,6 +81,8 @@ const Dashboard: React.FC = React.memo(() => {
   const initializedRef = useRef(false);
   const [dashboardError, setDashboardError] = React.useState<string | null>(null);
   const [isInitialized, setIsInitialized] = React.useState(false);
+  const [showWalkthrough, setShowWalkthrough] = React.useState(false);
+  const [walkthroughContext, setWalkthroughContext] = React.useState<'dashboard' | 'pipeline' | 'remote-app'>('dashboard');
 
   useEffect(() => {
     // Only fetch data once
@@ -165,7 +170,19 @@ const Dashboard: React.FC = React.memo(() => {
       case 'executive-overview-section':
         return typeof ExecutiveOverviewSection === 'function' ? <ExecutiveOverviewSection /> : (
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Executive Overview</h3>
+            <div className="flex items-center space-x-2 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Executive Overview</h3>
+              <AdvancedTooltip
+                id="executive-overview-tooltip"
+                target="ⓘ"
+                context="dashboard"
+                data={{
+                  revenue: '$2.4M',
+                  growth: '+23%',
+                  kpis: 12
+                }}
+              />
+            </div>
             <p className="text-gray-600 dark:text-gray-400">Dashboard content loading...</p>
           </div>
         );
@@ -173,7 +190,19 @@ const Dashboard: React.FC = React.memo(() => {
       case 'ai-smart-features-hub':
         return typeof AISmartFeaturesHub === 'function' ? <AISmartFeaturesHub /> : (
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Smart Features Hub</h3>
+            <div className="flex items-center space-x-2 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Smart Features Hub</h3>
+              <AdvancedTooltip
+                id="ai-features-tooltip"
+                target="ⓘ"
+                context="dashboard"
+                data={{
+                  tools: 20,
+                  activeUsers: 1250,
+                  avgUsage: '45 min/day'
+                }}
+              />
+            </div>
             <p className="text-gray-600 dark:text-gray-400">AI tools and features loading...</p>
           </div>
         );
@@ -245,23 +274,45 @@ const Dashboard: React.FC = React.memo(() => {
         return <ConnectedApps />;
 
       case 'contacts-section':
-        return (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contacts & Leads</h3>
-            <LoadingSpinner message="Loading contacts..." size="lg" />
-          </div>
-        );
+        return <DetailedContactsModule />;
 
       case 'pipeline-section':
         return (
           <React.Suspense fallback={
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pipeline</h3>
+              <div className="flex items-center space-x-2 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pipeline</h3>
+                <AdvancedTooltip
+                  id="pipeline-tooltip"
+                  target="ⓘ"
+                  context="pipeline"
+                  data={{
+                    value: '$847K',
+                    winRate: '68%',
+                    timeToClose: '23 days'
+                  }}
+                  federated={true}
+                />
+              </div>
               <LoadingSpinner message="Loading pipeline..." size="lg" />
             </div>
           }>
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-              <ModuleFederationPipeline showHeader={true} />
+              <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Sales Pipeline</h3>
+                <AdvancedTooltip
+                  id="pipeline-remote-tooltip"
+                  target="ⓘ"
+                  context="pipeline"
+                  data={{
+                    value: '$847K',
+                    winRate: '68%',
+                    timeToClose: '23 days'
+                  }}
+                  federated={true}
+                />
+              </div>
+              <ModuleFederationPipeline showHeader={false} />
             </div>
           </React.Suspense>
         );
@@ -278,12 +329,39 @@ const Dashboard: React.FC = React.memo(() => {
         return (
           <React.Suspense fallback={
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">White Label</h3>
+              <div className="flex items-center space-x-2 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">White Label</h3>
+                <AdvancedTooltip
+                  id="white-label-tooltip"
+                  target="ⓘ"
+                  context="analytics"
+                  data={{
+                    features: 15,
+                    integrations: 8,
+                    customization: 'Full'
+                  }}
+                  federated={true}
+                />
+              </div>
               <LoadingSpinner message="Loading white label..." size="lg" />
             </div>
           }>
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-              <RemoteWhiteLabelLoader showHeader={true} />
+              <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">White Label Tools</h3>
+                <AdvancedTooltip
+                  id="white-label-remote-tooltip"
+                  target="ⓘ"
+                  context="analytics"
+                  data={{
+                    features: 15,
+                    integrations: 8,
+                    customization: 'Full'
+                  }}
+                  federated={true}
+                />
+              </div>
+              <RemoteWhiteLabelLoader showHeader={false} />
             </div>
           </React.Suspense>
         );
@@ -291,21 +369,63 @@ const Dashboard: React.FC = React.memo(() => {
       case 'product-research-section':
         return (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <RemoteProductResearchLoader showHeader={true} />
+            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Product Research</h3>
+              <AdvancedTooltip
+                id="product-research-tooltip"
+                target="ⓘ"
+                context="analytics"
+                data={{
+                  markets: 500,
+                  competitors: 250,
+                  insights: 'Real-time'
+                }}
+                federated={true}
+              />
+            </div>
+            <RemoteProductResearchLoader showHeader={false} />
           </div>
         );
 
       case 'ai-analytics-section':
         return (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <ModuleFederationAnalytics showHeader={true} />
+            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Analytics</h3>
+              <AdvancedTooltip
+                id="ai-analytics-tooltip"
+                target="ⓘ"
+                context="analytics"
+                data={{
+                  predictions: '85%',
+                  insights: 1200,
+                  accuracy: '94%'
+                }}
+                federated={true}
+              />
+            </div>
+            <ModuleFederationAnalytics showHeader={false} />
           </div>
         );
 
       case 'ai-goals-section':
         return (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '500px' }}>
-            <RemoteAIGoalsLoader showHeader={true} />
+            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Goals</h3>
+              <AdvancedTooltip
+                id="ai-goals-tooltip"
+                target="ⓘ"
+                context="analytics"
+                data={{
+                  goals: 25,
+                  progress: '78%',
+                  achievements: 18
+                }}
+                federated={true}
+              />
+            </div>
+            <RemoteAIGoalsLoader showHeader={false} />
           </div>
         );
 
@@ -326,8 +446,26 @@ const Dashboard: React.FC = React.memo(() => {
     <main className={`w-full h-full overflow-y-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Dashboard Header - Always visible */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <div className="flex items-center space-x-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <AdvancedTooltip
+            id="dashboard-header-tooltip"
+            target="ⓘ"
+            context="dashboard"
+            data={{
+              conversion: '24%',
+              deals: 47,
+              avgDeal: '$12.5K'
+            }}
+          />
+        </div>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your AI-powered CRM</p>
+        <button
+          onClick={() => setShowWalkthrough(true)}
+          className="mt-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Start Tour
+        </button>
       </div>
 
 
@@ -376,6 +514,21 @@ const Dashboard: React.FC = React.memo(() => {
           </div>
         )}
       </div>
+
+      {/* Advanced Walkthrough */}
+      <AdvancedWalkthrough
+        run={showWalkthrough}
+        context={walkthroughContext}
+        federatedApps={[
+          'AI Agency Suite',
+          'Content AI',
+          'Sales Maximizer',
+          'Business Intelligence',
+          'Referral Maximizer',
+          'Contacts'
+        ]}
+        onComplete={() => setShowWalkthrough(false)}
+      />
 
       {/* Video Call Components */}
       <PersistentVideoCallButton />

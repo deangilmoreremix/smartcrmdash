@@ -1,0 +1,161 @@
+{
+  "baseUrl": "http://localhost:5000",
+  "videosDir": "screenshots/videos",
+  "screenshotsDir": "screenshots/screenshots_16x9",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "videoValidation": {
+    "minValidSize": 50000,
+    "estimationFactor": 100000,
+    "estimationMultiplier": 2
+  },
+  "conversionSettings": {
+    "maxConcurrent": 2
+  },
+  "walkthroughDemos": [
+    {
+      "name": "dashboard-overview",
+      "url": "/dashboard-embed",
+      "actions": [
+        { "wait": 3000 },
+        { "eval": "window.scrollTo(0, 200)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 400)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 600)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 800)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 600)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 400)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 200)" },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    },
+    {
+      "name": "contacts-management",
+      "url": "/contacts",
+      "actions": [
+        { "wait": 3000 },
+        { "click": [".add-contact-btn", ".add-contact", "[data-add-contact]", "button:has-text('Add')", "button:has-text('New')"] },
+        { "wait": 2000 },
+        { "type": [".contact-name", "input[name*='name']", "input[placeholder*='name']", "input[type='text']:first-child"], "text": "John Doe" },
+        { "wait": 1000 },
+        { "type": [".contact-email", "input[name*='email']", "input[type='email']", "input[placeholder*='email']"], "text": "john@example.com" },
+        { "wait": 2000 },
+        { "click": [".save-contact", "button[type='submit']", "button:has-text('Save')", "[data-save]"] },
+        { "wait": 3000 },
+        { "click": [".contact-row:first-child", "tr:first-child", ".contact-item", "[data-contact]:first-child"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 400)" },
+        { "wait": 2000 },
+        { "click": [".edit-contact", "button:has-text('Edit')", "[data-edit]", ".edit-btn"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    },
+    {
+      "name": "pipeline-management",
+      "url": "/pipeline",
+      "actions": [
+        { "wait": 3000 },
+        { "click": [".add-deal-btn", ".add-deal", "[data-add-deal]", "button:has-text('Add')", "button:has-text('New Deal')"] },
+        { "wait": 2000 },
+        { "type": [".deal-name", "input[name*='name']", "input[placeholder*='deal']", "input[type='text']"], "text": "New Software Deal" },
+        { "wait": 1000 },
+        { "type": [".deal-value", "input[name*='value']", "input[type='number']", "input[placeholder*='value']"], "text": "50000" },
+        { "wait": 2000 },
+        { "click": [".save-deal", "button[type='submit']", "button:has-text('Save')", "[data-save]"] },
+        { "wait": 3000 },
+        { "click": [".deal-card:first-child", ".deal-item:first-child", "[data-deal]:first-child", ".pipeline-item"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 300)" },
+        { "wait": 2000 },
+        { "click": [".move-stage", ".stage-btn", "[data-move]", "button:has-text('Move')"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    },
+    {
+      "name": "ai-tools-integration",
+      "url": "/ai-tools",
+      "actions": [
+        { "wait": 3000 },
+        { "click": [".ai-assistant-btn", ".ai-btn", "[data-ai]", "button:has-text('AI')", "button:has-text('Assistant')"] },
+        { "wait": 2000 },
+        { "type": [".ai-prompt", "textarea", "input[type='text']", "[contenteditable]", ".prompt-input"], "text": "Generate a sales email for a software deal" },
+        { "wait": 2000 },
+        { "click": [".generate-btn", "button:has-text('Generate')", "button:has-text('Create')", "[data-generate]"] },
+        { "wait": 4000 },
+        { "eval": "window.scrollTo(0, 400)" },
+        { "wait": 2000 },
+        { "click": [".copy-result", "button:has-text('Copy')", "[data-copy]", ".copy-btn"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    },
+    {
+      "name": "analytics-dashboard",
+      "url": "/analytics",
+      "actions": [
+        { "wait": 3000 },
+        { "click": [".date-filter", "select", "[role='combobox']", ".dropdown", ".date-picker"] },
+        { "wait": 2000 },
+        { "click": [".last-30-days", "[data-date='30']", "option:has-text('30')", "li:has-text('30')"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 300)" },
+        { "wait": 2000 },
+        { "click": [".chart-toggle", ".toggle", "[data-toggle]", "button:has-text('Chart')"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 600)" },
+        { "wait": 2000 },
+        { "click": [".export-btn", "button:has-text('Export')", "[data-export]", ".download-btn"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    },
+    {
+      "name": "communication-hub",
+      "url": "/communication",
+      "actions": [
+        { "wait": 3000 },
+        { "click": [".compose-email", ".compose", "[data-compose]", "button:has-text('Compose')", "button:has-text('New')"] },
+        { "wait": 2000 },
+        { "type": [".email-subject", "input[placeholder*='subject']", "input[name*='subject']", "input[type='text']"], "text": "Follow-up on our discussion" },
+        { "wait": 1000 },
+        { "type": [".email-body", "textarea", "[contenteditable]", ".message-body", ".email-content"], "text": "Hi, I wanted to follow up on our previous conversation..." },
+        { "wait": 2000 },
+        { "click": [".send-email", "button[type='submit']", "button:has-text('Send')", "[data-send]"] },
+        { "wait": 3000 },
+        { "click": [".sms-tab", "[data-tab='sms']", "button:has-text('SMS')", ".tab:has-text('SMS')"] },
+        { "wait": 2000 },
+        { "eval": "window.scrollTo(0, 0)" },
+        { "wait": 6000 }
+      ]
+    }
+  ],
+  "featureScreenshots": [
+    { "name": "dashboard-main", "url": "/dashboard-embed" },
+    { "name": "contacts-view", "url": "/contacts" },
+    { "name": "pipeline-view", "url": "/pipeline" },
+    { "name": "ai-tools", "url": "/ai-tools" },
+    { "name": "analytics", "url": "/analytics" },
+    { "name": "communication", "url": "/communication" },
+    { "name": "tasks", "url": "/tasks" },
+    { "name": "calendar", "url": "/calendar" },
+    { "name": "appointments", "url": "/appointments-dashboard" },
+    { "name": "phone-system", "url": "/phone-system" },
+    { "name": "invoicing", "url": "/invoicing" },
+    { "name": "content-library", "url": "/content-library" }
+  ]
+}

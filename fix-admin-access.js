@@ -1,5 +1,5 @@
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://your-project.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-key';
@@ -12,9 +12,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 const ADMIN_EMAILS = [
-  'victor@videoremix.io',
-  'samuel@videoremix.io', 
-  'dean@videoremix.io'
+  'victor@videoremix.vip',
+  'samuel@videoremix.vip',
+  'dean@videoremix.vip'
 ];
 
 async function fixAdminAccess() {

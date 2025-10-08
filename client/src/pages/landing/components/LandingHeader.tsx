@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -8,6 +8,8 @@ const LandingHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<number | null>(null);
   
   // Debug logging
   console.log('LandingHeader component rendering');
@@ -24,18 +26,42 @@ const LandingHeader = () => {
   // Track scroll position to change header style
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      if (scrollRef.current !== null) return;
+      scrollRef.current = requestAnimationFrame(() => {
+        if (window.scrollY > 10) {
+          setIsScrolled(true);
+        } else {
+          setIsScrolled(false);
+        }
+        scrollRef.current = null;
+      });
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (scrollRef.current !== null) {
+        cancelAnimationFrame(scrollRef.current);
+      }
     };
   }, []);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setFeaturesOpen(false);
+      }
+    };
+
+    if (featuresOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [featuresOpen]);
 
   return (
     <header 
@@ -64,16 +90,15 @@ const LandingHeader = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             <div className="relative">
-              <button 
+              <button
                 className="flex items-center text-gray-700 hover:text-blue-600 transition-colors"
                 onClick={() => setFeaturesOpen(!featuresOpen)}
-                onBlur={() => setTimeout(() => setFeaturesOpen(false), 200)}
               >
                 Features <ChevronDown size={16} className={`ml-1 transition-transform ${featuresOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {featuresOpen && (
-                <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-[100]">
+                <div ref={dropdownRef} className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 p-4 w-[580px] z-[100]">
                   <div className="grid grid-cols-2 gap-2">
                     <Link to="/features/ai-tools" className="p-2 hover:bg-gray-50 rounded-md text-gray-700 hover:text-blue-600 transition-colors flex items-center">
                       AI Sales Tools

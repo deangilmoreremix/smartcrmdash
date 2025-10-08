@@ -53,6 +53,7 @@ import ParticleBackground from '../components/landing/ParticleBackground';
 // Import the embedded dashboard demo
 import EmbeddedDashboardDemo from '../components/landing/EmbeddedDashboardDemo';
 import VideoCallDemo from '../components/landing/VideoCallDemo';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -171,7 +172,9 @@ const LandingPage = () => {
             </div>
             
             <div className="max-w-6xl mx-auto">
-              <EmbeddedDashboardDemo />
+              <ErrorBoundary>
+                <EmbeddedDashboardDemo />
+              </ErrorBoundary>
             </div>
           </ScrollAnimationWrapper>
         </div>

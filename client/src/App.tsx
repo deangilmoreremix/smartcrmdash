@@ -279,8 +279,8 @@ function AppContent() {
         <RemoteAppRefreshManager />
         <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
         <Routes>
-          {/* Landing page as root - no navbar */}
-          <Route path="/" element={<LandingPage />} />
+           {/* Redirect root to dashboard for automation */}
+           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           {/* Dashboard embed - no navbar */}
           <Route path="/dashboard-embed" element={<DashboardEmbed />} />
@@ -296,6 +296,12 @@ function AppContent() {
           
           {/* Demo Dashboard - Public access for sales page embedding */}
           <Route path="/demo-dashboard" element={<DemoDashboard />} />
+
+          {/* Demo Contacts - Public access for automation */}
+          <Route path="/demo-contacts" element={<ContactsDemo />} />
+
+          {/* Demo Pipeline - Public access for automation */}
+          <Route path="/demo-pipeline" element={<PipelineDemo />} />
 
           {/* Core pages */}
           <Route

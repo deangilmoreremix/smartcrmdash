@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { Brain, Users, BarChart3, Zap, Search, Image, Mail, ArrowRight } from 'lucide-react';
@@ -22,32 +22,30 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
 
   // Track when component has rendered
   useEffect(() => {
-    console.log("ParallaxHero component mounted");
     setHasRendered(true);
   }, []);
 
-  // Track scroll position
-  useEffect(() => {
-    const handleScroll = () => {
-      if (containerRef.current) {
-        const { top } = containerRef.current.getBoundingClientRect();
-        
-        // Only update if the element is in view
-        if (top < window.innerHeight && top > -containerRef.current.clientHeight) {
-          setScrollY(window.scrollY);
-          console.log("Updating parallax scroll position:", window.scrollY);
-        }
-      }
-    };
+  // Track scroll position with performance optimization
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      const { top } = containerRef.current.getBoundingClientRect();
 
+      // Only update if the element is in view
+      if (top < window.innerHeight && top > -containerRef.current.clientHeight) {
+        requestAnimationFrame(() => setScrollY(window.scrollY));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     // Force an initial call to properly position elements
     handleScroll();
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasRendered]);
-  
+  }, [hasRendered, handleScroll]);
+
   const parallaxItems = [
     { 
       icon: <Brain size={40} className="text-indigo-600" />, 
@@ -100,38 +98,14 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
     }
   ];
 
-  // Log the rendering state and elements
-  useEffect(() => {
-    if (containerRef.current) {
-      console.log("ParallaxHero container element:", containerRef.current);
-      const styles = window.getComputedStyle(containerRef.current);
-      console.log("Container styles:", {
-        position: styles.position,
-        background: styles.background,
-        backgroundImage: styles.backgroundImage,
-        height: styles.height,
-        minHeight: styles.minHeight
-      });
-    }
-    
-    if (iconsRef.current) {
-      console.log("Icons container:", iconsRef.current);
-      console.log("Parallax items count:", parallaxItems.length);
-      console.log("Parallax icons rendered:", iconsRef.current.querySelectorAll('.absolute').length);
-    }
-  }, [hasRendered]);
+  
 
   return (
     <div 
       ref={containerRef}
       className="relative min-h-[600px] overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50 py-24"
     >
-      {/* Debug information */}
-      <div 
-        style={{ position: 'absolute', top: 5, left: 5, fontSize: '10px', color: '#666', zIndex: 1000, backgroundColor: 'white', padding: '2px 5px', borderRadius: '3px' }}
-      >
-        ScrollY: {scrollY} | Items: {parallaxItems.length}
-      </div>
+      
       
       {/* Parallax Elements */}
       <div ref={iconsRef} className="absolute inset-0 pointer-events-none">
