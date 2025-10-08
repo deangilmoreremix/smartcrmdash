@@ -448,7 +448,7 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - Security management and access control
 - Compliance tools and regulatory management
 
-### **Remote Pipeline** (https://cheery-syrniki-b5b6ca.netlify.app)
+### **Remote Pipeline** (https://pipeline.smartcrm.vip)
 - Advanced pipeline visualization options
 - AI-powered deal prediction and forecasting
 - Pipeline analytics with health metrics
@@ -465,7 +465,7 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - Collaboration tools and communication features
 - Mobile optimization and responsive design
 
-### **AI Goals** (https://tubular-choux-2a9b3c.netlify.app)
+### **AI Goals** (https://agency.smartcrm.vip)
 - AI-assisted goal setting and planning
 - Real-time progress tracking and monitoring
 - Milestone management with breakdown capabilities
@@ -482,7 +482,7 @@ SmartCRM is a comprehensive AI-powered sales and marketing platform that combine
 - Progress visualization and reporting
 - Goal optimization with AI-powered suggestions
 
-### **Remote Contacts** (https://taupe-sprinkles-83c9ee.netlify.app)
+### **Remote Contacts** (https://contacts.smartcrm.vip)
 - Advanced contact segmentation with AI
 - Automatic contact data enrichment
 - Bulk operations for contact management

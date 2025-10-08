@@ -29,7 +29,7 @@ const Pipeline: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showLocalFallback, setShowLocalFallback] = useState(false);
   
-  const REMOTE_PIPELINE_URL = 'https://cheery-syrniki-b5b6ca.netlify.app';
+  const REMOTE_PIPELINE_URL = 'https://pipeline.smartcrm.vip';
   const MAX_CONNECTION_ATTEMPTS = 3;
 
   // Initialize Remote Pipeline Bridge
@@ -82,7 +82,7 @@ const Pipeline: React.FC = () => {
               </h2>
             </div>
             <p className={`mb-4 ${isDark ? 'text-yellow-200' : 'text-yellow-700'}`}>
-              The remote pipeline module couldn't be loaded from https://cheery-syrniki-b5b6ca.netlify.app. 
+              The remote pipeline module couldn't be loaded from https://pipeline.smartcrm.vip. 
               This might be due to network issues or the remote service being temporarily unavailable.
             </p>
             <div className="flex gap-3">

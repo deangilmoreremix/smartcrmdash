@@ -1,19 +1,22 @@
 // Remote AI Analytics Dashboard Loader
 import React, { useRef, useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface RemoteAIAnalyticsLoaderProps {
   showHeader?: boolean;
 }
 
-const RemoteAIAnalyticsLoader: React.FC<RemoteAIAnalyticsLoaderProps> = ({ 
-  showHeader = false 
+const RemoteAIAnalyticsLoader: React.FC<RemoteAIAnalyticsLoaderProps> = ({
+  showHeader = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const REMOTE_URL = 'https://resilient-frangipane-6289c8.netlify.app';
+  const { isDark } = useTheme();
+  const currentTheme = isDark ? 'dark' : 'light';
+
+  const REMOTE_URL = 'https://ai-analytics.smartcrm.vip';
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -21,6 +24,15 @@ const RemoteAIAnalyticsLoader: React.FC<RemoteAIAnalyticsLoaderProps> = ({
       const handleLoad = () => {
         setError(null);
         setIsConnected(true);
+        // Send theme message to iframe
+        try {
+          iframe.contentWindow?.postMessage({
+            type: 'SET_THEME',
+            theme: currentTheme
+          }, REMOTE_URL);
+        } catch (error) {
+          console.log('Unable to communicate with iframe for theme setting');
+        }
       };
 
       const handleError = () => {
@@ -36,7 +48,18 @@ const RemoteAIAnalyticsLoader: React.FC<RemoteAIAnalyticsLoaderProps> = ({
         iframe.removeEventListener('error', handleError);
       };
     }
-  }, []);
+  }, [currentTheme]);
+
+  // Update theme when it changes
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (iframe?.contentWindow && isConnected) {
+      iframe.contentWindow.postMessage({
+        type: 'SET_THEME',
+        theme: currentTheme
+      }, REMOTE_URL);
+    }
+  }, [currentTheme, isConnected]);
 
   const handleRefresh = () => {
     if (iframeRef.current) {
@@ -98,7 +121,7 @@ const RemoteAIAnalyticsLoader: React.FC<RemoteAIAnalyticsLoaderProps> = ({
 
         <iframe
           ref={iframeRef}
-          src={REMOTE_URL}
+          src={`${REMOTE_URL}?theme=light&mode=light`}
           className="w-full h-full border-0"
           title="AI Analytics Dashboard"
           allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"

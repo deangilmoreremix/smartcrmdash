@@ -2,7 +2,7 @@
 
 ## Step 1: Add the Bridge Script to Your Pipeline App
 
-Add the `remote-pipeline-integration.js` file to your pipeline app at `https://cheery-syrniki-b5b6ca.netlify.app`.
+Add the `remote-pipeline-integration.js` file to your pipeline app at `https://pipeline.smartcrm.vip`.
 
 ### Option A: Include as Script Tag
 ```html

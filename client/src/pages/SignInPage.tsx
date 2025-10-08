@@ -47,7 +47,34 @@ const SignInPage: React.FC = () => {
     });
   };
   const handleDevBypass = () => {
-    navigate('/dashboard', { replace: true });
+    // Set up dev session in localStorage
+    const devUser = {
+      id: 'dev-user-12345',
+      email: 'dev@smartcrm.local',
+      username: 'developer',
+      firstName: 'Development',
+      lastName: 'User',
+      role: 'super_admin',
+      app_context: 'smartcrm',
+      created_at: new Date().toISOString()
+    };
+
+    const devSession = {
+      access_token: 'dev-bypass-token',
+      refresh_token: 'dev-bypass-refresh',
+      expires_at: Date.now() + (24 * 60 * 60 * 1000),
+      user: devUser
+    };
+
+    localStorage.setItem('dev-user-session', JSON.stringify(devUser));
+    localStorage.setItem('sb-supabase-auth-token', JSON.stringify(devSession));
+    localStorage.setItem('smartcrm-dev-mode', 'true');
+    localStorage.setItem('smartcrm-dev-user', JSON.stringify(devUser));
+
+    console.log('✅ Dev bypass session created from sign-in page');
+
+    // Force page reload to trigger auth context update
+    window.location.href = '/dashboard';
   };
 
 

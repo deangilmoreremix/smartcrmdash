@@ -18,7 +18,7 @@ const PipelineApp: React.FC = () => {
         });
         
         const modulePromise = loadRemoteComponent(
-          'https://cheery-syrniki-b5b6ca.netlify.app',
+          'https://pipeline.smartcrm.vip',
           'PipelineApp',
           './PipelineApp'
         );
@@ -59,7 +59,7 @@ const PipelineApp: React.FC = () => {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://cheery-syrniki-b5b6ca.netlify.app?theme=light&mode=light"
+        src="https://pipeline.smartcrm.vip?theme=light&mode=light"
         className="w-full h-full border-0"
         title="Remote Pipeline System"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"

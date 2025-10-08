@@ -30,7 +30,7 @@ const IframeOverlapDetector: React.FC = () => {
     {
       id: 'intel',
       name: 'Intel Dashboard',
-      url: 'https://clever-syrniki-4df87f.netlify.app/',
+      url: 'https://research.smartcrm.vip/',
       location: 'Navbar Intel Dropdown'
     },
     {

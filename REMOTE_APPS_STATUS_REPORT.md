@@ -10,7 +10,7 @@
 - **RemoteFunnelCraftLoader**: https://funnelcraft-ai.videoremix.io/
 - **RemoteContentAILoader**: https://content-ai.videoremix.io
 - **RemoteSmartCRMLoader**: https://smartcrm-closer.videoremix.io
-- **RemoteAIGoalsLoader**: https://tubular-choux-2a9b3c.netlify.app
+- **RemoteAIGoalsLoader**: https://agency.smartcrm.vip
 
 ### Status: All use simple iframe approach with proper error handling
 

@@ -18,7 +18,7 @@ const ContactsApp: React.FC = () => {
         });
         
         const modulePromise = loadRemoteComponent(
-          'https://taupe-sprinkles-83c9ee.netlify.app',
+          'https://contacts.smartcrm.vip',
           'ContactsApp',
           './ContactsApp'
         );
@@ -59,7 +59,7 @@ const ContactsApp: React.FC = () => {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://taupe-sprinkles-83c9ee.netlify.app?theme=light&mode=light"
+        src="https://contacts.smartcrm.vip?theme=light&mode=light"
         className="w-full h-full border-0"
         style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
         title="Enhanced Contacts Module"

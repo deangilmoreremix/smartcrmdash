@@ -10,7 +10,7 @@ const AnalyticsApp: React.FC = () => {
       try {
         console.log('🚀 Loading Module Federation Analytics...');
         const module = await loadRemoteComponent(
-          'https://resilient-frangipane-6289c8.netlify.app',
+          'https://ai-analytics.smartcrm.vip',
           'AnalyticsApp',
           './AnalyticsApp'
         );
@@ -29,7 +29,7 @@ const AnalyticsApp: React.FC = () => {
     // Fallback to iframe
     return (
       <iframe
-        src="https://resilient-frangipane-6289c8.netlify.app"
+        src="https://ai-analytics.smartcrm.vip"
         className="w-full h-full border-0"
         title="AI Analytics Dashboard"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"

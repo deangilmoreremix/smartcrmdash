@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', addNavigationButtons);
 </script>
 ```
 
-### 2. Product Research Module (https://clever-syrniki-4df87f.netlify.app)
+### 2. Product Research Module (https://research.smartcrm.vip)
 
 ```html
 <script src="./remote-navigation-bridge.js"></script>
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', setupCRMIntegration);
 </script>
 ```
 
-### 3. AI Analytics Dashboard (https://resilient-frangipane-6289c8.netlify.app)
+### 3. AI Analytics Dashboard (https://ai-analytics.smartcrm.vip)
 
 ```html
 <script src="./remote-navigation-bridge.js"></script>

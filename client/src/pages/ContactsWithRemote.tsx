@@ -311,7 +311,7 @@ const ContactsWithRemote: React.FC = () => {
     
     messages.forEach((message, index) => {
       setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage(message, 'https://taupe-sprinkles-83c9ee.netlify.app');
+        iframeRef.current?.contentWindow?.postMessage(message, 'https://contacts.smartcrm.vip');
         console.log(`📤 Sent setup message ${index + 1}:`, message.type);
       }, index * 200);
     });
@@ -360,7 +360,7 @@ const ContactsWithRemote: React.FC = () => {
       <div className="flex-1" style={{ height: 'calc(100vh - 100px)' }}>
         <iframe
           ref={iframeRef}
-          src="https://taupe-sprinkles-83c9ee.netlify.app"
+          src="https://contacts.smartcrm.vip"
           style={{
             width: '100%',
             height: '100%',

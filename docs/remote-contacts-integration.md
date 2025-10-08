@@ -1,6 +1,6 @@
 # Remote Contacts Module Integration Guide
 
-This guide explains how to integrate your remote contacts module (https://taupe-sprinkles-83c9ee.netlify.app) with the CRM system using postMessage communication.
+This guide explains how to integrate your remote contacts module (https://contacts.smartcrm.vip) with the CRM system using postMessage communication.
 
 ## Overview
 

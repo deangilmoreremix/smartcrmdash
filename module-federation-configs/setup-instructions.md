@@ -11,7 +11,7 @@ npm install @originjs/vite-plugin-federation
 ```
 
 ### 2. Replace vite.config.js
-- **Contacts App** (`https://taupe-sprinkles-83c9ee.netlify.app`): Use `contacts-app-vite.config.js`
+- **Contacts App** (`https://contacts.smartcrm.vip`): Use `contacts-app-vite.config.js`
 - **Pipeline App** (`https://cheery-syrniki-b5b6ca.netlify.app`): Use `pipeline-app-vite.config.js`  
 - **Analytics App** (`https://resilient-frangipane-6289c8.netlify.app`): Use `analytics-app-vite.config.js`
 
@@ -43,7 +43,7 @@ npm run build
 ```
 
 After deployment, each app will expose:
-- `https://taupe-sprinkles-83c9ee.netlify.app/remoteEntry.js`
+- `https://contacts.smartcrm.vip/remoteEntry.js`
 - `https://cheery-syrniki-b5b6ca.netlify.app/remoteEntry.js`
 - `https://resilient-frangipane-6289c8.netlify.app/remoteEntry.js`
 
@@ -56,7 +56,7 @@ After setup, your CRM will be able to load these as proper Module Federation rem
 import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
 
 const ContactsModule = await loadRemoteComponent(
-  'https://taupe-sprinkles-83c9ee.netlify.app',
+  'https://contacts.smartcrm.vip',
   'ContactsApp',
   './ContactsApp'
 );

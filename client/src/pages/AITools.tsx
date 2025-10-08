@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useAITools, AIToolType } from '../components/AIToolsProvider';
-import { 
-  Brain, 
-  Mail, 
-  MessageSquare, 
-  FileText, 
-  Phone, 
-  Target, 
-  FileSearch, 
-  TrendingUp, 
+import { useTheme } from '../contexts/ThemeContext';
+import {
+  Brain,
+  Mail,
+  MessageSquare,
+  FileText,
+  Phone,
+  Target,
+  FileSearch,
+  TrendingUp,
   BarChart3,
-  PieChart, 
+  PieChart,
   ChevronRight,
   CheckCheck,
   ArrowRight,
@@ -36,7 +37,9 @@ import {
   Calendar,
   X,
   Bot,
-  Lightbulb
+  Lightbulb,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StreamingChat from '../components/aiTools/StreamingChat';
@@ -63,6 +66,7 @@ import ImageGallery from '../components/ImageGallery';
 
 const AITools: React.FC = () => {
   const { openTool } = useAITools();
+  const { isDark, toggleTheme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showDemo, setShowDemo] = useState(false);
@@ -461,25 +465,42 @@ const AITools: React.FC = () => {
   // The modal system now handles tool rendering, so we only show the main grid
 
   return (
-    <div className="h-screen overflow-y-auto">
+    <div className={`h-screen overflow-y-auto ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">AI Tools</h1>
-        <p className="text-gray-600 mt-1">Advanced AI capabilities for your CRM</p>
+      <header className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>AI Tools</h1>
+          <p className={`text-gray-600 mt-1 ${isDark ? 'text-gray-400' : ''}`}>Advanced AI capabilities for your CRM</p>
+        </div>
+        <button
+          onClick={toggleTheme}
+          className={`p-2 rounded-lg transition-colors ${
+            isDark
+              ? 'bg-gray-800 hover:bg-gray-700 text-yellow-400'
+              : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm border border-gray-200'
+          }`}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
       </header>
 
       <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
         {/* Search Bar */}
         <div className="relative max-w-md w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-400'}`} />
           </div>
           <input
             type="text"
             placeholder="Search AI tools..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className={`pl-10 pr-4 py-2 w-full border rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none ${
+              isDark
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400'
+                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+            }`}
           />
         </div>
 
