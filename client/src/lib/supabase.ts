@@ -8,16 +8,23 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 console.log('🔍 Supabase URL:', supabaseUrl);
 console.log('🔍 Supabase Anon Key:', supabaseAnonKey ? '***' + supabaseAnonKey.slice(-4) : 'undefined');
 
-// Create client directly (like your working example)
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    storageKey: 'smartcrm-auth-token'
+// Create singleton Supabase client to avoid multiple GoTrueClient instances
+let supabaseInstance: any = null;
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+        storageKey: 'smartcrm-auth-token'
+      }
+    });
   }
-});
+  return supabaseInstance;
+})();
 
 // Export a flag to check if Supabase is available
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);

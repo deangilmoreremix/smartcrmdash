@@ -70,6 +70,10 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['lucide-react'],
+    include: [
+      // Force include simple-peer to avoid util module issues
+      'simple-peer'
+    ]
   },
   define: {
     global: 'globalThis',

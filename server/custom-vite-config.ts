@@ -15,7 +15,7 @@ export const customViteServerConfig = {
   host: "0.0.0.0",
   hmr: {
     host: "0.0.0.0",
-    port: 5000
+    port: process.env.PORT ? parseInt(process.env.PORT) : 5000
   }
 };
 

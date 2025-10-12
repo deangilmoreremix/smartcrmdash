@@ -50,8 +50,8 @@ class DynamicModuleFederation {
       
       // Try different possible script URLs
       const possibleUrls = [
-        `${url}/assets/remoteEntry.js`,
         `${url}/remoteEntry.js`,
+        `${url}/assets/remoteEntry.js`,
         `${url}/static/js/remoteEntry.js`,
         url.endsWith('.js') ? url : `${url}/remoteEntry.js`
       ];

@@ -9,10 +9,15 @@ export class GPT5Service {
 
   private async checkApiStatus(): Promise<void> {
     try {
-      const response = await fetch('/api/openai/status');
-      const status = await response.json();
-      this.isConfigured = status.configured;
-      console.log('GPT5Service: API status checked', status);
+      // Check if OpenAI API key is available in environment
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (apiKey && apiKey.length > 10) {
+        this.isConfigured = true;
+        console.log('GPT5Service: API key found, service configured');
+      } else {
+        this.isConfigured = false;
+        console.warn('GPT5Service: No valid API key found');
+      }
     } catch (error) {
       console.error('GPT5Service: Failed to check API status:', error);
       this.isConfigured = false;

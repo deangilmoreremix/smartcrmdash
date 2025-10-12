@@ -8,28 +8,34 @@ const AnalyticsApp: React.FC = () => {
   useEffect(() => {
     const loadRemote = async () => {
       try {
-        console.log('🚀 Loading Module Federation Analytics...');
+        console.log('🚀 Loading Module Federation Analytics from https://ai-analytics.smartcrm.vip...');
         const module = await loadRemoteComponent(
           'https://ai-analytics.smartcrm.vip',
           'AnalyticsApp',
           './AnalyticsApp'
         );
+        console.log('✅ Module Federation Analytics loaded successfully:', module);
         setRemoteAnalytics(() => module.default || module);
-        console.log('✅ Module Federation Analytics loaded successfully');
       } catch (err) {
         console.warn('❌ Module Federation failed, using iframe fallback:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     };
 
-    loadRemote();
+    // Try Module Federation first, but don't wait too long
+    const timeout = setTimeout(() => {
+      console.log('⏰ Module Federation timeout, falling back to iframe');
+      setError('Module Federation timeout');
+    }, 10000); // 10 second timeout
+
+    loadRemote().finally(() => clearTimeout(timeout));
   }, []);
 
   if (error || !RemoteAnalytics) {
     // Fallback to iframe
     return (
       <iframe
-        src="https://ai-analytics.smartcrm.vip"
+        src="https://ai-analytics.smartcrm.vip/"
         className="w-full h-full border-0"
         title="AI Analytics Dashboard"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"

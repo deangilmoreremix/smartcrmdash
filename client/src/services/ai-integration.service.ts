@@ -10,7 +10,7 @@ import { logger } from './logger.service';
 import { rateLimiter } from './rate-limiter.service';
 import { Contact } from '../types';
 import { ContactEnrichmentData } from './aiEnrichmentService';
-import apiConfig, { getDefaultModel, getBestModelForTask } from '../config/api.config';
+import apiConfig from '../config/api.config';
 
 export interface AIAnalysisRequest {
   contactId: string;
@@ -68,7 +68,12 @@ export interface BulkAnalysisResponse {
 }
 
 class AIIntegrationService {
-  private apiUrl = apiConfig.dataProcessing.enrichment.baseURL;
+  private apiUrl: string;
+
+  constructor() {
+    // Use the contactsAPI baseURL as fallback since dataProcessing doesn't exist
+    this.apiUrl = apiConfig.contactsAPI.baseURL + '/ai-integration';
+  }
   
   async analyzeContact(request: AIAnalysisRequest): Promise<AIAnalysisResponse> {
     const startTime = Date.now();

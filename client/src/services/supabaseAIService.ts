@@ -200,9 +200,15 @@ class SupabaseAIService {
         console.warn('Supabase connection failed. Invalid URL. Using fallback configurations.');
         this.supabaseAvailable = false;
       } else {
-        // Test connection with a simple query
+        // Test connection with a simple query - use timeout to avoid hanging
         try {
-          const { error } = await supabase.from('ai_models').select('id').limit(1);
+          const { error } = await Promise.race([
+            supabase.from('ai_models').select('id').limit(1),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Connection timeout')), 5000)
+            )
+          ]) as any;
+
           if (error) {
             console.warn('Supabase connection failed. Using fallback configurations:', error);
             this.supabaseAvailable = false;

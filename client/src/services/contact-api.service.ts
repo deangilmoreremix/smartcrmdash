@@ -54,7 +54,7 @@ class ContactAPIService {
     // Edge Functions are more suitable for complex operations like AI enrichment
     this.baseURL = apiConfig.contactsAPI.baseURL;
     this.isMockMode = true; // Always use local storage for now
-    
+
     console.log('Using local storage for contact management');
   }
   
@@ -102,7 +102,7 @@ class ContactAPIService {
         avatarSrc: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
         sources: ['LinkedIn', 'Email'],
         interestLevel: 'hot',
-        status: 'prospect',
+        status: 'lead',
         lastConnected: '2024-01-15',
         aiScore: 85,
         tags: ['Enterprise', 'High Value'],
@@ -137,7 +137,7 @@ class ContactAPIService {
         avatarSrc: 'https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
         sources: ['Conference', 'LinkedIn'],
         interestLevel: 'hot',
-        status: 'qualified',
+        status: 'customer',
         lastConnected: '2024-01-20',
         aiScore: 92,
         tags: ['Enterprise', 'Decision Maker'],
@@ -213,7 +213,7 @@ class ContactAPIService {
         industry: 'Retail',
         avatarSrc: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
         sources: ['Website', 'Email'],
-        interestLevel: 'warm',
+        interestLevel: 'medium',
         status: 'prospect',
         lastConnected: '2024-01-25',
         aiScore: 73,
@@ -366,7 +366,14 @@ class ContactAPIService {
     // Check cache
     const cached = cacheService.getContactList(filters);
     if (cached) {
-      return cached;
+      // Convert cached array back to ContactListResponse format
+      return {
+        contacts: cached,
+        total: cached.length,
+        limit: filters.limit || 50,
+        offset: filters.offset || 0,
+        hasMore: false // Can't determine from cached array
+      };
     }
     
     // Local storage fallback
