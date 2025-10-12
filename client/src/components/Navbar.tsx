@@ -105,7 +105,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   // Counters
   const counters = React.useMemo(() => {
     const activeDeals = Object.values(deals).filter(
-      deal => String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
+      (deal: any) => deal.status === 'open'
     ).length;
 
     const hotContacts = Object.values(contacts).filter(contact =>
@@ -412,7 +412,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
-    { id: 'communications', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
+    { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
     { id: 'intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
     { id: 'intel-page', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
