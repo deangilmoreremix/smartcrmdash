@@ -8,6 +8,7 @@ interface DealStore {
 
   // Actions
   fetchDeals: () => Promise<void>;
+  getStageValues: () => Record<string, number>;
   addDeal: (deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => Deal;
   updateDeal: (id: string, updates: Partial<Deal>) => void;
   deleteDeal: (id: string) => void;
@@ -28,12 +29,24 @@ export const useDealStore = create<DealStore>((set, get) => ({
     }
   },
 
+  getStageValues: () => {
+    const deals = get().deals;
+    const stageValues: Record<string, number> = {};
+
+    Object.values(deals).forEach(deal => {
+      const stage = deal.stage_id || 'qualification';
+      stageValues[stage] = (stageValues[stage] || 0) + deal.value;
+    });
+
+    return stageValues;
+  },
+
   addDeal: (dealData) => {
     const newDeal: Deal = {
       ...dealData,
       id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     set(state => ({
@@ -50,7 +63,7 @@ export const useDealStore = create<DealStore>((set, get) => ({
         [id]: {
           ...state.deals[id],
           ...updates,
-          updatedAt: new Date()
+          updated_at: new Date().toISOString()
         }
       }
     }));

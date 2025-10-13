@@ -32,7 +32,7 @@ export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 // Helper function to check connection
 export const checkSupabaseConnection = async () => {
   try {
-    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    const { error } = await supabase.from('profiles').select('count').limit(1);
     return { connected: !error, error: error?.message };
   } catch (error) {
     return { connected: false, error: 'Connection failed' };

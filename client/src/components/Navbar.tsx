@@ -199,18 +199,18 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
   ];
 
-  // General connected apps - now sales tools
+  // General connected apps - remote federated modules
   const connectedApps = [
-    { name: "Pipeline Intelligence", url: '/pipeline-intelligence', icon: BarChart3, isExternal: false },
-    { name: "Deal Risk Monitor", url: '/deal-risk-monitor', icon: Shield, isExternal: false },
-    { name: "Smart Conversion Insights", url: '/smart-conversion-insights', icon: Zap, isExternal: false },
-    { name: "Pipeline Health Dashboard", url: '/pipeline-health-dashboard', icon: Activity, isExternal: false },
-    { name: "Sales Cycle Analytics", url: '/sales-cycle-analytics', icon: Clock, isExternal: false },
-    { name: "Win Rate Intelligence", url: '/win-rate-intelligence', icon: TrendingUp, isExternal: false },
-    { name: "AI Sales Forecast", url: '/ai-sales-forecast', icon: LineChart, isExternal: false },
-    { name: "Live Deal Analysis", url: '/live-deal-analysis', icon: Briefcase, isExternal: false },
-    { name: "Competitor Insights", url: '/competitor-insights', icon: Target, isExternal: false },
-    { name: "Revenue Intelligence", url: '/revenue-intelligence', icon: DollarSign, isExternal: false }
+    { name: "Enhanced Contacts Module", url: 'https://contacts.smartcrm.vip', icon: Users, isExternal: true },
+    { name: "AI Agency Suite", url: 'https://agency.smartcrm.vip', icon: Brain, isExternal: true },
+    { name: "AI Analytics Dashboard", url: 'https://analytics.smartcrm.vip', icon: BarChart3, isExternal: true },
+    { name: "Enhanced Pipeline Deals", url: 'https://pipeline.smartcrm.vip', icon: Briefcase, isExternal: true },
+    { name: "Product Research Module", url: 'https://research.smartcrm.vip', icon: Search, isExternal: true },
+    { name: "Advanced AI Calendar", url: 'https://calendar.smartcrm.vip', icon: Calendar, isExternal: true },
+    { name: "AI-Powered Analytics Dashboard", url: 'https://ai-analytics.smartcrm.vip', icon: TrendingUp, isExternal: true },
+    { name: "AI Sales Maximizer", url: 'https://salesmax.smartcrm.vip', icon: DollarSign, isExternal: true },
+    { name: "AI Referral Maximizer", url: 'https://referrals.smartcrm.vip', icon: Users, isExternal: true },
+    { name: "Content AI", url: 'https://contentai.smartcrm.vip', icon: FileText, isExternal: true }
   ];
 
   const analyticsOptions = [
@@ -1029,17 +1029,19 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
             key={index}
             onClick={() => {
               const routeMap: { [key: string]: string } = {
-                'appointments': '/appointments',
+                'appointments': '/appointments-dashboard',
                 'video-email': '/video-email',
                 'text-messages': '/text-messages',
                 'phone-system': '/phone-system',
                 'invoicing': '/invoicing',
+                'lead-automation': '/lead-automation',
+                'circle-prospecting': '/circle-prospecting',
+                'forms': '/forms',
+                'business-analysis': '/business-analyzer',
                 'content-library': '/content-library',
-                'forms-and-surveys': '/forms-and-surveys',
-                'voice-profiles': '/voice-profiles',
-                'business-analysis': '/business-analysis'
+                'voice-profiles': '/voice-profiles'
               };
-              
+
               const route = routeMap[tool.tool] || `/${tool.tool}`;
               navigate(route);
               closeDropdown();

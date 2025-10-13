@@ -21,7 +21,6 @@ export interface ApiConfig {
 
 // Get Supabase URL from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const isDevMode = import.meta.env.DEV || import.meta.env.VITE_ENV === 'development';
 
 // Updated base URL for API endpoints to use Supabase Edge Functions
 const apiBaseUrl = supabaseUrl ?

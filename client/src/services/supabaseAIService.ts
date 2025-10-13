@@ -293,7 +293,7 @@ class SupabaseAIService {
         return Object.values(FALLBACK_MODELS).filter(model => model.is_active);
       }
 
-      return (data || []).map(model => ({
+      return (data || []).map((model: any) => ({
         ...model,
         created_at: new Date(model.created_at),
         updated_at: new Date(model.updated_at)
@@ -331,7 +331,7 @@ class SupabaseAIService {
         );
       }
 
-      return (data || []).map(model => ({
+      return (data || []).map((model: any) => ({
         ...model,
         created_at: new Date(model.created_at),
         updated_at: new Date(model.updated_at)
@@ -433,7 +433,7 @@ class SupabaseAIService {
         return recommended;
       }
 
-      return (data || []).map(model => ({
+      return (data || []).map((model: any) => ({
         ...model,
         created_at: new Date(model.created_at),
         updated_at: new Date(model.updated_at)
@@ -541,7 +541,7 @@ class SupabaseAIService {
       }
 
       // Process the data for statistics
-      const stats = (data || []).reduce((acc, log) => {
+      const stats = (data || []).reduce((acc: any, log: any) => {
         const modelId = log.model_id;
         
         if (!acc[modelId]) {
@@ -619,7 +619,7 @@ class SupabaseAIService {
         );
       }
 
-      return (data || []).map(model => ({
+      return (data || []).map((model: any) => ({
         ...model,
         created_at: new Date(model.created_at),
         updated_at: new Date(model.updated_at)

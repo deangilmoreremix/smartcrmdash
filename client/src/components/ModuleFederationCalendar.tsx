@@ -18,7 +18,7 @@ const CalendarApp: React.FC = () => {
         });
         
         const modulePromise = loadRemoteComponent(
-          'https://ai-calendar-applicat-qshp.bolt.host',
+          'https://calendar.smartcrm.vip',
           'CalendarApp',
           './CalendarApp'
         );
@@ -44,36 +44,109 @@ const CalendarApp: React.FC = () => {
     loadRemote();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading Calendar Module...</p>
-        </div>
-      </div>
-    );
-  }
+  // Remove loading spinner - go directly to iframe fallback
 
   if (error || !RemoteCalendar) {
     // Fallback to iframe - remote app needs Module Federation configuration
     return (
       <iframe
-        src="https://ai-calendar-applicat-qshp.bolt.host?theme=light&mode=light"
+        src="https://calendar.smartcrm.vip?theme=light&mode=light"
         className="w-full h-full border-0"
         style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
-        title="Calendar Moderation System"
+        title="Advanced AI Calendar"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
         loading="lazy"
         onLoad={(e) => {
+          console.log('🎯 AI Calendar iframe loaded, setting up communication...');
+
           // Send theme message to iframe
           const iframe = e.currentTarget;
+
+          // Get current theme from the host app
+          const isDark = document.documentElement.classList.contains('dark');
+          const theme = isDark ? 'dark' : 'light';
+
           iframe.contentWindow?.postMessage({
             type: 'SET_THEME',
-            theme: 'light',
-            mode: 'light'
+            theme: theme,
+            mode: theme
           }, '*');
+
+          // Send shared data
+          const sharedData = useSharedModuleState.getState().sharedData;
+          iframe.contentWindow?.postMessage({
+            type: 'INITIAL_DATA_SYNC',
+            data: sharedData,
+            source: 'CRM_HOST'
+          }, '*');
+
+          // Set up message listener for iframe interactions
+          const messageHandler = (event: MessageEvent) => {
+            // Allow messages from the calendar domain
+            if (event.origin === 'https://calendar.smartcrm.vip' || event.origin === window.location.origin) {
+              const { type, data } = event.data;
+              console.log('📨 Message from AI Calendar:', type, data);
+
+              switch (type) {
+                case 'BUTTON_CLICK':
+                  console.log('🖱️ Calendar button clicked via iframe:', data);
+                  moduleFederationOrchestrator.broadcastToAllModules('CALENDAR_BUTTON_CLICK', data);
+                  break;
+                case 'APPOINTMENT_CREATED':
+                  console.log('📅 Appointment created via iframe:', data);
+                  moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_CREATED', data);
+                  break;
+                case 'APPOINTMENT_UPDATED':
+                  console.log('📝 Appointment updated via iframe:', data);
+                  moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_UPDATED', data);
+                  break;
+                case 'APPOINTMENT_DELETED':
+                  console.log('🗑️ Appointment deleted via iframe:', data);
+                  moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_DELETED', data);
+                  break;
+                case 'CALENDAR_READY':
+                  console.log('✅ AI Calendar ready for interaction');
+                  // Send confirmation back
+                  iframe.contentWindow?.postMessage({
+                    type: 'CRM_READY',
+                    data: { connected: true }
+                  }, '*');
+                  break;
+                default:
+                  console.log('📨 Unhandled message type from calendar:', type);
+              }
+            }
+          };
+
+          window.addEventListener('message', messageHandler);
+
+          // Listen for theme changes from the host app
+          const themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const isDark = document.documentElement.classList.contains('dark');
+                const theme = isDark ? 'dark' : 'light';
+                console.log('🎨 Theme changed, updating calendar:', theme);
+                iframe.contentWindow?.postMessage({
+                  type: 'SET_THEME',
+                  theme: theme,
+                  mode: theme
+                }, '*');
+              }
+            });
+          });
+
+          themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+          });
+
+          // Clean up on unmount
+          return () => {
+            window.removeEventListener('message', messageHandler);
+            themeObserver.disconnect();
+          };
         }}
       />
     );
@@ -81,13 +154,30 @@ const CalendarApp: React.FC = () => {
 
   // Pass shared state and theme props to Module Federation component
   const sharedData = useSharedModuleState(state => state.sharedData);
-  
-  return React.createElement(RemoteCalendar as any, { 
-    theme: "light", 
+
+  return React.createElement(RemoteCalendar as any, {
+    theme: "light",
     mode: "light",
     sharedData,
     onDataUpdate: (data: any) => {
       moduleFederationOrchestrator.broadcastToAllModules('CALENDAR_DATA_UPDATE', data);
+    },
+    // Add event handlers for button interactions
+    onButtonClick: (action: string, data?: any) => {
+      console.log('Calendar button clicked:', action, data);
+      moduleFederationOrchestrator.broadcastToAllModules('CALENDAR_BUTTON_CLICK', { action, data });
+    },
+    onAppointmentCreate: (appointment: any) => {
+      console.log('Appointment created:', appointment);
+      moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_CREATED', appointment);
+    },
+    onAppointmentUpdate: (appointment: any) => {
+      console.log('Appointment updated:', appointment);
+      moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_UPDATED', appointment);
+    },
+    onAppointmentDelete: (appointmentId: string) => {
+      console.log('Appointment deleted:', appointmentId);
+      moduleFederationOrchestrator.broadcastToAllModules('APPOINTMENT_DELETED', appointmentId);
     }
   });
 };

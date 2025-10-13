@@ -1,51 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { loadRemoteComponent } from '../utils/dynamicModuleFederation';
+import React from 'react';
 
 const AnalyticsApp: React.FC = () => {
-  const [RemoteAnalytics, setRemoteAnalytics] = useState<React.ComponentType | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Always use iframe fallback (no loading spinner)
+  return (
+    <iframe
+      src="https://ai-analytics.smartcrm.vip/"
+      className="w-full h-full border-0"
+      title="AI-Powered Analytics Dashboard with Multiple Apps"
+      allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+      loading="lazy"
+      onLoad={(e) => {
+        console.log('🎯 AI Analytics iframe loaded, setting up communication...');
 
-  useEffect(() => {
-    const loadRemote = async () => {
-      try {
-        console.log('🚀 Loading Module Federation Analytics from https://ai-analytics.smartcrm.vip...');
-        const module = await loadRemoteComponent(
-          'https://ai-analytics.smartcrm.vip',
-          'AnalyticsApp',
-          './AnalyticsApp'
-        );
-        console.log('✅ Module Federation Analytics loaded successfully:', module);
-        setRemoteAnalytics(() => module.default || module);
-      } catch (err) {
-        console.warn('❌ Module Federation failed, using iframe fallback:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      }
-    };
+        // Send theme message to iframe
+        const iframe = e.currentTarget;
 
-    // Try Module Federation first, but don't wait too long
-    const timeout = setTimeout(() => {
-      console.log('⏰ Module Federation timeout, falling back to iframe');
-      setError('Module Federation timeout');
-    }, 10000); // 10 second timeout
+        // Get current theme from the host app
+        const isDark = document.documentElement.classList.contains('dark');
+        const theme = isDark ? 'dark' : 'light';
 
-    loadRemote().finally(() => clearTimeout(timeout));
-  }, []);
+        iframe.contentWindow?.postMessage({
+          type: 'SET_THEME',
+          theme: theme,
+          mode: theme
+        }, '*');
 
-  if (error || !RemoteAnalytics) {
-    // Fallback to iframe
-    return (
-      <iframe
-        src="https://ai-analytics.smartcrm.vip/"
-        className="w-full h-full border-0"
-        title="AI Analytics Dashboard"
-        allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
-        loading="lazy"
-      />
-    );
-  }
+        // Send shared data
+        const sharedData = { theme: 'light', user: null };
+        iframe.contentWindow?.postMessage({
+          type: 'INITIAL_DATA_SYNC',
+          data: sharedData,
+          source: 'CRM_HOST'
+        }, '*');
 
-  return <RemoteAnalytics />;
+        // Set up message listener for iframe interactions
+        const messageHandler = (event: MessageEvent) => {
+          // Allow messages from the analytics domain
+          if (event.origin === 'https://ai-analytics.smartcrm.vip' || event.origin === window.location.origin) {
+            const { type, data } = event.data;
+            console.log('📨 Message from AI Analytics:', type, data);
+
+            switch (type) {
+              case 'ANALYTICS_READY':
+                console.log('✅ AI Analytics ready for interaction');
+                iframe.contentWindow?.postMessage({
+                  type: 'CRM_READY',
+                  data: { connected: true }
+                }, '*');
+                break;
+              case 'DASHBOARD_CLICK':
+                console.log('📊 Analytics dashboard interaction:', data);
+                // Handle dashboard interactions
+                break;
+              default:
+                console.log('📨 Unhandled message type from analytics:', type);
+            }
+          }
+        };
+
+        window.addEventListener('message', messageHandler);
+
+        // Listen for theme changes from the host app
+        const themeObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              const isDark = document.documentElement.classList.contains('dark');
+              const theme = isDark ? 'dark' : 'light';
+              console.log('🎨 Theme changed, updating analytics:', theme);
+              iframe.contentWindow?.postMessage({
+                type: 'SET_THEME',
+                theme: theme,
+                mode: theme
+              }, '*');
+            }
+          });
+        });
+
+        themeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+
+        // Clean up on unmount
+        return () => {
+          window.removeEventListener('message', messageHandler);
+          themeObserver.disconnect();
+        };
+      }}
+    />
+  );
 };
 
 interface ModuleFederationAnalyticsProps {
