@@ -700,6 +700,22 @@ We welcome contributions to SmartCRM! Please see our [Contributing Guide](CONTRI
 - Pull request process
 - Issue reporting
 
+## 🚀 Netlify Deployment Notes
+
+The production build is a Vite single-page application (SPA) rooted in the `client` directory. Netlify consumes the
+[`netlify.toml`](netlify.toml) configuration to:
+
+- run `npm run build` from the repository root (the Vite config already points its `root` to `./client`, and the build now
+  emits into the top-level `dist` folder)
+- publish the generated static assets from `dist`
+- provide the Supabase URL, anon key, and service role key to both the Vite build (via the `VITE_`-prefixed variables) and any
+  Netlify Functions (via the `SUPABASE_` variables)
+- force every route to resolve to `index.html` so the SPA can handle navigation even on deep links
+
+If a deploy still shows a 404 page, double-check the Netlify site's build settings. The base directory should remain the
+repository root, the publish directory must be `dist`, and a fresh deploy will copy the `_redirects` file and hashed bundles
+from the Vite build into that folder.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
