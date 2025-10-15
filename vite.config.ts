@@ -123,10 +123,10 @@ export default defineConfig({
             return 'calendar';
           }
 
-          // Split large service files
-          if (id.includes('src/services/openai')) {
-            return 'openai-services';
-          }
+          // Split large service files - temporarily disable openai chunking to fix TDZ error
+          // if (id.includes('src/services/openai')) {
+          //   return 'openai-services';
+          // }
           if (id.includes('src/services/gemini') || id.includes('src/services/gpt5')) {
             return 'ai-providers';
           }
