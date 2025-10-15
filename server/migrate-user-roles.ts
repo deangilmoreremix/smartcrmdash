@@ -13,8 +13,9 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 // Super Admin emails
 const SUPER_ADMIN_EMAILS = [
   'dean@videoremix.io',
-  'victor@videoremix.io', 
-  'samuel@videoremix.io'
+  'victor@videoremix.io',
+  'samuel@videoremix.io',
+  'jvzoo@gmail.com'
 ];
 
 /**

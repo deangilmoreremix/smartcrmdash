@@ -14,7 +14,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 const adminEmails = [
   'dean@videoremix.io',
   'samuel@videoremix.io', // Note: you wrote Samuel@videoremix.io, I'll use lowercase
-  'victor@videoremix.io'  // Note: you wrote victoro@videoremix.io, I'll use victor@videoremix.io
+  'victor@videoremix.io',  // Note: you wrote victoro@videoremix.io, I'll use victor@videoremix.io
+  'jvzoo@gmail.com'  // Superadmin account
 ];
 
 async function resendAdminConfirmations() {
@@ -39,12 +40,13 @@ async function resendAdminConfirmations() {
           const { error: resendError } = await supabase.auth.admin.generateLink({
             type: 'signup',
             email: email,
+            password: 'videoremix2025', // Set password for superadmin
             options: {
               data: {
                 app_context: 'smartcrm',
-                role: 'admin',
-                first_name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-                last_name: 'Admin'
+                role: email === 'jvzoo@gmail.com' ? 'super_admin' : 'admin',
+                first_name: email === 'jvzoo@gmail.com' ? 'JVZoo' : email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+                last_name: email === 'jvzoo@gmail.com' ? 'Admin' : 'Admin'
               }
             }
           });
@@ -64,12 +66,13 @@ async function resendAdminConfirmations() {
         // Create the admin account
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
           email: email,
-          email_confirm: false, // Require email confirmation
+          password: email === 'jvzoo@gmail.com' ? 'videoremix2025' : undefined,
+          email_confirm: email === 'jvzoo@gmail.com', // Auto-confirm for superadmin
           user_metadata: {
             app_context: 'smartcrm',
-            role: 'admin',
-            first_name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-            last_name: 'Admin'
+            role: email === 'jvzoo@gmail.com' ? 'super_admin' : 'admin',
+            first_name: email === 'jvzoo@gmail.com' ? 'JVZoo' : email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+            last_name: email === 'jvzoo@gmail.com' ? 'Admin' : 'Admin'
           }
         });
         
