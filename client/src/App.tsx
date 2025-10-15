@@ -169,8 +169,9 @@ import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyze
 import LinkRedirect from './components/shared/LinkRedirect';
 const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomization'));
 
-// Landing page import
+// Landing page imports
 import LandingPage from './pages/LandingPage';
+import SalesLandingPage from './pages/SalesLandingPage';
 
 // Dashboard embed import
 import DashboardEmbed from './pages/DashboardEmbed';
@@ -277,10 +278,10 @@ function AppContent() {
         <EdgeZones />
         <LinkRedirect />
         <RemoteAppRefreshManager />
-        <Suspense fallback={<LoadingSpinner message="Loading page..." size="lg" />}>
+        <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-           {/* Redirect root to dashboard for automation */}
-           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+           {/* Sales landing page as root */}
+           <Route path="/" element={<SalesLandingPage />} />
 
           {/* Dashboard embed - no navbar */}
           <Route path="/dashboard-embed" element={<DashboardEmbed />} />
