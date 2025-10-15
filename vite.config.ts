@@ -129,9 +129,10 @@ export default defineConfig({
           if (id.includes('src/services/gemini') || id.includes('src/services/gpt5')) {
             return 'ai-providers';
           }
-          if (id.includes('src/services/') && !id.includes('openai') && !id.includes('gemini')) {
-            return 'core-services';
-          }
+          // Temporarily disable core-services chunking to debug TDZ issue
+          // if (id.includes('src/services/') && !id.includes('openai') && !id.includes('gemini')) {
+          //   return 'core-services';
+          // }
 
           // Split AI tools into smaller chunks
           if (id.includes('src/components/aiTools/')) {
