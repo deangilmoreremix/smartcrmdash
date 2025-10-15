@@ -1,5 +1,0 @@
-# send API calls to Netlify Functions first
-/api/*                   /.netlify/functions/:splat   200
-
-# THEN your SPA fallback last
-/*                       /index.html                  200
