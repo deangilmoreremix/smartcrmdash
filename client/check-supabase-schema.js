@@ -1,6 +1,6 @@
 // Check Supabase table schemas
 const baseURL = 'https://YOUR_PROJECT_REF.supabase.co/rest/v1';
-const apiKey = 'YOUR_SUPABASE_ANON_KEY
+const apiKey = 'YOUR_SUPABASE_ANON_KEY';
 
 const headers = {
   'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 // Check all Supabase Edge Functions status
 const supabaseUrl = 'https://YOUR_PROJECT_REF.supabase.co';
-const apiKey = 'YOUR_SUPABASE_ANON_KEY
+const apiKey = 'YOUR_SUPABASE_ANON_KEY';
 
 const functions = [
   // Contact functions
