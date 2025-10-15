@@ -69,10 +69,11 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    exclude: ['lucide-react'],
     include: [
       // Force include simple-peer to avoid util module issues
-      'simple-peer'
+      'simple-peer',
+      // Include lucide-react to ensure proper bundling and avoid dynamic import failures
+      'lucide-react'
     ]
   },
   define: {
@@ -129,10 +130,9 @@ export default defineConfig({
           if (id.includes('src/services/gemini') || id.includes('src/services/gpt5')) {
             return 'ai-providers';
           }
-          // Temporarily disable core-services chunking to debug TDZ issue
-          // if (id.includes('src/services/') && !id.includes('openai') && !id.includes('gemini')) {
-          //   return 'core-services';
-          // }
+          if (id.includes('src/services/') && !id.includes('openai') && !id.includes('gemini')) {
+            return 'core-services';
+          }
 
           // Split AI tools into smaller chunks
           if (id.includes('src/components/aiTools/')) {
