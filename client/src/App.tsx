@@ -281,7 +281,9 @@ function AppContent() {
         <Suspense fallback={<LoadingSpinner />}>
         <Routes>
             {/* Sales landing page as root */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<SalesLandingPage />} />
+            <Route path="/sales" element={<SalesLandingPage />} />
+            <Route path="/product" element={<LandingPage />} />
 
           {/* Dashboard embed - no navbar */}
           <Route path="/dashboard-embed" element={<DashboardEmbed />} />
@@ -297,6 +299,7 @@ function AppContent() {
           
           {/* Demo Dashboard - Public access for sales page embedding */}
           <Route path="/demo-dashboard" element={<DemoDashboard />} />
+          <Route path="/demo" element={<DemoDashboard />} />
 
           {/* Demo Dashboard - Public access for sales page embedding */}
           <Route path="/demo/dashboard" element={<DashboardDemo />} />
