@@ -16,7 +16,7 @@ import {
   Search,
   AlertCircle,
 } from 'lucide-react';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { Activity } from '../types/task';
 import { Button } from './ui/button';
 import { Input } from './ui/input';

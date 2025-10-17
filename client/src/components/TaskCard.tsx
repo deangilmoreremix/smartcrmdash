@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, Clock, Mail, Video, FileText, MoreHorizontal, CheckCircle, Check, MoreVertical } from 'lucide-react';
 import Avatar from './ui/Avatar';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { getInitials, getAvatarByIndex } from '../utils/avatars';
 import { useTheme } from '../contexts/ThemeContext';
 

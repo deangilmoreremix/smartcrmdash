@@ -16,7 +16,7 @@ import { useRole } from './RoleBasedAccess';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
-import { useTaskStore } from "../store/taskStore";
+import { useTaskStore } from "../stores/taskStore";
 import { useAppointmentStore } from "../store/appointmentStore";
 
 interface NavbarProps {

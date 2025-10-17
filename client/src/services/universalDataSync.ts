@@ -2,7 +2,7 @@
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { useContactStore } from '../store/contactStore';
 import { useDealStore } from '../store/dealStore';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 
 export interface UniversalSyncData {
   contacts: any[];

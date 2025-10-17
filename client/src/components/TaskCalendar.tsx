@@ -27,7 +27,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { Task } from '../types/task';
 import { TaskDetailsModal } from './TaskDetailsModal';
 
