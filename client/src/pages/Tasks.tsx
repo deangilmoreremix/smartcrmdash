@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTaskStore } from '../store/taskStore';
-import { Task } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
+import { Task } from '../stores/taskStore';
 import { 
   CheckSquare, 
   Plus, 

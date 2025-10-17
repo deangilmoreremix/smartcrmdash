@@ -48,7 +48,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { Task, SubTask, TaskAttachment } from '../types/task';
 
 interface TaskDetailsModalProps {

@@ -4,7 +4,7 @@ import { Brain, TrendingUp, AlertTriangle, Target, Zap, Activity, BarChart3, Dol
 import { gpt5Service } from '../../services/gpt5Service';
 import { useDealStore } from '../../store/dealStore';
 import { useContactStore } from '../../store/contactStore';
-import { useTaskStore } from '../../store/taskStore';
+import { useTaskStore } from '../../stores/taskStore';
 
 interface AnalyticsInsight {
   title: string;

@@ -13,7 +13,7 @@ import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { TaskKanbanBoard } from '../components/TaskKanbanBoard';
 import { TaskCalendar } from '../components/TaskCalendar';
 import { ActivityFeed } from '../components/ActivityFeed';

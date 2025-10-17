@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { useGemini } from '../services/geminiService';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../stores/taskStore';
 import { useAppointmentStore } from '../store/appointmentStore';
 import { useAITools } from '../components/AIToolsProvider';
 import AppointmentWidget from '../components/AppointmentWidget';
