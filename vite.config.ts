@@ -2,12 +2,32 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
+import federation from '@originjs/vite-plugin-federation';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   root: './client',
   plugins: [
     react(),
+    federation({
+      name: 'SmartCRM',
+      remotes: {
+        CalendarApp: 'https://calendar.smartcrm.vip/assets/remoteEntry.js',
+        AnalyticsApp: 'https://analytics.smartcrm.vip/assets/remoteEntry.js',
+        ContactsApp: 'https://contacts.smartcrm.vip/assets/remoteEntry.js',
+        AgencyApp: 'https://agency.smartcrm.vip/assets/remoteEntry.js',
+        PipelineApp: 'https://pipeline.smartcrm.vip/assets/remoteEntry.js',
+        ResearchApp: 'https://research.smartcrm.vip/assets/remoteEntry.js',
+        SalesMaxApp: 'https://salesmax.smartcrm.vip/assets/remoteEntry.js',
+        ReferralsApp: 'https://referrals.smartcrm.vip/assets/remoteEntry.js',
+        ContentAIApp: 'https://contentai.smartcrm.vip/assets/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true, requiredVersion: '^18.3.0' },
+        'react-dom': { singleton: true, requiredVersion: '^18.3.0' },
+        'react-router-dom': { singleton: true },
+      },
+    }),
     visualizer({
       filename: 'dist/stats.html',
       open: false,
@@ -73,7 +93,30 @@ export default defineConfig({
       // Force include simple-peer to avoid util module issues
       'simple-peer',
       // Include lucide-react to ensure proper bundling and avoid dynamic import failures
-      'lucide-react'
+      'lucide-react',
+      // Add UI vendor packages to force prebundling and fix React import issues
+      '@radix-ui/react-slot',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-label',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-switch',
+      'framer-motion',
+      'react-beautiful-dnd',
+      'react-big-calendar',
+      'react-calendar',
+      'react-select',
+      'react-window',
+      'recharts',
+      'sonner',
+      'zustand'
     ]
   },
   define: {
@@ -81,6 +124,7 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
   },
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: [
       {
         find: '@/',
@@ -152,7 +196,7 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 800,
-    sourcemap: false,
+    sourcemap: true,
     minify: 'terser',
     terserOptions: {
       compress: {
