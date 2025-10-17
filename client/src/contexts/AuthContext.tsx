@@ -35,9 +35,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initialized.current = true;
 
     let subscription: any = null;
+    let timeoutId: NodeJS.Timeout;
 
     const initializeAuth = async () => {
       try {
+        // Set a timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          console.warn('Auth initialization timeout - proceeding without auth');
+          setUser(null);
+          setSession(null);
+          setLoading(false);
+        }, 10000); // 10 second timeout
+
         // Check for dev session in localStorage
         const checkDevSession = () => {
           const devSession = localStorage.getItem('dev-user-session');
@@ -71,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
 
               console.log('Using dev bypass session:', userData.email);
+              clearTimeout(timeoutId);
               setUser(userData);
               setSession({
                 user: userData,
@@ -114,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           async (event: any, session: any) => {
             try {
               console.log('Auth state changed:', event, session?.user?.id);
+              clearTimeout(timeoutId);
               setSession(session);
               setUser(session?.user ?? null);
               setAuthError(null);
@@ -134,9 +145,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.warn('Auth initialization warning:', error);
         // Set fallback auth state instead of blocking
-        setUser({ id: 'fallback-user', email: 'user@example.com' } as any);
+        setUser(null);
         setAuthError(null);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
@@ -147,6 +159,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       if (subscription) {
         subscription.unsubscribe();
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
   }, []);
