@@ -2,7 +2,6 @@
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { useContactStore } from '../store/contactStore';
 import { useDealStore } from '../store/dealStore';
-import { useTaskStore } from '../store/taskStore';
 
 export interface UniversalSyncData {
   contacts: any[];
@@ -107,51 +106,57 @@ export class UniversalDataSyncService {
 
   private handleIncomingDealData(action: string, data: any) {
     const dealStore = useDealStore.getState();
-    
+
     switch (action) {
       case 'create':
-        dealStore.addDeal(data);
+        dealStore.setDeals([...Object.values(dealStore.deals), data]);
         break;
       case 'update':
-        dealStore.updateDeal(data.id, data);
+        const updatedDeals = Object.values(dealStore.deals).map((deal: any) =>
+          deal.id === data.id ? { ...deal, ...data } : deal
+        );
+        dealStore.setDeals(updatedDeals);
         break;
       case 'delete':
-        dealStore.deleteDeal(data.id);
+        const filteredDeals = Object.values(dealStore.deals).filter((deal: any) => deal.id !== data.id);
+        dealStore.setDeals(filteredDeals);
         break;
     }
   }
 
   private handleIncomingTaskData(action: string, data: any) {
-    const taskStore = useTaskStore.getState();
-    
-    switch (action) {
-      case 'create':
-        taskStore.addTask(data);
-        break;
-      case 'update':
-        taskStore.updateTask(data.id, data);
-        break;
-      case 'delete':
-        taskStore.deleteTask(data.id);
-        break;
-    }
+    // Lazy import to avoid circular dependency
+    import('../store/taskStore').then(({ useTaskStore }) => {
+      const taskStore = useTaskStore.getState();
+
+      switch (action) {
+        case 'create':
+          taskStore.addTask(data);
+          break;
+        case 'update':
+          taskStore.updateTask(data.id, data);
+          break;
+        case 'delete':
+          taskStore.deleteTask(data.id);
+          break;
+      }
+    });
   }
 
   // Get current synchronized data
   getCurrentSyncData(): UniversalSyncData {
     const contactStore = useContactStore.getState();
     const dealStore = useDealStore.getState();
-    const taskStore = useTaskStore.getState();
 
     return {
       contacts: Object.values(contactStore.contacts),
       deals: Object.values(dealStore.deals),
-      tasks: Object.values(taskStore.tasks),
+      tasks: [], // Lazy loaded to avoid circular dependency
       activities: [], // Would come from activity store
       analytics: {
         totalContacts: Object.keys(contactStore.contacts).length,
         totalDeals: Object.keys(dealStore.deals).length,
-        totalTasks: Object.keys(taskStore.tasks).length
+        totalTasks: 0 // Lazy loaded to avoid circular dependency
       },
       timestamp: Date.now(),
       version: '1.0.0'
@@ -161,19 +166,28 @@ export class UniversalDataSyncService {
   // Sync all data to remote apps
   syncAllData() {
     const syncData = this.getCurrentSyncData();
-    
+
     // Sync to each data type
     remoteAppManager.syncContactsToAllApps(syncData.contacts);
     remoteAppManager.syncDealsToAllApps(syncData.deals);
-    remoteAppManager.syncTasksToAllApps(syncData.tasks);
-    
-    // Broadcast full sync event
-    remoteAppManager.broadcastToAllApps('FULL_DATA_SYNC', syncData, 'crm');
-    
-    this.lastSyncTimestamp = Date.now();
-    this.isDirty.clear();
-    
-    console.log('✅ Full data sync completed');
+
+    // Lazy load task store to avoid circular dependency
+    import('../store/taskStore').then(({ useTaskStore }) => {
+      const taskStore = useTaskStore.getState();
+      const tasks = Object.values(taskStore.tasks);
+      remoteAppManager.syncTasksToAllApps(tasks);
+
+      // Update sync data with tasks
+      const fullSyncData = { ...syncData, tasks, analytics: { ...syncData.analytics, totalTasks: tasks.length } };
+
+      // Broadcast full sync event
+      remoteAppManager.broadcastToAllApps('FULL_DATA_SYNC', fullSyncData, 'crm');
+
+      this.lastSyncTimestamp = Date.now();
+      this.isDirty.clear();
+
+      console.log('✅ Full data sync completed');
+    });
   }
 
   private markDirty(dataType: string) {

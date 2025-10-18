@@ -4,7 +4,6 @@ import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';
 import { useContactStore } from '../store/contactStore';
 import { useDealStore } from '../store/dealStore';
-import { useTaskStore } from '../store/taskStore';
 
 export interface RemoteAppConfig {
   id: string;
@@ -23,7 +22,23 @@ export function useUniversalRemoteIntegration(config: RemoteAppConfig) {
 
   const { contacts } = useContactStore();
   const { deals } = useDealStore();
-  const { tasks } = useTaskStore();
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  // Lazy load task store to avoid circular dependency
+  useEffect(() => {
+    import('../store/taskStore').then(({ useTaskStore }) => {
+      const taskStore = useTaskStore.getState();
+      setTasks(Object.values(taskStore.tasks));
+
+      // Listen for task changes
+      const handleTasksChanged = (event: any) => {
+        setTasks(Object.values(event.detail.tasks));
+      };
+      window.addEventListener('tasksChanged', handleTasksChanged);
+
+      return () => window.removeEventListener('tasksChanged', handleTasksChanged);
+    });
+  }, []);
 
   useEffect(() => {
     if (!iframeRef.current) return;
