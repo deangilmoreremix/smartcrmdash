@@ -101,9 +101,9 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
   
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="relative min-h-[600px] overflow-hidden bg-gradient-to-b from-gray-50 to-indigo-50 py-24"
+      className="relative min-h-[600px] overflow-hidden bg-gradient-to-b from-purple-50 to-blue-50 py-24"
     >
       
       
