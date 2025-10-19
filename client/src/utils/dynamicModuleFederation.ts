@@ -1,8 +1,11 @@
 // Dynamic Module Federation Loader - Works without Vite config changes
+import { wt } from './satisfy';
+
 export interface RemoteModuleConfig {
   url: string;
   scope: string;
   module: string;
+  requiredVersion?: string; // Optional version requirement for compatibility checking
 }
 
 interface ModuleContainer {
@@ -22,24 +25,37 @@ class DynamicModuleFederation {
 
   async loadRemoteModule<T = any>(config: RemoteModuleConfig): Promise<T> {
     const { url, scope, module } = config;
-    
-    // Load the remote script if not already loaded
-    if (!this.loadedScripts.has(url)) {
-      await this.loadScript(url);
-      this.loadedScripts.add(url);
-    }
 
-    // Get the container
-    const container = await this.getContainer(scope);
-    
-    // Initialize container with shared dependencies
-    await this.initContainer(container);
-    
-    // Get the module factory
-    const factory = await container.get(module);
-    const Module = factory();
-    
-    return Module.default || Module;
+    try {
+      // Load the remote script if not already loaded
+      if (!this.loadedScripts.has(url)) {
+        await this.loadScript(url);
+        this.loadedScripts.add(url);
+      }
+
+      // Get the container
+      const container = await this.getContainer(scope);
+
+      // Initialize container with shared dependencies
+      await this.initContainer(container);
+
+      // Get the module factory
+      const factory = await container.get(module);
+      const Module = factory();
+
+      // Optional: Check version compatibility if the module exposes a version
+      if (Module.version && config.requiredVersion) {
+        if (!wt(Module.version, config.requiredVersion)) {
+          throw new Error(`Module ${scope}/${module} version ${Module.version} does not satisfy required version ${config.requiredVersion}`);
+        }
+      }
+
+      return Module.default || Module;
+    } catch (error) {
+      console.warn(`Failed to load remote module ${scope}/${module} from ${url}:`, error);
+      // Return a fallback/placeholder component instead of throwing
+      return this.createFallbackComponent(scope, module) as T;
+    }
   }
 
   private async loadScript(url: string): Promise<void> {
@@ -149,6 +165,16 @@ class DynamicModuleFederation {
     this.loadedScripts.clear();
     this.loadedContainers.clear();
   }
+
+  // Create a fallback component when remote module fails to load
+  private createFallbackComponent(scope: string, module: string): any {
+    // Return a simple object that can be used as a fallback
+    // This prevents the app from crashing when remote modules fail
+    return {
+      default: () => null,
+      [module]: () => null
+    };
+  }
 }
 
 export const moduleFederation = new DynamicModuleFederation();
@@ -157,12 +183,14 @@ export const moduleFederation = new DynamicModuleFederation();
 export async function loadRemoteComponent<T = any>(
   remoteUrl: string,
   scope: string,
-  module: string
+  module: string,
+  requiredVersion?: string
 ): Promise<T> {
   return moduleFederation.loadRemoteModule<T>({
     url: remoteUrl,
     scope,
-    module
+    module,
+    requiredVersion
   });
 }
 
@@ -172,7 +200,8 @@ import { useState, useEffect } from 'react';
 export function useRemoteComponent<T = any>(
   remoteUrl: string | null,
   scope: string,
-  module: string
+  module: string,
+  requiredVersion?: string
 ) {
   const [component, setComponent] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
@@ -193,7 +222,7 @@ export function useRemoteComponent<T = any>(
         setLoading(true);
         setError(null);
         
-        const loadedComponent = await loadRemoteComponent<T>(remoteUrl, scope, module);
+        const loadedComponent = await loadRemoteComponent<T>(remoteUrl, scope, module, requiredVersion);
         
         if (!cancelled) {
           setComponent(loadedComponent);
@@ -214,7 +243,7 @@ export function useRemoteComponent<T = any>(
     return () => {
       cancelled = true;
     };
-  }, [remoteUrl, scope, module]);
+  }, [remoteUrl, scope, module, requiredVersion]);
 
   return { component, loading, error };
 }
