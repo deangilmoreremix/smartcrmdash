@@ -1,6 +1,6 @@
 
 class RemoteAppManager {
-  private refreshIntervals: Map<string, number> = new Map();
+  private refreshIntervals: Map<string, NodeJS.Timeout> = new Map();
   private lastUpdateChecks: Map<string, number> = new Map();
   private updateHashCache: Map<string, string> = new Map();
   private bridges: Map<string, any> = new Map();
