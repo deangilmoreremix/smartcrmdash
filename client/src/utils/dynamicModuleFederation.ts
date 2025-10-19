@@ -1,4 +1,5 @@
 // Dynamic Module Federation Loader - Works without Vite config changes
+// Import satisfy first to avoid TDZ issues
 import { wt } from './satisfy';
 
 // Import remoteAppManager after satisfy to avoid TDZ issues

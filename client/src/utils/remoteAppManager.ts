@@ -239,10 +239,10 @@ class RemoteAppManager {
   }
 }
 
-export const remoteAppManager = new RemoteAppManager();
-
 // React hook for remote app updates
 import { useEffect, useState, useCallback } from 'react';
+
+export const remoteAppManager = new RemoteAppManager();
 
 export function useRemoteAppUpdates(
   iframeId: string, 
