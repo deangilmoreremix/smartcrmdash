@@ -280,8 +280,9 @@ function AppContent() {
         <RemoteAppRefreshManager />
         <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-            {/* Sales landing page as root */}
-            <Route path="/" element={<LandingPage />} />
+            {/* Redirect root to dashboard for authenticated users, landing page for guests */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/landing" element={<LandingPage />} />
 
           {/* Dashboard embed - no navbar */}
           <Route path="/dashboard-embed" element={<DashboardEmbed />} />
