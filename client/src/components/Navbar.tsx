@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Draggable } from '@hello-pangea/dnd';
@@ -16,6 +16,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRole } from './RoleBasedAccess';
 import { useNavbarPosition } from '../contexts/NavbarPositionContext';
+import { logger } from '../utils/logger';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -26,10 +27,18 @@ interface NavbarProps {
   onOpenPipelineModal?: () => void;
 }
 
+interface CounterData {
+  activeDeals: number;
+  hotContacts: number;
+  pendingTasks: number;
+  todayAppointments: number;
+  totalNotifications: number;
+}
+
 type AITool = {
   title: string;
   id: string;       // must match AITools.tsx switch cases
-  icon?: any;  // Simplified for compatibility with lucide-react icons
+  icon?: React.ComponentType<any>;  // Proper typing for lucide-react icons
   category?: string;
 };
 
@@ -108,15 +117,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { tasks } = useTaskStore();
   const { appointments } = useAppointmentStore();
 
-  // Counters
-  const counters = React.useMemo(() => {
+  // Counters with proper typing
+  const counters: CounterData = useMemo(() => {
     const activeDeals = Object.values(deals).filter(
-      (deal: any) => deal.status === 'open'
+      (deal) => deal.status === 'open'
     ).length;
 
     const hotContacts = Object.values(contacts).filter(contact =>
-      (contact as any)?.interestLevel === 'hot' ||
-      (contact as any)?.status?.toLowerCase?.() === 'hot'
+      contact?.interestLevel === 'hot' ||
+      contact?.status?.toLowerCase?.() === 'hot'
     ).length;
 
     const pendingTasks = Object.values(tasks).filter(task => !task.completed).length;
@@ -295,7 +304,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
-    console.log('🔧 Dropdown toggled:', dropdown);
+    logger.debug('Dropdown toggled', { dropdown });
     if (e) {
       e.stopPropagation();
       // Capture button position for portal positioning
@@ -310,7 +319,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, []);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
-    console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
+    logger.info('Navigation triggered', { route, tabName, currentPath: location.pathname });
     navigate(route);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
@@ -326,8 +335,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, [navigate, openAITool]);
 
   const handleSignOut = useCallback(async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      logger.info('User signed out successfully');
+      navigate('/');
+    } catch (error) {
+      logger.error('Sign out failed', error);
+    }
   }, [signOut, navigate]);
 
   // Active tab based on route
@@ -575,24 +589,16 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                 <div className="hidden lg:flex flex-1 min-w-0">
                   <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
                     <div className="inline-flex items-center gap-1 whitespace-nowrap">
-          <div className="flex items-center justify-between px-6 lg:px-8 py-3">
-
-                            {/* Desktop nav pills */}
-                            <div className="hidden lg:flex flex-1 min-w-0">
-                              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-                                          <div className="inline-flex items-center gap-1 whitespace-nowrap">
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <div key={tab.id} className="relative shrink-0">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action(e);
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation(); tab.action(e);
                       }}
                       data-testid={`nav-${tab.id}`}
+                      aria-current={isActive ? 'page' : undefined}
                       className={`
                         relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                         transition-all duration-300 transform hover:scale-105 text-xs
@@ -604,7 +610,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       `}
                       title={tab.label}
                     >
-                      <tab.icon size={16} className={`block overflow-visible shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      <tab.icon size={16} className={`block overflow-visible shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} aria-hidden="true" />
                       <span className="text-xs font-medium hidden lg:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
@@ -618,7 +624,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         'bg-blue-500'
                       )}
                       {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
-                        <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} aria-hidden="true" />
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
@@ -675,6 +681,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         }}
                         data-dropdown-toggle="true"
                         data-testid={`nav-${menu.id}`}
+                        aria-expanded={activeDropdown === menu.id}
+                        aria-haspopup={menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl' ? 'menu' : undefined}
+                        aria-label={`${menu.label} menu`}
                         className={`
                           relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                           transition-all duration-300 transform hover:scale-105
@@ -685,12 +694,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           group
                         `}
                       >
-                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
-                        {menu.id === 'apps' && <Grid size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'apps' && <Grid size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
 
                         <span className="text-xs font-medium">
                           {menu.id === 'sales' ? 'Sales'
@@ -702,7 +711,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         </span>
                         {/* Only show chevron for dropdown menus */}
                         {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
-                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
+                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} aria-hidden="true" />
                         )}
                         {renderBadge(menu.badge, menu.badgeColor)}
                         {activeDropdown === menu.id && (
@@ -720,7 +729,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <button
                             key={index}
                             onClick={() => {
-                              console.log('Sales tool clicked:', tool.tool, tool.name);
+                              logger.debug('Sales tool clicked', { tool: tool.tool, name: tool.name });
                               const routeMap: { [key: string]: string } = {
                                 'deal-pipeline': '/pipeline-intelligence',
                                 'deal-risk': '/deal-risk-monitor',
@@ -756,7 +765,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           <button
                             key={index}
                             onClick={() => {
-                              console.log('Communication tool clicked:', tool.tool, tool.name);
+                              logger.debug('Communication tool clicked', { tool: tool.tool, name: tool.name });
                               const routeMap: { [key: string]: string } = {
                                 'appointments': '/appointments',
                                 'video-email': '/video-profiles',
@@ -768,7 +777,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                 'forms': '/forms',
                                 'business-analysis': '/business-analysis'
                               };
-                              
+
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
                               closeDropdown();
@@ -822,7 +831,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                     fullscreen: true
                                   }, '*');
                                 } catch (error) {
-                                  console.log('Could not communicate with iframe');
+                                  logger.debug('Could not communicate with iframe', error);
                                 }
                               }}
                             />
@@ -907,7 +916,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                     fullscreen: true
                                   }, '*');
                                 } catch (error) {
-                                  console.log('Could not communicate with iframe');
+                                  logger.debug('Could not communicate with iframe', error);
                                 }
                               }}
                             />
@@ -957,113 +966,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
               </div>
             </div>
 
-            {/* Mobile menu button */}
-            <div className="lg:hidden">
-              <button
-                onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(!isMobileMenuOpen); }}
-                data-testid="button-mobile-menu-toggle"
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-              >
-                {isMobileMenuOpen ? <X size={24} className="block overflow-visible shrink-0" /> : <Menu size={24} className="block overflow-visible shrink-0" />}
-              </button>
-            </div>
 
-            {/* Mobile theme toggle */}
-            <button
-              onClick={toggleTheme}
-              data-testid="button-mobile-theme-toggle"
-              className={`p-2 rounded-lg transition-colors lg:hidden ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
-            </button>
-
-            {/* Right controls */}
-            <div className="hidden lg:flex items-center space-x-0.5 flex-none shrink-0 pl-2">
-              <button 
-                data-testid="button-search"
-                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Search size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
-              </button>
-              <button 
-                data-testid="button-notifications"
-                className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
-                <Bell size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
-                {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
-              </button>
-              <button
-                onClick={toggleTheme}
-                data-testid="button-theme-toggle"
-                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
-                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              >
-                {isDark ? <Sun size={16} className="block overflow-visible shrink-0 text-white" /> : <Moon size={16} className="block overflow-visible shrink-0 text-gray-600" />}
-              </button>
-              <div className="relative">
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
-                  data-testid="button-user-menu"
-                  className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
-                >
-                  <User size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
-                </button>
-
-                {activeDropdown === 'user' && (
-                  <div className={`absolute top-full mt-2 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
-                    <div className="p-3">
-                      <div className="px-3 py-2 border-b border-gray-200/30">
-                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {user?.email}
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleSignOut}
-                        data-testid="button-sign-out"
-                        className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className={`lg:hidden mt-4 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden animate-fade-in`}>
-            <div className="p-4 space-y-3">
-              {mainTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={tab.action}
-                  className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                >
-                  <tab.icon size={20} className="block overflow-visible shrink-0" />
-                  <span className="font-medium">{tab.label}</span>
-                  {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
-                </button>
-              ))}
-
-              <hr className={`${isDark ? 'border-white/20' : 'border-gray-200'}`} />
-
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={toggleTheme}
-                  className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-                >
-                  {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
-                  <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
-    
     {/* Portal-rendered Dropdowns */}
     {/* Analytics Dropdown Portal */}
     <DropdownPortal
