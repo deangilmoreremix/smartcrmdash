@@ -64,7 +64,7 @@ const ContactsApp: React.FC = () => {
         style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0 }}
         title="Enhanced Contacts Module"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
         loading="lazy"
         onLoad={(e) => {
           // Send theme message to iframe

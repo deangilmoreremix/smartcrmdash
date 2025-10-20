@@ -1,22 +1,17 @@
 // src/components/Navbar.tsx
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
-  TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid, Briefcase,
+  TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid3X3, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus,
-  GripVertical, Minimize2, Maximize2
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRole } from './RoleBasedAccess';
-import { useNavbarPosition } from '../contexts/NavbarPositionContext';
-import { logger } from '../utils/logger';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -27,81 +22,22 @@ interface NavbarProps {
   onOpenPipelineModal?: () => void;
 }
 
-interface CounterData {
-  activeDeals: number;
-  hotContacts: number;
-  pendingTasks: number;
-  todayAppointments: number;
-  totalNotifications: number;
-}
-
 type AITool = {
   title: string;
   id: string;       // must match AITools.tsx switch cases
-  icon?: React.ComponentType<any>;  // Proper typing for lucide-react icons
+  icon?: any;  // Simplified for compatibility with lucide-react icons
   category?: string;
-};
-
-// Dropdown positioning type
-type DropdownAnchor = {
-  top: number;
-  left: number;
-  width: number;
-} | null;
-
-// Portal-based dropdown component
-const DropdownPortal: React.FC<{
-  isOpen: boolean;
-  anchor: DropdownAnchor;
-  onClose: () => void;
-  children: React.ReactNode;
-  className?: string;
-}> = ({ isOpen, anchor, onClose, children, className = '' }) => {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !anchor) return null;
-
-  return createPortal(
-    <div
-      ref={dropdownRef}
-      className={`fixed z-[9999] bg-white/95 backdrop-blur-2xl border border-gray-200 rounded-2xl shadow-2xl min-w-[280px] max-w-[400px] ${className}`}
-      style={{
-        top: anchor.top,
-        left: Math.max(8, anchor.left - 140), // Center dropdown under button with padding
-      }}
-    >
-      {children}
-    </div>,
-    document.body
-  );
 };
 
 const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [dropdownAnchor, setDropdownAnchor] = useState<DropdownAnchor>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
   const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
-  const { position, setPosition, setIsDragging: setContextDragging } = useNavbarPosition();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,15 +53,15 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { tasks } = useTaskStore();
   const { appointments } = useAppointmentStore();
 
-  // Counters with proper typing
-  const counters: CounterData = useMemo(() => {
+  // Counters
+  const counters = React.useMemo(() => {
     const activeDeals = Object.values(deals).filter(
-      (deal) => deal.status === 'open'
+      deal => String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
     ).length;
 
     const hotContacts = Object.values(contacts).filter(contact =>
-      contact?.interestLevel === 'hot' ||
-      contact?.status?.toLowerCase?.() === 'hot'
+      (contact as any)?.interestLevel === 'hot' ||
+      (contact as any)?.status?.toLowerCase?.() === 'hot'
     ).length;
 
     const pendingTasks = Object.values(tasks).filter(task => !task.completed).length;
@@ -214,18 +150,11 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Partner Onboarding', url: '/partner-onboarding', icon: UserPlus, isExternal: false }
   ];
 
-  // General connected apps - remote federated modules
+  // General connected apps
   const connectedApps = [
-    { name: "Enhanced Contacts Module", url: 'https://contacts.smartcrm.vip', icon: Users, isExternal: true },
-    { name: "AI Agency Suite", url: 'https://agency.smartcrm.vip', icon: Brain, isExternal: true },
-    { name: "AI Analytics Dashboard", url: 'https://analytics.smartcrm.vip', icon: BarChart3, isExternal: true },
-    { name: "Enhanced Pipeline Deals", url: 'https://pipeline.smartcrm.vip', icon: Briefcase, isExternal: true },
-    { name: "Product Research Module", url: 'https://research.smartcrm.vip', icon: Search, isExternal: true },
-    { name: "Advanced AI Calendar", url: 'https://calendar.smartcrm.vip', icon: Calendar, isExternal: true },
-    { name: "AI-Powered Analytics Dashboard", url: 'https://ai-analytics.smartcrm.vip', icon: TrendingUp, isExternal: true },
-    { name: "AI Sales Maximizer", url: 'https://salesmax.smartcrm.vip', icon: DollarSign, isExternal: true },
-    { name: "AI Referral Maximizer", url: 'https://referrals.smartcrm.vip', icon: Users, isExternal: true },
-    { name: "Content AI", url: 'https://contentai.smartcrm.vip', icon: FileText, isExternal: true }
+    { name: 'FunnelCraft AI', url: '/funnelcraft-ai', icon: Megaphone, isExternal: false },
+    { name: 'SmartCRM Closer', url: '/smartcrm-closer', icon: Users, isExternal: false },
+    { name: 'ContentAI', url: '/content-ai', icon: FileText, isExternal: false }
   ];
 
   const analyticsOptions = [
@@ -267,7 +196,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       { title: 'Function Assistant', id: 'function-assistant', icon: Code },
     ],
     'Real-time Features': [
-      { title: 'Streaming Chat', id: 'streaming-chat', icon: MessageSquare },
+      { title: 'Streaming Chat', id: 'ai-assistant-chat', icon: MessageSquare },
       { title: 'Form Validation', id: 'form-validation', icon: CheckSquare },
       { title: 'Live Deal Analysis', id: 'live-deal-analysis', icon: BarChart3 },
       { title: 'Instant Response', id: 'instant-response', icon: Zap },
@@ -283,43 +212,30 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     ]
   };
 
-  // Close dropdowns when pressing escape
+  // Click outside to close dropdowns only (not mobile menu)
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
         setActiveDropdown(null);
-        setDropdownAnchor(null);
-        setIsMobileMenuOpen(false);
+        // Don't auto-close mobile menu - only close it explicitly
       }
     };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, []);
-
-  // Close dropdown helper
-  const closeDropdown = useCallback(() => {
-    setActiveDropdown(null);
-    setDropdownAnchor(null);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleDropdown = useCallback((dropdown: string, e?: React.MouseEvent) => {
-    logger.debug('Dropdown toggled', { dropdown });
-    if (e) {
-      e.stopPropagation();
-      // Capture button position for portal positioning
-      const rect = e.currentTarget.getBoundingClientRect();
-      setDropdownAnchor({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width
-      });
-    }
-    setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
-  }, []);
+    if (e) e.stopPropagation();
+    console.log('🔽 Dropdown clicked:', dropdown, 'Current activeDropdown:', activeDropdown);
+    setActiveDropdown(prev => {
+      const newValue = prev === dropdown ? null : dropdown;
+      console.log('🔽 Setting activeDropdown to:', newValue);
+      return newValue;
+    });
+  }, [activeDropdown]);
 
   const handleNavigation = useCallback((route: string, tabName: string) => {
-    logger.info('Navigation triggered', { route, tabName, currentPath: location.pathname });
+    console.log('Navigation triggered:', { route, tabName, currentPath: location.pathname });
     navigate(route);
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
@@ -335,13 +251,8 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   }, [navigate, openAITool]);
 
   const handleSignOut = useCallback(async () => {
-    try {
-      await signOut();
-      logger.info('User signed out successfully');
-      navigate('/');
-    } catch (error) {
-      logger.error('Sign out failed', error);
-    }
+    await signOut();
+    navigate('/');
   }, [signOut, navigate]);
 
   // Active tab based on route
@@ -352,6 +263,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     else if (path === '/pipeline') setActiveTab('pipeline');
     else if (path === '/tasks' || path === '/appointments') setActiveTab('appointments');
     else if (path === '/ai-tools') setActiveTab('ai-tools');
+    else if (path === '/assistants') setActiveTab('assistants'); // Add this line for the new route
     else if (path === '/analytics') setActiveTab('analytics');
     else if (path === '/ai-goals') setActiveTab('ai-goals');
     else setActiveTab('');
@@ -362,7 +274,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'dashboard',
       label: 'Dashboard',
       icon: BarChart3,
-      action: (e?: React.MouseEvent) => handleNavigation('/dashboard', 'dashboard'),
+      action: () => handleNavigation('/dashboard', 'dashboard'),
       badge: 1,
       color: 'from-indigo-500 to-purple-500'
     },
@@ -370,7 +282,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'contacts',
       label: 'Contacts',
       icon: Users,
-      action: (e?: React.MouseEvent) => handleNavigation('/contacts', 'contacts'),
+      action: () => handleNavigation('/contacts', 'contacts'),
       badge: 10,
       color: 'from-purple-500 to-indigo-500'
     },
@@ -378,7 +290,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'pipeline',
       label: 'Pipeline',
       icon: Briefcase,
-      action: (e?: React.MouseEvent) => handleNavigation('/pipeline', 'pipeline'),
+      action: () => handleNavigation('/pipeline', 'pipeline'),
       badge: 5,
       color: 'from-green-500 to-emerald-500'
     },
@@ -386,7 +298,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'analytics',
       label: 'Analytics',
       icon: TrendingUp,
-      action: (e?: React.MouseEvent) => toggleDropdown('analytics', e),
+      action: () => toggleDropdown('analytics'),
       badge: 30,
       color: 'from-blue-500 to-cyan-500',
       hasDropdown: true
@@ -395,7 +307,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-goals',
       label: 'AI Goals',
       icon: Target,
-      action: (e?: React.MouseEvent) => handleNavigation('/ai-goals', 'ai-goals'),
+      action: () => handleNavigation('/ai-goals', 'ai-goals'),
       badge: 58,
       color: 'from-purple-500 to-pink-500'
     },
@@ -403,15 +315,23 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Brain,
-      action: (e?: React.MouseEvent) => toggleDropdown('ai-tools', e),
+      action: () => toggleDropdown('ai-tools'),
       badge: Object.values(aiToolCategories).flat().length,
       color: 'from-pink-500 to-rose-500'
     },
     {
-      id: 'calendar',
+      id: 'assistants', // New tab for AI Assistants
+      label: 'AI Assistants',
+      icon: Bot,
+      action: () => handleNavigation('/assistants', 'assistants'),
+      badge: 0, // Placeholder for assistant count
+      color: 'from-emerald-500 to-lime-500'
+    },
+    {
+      id: 'appointments',
       label: 'Calendar',
       icon: Calendar,
-      action: (e?: React.MouseEvent) => handleNavigation('/calendar', 'calendar'),
+      action: () => handleNavigation('/appointments', 'appointments'),
       badge: 15,
       color: 'from-cyan-500 to-blue-500'
     }
@@ -423,7 +343,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
       id: 'admin',
       label: 'Admin Panel',
       icon: Shield,
-      action: (e?: React.MouseEvent) => handleNavigation('/admin', 'admin'),
+      action: () => handleNavigation('/admin', 'admin'),
       badge: 0,
       color: 'from-red-500 to-orange-500'
     });
@@ -433,10 +353,10 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const dropdownMenus = [
     { id: 'sales', label: 'Sales', icon: DollarSign, badge: salesTools.length, color: 'from-green-500 to-teal-500', badgeColor: 'bg-green-500' },
     { id: 'communication', label: 'Comm', icon: MessageSquare, badge: communicationTools.length, color: 'from-blue-500 to-sky-500', badgeColor: 'bg-blue-500' },
-    { id: 'intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
+    { id: 'business-intel', label: 'Business Intel', icon: BarChart3, badge: 35, color: 'from-amber-500 to-orange-500', badgeColor: 'bg-amber-500' },
     { id: 'wl', label: 'WL', icon: Globe, badge: wlApps.length, color: 'from-indigo-500 to-purple-500', badgeColor: 'bg-indigo-500' },
-    { id: 'intel-page', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
-    { id: 'apps', label: 'Apps', icon: Grid, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
+    { id: 'intel', label: 'Intel', icon: Brain, badge: 1, color: 'from-purple-500 to-pink-500', badgeColor: 'bg-purple-500' },
+    { id: 'apps', label: 'Apps', icon: Grid3X3, badge: connectedApps.length, color: 'from-purple-500 to-violet-500', badgeColor: 'bg-purple-500' }
   ];
 
   const renderBadge = useCallback((count: number | null, color: string = 'bg-red-500') => {
@@ -448,157 +368,32 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     );
   }, []);
 
-  // Calculate navbar styles based on position and size
-  const getNavbarStyles = () => {
-    const baseClasses = `${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`;
-
-    switch (position) {
-      case 'top':
-        return {
-          className: `${baseClasses} rounded-full`,
-          style: {
-            position: 'fixed' as const,
-            top: isMinimized ? '8px' : '24px',
-            left: '16px',
-            right: '16px',
-            zIndex: 50,
-            height: isMinimized ? '48px' : 'auto',
-            paddingTop: isMinimized ? '6px' : '6px',
-            paddingBottom: isMinimized ? '6px' : '12px',
-          }
-        };
-      case 'bottom':
-        return {
-          className: `${baseClasses} rounded-full`,
-          style: {
-            position: 'fixed' as const,
-            bottom: isMinimized ? '8px' : '24px',
-            left: '16px',
-            right: '16px',
-            zIndex: 50,
-            height: isMinimized ? '48px' : 'auto',
-            paddingTop: isMinimized ? '6px' : '12px',
-            paddingBottom: isMinimized ? '6px' : '6px',
-          }
-        };
-      case 'left':
-        return {
-          className: `${baseClasses} rounded-2xl`,
-          style: {
-            position: 'fixed' as const,
-            top: '50%',
-            left: isMinimized ? '8px' : '16px',
-            transform: 'translateY(-50%)',
-            zIndex: 50,
-            width: isMinimized ? '48px' : '280px',
-            maxHeight: '80vh',
-            overflowY: 'auto',
-          }
-        };
-      case 'right':
-        return {
-          className: `${baseClasses} rounded-2xl`,
-          style: {
-            position: 'fixed' as const,
-            top: '50%',
-            right: isMinimized ? '8px' : '16px',
-            transform: 'translateY(-50%)',
-            zIndex: 50,
-            width: isMinimized ? '48px' : '280px',
-            maxHeight: '80vh',
-            overflowY: 'auto',
-          }
-        };
-      case 'sidebar':
-        return {
-          className: `${baseClasses} rounded-none`,
-          style: {
-            position: 'fixed' as const,
-            top: 0,
-            left: 0,
-            zIndex: 50,
-            width: isMinimized ? '64px' : '280px',
-            height: '100vh',
-            overflowY: 'auto',
-          }
-        };
-      default:
-        return {
-          className: `${baseClasses} rounded-full`,
-          style: {
-            position: 'fixed' as const,
-            top: '24px',
-            left: '16px',
-            right: '16px',
-            zIndex: 50,
-          }
-        };
-    }
-  };
-
-  const navbarStyles = getNavbarStyles();
-
   return (
-    <>
-    <Draggable draggableId="navbar" index={0}>
-      {(provided, snapshot) => (
-        <nav
-          ref={(el) => {
-            navRef.current = el;
-            provided.innerRef(el);
-          }}
-          {...provided.draggableProps}
-          className={navbarStyles.className}
-          style={{
-            ...navbarStyles.style,
-            ...provided.draggableProps.style,
-            opacity: snapshot.isDragging ? 0.8 : 1,
-          }}
-        >
-          {/* Drag Handle */}
-          <div
-            {...provided.dragHandleProps}
-            className="absolute -top-2 left-1/2 transform -translate-x-1/2 cursor-move opacity-0 hover:opacity-100 transition-opacity duration-200"
-            title="Drag to reposition navbar"
-          >
-            <GripVertical size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
-          </div>
+    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-[1000] pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
+      <div className="max-w-[90rem] mx-auto will-change-transform">
+        <div className={`${isDark ? 'bg-gray-900/95 border-white/20' : 'bg-white/95 border-gray-200'} backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
+          <div className="flex items-center justify-between px-6 lg:px-8 py-3">
 
-          {/* Minimize/Maximize Button */}
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="absolute -top-2 right-4 cursor-pointer opacity-0 hover:opacity-100 transition-opacity duration-200 p-1 rounded-full hover:bg-gray-100/20"
-            title={isMinimized ? 'Maximize navbar' : 'Minimize navbar'}
-          >
-            {isMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-          </button>
+            {/* Logo */}
+            <div className="flex items-center flex-none shrink-0">
+              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Smart<span className="text-green-400">CRM</span>
+              </h1>
+            </div>
 
-          <div className="max-w-[90rem] mx-auto will-change-transform">
-            <div className={`${position === 'left' || position === 'right' || position === 'sidebar' ? 'flex flex-col space-y-4' : 'flex items-center justify-between'} px-6 lg:px-8 py-3`}>
-              {/* Logo - only show when not minimized */}
-              {!isMinimized && (position === 'top' || position === 'bottom') && (
-                <div className="flex items-center flex-none shrink-0">
-                  <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Smart<span className="text-green-400">CRM</span>
-                  </h1>
-                </div>
-              )}
-
-              {/* Desktop nav pills - only show when not minimized */}
-              {!isMinimized && (
-                <div className="hidden lg:flex flex-1 min-w-0">
-                  <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-                    <div className="inline-flex items-center gap-1 whitespace-nowrap">
+            {/* Desktop nav pills */}
+            <div className="hidden lg:flex flex-1 min-w-0">
+              <div className={`w-full ${activeDropdown ? 'overflow-visible' : 'overflow-x-auto'} px-1 py-1.5`} style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                <div className={`inline-flex items-center gap-1 whitespace-nowrap ${activeDropdown ? 'overflow-visible' : ''}`}>
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <div key={tab.id} className="relative shrink-0">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); tab.action(e);
+                        e.stopPropagation(); console.log('Tab clicked:', tab.id, tab.label); tab.action();
                       }}
-                      data-testid={`nav-${tab.id}`}
-                      aria-current={isActive ? 'page' : undefined}
+                      data-testid={`nav-tab-${tab.id}`}
                       className={`
                         relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                         transition-all duration-300 transform hover:scale-105 text-xs
@@ -610,7 +405,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       `}
                       title={tab.label}
                     >
-                      <tab.icon size={16} className={`block overflow-visible shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} aria-hidden="true" />
+                      <tab.icon size={16} className={`block overflow-visible shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                       <span className="text-xs font-medium hidden lg:block">{tab.label}</span>
                       {tab.badge && renderBadge(
                         tab.badge,
@@ -620,20 +415,21 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         tab.id === 'ai-tools' ? 'bg-pink-500' :
                         tab.id === 'appointments' ? 'bg-cyan-500' :
                         tab.id === 'analytics' ? 'bg-blue-500' :
+                        tab.id === 'assistants' ? 'bg-emerald-500' : // Color for new assistants tab
                         tab.id === 'admin' ? 'bg-red-500' : // Color for admin tab
                         'bg-blue-500'
                       )}
                       {(tab.id === 'ai-tools' || tab.id === 'analytics') && (
-                        <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} aria-hidden="true" />
+                        <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === tab.id ? 'rotate-180' : ''}`} />
                       )}
                       {isActive && <div className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-full opacity-20 animate-pulse`}></div>}
                     </button>
 
                     {/* AI Tools Dropdown */}
                     {tab.id === 'ai-tools' && activeDropdown === 'ai-tools' && (
-                      <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                         <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                          {Object.values(aiToolCategories).flat().map((tool) => (
+                          {Object.values(aiToolCategories).flat().slice(0, 8).map((tool) => (
                             <button
                               key={tool.id}
                               onClick={() => handleAIToolClick(tool.id)}
@@ -657,7 +453,28 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       </div>
                     )}
 
-                    {/* Analytics Dropdown - now rendered via portal */}
+                    {/* Analytics Dropdown */}
+                    {tab.id === 'analytics' && activeDropdown === 'analytics' && (
+                      <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
+                        <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                          {analyticsOptions.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                navigate(option.url);
+                                setActiveDropdown(null);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                            >
+                              <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
+                              <span className="text-sm font-medium">{option.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
                   })}
@@ -668,22 +485,16 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (menu.id === 'intel') {
-                            handleNavigation('/business-intel', 'intel');
-                          } else if (menu.id === 'intel-page') {
-                            handleNavigation('/intel', 'intel-page');
+                          if (menu.id === 'business-intel') {
+                            handleNavigation('/business-intel', 'business-intel');
+                          } else if (menu.id === 'intel') {
+                            handleNavigation('/intel', 'intel');
                           } else {
                             toggleDropdown(menu.id, e);
                           }
                         }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                        }}
                         data-dropdown-toggle="true"
-                        data-testid={`nav-${menu.id}`}
-                        aria-expanded={activeDropdown === menu.id}
-                        aria-haspopup={menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl' ? 'menu' : undefined}
-                        aria-label={`${menu.label} menu`}
+                        data-testid={`button-dropdown-${menu.id}`}
                         className={`
                           relative flex items-center space-x-2 px-3 py-2.5 rounded-full leading-none
                           transition-all duration-300 transform hover:scale-105
@@ -694,12 +505,12 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                           group
                         `}
                       >
-                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
-                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
-                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
-                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
-                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
-                        {menu.id === 'apps' && <Grid size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" aria-hidden="true" />}
+                        {menu.id === 'sales' && <DollarSign size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'communication' && <MessageSquare size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'business-intel' && <BarChart3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'wl' && <Globe size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'intel' && <Brain size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
+                        {menu.id === 'apps' && <Grid3X3 size={16} className="block overflow-visible flex-none transition-transform duration-300 group-hover:scale-105" />}
 
                         <span className="text-xs font-medium">
                           {menu.id === 'sales' ? 'Sales'
@@ -711,7 +522,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                         </span>
                         {/* Only show chevron for dropdown menus */}
                         {(menu.id === 'sales' || menu.id === 'communication' || menu.id === 'apps' || menu.id === 'wl') && (
-                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} aria-hidden="true" />
+                          <ChevronDown size={14} className={`block overflow-visible shrink-0 transition-transform duration-300 ${activeDropdown === menu.id ? 'rotate-180' : ''}`} />
                         )}
                         {renderBadge(menu.badge, menu.badgeColor)}
                         {activeDropdown === menu.id && (
@@ -723,13 +534,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                   {/* Other dropdown panels (sales/tasks/communication/content/apps) — keep your existing code */}
                   {menu.id === 'sales' && activeDropdown === 'sales' && (
-                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {salesTools.map((tool, index) => (
                           <button
                             key={index}
                             onClick={() => {
-                              logger.debug('Sales tool clicked', { tool: tool.tool, name: tool.name });
+                              console.log('Sales tool clicked:', tool.tool, tool.name);
                               const routeMap: { [key: string]: string } = {
                                 'deal-pipeline': '/pipeline-intelligence',
                                 'deal-risk': '/deal-risk-monitor',
@@ -745,7 +556,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
-                              closeDropdown();
+                              setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -759,28 +570,28 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'communication' && activeDropdown === 'communication' && (
-                    <div className={`absolute top-full mt-2 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
+                    <div className={`absolute top-14 right-0 w-64 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {communicationTools.map((tool, index) => (
                           <button
                             key={index}
                             onClick={() => {
-                              logger.debug('Communication tool clicked', { tool: tool.tool, name: tool.name });
+                              console.log('Communication tool clicked:', tool.tool, tool.name);
                               const routeMap: { [key: string]: string } = {
                                 'appointments': '/appointments',
-                                'video-email': '/video-profiles',
+                                'video-email': '/voice-profiles',
                                 'text-messages': '/communication-hub',
                                 'phone-system': '/phone-system',
                                 'invoicing': '/invoicing',
-                                'lead-automation': '/lead-automation',
-                                'circle-prospecting': '/circle-prospecting',
+                                'lead-automation': '/tasks', // Redirect to working tasks page
+                                'circle-prospecting': '/communication', // Redirect to working communication page
                                 'forms': '/forms',
                                 'business-analysis': '/business-analysis'
                               };
-
+                              
                               const route = routeMap[tool.tool] || `/${tool.tool}`;
                               navigate(route);
-                              closeDropdown();
+                              setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
                             className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -794,7 +605,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'business-intel' && activeDropdown === 'business-intel' && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                    <div className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
                       <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                         <div className="h-full flex flex-col">
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
@@ -823,7 +634,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               title="Business Intelligence Dashboard"
                               frameBorder="0"
                               allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups  allow-top-navigation"
                               onLoad={(e) => {
                                 try {
                                   (e.target as HTMLIFrameElement).contentWindow?.postMessage({
@@ -831,7 +642,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                     fullscreen: true
                                   }, '*');
                                 } catch (error) {
-                                  logger.debug('Could not communicate with iframe', error);
+                                  console.log('Could not communicate with iframe');
                                 }
                               }}
                             />
@@ -842,7 +653,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'wl' && activeDropdown === 'wl' && (
-                    <div className={`absolute top-full mt-2 right-0 w-80 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-visible`}>
+                    <div className={`absolute top-14 right-0 w-80 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-visible animate-fade-in`}>
                       <div className="p-3 max-h-[80vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {wlApps.map((app, index) =>
                           app.isExternal ? (
@@ -864,7 +675,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               key={index}
                               onClick={() => {
                                 handleNavigation(app.url, 'white-label');
-                                closeDropdown();
+                                setActiveDropdown(null);
                                 setIsMobileMenuOpen(false);
                               }}
                               className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
@@ -879,7 +690,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   )}
 
                   {menu.id === 'intel' && activeDropdown === 'intel' && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
+                    <div className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setActiveDropdown(null)}>
                       <div className={`absolute inset-4 ${isDark ? 'bg-gray-900/98' : 'bg-white/98'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                         <div className="h-full flex flex-col">
                           <div className="flex items-center justify-between p-4 border-b border-gray-200/30">
@@ -908,7 +719,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                               title="Intel Dashboard"
                               frameBorder="0"
                               allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+                              sandbox="allow-same-origin allow-scripts allow-forms allow-popups  allow-top-navigation"
                               onLoad={(e) => {
                                 try {
                                   (e.target as HTMLIFrameElement).contentWindow?.postMessage({
@@ -916,7 +727,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                                     fullscreen: true
                                   }, '*');
                                 } catch (error) {
-                                  logger.debug('Could not communicate with iframe', error);
+                                  console.log('Could not communicate with iframe');
                                 }
                               }}
                             />
@@ -929,7 +740,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
 
 
                   {menu.id === 'apps' && activeDropdown === 'apps' && (
-                    <div className={`absolute top-full mt-2 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[9999] overflow-hidden`}>
+                    <div className={`absolute top-14 right-0 w-72 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
                       <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                         {connectedApps.map((app, index) =>
                           app.isExternal ? (
@@ -964,221 +775,114 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   ))}
                 </div>
               </div>
-         </nav>
+            </div>
 
+            {/* Mobile menu button */}
+            <div className="lg:hidden">
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(!isMobileMenuOpen); }}
+                data-testid="button-mobile-menu-toggle"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              >
+                {isMobileMenuOpen ? <X size={24} className="block overflow-visible shrink-0" /> : <Menu size={24} className="block overflow-visible shrink-0" />}
+              </button>
+            </div>
 
-    {/* Portal-rendered Dropdowns */}
-    {/* Analytics Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'analytics'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {analyticsOptions.map((option, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              navigate(option.url);
-              closeDropdown();
-              setIsMobileMenuOpen(false);
-            }}
-            data-testid={`analytics-option-${option.name.toLowerCase().replace(/\s+/g, '-')}`}
-            className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
-          >
-            <option.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
-            <span className="text-sm font-medium">{option.name}</span>
-          </button>
-        ))}
-      </div>
-    </DropdownPortal>
-
-    {/* AI Tools Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'ai-tools'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {Object.values(aiToolCategories).flat().map((tool) => (
-          <button
-            key={tool.id}
-            onClick={() => {
-              handleAIToolClick(tool.id);
-              closeDropdown();
-            }}
-            data-testid={`ai-tool-${tool.id}`}
-            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          >
-            {tool.icon ? <tool.icon size={16} className="block overflow-visible shrink-0 text-pink-500" /> : <Sparkles size={16} className="block overflow-visible shrink-0 text-pink-500" />}
-            <span className="text-sm font-medium">{tool.title}</span>
-          </button>
-        ))}
-      </div>
-    </DropdownPortal>
-
-    {/* Sales Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'sales'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {salesTools.map((tool, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              // Navigate to the sales tool
-              const routeMap: { [key: string]: string } = {
-                'deal-pipeline': '/pipeline-intelligence',
-                'deal-risk': '/deal-risk-monitor',
-                'conversion-insights': '/smart-conversion-insights',
-                'pipeline-health': '/pipeline-health-dashboard',
-                'sales-cycle': '/sales-cycle-analytics',
-                'win-rate-analysis': '/win-rate-intelligence',
-                'ai-sales-forecast': '/ai-sales-forecast',
-                'live-deal-analysis': '/live-deal-analysis',
-                'competitor-insights': '/competitor-insights',
-                'revenue-intelligence': '/revenue-intelligence'
-              };
-              const route = routeMap[tool.tool] || `/${tool.tool}`;
-              navigate(route);
-              closeDropdown();
-              setIsMobileMenuOpen(false);
-            }}
-            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          >
-            <tool.icon size={16} className="block overflow-visible shrink-0 text-green-500" />
-            <span className="text-sm font-medium">{tool.name}</span>
-          </button>
-        ))}
-      </div>
-    </DropdownPortal>
-
-    {/* Communication Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'communication'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {communicationTools.map((tool, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              const routeMap: { [key: string]: string } = {
-                'appointments': '/appointments-dashboard',
-                'video-email': '/video-email',
-                'text-messages': '/text-messages',
-                'phone-system': '/phone-system',
-                'invoicing': '/invoicing',
-                'lead-automation': '/lead-automation',
-                'circle-prospecting': '/circle-prospecting',
-                'forms': '/forms',
-                'business-analysis': '/business-analyzer',
-                'content-library': '/content-library',
-                'voice-profiles': '/voice-profiles'
-              };
-
-              const route = routeMap[tool.tool] || `/${tool.tool}`;
-              navigate(route);
-              closeDropdown();
-              setIsMobileMenuOpen(false);
-            }}
-            className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-          >
-            <tool.icon size={16} className="block overflow-visible shrink-0 text-blue-500" />
-            <span className="text-sm font-medium">{tool.name}</span>
-          </button>
-        ))}
-      </div>
-    </DropdownPortal>
-
-    {/* WL (White Label) Apps Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'wl'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {wlApps.map((app, index) => (
-          app.isExternal ? (
-            <a
-              key={index}
-              href={app.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-            >
-              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
-              <span className="text-sm font-medium">{app.name}</span>
-              <ExternalLink size={12} className="ml-auto text-gray-400" />
-            </a>
-          ) : (
+            {/* Mobile theme toggle */}
             <button
-              key={index}
-              onClick={() => {
-                handleNavigation(app.url, 'white-label');
-                closeDropdown();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+              onClick={toggleTheme}
+              data-testid="button-mobile-theme-toggle"
+              className={`p-2 rounded-lg transition-colors lg:hidden ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              <app.icon size={16} className="block overflow-visible shrink-0 text-indigo-500" />
-              <span className="text-sm font-medium">{app.name}</span>
+              {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
             </button>
-          )
-        ))}
-      </div>
-    </DropdownPortal>
 
+            {/* Right controls */}
+            <div className="hidden lg:flex items-center space-x-0.5 flex-none shrink-0 pl-2">
+              <button 
+                data-testid="button-search"
+                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Search size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+              </button>
+              <button 
+                data-testid="button-notifications"
+                className={`relative p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}>
+                <Bell size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+                {counters.totalNotifications > 0 && renderBadge(counters.totalNotifications)}
+              </button>
+              <button
+                onClick={toggleTheme}
+                data-testid="button-theme-toggle"
+                className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDark ? <Sun size={16} className="block overflow-visible shrink-0 text-white" /> : <Moon size={16} className="block overflow-visible shrink-0 text-gray-600" />}
+              </button>
+              <div className="relative">
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleDropdown('user'); }}
+                  data-testid="button-user-menu"
+                  className={`p-2 rounded-full transition-all duration-300 ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                >
+                  <User size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-white' : 'text-gray-600'}`} />
+                </button>
 
-    {/* Apps Dropdown Portal */}
-    <DropdownPortal
-      isOpen={activeDropdown === 'apps'}
-      anchor={dropdownAnchor}
-      onClose={closeDropdown}
-    >
-      <div className="p-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {connectedApps.map((app, index) =>
-          app.isExternal ? (
-            <a
-              key={index}
-              href={app.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                closeDropdown();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-              data-testid={`external-app-${app.name.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              <div className="flex items-center space-x-3">
-                <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
-                <span className="text-sm font-medium">{app.name}</span>
+                {activeDropdown === 'user' && (
+                  <div className={`absolute top-14 right-0 w-48 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/10' : 'border-gray-200'} rounded-2xl shadow-2xl z-[10000] overflow-hidden animate-fade-in`}>
+                    <div className="p-3">
+                      <div className="px-3 py-2 border-b border-gray-200/30">
+                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {user?.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleSignOut}
+                        data-testid="button-sign-out"
+                        className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <ExternalLink size={12} className="block overflow-visible shrink-0 opacity-50" />
-            </a>
-          ) : (
-            <button
-              key={index}
-              onClick={() => {
-                navigate(app.url);
-                closeDropdown();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900"
-              data-testid={`internal-app-${app.name.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              <app.icon size={16} className="block overflow-visible shrink-0 text-purple-500" />
-              <span className="text-sm font-medium">{app.name}</span>
-            </button>
-          )
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className={`lg:hidden mt-4 ${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-2xl border ${isDark ? 'border-white/20' : 'border-gray-200'} rounded-2xl shadow-2xl overflow-hidden animate-fade-in`}>
+            <div className="p-4 space-y-3">
+              {mainTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={tab.action}
+                  className={`w-full text-left flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  <tab.icon size={20} className="block overflow-visible shrink-0" />
+                  <span className="font-medium">{tab.label}</span>
+                  {tab.badge && renderBadge(tab.badge, 'bg-blue-500')}
+                </button>
+              ))}
+
+              <hr className={`${isDark ? 'border-white/20' : 'border-gray-200'}`} />
+
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={toggleTheme}
+                  className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${isDark ? 'hover:bg-white/5 text-gray-300 hover:text-white' : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'}`}
+                >
+                  {isDark ? <Sun size={20} className="block overflow-visible shrink-0" /> : <Moon size={20} className="block overflow-visible shrink-0" />}
+                  <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-    </DropdownPortal>
-    </>
+    </nav>
   );
 });
 

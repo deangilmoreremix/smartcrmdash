@@ -29,7 +29,7 @@ const AnalyticsApp: React.FC = () => {
         className="w-full h-full border-0"
         title="AI-Powered Analytics Dashboard with Multiple Apps"
         allow="clipboard-read; clipboard-write; fullscreen; microphone; camera"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-navigation allow-top-navigation"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
         loading="lazy"
         onLoad={(e) => {
           console.log('🎯 AI Analytics iframe loaded, setting up communication...');
