@@ -882,8 +882,9 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
           </div>
         )}
       </div>
-    </nav>
-  );
-});
+     </nav>
+   );
+ }
+);
 
 export default Navbar;
