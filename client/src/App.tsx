@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -25,26 +25,19 @@ import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
 import { Toaster } from './components/ui/toaster';
 import ProtectedRoute from './components/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
 
 // Eager pages
 import Dashboard from './pages/Dashboard';
 import SystemOverview from './pages/SystemOverview';
 
 // Lazy pages
-const Tasks = lazy(() => import('./pages/Tasks'));
 const TasksNew = lazy(() => import('./pages/TasksNew'));
 const Communication = lazy(() => import('./pages/Communication'));
-const Contacts = lazy(() => import('./pages/Contacts'));
-const ContactsWithRemote = lazy(() => import('./pages/ContactsWithRemote'));
-const SimpleContactsTest = lazy(() => import('./pages/SimpleContactsTest'));
 const ContactsWorking = lazy(() => import('./pages/ContactsWorking'));
-const PipelineWithRemote = lazy(() => import('./pages/PipelineWithRemote'));
 const PipelinePage = lazy(() => import('./pages/PipelinePage'));
 const AITools = lazy(() => import('./pages/AITools'));
 const Analytics = lazy(() => import('./pages/AnalyticsDashboard'));
 const AIIntegration = lazy(() => import('./pages/AIIntegration'));
-const Settings = lazy(() => import('./pages/Settings'));
 const TextMessages = lazy(() => import('./pages/TextMessages'));
 
 // Authentication
@@ -54,7 +47,6 @@ const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
 const DevBypassPage = lazy(() => import('./pages/DevBypassPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 
 // Comprehensive implementations
 const PhoneSystem = lazy(() => import('./pages/PhoneSystem'));
@@ -65,7 +57,6 @@ const VoiceProfiles = lazy(() => import('./pages/VoiceProfiles'));
 const BusinessAnalysis = lazy(() => import('./pages/BusinessAnalysis'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
-const RemotePipeline = lazy(() => import('./pages/RemotePipeline'));
 const RemoteCalendar = lazy(() => import('./pages/RemoteCalendar'));
 
 // Sales pages
@@ -120,7 +111,6 @@ const ContentAIPage = lazy(() => import('./pages/ContentAIPage'));
 const AnalyticsRemotePage = lazy(() => import('./pages/AnalyticsRemotePage'));
 
 // User Account Management
-const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
 // Demo Pages for Sales
 const DashboardDemo = lazy(() => import('./pages/demos/DashboardDemo'));
@@ -131,39 +121,26 @@ const PipelineDemo = lazy(() => import('./pages/demos/PipelineDemo'));
 const AssistantsDashboard = lazy(() => import('./pages/AssistantsDashboard'));
 
 // Added lazy import for IframeOverlapChecker
-const IframeOverlapChecker = lazy(() => import('./pages/IframeOverlapChecker'));
 
 // Authentication imports
-import FormPublic from './pages/FormPublic';
-import UnauthorizedPage from './pages/UnauthorizedPage';
-import UserManagement from './pages/UserManagement';
 import DemoDashboard from './pages/DemoDashboard';
-import PartnerManagementPage from './pages/PartnerManagementPage';
-import SuperAdminDashboard from './pages/SuperAdminDashboard';
-import LeadCapture from './pages/LeadCapture';
-import AIGoalsPage from './pages/AIGoals/AIGoalsPage';
 const AIGoalsWithRemote = lazy(() => import('./pages/AIGoalsWithRemote'));
-import GoalCardDemo from './pages/GoalCardDemo';
-import ContactDetail from './pages/ContactDetail';
 
 // Bulk import page
-const BulkImportPage = lazy(() => import('./pages/BulkImportPage'));
 // Admin Dashboard page
 import AdminDashboard from './pages/AdminDashboard';
 
 // Entitlements management page
-const EntitlementsPage = lazy(() => import('./pages/EntitlementsPage'));
 
 // Feature pages
-import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
 import AiToolsFeaturePage from './pages/landing/FeaturePage/AiToolsFeaturePage';
-import CommunicationsFeaturePage from './pages/landing/FeaturePage/CommunicationsFeaturePage';
 import ContactsFeaturePage from './pages/landing/FeaturePage/ContactsFeaturePage';
-import FunctionAssistantFeaturePage from './pages/landing/FeaturePage/FunctionAssistantFeaturePage';
-import ImageGeneratorFeaturePage from './pages/landing/FeaturePage/ImageGeneratorFeaturePage';
 import PipelineFeaturePage from './pages/landing/FeaturePage/PipelineFeaturePage';
-import SemanticSearchFeaturePage from './pages/landing/FeaturePage/SemanticSearchFeaturePage';
+import AiAssistantFeaturePage from './pages/landing/FeaturePage/AiAssistantFeaturePage';
 import VisionAnalyzerFeaturePage from './pages/landing/FeaturePage/VisionAnalyzerFeaturePage';
+import ImageGeneratorFeaturePage from './pages/landing/FeaturePage/ImageGeneratorFeaturePage';
+import FunctionAssistantFeaturePage from './pages/landing/FeaturePage/FunctionAssistantFeaturePage';
+import SemanticSearchFeaturePage from './pages/landing/FeaturePage/SemanticSearchFeaturePage';
 
 // Additional whitelabel imports
 import LinkRedirect from './components/shared/LinkRedirect';
@@ -171,15 +148,12 @@ const WhiteLabelCustomization = lazy(() => import('./pages/WhiteLabelCustomizati
 
 // Landing page imports
 import LandingPage from './pages/LandingPage';
-import SalesLandingPage from './pages/SalesLandingPage';
 
 // Dashboard embed import
 import DashboardEmbed from './pages/DashboardEmbed';
 
 import './styles/design-system.css';
 // ElevenLabs widgets removed to prevent performance issues
-// import VoiceAgentWidget from './components/VoiceAgentWidget';
-// import ElevenLabsIframeWidget from './components/ElevenLabsIframeWidget';
 
 // Reusable placeholder
 const PlaceholderPage = ({ title, description }: { title: string; description?: string }) => (
@@ -252,12 +226,12 @@ function App() {
 
 // AppContent component with all the routing logic
 function AppContent() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const { setPosition } = useNavbarPosition();
 
   // Handle navbar drag end
   const handleNavbarDragEnd = (result: DropResult) => {
-    const { destination, source } = result;
+    const { destination } = result;
 
     if (!destination) return;
 

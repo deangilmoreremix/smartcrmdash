@@ -13,6 +13,50 @@ interface ContactAnalysisResult {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Export for aiToolsService compatibility
+export const openaiService = {
+  async generateCompletion(prompt: string, options: any = {}) {
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/openai-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
+        } as Record<string, string>,
+        body: JSON.stringify({
+          model: options.model || 'gpt-4',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: options.temperature || 0.7,
+          max_tokens: options.maxTokens || 1000,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('Invalid response from OpenAI');
+      }
+
+      return { content };
+    } catch (error) {
+      logger.error('OpenAI completion failed', error as Error);
+      return { content: 'Error generating content. Please try again.' };
+    }
+  }
+};
+
 export const useOpenAI = () => {
   const analyzeContact = async (contact: any): Promise<ContactAnalysisResult> => {
     logger.info(`Analyzing contact with OpenAI: ${contact.name}`);
@@ -24,7 +68,7 @@ export const useOpenAI = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'apikey': SUPABASE_ANON_KEY
-        },
+        } as Record<string, string>,
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [
@@ -90,7 +134,7 @@ export const useOpenAI = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'apikey': SUPABASE_ANON_KEY
-        },
+        } as Record<string, string>,
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
@@ -138,7 +182,7 @@ export const useOpenAI = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'apikey': SUPABASE_ANON_KEY
-        },
+        } as Record<string, string>,
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [

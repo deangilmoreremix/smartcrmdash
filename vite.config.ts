@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
 import federation from '@originjs/vite-plugin-federation';
-import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -151,10 +150,10 @@ export default defineConfig({
             return 'calendar';
           }
 
-          // Split large service files - temporarily disable openai chunking to fix TDZ error
-          // if (id.includes('src/services/openai')) {
-          //   return 'openai-services';
-          // }
+          // Split large service files
+          if (id.includes('src/services/openai')) {
+            return 'openai-services';
+          }
           if (id.includes('src/services/gemini') || id.includes('src/services/gpt5')) {
             return 'ai-providers';
           }
