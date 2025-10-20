@@ -1,9 +1,13 @@
+import * as React from 'react';
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import * as ReactDOM from 'react-dom';
+import * as ReactDOMClient from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { logger } from './config/logger.config';
+
+const { createRoot } = ReactDOMClient;
 
 // Fix for "global is not defined" error in browser
 if (typeof global === 'undefined') {
@@ -17,7 +21,24 @@ if (typeof process === 'undefined') {
 
 // Polyfill for Node.js modules that might be required by third-party scripts
 (window as any).Buffer = (window as any).Buffer || undefined;
-(window as any).require = (window as any).require || function() { return {}; };
+
+if (typeof (window as any).require === 'undefined') {
+  const moduleMap: Record<string, unknown> = {
+    react: React,
+    'react/jsx-runtime': React,
+    'react/jsx-dev-runtime': React,
+    'react-dom': ReactDOM,
+    'react-dom/client': ReactDOMClient,
+  };
+
+  (window as any).require = (moduleName: string) => {
+    const resolvedModule = moduleMap[moduleName];
+    if (!resolvedModule) {
+      throw new Error(`Module not found: ${moduleName}`);
+    }
+    return resolvedModule;
+  };
+}
 
 // Enhanced error boundary for unhandled errors
 window.addEventListener('error', (event) => {
