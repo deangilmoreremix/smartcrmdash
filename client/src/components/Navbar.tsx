@@ -964,7 +964,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
                   ))}
                 </div>
               </div>
-            </div>
+         </nav>
 
 
     {/* Portal-rendered Dropdowns */}
