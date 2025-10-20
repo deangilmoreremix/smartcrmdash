@@ -231,7 +231,7 @@ function App() {
                         <DashboardLayoutProvider>
                           <AIProvider>
                             <RoleProvider>
-                              <NavbarPositionProvider>
+                              <NavbarPositionProvider initialPosition="sidebar">
                                 <AppContent />
                               </NavbarPositionProvider>
                             </RoleProvider>

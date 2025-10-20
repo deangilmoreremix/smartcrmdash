@@ -2,17 +2,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Draggable } from '@hello-pangea/dnd';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
   TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid, Briefcase,
   Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
+  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus,
+  GripVertical, Minimize2, Maximize2
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRole } from './RoleBasedAccess';
+import { useNavbarPosition } from '../contexts/NavbarPositionContext';
 
 import { useDealStore } from "../store/dealStore";
 import { useContactStore } from "../hooks/useContactStore";
@@ -82,11 +85,14 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const [dropdownAnchor, setDropdownAnchor] = useState<DropdownAnchor>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
   const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
+  const { position, setPosition, setIsDragging: setContextDragging } = useNavbarPosition();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -428,24 +434,153 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     );
   }, []);
 
+  // Calculate navbar styles based on position and size
+  const getNavbarStyles = () => {
+    const baseClasses = `${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`;
+
+    switch (position) {
+      case 'top':
+        return {
+          className: `${baseClasses} rounded-full`,
+          style: {
+            position: 'fixed' as const,
+            top: isMinimized ? '8px' : '24px',
+            left: '16px',
+            right: '16px',
+            zIndex: 50,
+            height: isMinimized ? '48px' : 'auto',
+            paddingTop: isMinimized ? '6px' : '6px',
+            paddingBottom: isMinimized ? '6px' : '12px',
+          }
+        };
+      case 'bottom':
+        return {
+          className: `${baseClasses} rounded-full`,
+          style: {
+            position: 'fixed' as const,
+            bottom: isMinimized ? '8px' : '24px',
+            left: '16px',
+            right: '16px',
+            zIndex: 50,
+            height: isMinimized ? '48px' : 'auto',
+            paddingTop: isMinimized ? '6px' : '12px',
+            paddingBottom: isMinimized ? '6px' : '6px',
+          }
+        };
+      case 'left':
+        return {
+          className: `${baseClasses} rounded-2xl`,
+          style: {
+            position: 'fixed' as const,
+            top: '50%',
+            left: isMinimized ? '8px' : '16px',
+            transform: 'translateY(-50%)',
+            zIndex: 50,
+            width: isMinimized ? '48px' : '280px',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+          }
+        };
+      case 'right':
+        return {
+          className: `${baseClasses} rounded-2xl`,
+          style: {
+            position: 'fixed' as const,
+            top: '50%',
+            right: isMinimized ? '8px' : '16px',
+            transform: 'translateY(-50%)',
+            zIndex: 50,
+            width: isMinimized ? '48px' : '280px',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+          }
+        };
+      case 'sidebar':
+        return {
+          className: `${baseClasses} rounded-none`,
+          style: {
+            position: 'fixed' as const,
+            top: 0,
+            left: 0,
+            zIndex: 50,
+            width: isMinimized ? '64px' : '280px',
+            height: '100vh',
+            overflowY: 'auto',
+          }
+        };
+      default:
+        return {
+          className: `${baseClasses} rounded-full`,
+          style: {
+            position: 'fixed' as const,
+            top: '24px',
+            left: '16px',
+            right: '16px',
+            zIndex: 50,
+          }
+        };
+    }
+  };
+
+  const navbarStyles = getNavbarStyles();
+
   return (
     <>
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 pt-6 pb-3 px-4" style={{ marginTop: 0, top: 0 }}>
-      <div className="max-w-[90rem] mx-auto will-change-transform">
-        <div className={`${isDark ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-xl rounded-full shadow-2xl transition-all duration-500 hover:shadow-3xl ring-1 ${isDark ? 'ring-white/10' : 'ring-gray-100'} overflow-visible`}>
+    <Draggable draggableId="navbar" index={0}>
+      {(provided, snapshot) => (
+        <nav
+          ref={(el) => {
+            navRef.current = el;
+            provided.innerRef(el);
+          }}
+          {...provided.draggableProps}
+          className={navbarStyles.className}
+          style={{
+            ...navbarStyles.style,
+            ...provided.draggableProps.style,
+            opacity: snapshot.isDragging ? 0.8 : 1,
+          }}
+        >
+          {/* Drag Handle */}
+          <div
+            {...provided.dragHandleProps}
+            className="absolute -top-2 left-1/2 transform -translate-x-1/2 cursor-move opacity-0 hover:opacity-100 transition-opacity duration-200"
+            title="Drag to reposition navbar"
+          >
+            <GripVertical size={16} className={`block overflow-visible shrink-0 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
+          </div>
+
+          {/* Minimize/Maximize Button */}
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="absolute -top-2 right-4 cursor-pointer opacity-0 hover:opacity-100 transition-opacity duration-200 p-1 rounded-full hover:bg-gray-100/20"
+            title={isMinimized ? 'Maximize navbar' : 'Minimize navbar'}
+          >
+            {isMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
+          </button>
+
+          <div className="max-w-[90rem] mx-auto will-change-transform">
+            <div className={`${position === 'left' || position === 'right' || position === 'sidebar' ? 'flex flex-col space-y-4' : 'flex items-center justify-between'} px-6 lg:px-8 py-3`}>
+              {/* Logo - only show when not minimized */}
+              {!isMinimized && (position === 'top' || position === 'bottom') && (
+                <div className="flex items-center flex-none shrink-0">
+                  <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Smart<span className="text-green-400">CRM</span>
+                  </h1>
+                </div>
+              )}
+
+              {/* Desktop nav pills - only show when not minimized */}
+              {!isMinimized && (
+                <div className="hidden lg:flex flex-1 min-w-0">
+                  <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                    <div className="inline-flex items-center gap-1 whitespace-nowrap">
           <div className="flex items-center justify-between px-6 lg:px-8 py-3">
 
-            {/* Logo */}
-            <div className="flex items-center flex-none shrink-0">
-              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Smart<span className="text-green-400">CRM</span>
-              </h1>
-            </div>
-
-            {/* Desktop nav pills */}
-            <div className="hidden lg:flex flex-1 min-w-0">
-              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-                <div className="inline-flex items-center gap-1 whitespace-nowrap">
+                            {/* Desktop nav pills */}
+                            <div className="hidden lg:flex flex-1 min-w-0">
+                              <div className="w-full overflow-x-auto px-1 py-1.5" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                                          <div className="inline-flex items-center gap-1 whitespace-nowrap">
                   {mainTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (

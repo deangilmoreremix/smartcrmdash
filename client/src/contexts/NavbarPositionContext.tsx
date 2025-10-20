@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type NavbarPosition = 'top' | 'left' | 'right' | 'bottom';
+export type NavbarPosition = 'top' | 'left' | 'right' | 'bottom' | 'sidebar';
 
 interface NavbarPositionState {
   position: NavbarPosition;
@@ -18,16 +18,17 @@ const NavbarPositionContext = createContext<NavbarPositionContextType | undefine
 
 interface NavbarPositionProviderProps {
   children: ReactNode;
+  initialPosition?: NavbarPosition;
 }
 
-export const NavbarPositionProvider: React.FC<NavbarPositionProviderProps> = ({ children }) => {
-  const [position, setPositionState] = useState<NavbarPosition>('top');
+export const NavbarPositionProvider: React.FC<NavbarPositionProviderProps> = ({ children, initialPosition = 'top' }) => {
+  const [position, setPositionState] = useState<NavbarPosition>(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
 
   // Load position from localStorage on mount
   useEffect(() => {
     const savedPosition = localStorage.getItem('navbar-position') as NavbarPosition;
-    if (savedPosition && ['top', 'left', 'right', 'bottom'].includes(savedPosition)) {
+    if (savedPosition && ['top', 'left', 'right', 'bottom', 'sidebar'].includes(savedPosition)) {
       setPositionState(savedPosition);
     }
   }, []);
