@@ -2,8 +2,6 @@
 // Import satisfy first to avoid TDZ issues
 import { wt } from './satisfy';
 
-// Import remoteAppManager after satisfy to avoid TDZ issues
-import { remoteAppManager } from './remoteAppManager';
 
 export interface RemoteModuleConfig {
   url: string;

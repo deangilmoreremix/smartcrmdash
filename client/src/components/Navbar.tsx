@@ -3,10 +3,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronDown, User, Bell, Search, BarChart3, Users, Target, MessageSquare, Video, FileText, Zap,
-  TrendingUp, Calendar, Phone, Receipt, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid, Briefcase,
-  Megaphone, Activity, CheckSquare, Sparkles, PieChart, Clock, Shield, Globe, Camera, Layers, Repeat,
-  Palette, DollarSign, Volume2, Image, Bot, Eye, Code, MessageCircle, AlertTriangle, LineChart,
-  Edit3, ExternalLink, Menu, X, RefreshCw, Plus, MapPin, FileCheck, Settings, Package, UserPlus
+  TrendingUp, Calendar, Phone, BookOpen, Mic, Sun, Moon, Brain, Mail, Grid, Briefcase,
+  Megaphone, Activity, CheckSquare, Sparkles, Clock, Shield, Globe, Camera, Repeat,
+  Palette, DollarSign, Volume2, Image, Bot, Eye, Code, AlertTriangle, LineChart,
+  ExternalLink, Menu, X, Plus, MapPin, FileCheck, Settings, Package, UserPlus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -22,14 +22,8 @@ interface NavbarProps {
   onOpenPipelineModal?: () => void;
 }
 
-type AITool = {
-  title: string;
-  id: string;       // must match AITools.tsx switch cases
-  icon?: any;  // Simplified for compatibility with lucide-react icons
-  category?: string;
-};
 
-const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
+const Navbar: React.FC<NavbarProps> = React.memo(() => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,15 +31,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   const { isDark, toggleTheme } = useTheme();
   const { openAITool } = useNavigation(); // expected from your AIToolsProvider/Navigation layer
   const { signOut, user } = useAuth();
-  const { canAccess, isSuperAdmin, isWLUser, isRegularUser } = useRole();
+  const { canAccess, isSuperAdmin } = useRole();
 
   const navigate = useNavigate();
   const location = useLocation();
 
   // Check access levels using new role system
   const isAdmin = isSuperAdmin();
-  const hasAITools = canAccess('ai_tools');
-  const hasAdvancedFeatures = canAccess('advanced_features');
 
   // Data sources
   const { deals } = useDealStore();
@@ -56,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
   // Counters
   const counters = React.useMemo(() => {
     const activeDeals = Object.values(deals).filter(
-      deal => String(deal.stage) !== 'closed-won' && String(deal.stage) !== 'closed-lost'
+      deal => deal.status !== 'won' && deal.status !== 'lost'
     ).length;
 
     const hotContacts = Object.values(contacts).filter(contact =>
@@ -82,27 +74,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     };
   }, [deals, contacts, tasks, appointments]);
 
-  // ===== UNIFIED TASKS DROPDOWN: View Options + Quick Actions + AI Features =====
-  const taskTools = [
-    // VIEW OPTIONS (navigate to TasksNew.tsx tabs)
-    { name: 'Task Board', tool: 'tasks', icon: CheckSquare, action: 'navigate', tab: 'board' },
-    { name: 'Task Calendar', tool: 'tasks', icon: Calendar, action: 'navigate', tab: 'calendar' },
-    { name: 'Task Analytics', tool: 'tasks', icon: BarChart3, action: 'navigate', tab: 'analytics' },
-    { name: 'Activity Feed', tool: 'tasks', icon: Activity, action: 'navigate', tab: 'activity' },
-    { type: 'divider' },
-
-    // QUICK ACTIONS
-    { name: 'New Task', tool: 'new-task', icon: Plus, action: 'modal' },
-    { name: 'Search Tasks', tool: 'search-tasks', icon: Search, action: 'search' },
-    { name: 'Task Templates', tool: 'task-templates', icon: FileText, action: 'templates' },
-    { type: 'divider' },
-
-    // AI ENHANCEMENTS
-    { name: 'AI Task Assistant', tool: 'task-automation', icon: Bot },
-    { name: 'Smart Prioritization', tool: 'smart-priority', icon: Zap },
-    { name: 'Deadline Optimizer', tool: 'deadline-manager', icon: AlertTriangle },
-    { name: 'Workflow Builder', tool: 'workflow-builder', icon: Repeat }
-  ];
 
   const salesTools = [
     { name: "Pipeline Intelligence", tool: 'deal-pipeline', icon: BarChart3 },
@@ -131,14 +102,6 @@ const Navbar: React.FC<NavbarProps> = React.memo(({ onOpenPipelineModal }) => {
     { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic }
   ];
 
-  const contentTools = [
-    { name: 'Content Library', tool: 'content-library', icon: BookOpen },
-    { name: 'Voice Profiles', tool: 'voice-profiles', icon: Mic },
-    { name: 'Business Analysis', tool: 'business-analysis', icon: BarChart3 },
-    { name: 'Image Generator', tool: 'image-generator', icon: Camera },
-    { name: 'Forms', tool: 'forms', icon: FileText },
-    { name: 'AI Model Demo', tool: 'ai-model-demo', icon: Brain }
-  ];
 
   // White Label specific apps
   const wlApps = [
