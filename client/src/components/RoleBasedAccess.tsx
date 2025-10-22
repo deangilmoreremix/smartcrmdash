@@ -50,14 +50,18 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const fetchUserRole = async () => {
     try {
       setIsLoading(true);
+      console.log('RoleProvider Debug: Fetching user role, tenant:', tenant);
 
       // Get current user with role information
       const response = await fetch('/api/auth/user-role', {
         headers: tenant ? { 'X-Tenant-ID': tenant.id } : {},
       });
 
+      console.log('RoleProvider Debug: Response status:', response.status);
+
       if (response.ok) {
         const userData = await response.json();
+        console.log('RoleProvider Debug: User data received:', userData);
         setUser(userData.user);
       } else {
         // Silently handle non-200 responses during development
@@ -66,6 +70,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     } catch (error) {
       // Only log significant errors, not network failures during development
       console.debug('User role fetch skipped:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('RoleProvider Debug: Error fetching user role:', error);
     } finally {
       setIsLoading(false);
     }
