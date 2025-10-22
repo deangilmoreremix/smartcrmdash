@@ -226,7 +226,7 @@ function App() {
 
 // AppContent component with all the routing logic
 function AppContent() {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
   const { setPosition } = useNavbarPosition();
 
   // Handle navbar drag end
@@ -254,8 +254,8 @@ function AppContent() {
         <RemoteAppRefreshManager />
         <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-            {/* Redirect root to dashboard for authenticated users, landing page for guests */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Show landing page for non-authenticated users, redirect authenticated users to dashboard */}
+            <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
             <Route path="/landing" element={<LandingPage />} />
 
           {/* Dashboard embed - no navbar */}

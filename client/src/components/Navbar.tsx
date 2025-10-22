@@ -33,28 +33,20 @@ const Navbar: React.FC<NavbarProps> = React.memo(() => {
   const { signOut, user } = useAuth();
   const { canAccess, isSuperAdmin } = useRole();
 
-  // Data sources
-  const { deals } = useDealStore();
-  const { contacts } = useContactStore();
-  const { tasks } = useTaskStore();
-  const { appointments } = useAppointmentStore();
-
-  // Debug logs
-  console.log('Navbar Debug: useRole - user:', user, 'isSuperAdmin:', isSuperAdmin());
-  console.log('Navbar Debug: useNavigation - openAITool:', typeof openAITool);
-  console.log('Navbar Debug: useAuth - user:', user);
-  console.log('Navbar Debug: Stores - deals:', deals, 'contacts:', contacts, 'tasks:', tasks, 'appointments:', appointments);
-
   const navigate = useNavigate();
   const location = useLocation();
 
   // Check access levels using new role system
   const isAdmin = isSuperAdmin();
 
+  // Data sources
+  const { deals } = useDealStore();
+  const { contacts } = useContactStore();
+  const { tasks } = useTaskStore();
+  const { appointments } = useAppointmentStore();
+
   // Counters
   const counters = React.useMemo(() => {
-    console.log('Navbar Debug: Computing counters - deals:', Object.keys(deals).length, 'contacts:', Object.keys(contacts).length, 'tasks:', Object.keys(tasks).length, 'appointments:', Object.keys(appointments).length);
-
     const activeDeals = Object.values(deals).filter(
       deal => deal.status !== 'won' && deal.status !== 'lost'
     ).length;
@@ -73,16 +65,13 @@ const Navbar: React.FC<NavbarProps> = React.memo(() => {
       return aptDate.toDateString() === today.toDateString() && apt.status === 'scheduled';
     }).length;
 
-    const result = {
+    return {
       activeDeals,
       hotContacts,
       pendingTasks,
       todayAppointments,
       totalNotifications: hotContacts + pendingTasks + todayAppointments
     };
-
-    console.log('Navbar Debug: Counters computed:', result);
-    return result;
   }, [deals, contacts, tasks, appointments]);
 
 
