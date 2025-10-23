@@ -93,3 +93,29 @@ Notes & Next steps
 - Update Netlify UI settings to match: Base directory: `client`, Build command: `npm run build`, Publish directory: `dist`.
 - Test the build and deployment process to confirm everything works correctly.
 - Verify that the app deploys without errors and all assets are served properly.
+
+---
+
+## Latest Commit: Node.js Engine Update
+
+**Commit Hash:** f89d312
+**Message:** fix: Update Node.js engine requirement to support v22
+
+### What Changed
+
+1. **Package.json Engines**
+   - Updated `"node": "20.x"` to `"node": ">=20.0.0"` to support Node.js v22.
+
+2. **Netlify Configuration**
+   - Updated `NODE_VERSION` from "20" to "22" in `netlify.toml`.
+
+### Reason
+
+- Resolved npm warning for unsupported engine version (current Node.js v22.17.0).
+- Ensures compatibility with the current environment and future Node.js versions.
+
+### Notes & Next Steps
+
+- Verify that the build process runs without warnings.
+- Test deployment on Netlify to confirm Node.js v22 support.
+- Monitor for any compatibility issues with dependencies.
