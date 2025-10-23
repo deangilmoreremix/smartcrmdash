@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Brain, 
-  Zap, 
-  DollarSign, 
-  Clock, 
-  Info, 
+import {
+  Brain,
+  DollarSign,
+  Clock,
+  Info,
   ChevronDown,
   CheckCircle
 } from 'lucide-react';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, TrendingUp, CheckSquare, ChevronRight } from 'lucide-react';
+import { Target, ChevronRight } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 

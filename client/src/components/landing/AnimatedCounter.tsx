@@ -31,7 +31,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
         hasAnimated.current = true;
         
         let startTime: number;
-        let startValue = 0;
+        const startValue = 0;
         const endValue = end;
         
         const step = (timestamp: number) => {

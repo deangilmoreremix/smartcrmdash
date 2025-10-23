@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, DollarSign, Zap, Clock, TrendingUp } from 'lucide-react';
+import { BarChart3, DollarSign, Zap, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { AI_MODELS } from '../services/aiModels';
 

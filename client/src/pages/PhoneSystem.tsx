@@ -28,53 +28,10 @@ const PhoneSystem: React.FC = () => {
   const [recordingPlayback, setRecordingPlayback] = useState<string | null>(null);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
   
-  // Call logs data
-  const [callLogs] = useState<CallLog[]>([
-    {
-      id: '1',
-      contactName: 'John Doe',
-      phoneNumber: '(555) 123-4567',
-      direction: 'outbound',
-      startTime: new Date(Date.now() - 86400000), // yesterday
-      duration: 325, // 5:25
-      status: 'completed',
-      notes: 'Discussed proposal details. Follow up next week.',
-      recordingUrl: 'https://example.com/recording1.mp3'
-    },
-    {
-      id: '2',
-      contactName: 'Sarah Williams',
-      phoneNumber: '(555) 987-6543',
-      direction: 'inbound',
-      startTime: new Date(Date.now() - 172800000), // 2 days ago
-      duration: 0,
-      status: 'missed',
-      notes: 'Left a voicemail about scheduling a demo'
-    },
-    {
-      id: '3',
-      contactName: 'Robert Johnson',
-      phoneNumber: '(555) 456-7890',
-      direction: 'outbound',
-      startTime: new Date(Date.now() - 259200000), // 3 days ago
-      duration: 183, // 3:03
-      status: 'completed',
-      recordingUrl: 'https://example.com/recording2.mp3'
-    },
-    {
-      id: '4',
-      contactName: 'Jane Smith',
-      phoneNumber: '(555) 321-7654',
-      direction: 'inbound',
-      startTime: new Date(Date.now() - 345600000), // 4 days ago
-      duration: 0,
-      status: 'voicemail',
-      notes: 'Asked about pricing options',
-      recordingUrl: 'https://example.com/voicemail1.mp3'
-    }
-  ]);
-  
-  // Voicemail data
+  // Call logs data - will be loaded from API
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+
+  // Voicemail data - computed from call logs
   const voicemails = callLogs.filter(log => log.status === 'voicemail');
   
   // Handle dialer input
@@ -167,15 +124,18 @@ const PhoneSystem: React.FC = () => {
     if (recordingPlayback === url && isPlayingRecording) {
       setIsPlayingRecording(false);
       setRecordingPlayback(null);
+      // Stop actual audio playback here
     } else {
       setRecordingPlayback(url);
       setIsPlayingRecording(true);
-      
-      // Simulate playback (in real app, would use audio player)
-      setTimeout(() => {
-        setIsPlayingRecording(false);
-        setRecordingPlayback(null);
-      }, 3000);
+
+      // In real implementation, create and play audio element
+      // const audio = new Audio(url);
+      // audio.play();
+      // audio.onended = () => {
+      //   setIsPlayingRecording(false);
+      //   setRecordingPlayback(null);
+      // };
     }
   };
 

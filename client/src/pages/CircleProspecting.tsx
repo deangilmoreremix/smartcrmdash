@@ -71,102 +71,29 @@ const CircleProspecting: React.FC = () => {
     'Other'
   ];
   
-  // Mock data initialization
+  // Load circles from localStorage or initialize empty
   useEffect(() => {
-    const mockCircles: ProspectingCircle[] = [
-      {
-        id: '1',
-        name: 'Downtown Tech Corridor',
-        centerAddress: '123 Main St, San Francisco, CA',
-        radius: 3,
-        industries: ['Technology', 'Professional Services'],
-        filters: {
-          minEmployees: 10,
-          maxEmployees: 500
-        },
-        businesses: [
-          {
-            id: '1',
-            name: 'TechStart Solutions',
-            industry: 'Technology',
-            address: '456 Tech Ave, San Francisco, CA',
-            phone: '+1-555-0123',
-            email: 'info@techstart.com',
-            website: 'https://techstart.com',
-            employees: '50-100',
-            revenue: '$5M-$10M',
-            distance: 0.8,
-            prospectingScore: 85,
-            status: 'new'
-          },
-          {
-            id: '2',
-            name: 'Innovation Labs Inc',
-            industry: 'Technology',
-            address: '789 Innovation Blvd, San Francisco, CA',
-            phone: '+1-555-0456',
-            email: 'contact@innovlabs.com',
-            website: 'https://innovlabs.com',
-            employees: '25-50',
-            revenue: '$2M-$5M',
-            distance: 1.2,
-            prospectingScore: 78,
-            lastContact: new Date(Date.now() - 86400000), // yesterday
-            status: 'contacted'
-          },
-          {
-            id: '3',
-            name: 'Digital Strategy Group',
-            industry: 'Professional Services',
-            address: '321 Business Way, San Francisco, CA',
-            phone: '+1-555-0789',
-            email: 'hello@digitalstrategy.com',
-            employees: '10-25',
-            revenue: '$1M-$2M',
-            distance: 2.1,
-            prospectingScore: 72,
-            status: 'qualified'
-          }
-        ],
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
-        lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
-      },
-      {
-        id: '2',
-        name: 'Financial District',
-        centerAddress: '100 Wall St, San Francisco, CA',
-        radius: 2,
-        industries: ['Finance', 'Professional Services'],
-        filters: {
-          minEmployees: 50,
-          minRevenue: 5000000
-        },
-        businesses: [
-          {
-            id: '4',
-            name: 'Capital Investment Partners',
-            industry: 'Finance',
-            address: '200 Financial Plaza, San Francisco, CA',
-            phone: '+1-555-1234',
-            email: 'partnerships@capitalinvest.com',
-            website: 'https://capitalinvest.com',
-            employees: '100-250',
-            revenue: '$25M+',
-            distance: 0.5,
-            prospectingScore: 92,
-            status: 'converted'
-          }
-        ],
-        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 2 weeks ago
-        lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+    const savedCircles = localStorage.getItem('prospectingCircles');
+    if (savedCircles) {
+      try {
+        const parsedCircles = JSON.parse(savedCircles);
+        setCircles(parsedCircles);
+        if (parsedCircles.length > 0) {
+          setSelectedCircle(parsedCircles[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load saved circles:', error);
+        setCircles([]);
       }
-    ];
-    
-    setCircles(mockCircles);
-    if (mockCircles.length > 0) {
-      setSelectedCircle(mockCircles[0]);
     }
   }, []);
+
+  // Save circles to localStorage whenever circles change
+  useEffect(() => {
+    if (circles.length > 0) {
+      localStorage.setItem('prospectingCircles', JSON.stringify(circles));
+    }
+  }, [circles]);
   
   const handleCreateCircle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,38 +145,76 @@ const CircleProspecting: React.FC = () => {
   
   const searchBusinesses = async (circleId: string) => {
     setIsSearching(true);
-    
+    setError(null);
+
     try {
-      // Simulate API call to find businesses
+      // Simulate API call to find businesses with more realistic data
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockBusinesses: Business[] = [
-        {
-          id: `${Date.now()}-1`,
-          name: 'Local Business Solutions',
-          industry: formData.industries[0] || 'Professional Services',
-          address: `${formData.centerAddress} Area`,
-          phone: '+1-555-9999',
-          email: 'info@localbiz.com',
-          employees: '10-25',
-          revenue: '$1M-$5M',
-          distance: Math.random() * formData.radius,
-          prospectingScore: Math.floor(Math.random() * 30) + 70,
-          status: 'new'
-        }
+
+      const circle = circles.find(c => c.id === circleId);
+      if (!circle) {
+        throw new Error('Circle not found');
+      }
+
+      // Generate more realistic business data based on circle parameters
+      const businessCount = Math.floor(Math.random() * 8) + 3; // 3-10 businesses
+      const mockBusinesses: Business[] = [];
+
+      const businessNames = [
+        'Tech Solutions Inc', 'Digital Innovations', 'Business Systems Pro',
+        'Enterprise Solutions', 'Smart Tech Services', 'Data Dynamics',
+        'Cloud Computing Co', 'AI Solutions Group', 'Web Development Pros',
+        'Mobile App Experts', 'Cybersecurity Partners', 'IT Consulting Firm'
       ];
-      
-      setCircles(circles.map(circle => 
-        circle.id === circleId 
+
+      const cities = ['San Francisco', 'Oakland', 'Berkeley', 'Palo Alto', 'Mountain View', 'Sunnyvale'];
+
+      for (let i = 0; i < businessCount; i++) {
+        const industry = circle.industries[Math.floor(Math.random() * circle.industries.length)];
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        const distance = Math.random() * circle.radius;
+
+        // Calculate prospecting score based on filters and distance
+        let score = 70 + Math.floor(Math.random() * 25); // Base 70-95
+        if (distance < circle.radius * 0.3) score += 5; // Closer = higher score
+
+        mockBusinesses.push({
+          id: `${circleId}-${Date.now()}-${i}`,
+          name: businessNames[Math.floor(Math.random() * businessNames.length)] + ` ${city}`,
+          industry,
+          address: `${Math.floor(Math.random() * 999) + 1} ${['Main St', 'Oak Ave', 'Pine St', 'Elm Dr', 'Maple Ln'][Math.floor(Math.random() * 5)]}, ${city}, CA`,
+          phone: `+1-555-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`,
+          email: `contact@${businessNames[Math.floor(Math.random() * businessNames.length)].toLowerCase().replace(/\s+/g, '')}.com`,
+          website: `https://${businessNames[Math.floor(Math.random() * businessNames.length)].toLowerCase().replace(/\s+/g, '')}.com`,
+          employees: circle.filters.minEmployees ?
+            `${circle.filters.minEmployees}-${circle.filters.maxEmployees || circle.filters.minEmployees + 50}` :
+            `${Math.floor(Math.random() * 200) + 10}-${Math.floor(Math.random() * 300) + 50}`,
+          revenue: circle.filters.minRevenue ?
+            `$${circle.filters.minRevenue.toLocaleString()}+` :
+            `$${Math.floor(Math.random() * 10) + 1}M-$${Math.floor(Math.random() * 20) + 5}M`,
+          distance: Math.round(distance * 10) / 10,
+          prospectingScore: score,
+          status: 'new' as const
+        });
+      }
+
+      // Update circles state
+      const updatedCircles = circles.map(circle =>
+        circle.id === circleId
           ? { ...circle, businesses: mockBusinesses, lastUpdated: new Date() }
           : circle
-      ));
-      
+      );
+
+      setCircles(updatedCircles);
+
+      // Update selected circle if it's the one being searched
       if (selectedCircle?.id === circleId) {
         setSelectedCircle(prev => prev ? { ...prev, businesses: mockBusinesses } : null);
       }
+
     } catch (err) {
-      setError('Failed to search for businesses');
+      console.error('Search businesses error:', err);
+      setError('Failed to search for businesses. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -257,18 +222,55 @@ const CircleProspecting: React.FC = () => {
   
   const updateBusinessStatus = async (businessId: string, newStatus: Business['status']) => {
     if (!selectedCircle) return;
-    
-    const updatedBusinesses = selectedCircle.businesses.map(biz =>
-      biz.id === businessId 
-        ? { ...biz, status: newStatus, lastContact: new Date() }
-        : biz
-    );
-    
-    const updatedCircle = { ...selectedCircle, businesses: updatedBusinesses };
-    setSelectedCircle(updatedCircle);
-    setCircles(circles.map(circle => 
-      circle.id === selectedCircle.id ? updatedCircle : circle
-    ));
+
+    try {
+      const updatedBusinesses = selectedCircle.businesses.map(biz =>
+        biz.id === businessId
+          ? { ...biz, status: newStatus, lastContact: new Date() }
+          : biz
+      );
+
+      const updatedCircle = { ...selectedCircle, businesses: updatedBusinesses, lastUpdated: new Date() };
+      setSelectedCircle(updatedCircle);
+
+      const updatedCircles = circles.map(circle =>
+        circle.id === selectedCircle.id ? updatedCircle : circle
+      );
+      setCircles(updatedCircles);
+
+      // Persist to localStorage
+      localStorage.setItem('prospectingCircles', JSON.stringify(updatedCircles));
+
+    } catch (error) {
+      console.error('Failed to update business status:', error);
+      setError('Failed to update business status. Please try again.');
+    }
+  };
+
+  // Delete a circle
+  const deleteCircle = async (circleId: string) => {
+    try {
+      const updatedCircles = circles.filter(circle => circle.id !== circleId);
+      setCircles(updatedCircles);
+
+      if (selectedCircle?.id === circleId) {
+        setSelectedCircle(updatedCircles.length > 0 ? updatedCircles[0] : null);
+      }
+
+      // Persist to localStorage
+      localStorage.setItem('prospectingCircles', JSON.stringify(updatedCircles));
+
+    } catch (error) {
+      console.error('Failed to delete circle:', error);
+      setError('Failed to delete circle. Please try again.');
+    }
+  };
+
+  // Clear all data (for testing)
+  const clearAllData = () => {
+    setCircles([]);
+    setSelectedCircle(null);
+    localStorage.removeItem('prospectingCircles');
   };
   
   const getStatusColor = (status: Business['status']) => {
@@ -296,7 +298,7 @@ const CircleProspecting: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Circle Prospecting</h1>
           <p className="text-gray-600 mt-1">Geographic prospecting to find local businesses</p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 flex space-x-2">
           <button
             onClick={() => setShowCreateForm(true)}
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
@@ -304,6 +306,14 @@ const CircleProspecting: React.FC = () => {
             <Plus size={18} className="mr-1" />
             New Circle
           </button>
+          {circles.length > 0 && (
+            <button
+              onClick={clearAllData}
+              className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
+            >
+              Clear All Data
+            </button>
+          )}
         </div>
       </header>
 
@@ -339,9 +349,21 @@ const CircleProspecting: React.FC = () => {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-gray-900">{circle.name}</h3>
-                      <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
-                        {circle.businesses.length} businesses
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
+                          {circle.businesses.length} businesses
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCircle(circle.id);
+                          }}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Delete Circle"
+                        >
+                          <span className="text-sm">×</span>
+                        </button>
+                      </div>
                     </div>
                     <div className="text-sm text-gray-600">
                       <div className="flex items-center mb-1">

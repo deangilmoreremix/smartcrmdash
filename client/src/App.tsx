@@ -72,12 +72,6 @@ import PipelineHealthDashboard from './pages/PipelineHealthDashboard';
 import SalesCycleAnalytics from './pages/SalesCycleAnalytics';
 
 // Communication pages
-import ActivityAnalytics from './pages/ActivityAnalytics';
-import ResponseIntelligence from './pages/ResponseIntelligence';
-import ChannelSyncHub from './pages/ChannelSyncHub';
-import SmartEmailOptimizer from './pages/SmartEmailOptimizer';
-import SentimentMonitor from './pages/SentimentMonitor';
-import CommPerformance from './pages/CommPerformance';
 
 // Remote embed pages
 const BusinessIntelPage = lazy(() => import('./pages/BusinessIntelPage'));

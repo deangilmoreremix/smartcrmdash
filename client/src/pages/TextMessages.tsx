@@ -1,20 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import openAIService from '../services/openAIService';
-import { 
-  MessageSquare, 
-  Send, 
-  Clock, 
-  Check, 
-  AlertCircle, 
-  RefreshCw, 
-  Trash2, 
-  Brain, 
-  Settings, 
-  Calendar, 
-  Plus, 
-  User, 
-  X, 
-  Copy, 
+import messagingService from '../services/messagingService';
+import SMSSettings from '../components/SMSSettings';
+import {
+  MessageSquare,
+  Send,
+  Clock,
+  Check,
+  AlertCircle,
+  RefreshCw,
+  Trash2,
+  Brain,
+  Settings,
+  Calendar,
+  Plus,
+  User,
+  X,
+  Copy,
   Search,
   Filter,
   SlidersHorizontal,
@@ -30,6 +32,17 @@ interface Message {
   content: string;
   timestamp: Date;
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  attachments?: MessageAttachment[];
+  emojis?: string[];
+}
+
+interface MessageAttachment {
+  id: string;
+  type: 'image' | 'file' | 'video' | 'audio';
+  url: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
 }
 
 interface Contact {
@@ -137,6 +150,8 @@ const TextMessages: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
+  const [scheduledTime, setScheduledTime] = useState<string>('');
+  const [isScheduled, setIsScheduled] = useState(false);
 
   // Template management
   const [messageTemplates, setMessageTemplates] = useState<MessageTemplate[]>([
@@ -173,6 +188,80 @@ const TextMessages: React.FC = () => {
       messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [selectedContact?.messages]);
+
+  // Load contacts from local storage on mount
+  useEffect(() => {
+    const savedContacts = localStorage.getItem('textMessagesContacts');
+    if (savedContacts) {
+      try {
+        const parsedContacts = JSON.parse(savedContacts);
+        // Convert date strings back to Date objects
+        const contactsWithDates = parsedContacts.map((contact: any) => ({
+          ...contact,
+          lastActivity: contact.lastActivity ? new Date(contact.lastActivity) : undefined,
+          messages: contact.messages.map((message: any) => ({
+            ...message,
+            timestamp: new Date(message.timestamp)
+          }))
+        }));
+        setContacts(contactsWithDates);
+      } catch (error) {
+        console.error('Failed to load contacts from local storage:', error);
+      }
+    }
+  }, []);
+
+  // Save contacts to local storage whenever contacts change
+  useEffect(() => {
+    localStorage.setItem('textMessagesContacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  // Load templates from local storage on mount
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('textMessagesTemplates');
+    if (savedTemplates) {
+      try {
+        const parsedTemplates = JSON.parse(savedTemplates);
+        setMessageTemplates(parsedTemplates);
+      } catch (error) {
+        console.error('Failed to load templates from local storage:', error);
+      }
+    }
+  }, []);
+
+  // Save templates to local storage whenever templates change
+  useEffect(() => {
+    localStorage.setItem('textMessagesTemplates', JSON.stringify(messageTemplates));
+  }, [messageTemplates]);
+
+  // Polling for new messages
+  useEffect(() => {
+    if (!selectedContactId) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const selectedContact = contacts.find(c => c.id === selectedContactId);
+        if (!selectedContact) return;
+
+        // Fetch latest messages from API
+        const latestMessages = await messagingService.getMessageHistory(10, 0, {
+          status: 'delivered'
+        });
+
+        // Update local state if new messages are found
+        // This is a simplified implementation; in a real app, you'd need to match messages to contacts
+        // For now, we'll just log new messages
+        if (latestMessages.length > 0) {
+          console.log('New messages received:', latestMessages);
+          // TODO: Update contacts state with new messages
+        }
+      } catch (error) {
+        console.error('Failed to poll for new messages:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [selectedContactId, contacts]);
   
   const selectContact = (contactId: string) => {
     setSelectedContactId(contactId);
@@ -193,53 +282,80 @@ const TextMessages: React.FC = () => {
     contact.phone.includes(searchText)
   );
   
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!selectedContactId || !newMessage.trim()) return;
-    
+
+    // Basic input validation
+    if (newMessage.length > 1000) {
+      alert('Message is too long. Please keep it under 1000 characters.');
+      return;
+    }
+
+    // Check for potentially harmful content (basic check)
+    const suspiciousPatterns = [/javascript:/i, /<script/i, /on\w+=/i];
+    if (suspiciousPatterns.some(pattern => pattern.test(newMessage))) {
+      alert('Message contains potentially unsafe content.');
+      return;
+    }
+
     setIsSending(true);
-    
-    // Create new message
-    const newMessageObj: Message = {
-      id: `m${Date.now()}`,
-      sender: 'user',
-      content: newMessage,
-      timestamp: new Date(),
-      status: 'sending'
-    };
-    
-    // Update contacts state with the new message
-    setContacts(contacts.map(contact => 
-      contact.id === selectedContactId 
-        ? {
-            ...contact,
-            messages: [...contact.messages, newMessageObj],
-            lastMessage: newMessage,
-            lastActivity: new Date()
-          }
-        : contact
-    ));
-    
-    // Clear input
-    setNewMessage('');
-    
-    // Simulate message delivery
-    setTimeout(() => {
-      setContacts(prevContacts =>
-        prevContacts.map(contact => 
-          contact.id === selectedContactId 
+
+    try {
+      const selectedContact = contacts.find(c => c.id === selectedContactId);
+      if (!selectedContact) return;
+
+      // Check if scheduling is enabled
+      if (isScheduled && scheduledTime) {
+        const scheduledDate = new Date(scheduledTime);
+        if (scheduledDate <= new Date()) {
+          alert('Scheduled time must be in the future.');
+          return;
+        }
+
+        // For now, just show a confirmation. In a real app, this would be handled by the backend
+        alert(`Message scheduled for ${scheduledDate.toLocaleString()}`);
+        setIsScheduled(false);
+        setScheduledTime('');
+      } else {
+        // Send message immediately via API
+        const response = await messagingService.sendMessage({
+          content: newMessage,
+          recipient: selectedContact.phone,
+          priority: 'medium'
+        });
+
+        // Create new message object
+        const newMessageObj: Message = {
+          id: response.message.id,
+          sender: 'user',
+          content: newMessage,
+          timestamp: new Date(),
+          status: response.message.status as Message['status']
+        };
+
+        // Update contacts state with the new message
+        setContacts(contacts.map(contact =>
+          contact.id === selectedContactId
             ? {
                 ...contact,
-                messages: contact.messages.map(message => 
-                  message.id === newMessageObj.id
-                    ? { ...message, status: 'delivered' }
-                    : message
-                )
+                messages: [...contact.messages, newMessageObj],
+                lastMessage: newMessage,
+                lastActivity: new Date()
               }
             : contact
-        )
-      );
+        ));
+      }
+
+      // Clear input
+      setNewMessage('');
+
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      // Show error to user (could add a toast or alert)
+      alert('Failed to send message. Please try again.');
+    } finally {
       setIsSending(false);
-    }, 1500);
+    }
   };
   
   const formatDate = (date: Date) => {
@@ -266,34 +382,52 @@ const TextMessages: React.FC = () => {
   
   const generateTextSuggestion = async () => {
     if (!selectedContact) return;
-    
+
     setIsGenerating(true);
     setGeneratedText(null);
-    
+
     try {
-      // Use the OpenAI service to generate a text message suggestion
+      // Enhanced prompt for better AI suggestions
+      const prompt = `Generate a short, professional text message (under 160 characters) for a follow-up conversation with ${selectedContact.name}.
+
+Context: This is a business communication in a CRM system. The message should be:
+- Professional but friendly
+- Personalized using the contact's name
+- Focused on building relationship or following up on previous discussion
+- Action-oriented (encourage response)
+
+Examples of good messages:
+- "Hi ${selectedContact.name}, following up on our recent discussion. How did the proposal look to you?"
+- "Hello ${selectedContact.name}, just checking in to see if you had any questions about the demo we discussed."
+
+Generate one concise message:`;
+
       const result = await openai.generateEmail({
         recipient: selectedContact.name,
-        purpose: "Short text message follow-up (keep it under 160 characters)",
+        purpose: "Generate a short, professional text message (under 160 characters) for a follow-up conversation. Context: Business communication in CRM system. Professional but friendly, personalized, focused on building relationship.",
         tone: 'casual'
       });
-      
-      // Extract just the body part for text messaging
-      let message = result.body;
-      
-      // If it has multiple paragraphs, just take the first one
+
+      let message = result.body.trim();
+
+      // Clean up the response
       if (message.includes('\n\n')) {
         message = message.split('\n\n')[0];
       }
-      
-      // Remove any "Subject:" line if present
-      if (message.toLowerCase().startsWith('subject:')) {
-        message = message.split('\n').slice(1).join('\n').trim();
+
+      // Remove any quotes or formatting
+      message = message.replace(/^["']|["']$/g, '');
+
+      // Ensure it's under 160 characters
+      if (message.length > 160) {
+        message = message.substring(0, 157) + '...';
       }
-      
+
       setGeneratedText(message);
     } catch (error) {
       console.error("Failed to generate text suggestion:", error);
+      // Fallback suggestion
+      setGeneratedText(`Hi ${selectedContact.name}, just following up on our recent conversation. Do you have any questions?`);
     } finally {
       setIsGenerating(false);
     }
@@ -423,6 +557,36 @@ const TextMessages: React.FC = () => {
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
+                    {/* Display emojis if present */}
+                    {message.emojis && message.emojis.length > 0 && (
+                      <div className="flex space-x-1 mt-1">
+                        {message.emojis.map((emoji, index) => (
+                          <span key={index} className="text-lg">{emoji}</span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Display attachments if present */}
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {message.attachments.map((attachment) => (
+                          <div key={attachment.id} className="flex items-center space-x-2 p-2 bg-black bg-opacity-10 rounded">
+                            {attachment.type === 'image' ? (
+                              <Image size={16} className="text-gray-500" />
+                            ) : (
+                              <Upload size={16} className="text-gray-500" />
+                            )}
+                            <a
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs underline"
+                            >
+                              {attachment.fileName}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-xs opacity-70">{formatDate(message.timestamp)}</p>
                       {message.sender === 'user' && (
@@ -469,23 +633,81 @@ const TextMessages: React.FC = () => {
               <div className="p-4 bg-gray-50 border-t border-gray-200">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-gray-900">Message Templates</h3>
-                  <button
-                    onClick={() => setShowTemplates(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        // Add new template
+                        const newTemplate: MessageTemplate = {
+                          id: `template-${Date.now()}`,
+                          name: 'New Template',
+                          content: 'Hi {name}, [your message here]',
+                          category: 'other',
+                          variables: ['name']
+                        };
+                        setMessageTemplates([...messageTemplates, newTemplate]);
+                      }}
+                      className="p-1 text-blue-600 hover:text-blue-800"
+                      title="Add new template"
+                    >
+                      <Plus size={16} />
+                    </button>
+                    <button
+                      onClick={() => setShowTemplates(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2">
                   {messageTemplates.map((template) => (
-                    <button
+                    <div
                       key={template.id}
-                      onClick={() => useTemplate(template.content)}
-                      className="text-left p-2 bg-white rounded border border-gray-200 hover:border-blue-300 transition-colors"
+                      className="p-2 bg-white rounded border border-gray-200 hover:border-blue-300 transition-colors"
                     >
-                      <div className="text-sm font-medium text-gray-900">{template.name}</div>
-                      <div className="text-xs text-gray-500 mt-1">{template.content}</div>
-                    </button>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-sm font-medium text-gray-900">{template.name}</div>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => {
+                              // Edit template
+                              const newName = prompt('Edit template name:', template.name);
+                              const newContent = prompt('Edit template content:', template.content);
+                              if (newName && newContent) {
+                                setMessageTemplates(messageTemplates.map(t =>
+                                  t.id === template.id
+                                    ? { ...t, name: newName, content: newContent }
+                                    : t
+                                ));
+                              }
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-600"
+                            title="Edit template"
+                          >
+                            <Settings size={12} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Delete template
+                              if (confirm('Delete this template?')) {
+                                setMessageTemplates(messageTemplates.filter(t => t.id !== template.id));
+                              }
+                            }}
+                            className="p-1 text-red-400 hover:text-red-600"
+                            title="Delete template"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">{template.content}</div>
+                      <button
+                        onClick={() => useTemplate(template.content)}
+                        className="mt-1 text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Use Template
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -493,6 +715,31 @@ const TextMessages: React.FC = () => {
 
             {/* Input Area */}
             <div className="p-4 bg-white border-t border-gray-200">
+              {/* Schedule Input */}
+              {isScheduled && (
+                <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-900">Schedule Message</span>
+                    <button
+                      onClick={() => {
+                        setIsScheduled(false);
+                        setScheduledTime('');
+                      }}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <input
+                    type="datetime-local"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="w-full p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+              )}
+
               <div className="flex items-end space-x-2">
                 <div className="flex-1">
                   <textarea
@@ -520,6 +767,13 @@ const TextMessages: React.FC = () => {
                     ) : (
                       <Brain size={16} />
                     )}
+                  </button>
+                  <button
+                    onClick={() => setIsScheduled(!isScheduled)}
+                    className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md"
+                    title="Schedule message"
+                  >
+                    <Calendar size={16} />
                   </button>
                   <button
                     onClick={sendMessage}

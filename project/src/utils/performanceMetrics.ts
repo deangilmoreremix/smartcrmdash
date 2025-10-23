@@ -18,7 +18,7 @@ export interface AnimationMetrics {
 }
 
 const metrics: Record<string, AnimationMetrics> = {};
-let frameCount = 0;
+const frameCount = 0;
 let lastFrameTime = performance.now();
 let frameDrops = 0;
 
@@ -63,7 +63,7 @@ export const startPerformanceTracking = (componentName: string): {
 
 const trackFPS = (): () => number => {
   let fps = 60;
-  let lastTime = performance.now();
+  const lastTime = performance.now();
   let frames = 0;
   let lastFpsUpdate = lastTime;
 

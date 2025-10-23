@@ -5,15 +5,14 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Switch } from './ui/switch';
 import { useAIIntegrationStore } from '../store/aiIntegrationStore';
-import { 
-  Bot, 
-  Zap, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Bot,
+  Zap,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   Play,
-  Pause,
   Trash2,
   Edit,
   Plus,
@@ -30,9 +29,7 @@ export default function AIAutomationDashboard() {
   const {
     automationRules,
     insights,
-    workflows,
     suggestions,
-    models,
     loading,
     newInsights,
     pendingSuggestions,
