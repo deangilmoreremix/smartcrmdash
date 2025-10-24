@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useContactAI, useCommunicationAI } from '../../contexts/AIContext';
+import { useContactAI, useCommunicationAI } from '@/contexts/AIContext';
 import { 
   BarChart3, 
   Mail, 

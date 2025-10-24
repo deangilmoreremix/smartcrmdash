@@ -3,8 +3,8 @@ import { Goal } from '../../types/goals';
 import InteractiveGoalExplorer from '../../components/InteractiveGoalExplorer';
 import InteractiveGoalCard from '../../components/InteractiveGoalCard';
 import GoalExecutionModal from '../../components/GoalExecutionModal';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardHeader } from '../../components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { 
   Brain, 
   Info, 

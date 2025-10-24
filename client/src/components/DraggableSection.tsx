@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useDashboardLayout } from '@/contexts/DashboardLayoutContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { GripVertical, Eye, EyeOff } from 'lucide-react';
 
 interface DraggableSectionProps {

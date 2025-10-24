@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog } from './ui/dialog';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useOpenAIDemoAgent } from '../hooks/useOpenAIDemoAgent';
+import { useOpenAIDemoAgent } from '@/hooks/useOpenAIDemoAgent';
 import { Mic, StopCircle, UploadCloud, Video, X } from 'lucide-react';
 
 interface DemoAgentModalProps {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Video, Phone, Users, MessageSquare, X } from 'lucide-react';
-import { useVideoCall } from '../contexts/VideoCallContext';
-import { useContactStore } from '../hooks/useContactStore';
-import { useTheme } from '../contexts/ThemeContext';
+import { useVideoCall } from '@/contexts/VideoCallContext';
+import { useContactStore } from '@/hooks/useContactStore';
+import { useTheme } from '@/contexts/ThemeContext';
 import Avatar from './ui/Avatar';
 import { getInitials } from '../utils/avatars';
 

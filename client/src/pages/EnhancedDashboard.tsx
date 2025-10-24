@@ -9,8 +9,8 @@ import { useAITools } from '../components/AIToolsProvider';
 import AppointmentWidget from '../components/AppointmentWidget';
 import AIToolsCard from '../components/Dashboard/AIToolsCard';
 import DealAnalytics from '../components/DealAnalytics';
-import HelpTooltip from '../components/ui/HelpTooltip';
-import { useEnhancedHelp } from '../contexts/EnhancedHelpContext';
+import HelpTooltip from '@/components/ui/HelpTooltip';
+import { useEnhancedHelp } from '@/contexts/EnhancedHelpContext';
 import GeminiImageModal from '../components/GeminiImageModal';
 import { 
   BarChart3, 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Search, Filter, Users, Building, Phone, Mail, Globe, Plus, Target, ArrowRight, RefreshCw } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
-import { ModernButton } from '../components/ui/ModernButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { ModernButton } from '@/components/ui/ModernButton';
 
 interface Business {
   id: string;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
 import { Shield, Loader2, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, BarChart3, Target } from 'lucide-react';

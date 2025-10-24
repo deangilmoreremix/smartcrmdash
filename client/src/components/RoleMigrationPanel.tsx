@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { AlertCircle, CheckCircle, Users, RefreshCw, Database, Settings } from 'lucide-react';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface RoleMigrationPanelProps {
   onComplete?: () => void;

@@ -3,9 +3,9 @@ import { MoreHorizontal, Mail, MapPin, Building, Star } from 'lucide-react'; // 
 import Avatar from './ui/Avatar';
 import CallButton from './CallButton';
 import { getInitials } from '../utils/avatars';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Contact } from '../types/contact';
-import { useContactStore } from '../hooks/useContactStore';
+import { useContactStore } from '@/hooks/useContactStore';
 
 interface ContactCardProps {
   contact: Contact;

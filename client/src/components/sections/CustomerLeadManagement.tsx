@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Users, UserPlus } from 'lucide-react';
 import LeadsSection from '../LeadsSection';
 import { NewLeadsSection } from '../dashboard/NewLeadsSection';

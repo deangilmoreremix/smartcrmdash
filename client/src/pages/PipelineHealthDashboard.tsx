@@ -1,10 +1,10 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../hooks/useContactStore';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import Avatar from '../components/ui/Avatar';
+import { useContactStore } from '@/hooks/useContactStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Avatar from '@/components/ui/Avatar';
 import { 
   Activity, 
   TrendingUp, 

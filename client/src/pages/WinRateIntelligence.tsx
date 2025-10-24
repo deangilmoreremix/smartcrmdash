@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../hooks/useContactStore';
+import { useContactStore } from '@/hooks/useContactStore';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
-import { GlassCard } from '../components/ui/GlassCard';
-import { ModernButton } from '../components/ui/ModernButton';
-import Avatar from '../components/ui/Avatar';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { ModernButton } from '@/components/ui/ModernButton';
+import Avatar from '@/components/ui/Avatar';
 import { 
   TrendingUp, 
   Target, 

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 const DevBypassPage = () => {
   const navigate = useNavigate();

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
 import federation from '@originjs/vite-plugin-federation';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -119,17 +120,17 @@ export default defineConfig({
   },
   resolve: {
     dedupe: ['react', 'react-dom'],
-    alias: [
-      { find: '@/', replacement: 'src' },
-      { find: '@components/', replacement: 'src/components' },
-      { find: '@store/', replacement: 'src/store' },
-      { find: '@utils/', replacement: 'src/utils' },
+    alias: {
+      '@/': path.resolve(__dirname, 'src'),
+      '@components/': path.resolve(__dirname, 'src/components'),
+      '@store/': path.resolve(__dirname, 'src/store'),
+      '@utils/': path.resolve(__dirname, 'src/utils'),
       // Keep existing Node polyfills
-      { find: 'events', replacement: 'events' },
-      { find: 'util', replacement: 'util' },
-      { find: 'stream', replacement: 'stream-browserify' },
-      { find: 'buffer', replacement: 'buffer' }
-    ],
+      'events': 'events',
+      'util': 'util',
+      'stream': 'stream-browserify',
+      'buffer': 'buffer'
+    },
   },
   build: {
     rollupOptions: {

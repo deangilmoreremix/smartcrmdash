@@ -15,7 +15,7 @@ import {
   Phone,
   Zap
 } from 'lucide-react';
-import { useContactStore } from '../hooks/useContactStore';
+import { useContactStore } from '@/hooks/useContactStore';
 // REMOVE THIS LINE: import { ContactsModal } from '../components/modals/ContactsModal';
 import { AIEnhancedContactCard } from '../components/contacts/AIEnhancedContactCard';
 import AdvancedContactFilter from '../components/contacts/AdvancedContactFilter';
