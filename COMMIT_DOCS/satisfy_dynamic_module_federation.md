@@ -1,3 +1,25 @@
+## Latest Commit: Netlify Configuration Fix
+
+**Commit Hash:** cf7b095
+**Message:** fix: Update netlify.toml for deployment fixes
+
+### What Changed
+
+1. **Updated netlify.toml**
+   - Removed `base = "client"` from the `[build]` section to fix deployment issues.
+
+### Reason
+
+- The `base` setting was causing deployment problems, so it was removed for a cleaner build process.
+
+### Notes & Next Steps
+
+- Verify that the Netlify build completes successfully without the base setting.
+- Test the deployed app to ensure all features work correctly.
+- Update Netlify dashboard settings if needed.
+
+---
+
 ## Latest Commit: Netlify Deployment Fix
 
 **Commit Hash:** 544ec82
