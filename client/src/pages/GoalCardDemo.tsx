@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import InteractiveGoalCard from '@/components/InteractiveGoalCard';
-import { Goal } from '@/types/goals';
+import InteractiveGoalCard from '../components/InteractiveGoalCard';
+import { Goal } from '../types/goals';
 
 const GoalCardDemo: React.FC = () => {
   const [executingGoal, setExecutingGoal] = useState<string | null>(null);

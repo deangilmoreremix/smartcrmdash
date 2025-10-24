@@ -36,6 +36,7 @@ const ContactsApp: React.FC = () => {
         setIsLoading(false);
       } catch (err) {
         console.log('📺 Module Federation not available, using iframe fallback (remote app needs MF configuration)');
+        console.error('Module Federation error details:', err);
         setError('Remote app needs Module Federation configuration');
         setIsLoading(false);
       }

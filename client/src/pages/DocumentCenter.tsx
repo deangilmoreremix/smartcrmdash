@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Upload, Download } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import DocumentManager from '@/components/filemanagement/DocumentManager';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import DocumentManager from '../components/filemanagement/DocumentManager';
 
 const DocumentCenter: React.FC = () => {
   return (

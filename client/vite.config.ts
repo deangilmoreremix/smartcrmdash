@@ -6,7 +6,6 @@ import federation from '@originjs/vite-plugin-federation';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: './client',
   plugins: [
     react(),
     federation({
@@ -121,10 +120,10 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: [
-      { find: '@/', replacement: './src' },
-      { find: '@components/', replacement: './src/components' },
-      { find: '@store/', replacement: './src/store' },
-      { find: '@utils/', replacement: './src/utils' },
+      { find: '@/', replacement: 'src' },
+      { find: '@components/', replacement: 'src/components' },
+      { find: '@store/', replacement: 'src/store' },
+      { find: '@utils/', replacement: 'src/utils' },
       // Keep existing Node polyfills
       { find: 'events', replacement: 'events' },
       { find: 'util', replacement: 'util' },

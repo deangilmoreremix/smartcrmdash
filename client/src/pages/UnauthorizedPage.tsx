@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { Button } from '../components/ui/button';
+import { useAuth } from '../hooks/useAuth';
 
 export default function UnauthorizedPage() {
   const { user, role } = useAuth();

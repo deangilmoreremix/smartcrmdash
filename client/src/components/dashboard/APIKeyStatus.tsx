@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Settings, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 
 interface APIStatus {
   configured: boolean;
