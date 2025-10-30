@@ -1,3 +1,4 @@
+import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -121,10 +122,10 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: [
-      { find: '@/', replacement: './src' },
-      { find: '@components/', replacement: './src/components' },
-      { find: '@store/', replacement: './src/store' },
-      { find: '@utils/', replacement: './src/utils' },
+      { find: '@', replacement: path.resolve(__dirname, 'client/src') },
+      { find: '@components', replacement: path.resolve(__dirname, 'client/src/components') },
+      { find: '@store', replacement: path.resolve(__dirname, 'client/src/store') },
+      { find: '@utils', replacement: path.resolve(__dirname, 'client/src/utils') },
       // Keep existing Node polyfills
       { find: 'events', replacement: 'events' },
       { find: 'util', replacement: 'util' },
