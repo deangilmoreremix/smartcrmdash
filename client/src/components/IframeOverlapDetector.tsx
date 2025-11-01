@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, ExternalLink, RefreshCw } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface IframeApp {
   id: string;

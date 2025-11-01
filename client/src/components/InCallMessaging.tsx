@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, X, Smile } from 'lucide-react';
 import { useVideoCall } from '@/contexts/VideoCallContext';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ChatMessage {
   id: string;

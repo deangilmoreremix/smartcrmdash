@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Brain, Sparkles, Target, TrendingUp, Users, Zap } from 'lucide-react';
 
 interface AIEnhancement {

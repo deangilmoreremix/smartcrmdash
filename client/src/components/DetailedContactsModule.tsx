@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Mail, Phone, MapPin, Calendar, Tag, MoreVertical, Edit, Trash2, Star, User, X } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import AdvancedTooltip from './ui/AdvancedTooltip';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 

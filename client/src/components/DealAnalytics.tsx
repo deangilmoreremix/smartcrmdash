@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { 
   LineChart, 
   Line, 

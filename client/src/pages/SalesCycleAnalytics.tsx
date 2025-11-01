@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '@/hooks/useContactStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

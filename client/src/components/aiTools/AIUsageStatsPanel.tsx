@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { aiUsageTracker, type ToolMetrics, type CategoryMetrics } from '../../services/aiUsageTracker';
 import { BarChart3, TrendingUp, Clock, Zap, Brain, Activity, Users, Target } from 'lucide-react';
 

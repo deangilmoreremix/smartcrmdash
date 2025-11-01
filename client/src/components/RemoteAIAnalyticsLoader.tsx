@@ -1,7 +1,7 @@
 // Remote AI Analytics Dashboard Loader
 import React, { useRef, useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface RemoteAIAnalyticsLoaderProps {
   showHeader?: boolean;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart3, DollarSign, Zap, Clock } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { AI_MODELS } from '../services/aiModels';
 
 interface ModelUsage {

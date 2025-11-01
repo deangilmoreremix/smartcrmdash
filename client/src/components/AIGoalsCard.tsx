@@ -1,6 +1,6 @@
 import React from 'react';
 import { Target, ChevronRight } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 
 interface Goal {

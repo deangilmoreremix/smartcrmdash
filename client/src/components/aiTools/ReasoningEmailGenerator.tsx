@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Mail, Brain, Lightbulb, Target, Send, Copy, RefreshCw, Zap, CheckCircle } from 'lucide-react';
 import { openAIService } from '../../services/openAIService';
 

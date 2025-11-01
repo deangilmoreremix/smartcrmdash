@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { RefreshCw, Wifi, WifiOff, Settings } from 'lucide-react';
 import { remoteAppManager } from '../utils/remoteAppManager';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 const RemoteAppRefreshManager: React.FC = () => {
   const { isDark } = useTheme();

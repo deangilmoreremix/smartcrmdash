@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Video, Phone, MessageSquare } from 'lucide-react';
 import { useVideoCall } from '@/contexts/VideoCallContext';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import type { CallParticipant } from '@/contexts/VideoCallContext';
 import { Contact } from '../types/contact';
 
