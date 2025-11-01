@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const RemoteWLLoader: React.FC = () => {
   const { isDark } = useTheme(); // Use global theme context for consistency

@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '@/hooks/useContactStore';
+import { useContactStore } from '@/store/contactStore';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ModernButton } from '@/components/ui/ModernButton';

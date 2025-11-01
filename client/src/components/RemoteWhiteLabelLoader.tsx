@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff, Sun, Moon } from 'lucide-react';
 import { useRemoteAppUpdates } from '../utils/remoteAppManager';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface RemoteWhiteLabelLoaderProps {
   showHeader?: boolean;

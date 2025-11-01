@@ -13,7 +13,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { useVideoCall } from '@/contexts/VideoCallContext';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface CallRecordingProps {
   isInCall: boolean;

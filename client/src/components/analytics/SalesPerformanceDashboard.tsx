@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { DashboardHeader } from '../dashboard/DashboardHeader';
 import { KPICards } from '../dashboard/KPICards';
 import { MetricsCards } from '../dashboard/MetricsCards';
@@ -14,7 +14,7 @@ import {
 import { 
   TrendingUp, BarChart3, Target, Users, DollarSign, Activity, Star, Building2
 } from 'lucide-react';
-import { useContactStore } from '@/hooks/useContactStore';
+import { useContactStore } from '@/store/contactStore';
 import { useDealStore } from '../../store/dealStore';
 
 const SalesPerformanceDashboard: React.FC = () => {

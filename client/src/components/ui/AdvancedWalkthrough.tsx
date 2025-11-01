@@ -13,7 +13,7 @@ import {
   SkipForward,
   Settings
 } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useGemini } from '../../services/geminiService';
 
 interface AdvancedWalkthroughProps {

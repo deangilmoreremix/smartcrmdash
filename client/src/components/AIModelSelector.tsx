@@ -7,7 +7,7 @@ import {
   ChevronDown,
   CheckCircle
 } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { 
   AI_MODELS, 
   getModelsByCategory, 

@@ -4,7 +4,7 @@ import { ModernButton } from '../ui/ModernButton';
 import { ContactDetailView } from './ContactDetailView';
 import { ImportContactsModal } from './ImportContactsModal';
 import { NewContactModal } from './NewContactModal';
-import { useContactStore } from '@/hooks/useContactStore';
+import { useContactStore } from '@/store/contactStore';
 import { Contact } from '../../types/contact';
 import { AIEnhancedContactCard } from '../contacts/AIEnhancedContactCard';
 import { DarkModeToggle } from '../ui/DarkModeToggle';

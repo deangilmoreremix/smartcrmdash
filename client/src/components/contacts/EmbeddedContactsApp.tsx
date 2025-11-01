@@ -24,7 +24,7 @@ import {
   Video,
   Calendar
 } from 'lucide-react';
-import { useContactStore } from '@/hooks/useContactStore';
+import { useContactStore } from '@/store/contactStore';
 import { Contact } from '../../types/contact';
 import EnhancedContactCard from './EnhancedContactCard';
 import ProfessionalContactModal from './ProfessionalContactModal';

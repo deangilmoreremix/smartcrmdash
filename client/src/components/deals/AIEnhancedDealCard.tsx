@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building, Calendar, DollarSign, TrendingUp, User, Users, AlertCircle, CheckCircle, Clock, BarChart3, Target, Zap, Search, Globe } from 'lucide-react';
 import { Deal } from '../../types';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useContactStore } from '../../store/contactStore';
 import { gpt5SocialResearchService } from '../../services/gpt5SocialResearchService';
 

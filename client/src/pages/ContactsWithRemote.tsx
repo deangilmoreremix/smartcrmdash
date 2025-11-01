@@ -1,7 +1,7 @@
 // Remote Contacts Page - Embedded Module with CRM Integration
 import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, Link, Wifi, WifiOff, MessageSquare } from 'lucide-react';
-import { useContactStore } from '@/hooks/useContactStore';
+import { useContactStore } from '@/store/contactStore';
 import { RemoteContactsBridge, CRMContact } from '../services/remoteContactsBridge';
 import { remoteAppManager } from '../utils/remoteAppManager';
 import { universalDataSync } from '../services/universalDataSync';

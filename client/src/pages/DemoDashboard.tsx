@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Dashboard from '../components/Dashboard';
 import Navbar from '../components/Navbar';
 
