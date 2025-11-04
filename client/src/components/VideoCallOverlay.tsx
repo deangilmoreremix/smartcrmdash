@@ -17,7 +17,7 @@ import {
   Settings,
   MoreVertical
 } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
 import Avatar from './ui/Avatar';
 import { getInitials } from '../utils/avatars';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
 import { Phone, Loader2, Copy, Download, CheckCircle, AlertCircle } from 'lucide-react';

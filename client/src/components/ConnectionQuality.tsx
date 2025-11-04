@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, Signal, AlertTriangle } from 'lucide-react';
 import { useVideoCall } from '../contexts/VideoCallContext';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ConnectionStats {
   bitrate: number;

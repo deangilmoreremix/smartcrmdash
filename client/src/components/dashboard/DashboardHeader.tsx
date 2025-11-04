@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { BarChart3, TrendingUp, Calendar, Search, Bell, User, Sparkles, Brain, Zap } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
 import { useDealStore } from '../../store/dealStore';

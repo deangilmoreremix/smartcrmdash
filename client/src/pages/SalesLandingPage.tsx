@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { ArrowRight, CheckCircle, Star, Users, Zap, TrendingUp } from 'lucide-react';
 
 const SalesLandingPage: React.FC = () => {

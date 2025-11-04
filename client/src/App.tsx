@@ -23,6 +23,7 @@ import { EdgeZones } from './components/EdgeZones';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import RemoteAppRefreshManager from './components/RemoteAppRefreshManager';
 import { universalDataSync } from './services/universalDataSync';
+import { networkTest } from './utils/networkConnectivityTest';
 import { Toaster } from './components/ui/toaster';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -177,7 +178,37 @@ const AuthLoadingScreen = () => (
 function App() {
   // Initialize universal data sync
   useEffect(() => {
-    console.log('🚀 Starting Universal Data Sync System');
+    console.log('🚀 DEBUG: Starting Universal Data Sync System');
+    console.log('🔧 DEBUG: Environment variables check:');
+    console.log('  - VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Set' : '❌ Missing');
+    console.log('  - VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing');
+    console.log('  - NODE_ENV:', import.meta.env.NODE_ENV);
+    console.log('  - MODE:', import.meta.env.MODE);
+
+    // Test remote app connectivity
+    const remoteAppUrls = [
+      'https://calendar.smartcrm.vip',
+      'https://analytics.smartcrm.vip',
+      'https://contacts.smartcrm.vip',
+      'https://agency.smartcrm.vip',
+      'https://pipeline.smartcrm.vip',
+      'https://research.smartcrm.vip',
+      'https://salesmax.smartcrm.vip',
+      'https://referrals.smartcrm.vip',
+      'https://contentai.smartcrm.vip'
+    ];
+
+    console.log('🌐 DEBUG: Testing connectivity to remote apps...');
+    networkTest.testAllRemoteApps(remoteAppUrls).then(results => {
+      console.log('📊 DEBUG: Remote app connectivity results:');
+      results.forEach((result, url) => {
+        const status = result.accessible ? '✅ Accessible' : '❌ Inaccessible';
+        console.log(`  ${status}: ${url}${result.error ? ` (${result.error})` : ''}`);
+      });
+    }).catch(error => {
+      console.error('❌ DEBUG: Failed to test remote app connectivity:', error);
+    });
+
     universalDataSync.initialize();
 
     return () => {

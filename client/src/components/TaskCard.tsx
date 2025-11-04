@@ -3,7 +3,7 @@ import { Calendar, Clock, Mail, Video, FileText, MoreHorizontal, CheckCircle, Ch
 import Avatar from './ui/Avatar';
 import { useTaskStore } from '../store/taskStore';
 import { getInitials, getAvatarByIndex } from '../utils/avatars';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskCardProps {
   task: {
