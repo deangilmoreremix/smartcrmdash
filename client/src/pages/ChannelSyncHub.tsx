@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useDealStore } from '../store/dealStore';
 import { BarChart3, Wifi, MessageSquare, Phone, Mail, Video, ArrowUpRight, Filter, Globe } from 'lucide-react';
 

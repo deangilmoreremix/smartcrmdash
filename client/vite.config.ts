@@ -134,6 +134,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      external: [],
       output: {
         manualChunks(id) {
           // Core vendor chunks

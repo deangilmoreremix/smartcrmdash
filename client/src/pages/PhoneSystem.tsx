@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, User, Clock, BarChart2, RefreshCw, Send, MessageSquare, Mic, MicOff, Volume2, VolumeX, PhoneOff, Play, Pause, MousePointer } from 'lucide-react';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { ModernButton } from '@/components/ui/ModernButton';
+import { GlassCard } from '../components/ui/GlassCard';
+import { ModernButton } from '../components/ui/ModernButton';
 
 interface CallLog {
   id: string;

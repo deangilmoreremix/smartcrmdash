@@ -12,7 +12,7 @@ import {
   Copy,
   ThumbsUp
 } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useGemini } from '../../services/geminiService';
 
 interface AdvancedTooltipProps {

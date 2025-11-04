@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useTenant } from '@/contexts/TenantProvider';
+import { useTenant } from '../contexts/TenantProvider';
 
 interface User {
   id: string;

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Goal, AIGoalContext } from '../types/goals';
 import InteractiveGoalExplorer from '../components/InteractiveGoalExplorer';
 import GoalExecutionModal from '../components/GoalExecutionModal';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
 import { Brain, Info, ArrowLeft, Target, Users, BarChart3, Bot, Activity, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

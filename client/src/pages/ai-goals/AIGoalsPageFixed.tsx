@@ -3,8 +3,8 @@ import { Goal } from '../../types/goals';
 import { GOALS, GOAL_CATEGORIES } from '../../data/goals';
 import InteractiveGoalCard from '../../components/InteractiveGoalCardComplete';
 import GoalExecutionModal from '../../components/GoalExecutionModalComplete';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Brain, Info, Lightbulb, ArrowLeft, Sparkles, Zap, Target, Users, BarChart3, Bot, Activity, Search, Filter, Grid, List, Play, Eye, Clock, TrendingUp, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

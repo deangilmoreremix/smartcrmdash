@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAI } from '@/contexts/AIContext';
+import { useAI } from '../contexts/AIContext';
 import { GlassCard } from '../ui/GlassCard';
 import { ModernButton } from '../ui/ModernButton';
 import { SmartAIControls } from '../ai/SmartAIControls';

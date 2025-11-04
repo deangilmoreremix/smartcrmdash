@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useContactAI } from '@/contexts/AIContext';
+import { useContactAI } from '../contexts/AIContext';
 import { AvatarWithStatus } from '../ui/AvatarWithStatus';
 import { CustomizableAIToolbar } from '../ui/CustomizableAIToolbar';
 import { Contact } from '../../types';

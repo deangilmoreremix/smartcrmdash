@@ -1,5 +1,5 @@
 import { useState, createElement } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
 import { Brain, Loader2, MessageSquare, TrendingUp, TrendingDown, Minus, CheckCircle, AlertCircle } from 'lucide-react';

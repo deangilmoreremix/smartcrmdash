@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSmartAI, useTaskOptimization } from '@/hooks/useSmartAI';
+import { useSmartAI, useTaskOptimization } from '../hooks/useSmartAI';
 import { ModernButton } from '../ui/ModernButton';
 import { GlassCard } from '../ui/GlassCard';
 import { Contact } from '../../types/contact';

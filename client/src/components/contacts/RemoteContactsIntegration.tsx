@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, ExternalLink, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
-import { useContactStore } from '@/store/contactStore';
+import { useContactStore } from '../store/contactStore';
 import { Contact } from '../../types/contact';
 
 interface RemoteContactsIntegrationProps {

@@ -12,7 +12,7 @@ import {
   RefreshCw // Added for random avatar
 } from 'lucide-react';
 import { Contact } from '../../types/contact';
-import { useContactStore } from '@/store/contactStore';
+import { useContactStore } from '../store/contactStore';
 import { formatDistanceToNow } from 'date-fns';
 import Avatar from '../ui/Avatar'; // Added import
 import { getRandomAvatar, getInitials } from '../../utils/avatars'; // Added import

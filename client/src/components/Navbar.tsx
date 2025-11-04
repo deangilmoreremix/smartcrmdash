@@ -8,9 +8,9 @@ import {
   Palette, DollarSign, Volume2, Image, Bot, Eye, Code, AlertTriangle, LineChart,
   ExternalLink, Menu, X, Plus, MapPin, FileCheck, Settings, Package, UserPlus
 } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useNavigation } from '@/contexts/NavigationContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '../contexts/NavigationContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useRole } from './RoleBasedAccess';
 
 import { useDealStore } from "../store/dealStore";

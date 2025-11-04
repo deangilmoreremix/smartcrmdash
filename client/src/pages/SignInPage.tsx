@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const SignInPage: React.FC = () => {

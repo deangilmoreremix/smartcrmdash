@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest } from '../lib/queryClient';
 import type { UserWLSettings, InsertUserWLSettings, TenantConfig, InsertTenantConfig, PartnerWLConfig, InsertPartnerWLConfig } from '@shared/schema';
 
 // User White Label Settings Hook

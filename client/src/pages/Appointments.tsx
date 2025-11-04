@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 // @ts-ignore
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { ModernButton } from '@/components/ui/ModernButton';
+import { GlassCard } from '../components/ui/GlassCard';
+import { ModernButton } from '../components/ui/ModernButton';
 import GeminiImageModal from '../components/GeminiImageModal';
 import {
   Clock,
