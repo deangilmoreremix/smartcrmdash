@@ -15,7 +15,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Contact } from '../../types/contact';
-import { useContactStore } from '../../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 
 interface EmailComposerProps {
   isOpen?: boolean;

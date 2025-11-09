@@ -22,7 +22,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { Contact } from '../../types/contact';
-import { useContactStore } from '../../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 
 interface AutomationRule {
   id: string;

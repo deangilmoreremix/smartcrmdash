@@ -23,9 +23,9 @@ import {
   MoreHorizontal,
   CheckCircle
 } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { useVideoCall } from '../contexts/VideoCallContext';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 import Avatar from './ui/Avatar';
 import { getInitials } from '../utils/avatars';
 

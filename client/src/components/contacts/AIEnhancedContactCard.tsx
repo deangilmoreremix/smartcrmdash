@@ -3,7 +3,7 @@ import { useContactAI } from '../contexts/AIContext';
 import { AvatarWithStatus } from '../ui/AvatarWithStatus';
 import { CustomizableAIToolbar } from '../ui/CustomizableAIToolbar';
 import { Contact } from '../../types';
-import { useContactStore } from '../../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 import { aiEnrichmentService } from '../../services/aiEnrichmentService';
 import { cacheService } from '../../services/cache.service';
 import { httpClient } from '../../services/http-client.service';

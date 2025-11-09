@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { RemoteContactsBridge, CRMContact } from '../../services/remoteContactsBridge';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 import { remoteAssistantBridge } from '../../services/remoteAssistantBridge';
 import { Bot, MessageSquare, Brain, Sparkles } from 'lucide-react';
 

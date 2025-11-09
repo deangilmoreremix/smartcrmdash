@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Switch } from './ui/switch';
-import { useAIIntegrationStore } from '../store/aiIntegrationStore';
+import { useAIIntegrationStore } from '@store/aiIntegrationStore';
 import {
   Bot,
   Zap,

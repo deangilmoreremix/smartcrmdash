@@ -1,12 +1,12 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { DashboardHeader } from '../dashboard/DashboardHeader';
 import { KPICards } from '../dashboard/KPICards';
 import { MetricsCards } from '../dashboard/MetricsCards';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '../../utils/avatars';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, Area, AreaChart 
@@ -14,8 +14,8 @@ import {
 import { 
   TrendingUp, BarChart3, Target, Users, DollarSign, Activity, Star, Building2
 } from 'lucide-react';
-import { useContactStore } from '../store/contactStore';
-import { useDealStore } from '../../store/dealStore';
+import { useContactStore } from '@store/contactStore';
+import { useDealStore } from '@store/dealStore';
 
 const SalesPerformanceDashboard: React.FC = () => {
   const { isDark } = useTheme();

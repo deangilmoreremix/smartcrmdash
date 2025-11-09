@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Goal } from '../../types/goals';
-import InteractiveGoalExplorer from '../../components/InteractiveGoalExplorer';
-import InteractiveGoalCard from '../../components/InteractiveGoalCard';
-import GoalExecutionModal from '../../components/GoalExecutionModal';
+import InteractiveGoalExplorer from '@components/InteractiveGoalExplorer';
+import InteractiveGoalCard from '@components/InteractiveGoalCard';
+import GoalExecutionModal from '@components/GoalExecutionModal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader } from '../components/ui/card';
 import { 
@@ -29,7 +29,7 @@ import {
   Play
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAITools } from '../../components/AIToolsProvider';
+import { useAITools } from '@components/AIToolsProvider';
 import { aiGoalsData, GOAL_CATEGORIES as goalCategories } from '../../data/goalsData';
 import { allGoals } from '../../data/completeGoalsData';
 

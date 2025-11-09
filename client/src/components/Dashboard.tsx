@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../store/contactStore';
+import { useDealStore } from '@store/dealStore';
+import { useContactStore } from '@store/contactStore';
 import { useGemini } from '../services/geminiService';
-import { useTaskStore } from '../store/taskStore';
-import { useAppointmentStore } from '../store/appointmentStore';
+import { useTaskStore } from '@store/taskStore';
+import { useAppointmentStore } from '@store/appointmentStore';
 import { useAITools } from './AIToolsProvider';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
 import DraggableSection from './DraggableSection';
 import DashboardLayoutControls from './DashboardLayoutControls';

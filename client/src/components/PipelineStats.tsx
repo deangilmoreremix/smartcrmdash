@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDealStore } from '../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { 
   DollarSign, 
   TrendingUp, 

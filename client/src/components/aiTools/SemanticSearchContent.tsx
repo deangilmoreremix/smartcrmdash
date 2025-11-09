@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOpenAIEmbeddings } from '../../services/openaiEmbeddingsService';
-import { useDealStore } from '../../store/dealStore';
-import { useContactStore } from '../../store/contactStore';
+import { useDealStore } from '@store/dealStore';
+import { useContactStore } from '@store/contactStore';
 import AIToolContent from '../shared/AIToolContent';
 import { Search, Database, RefreshCw, ChevronRight } from 'lucide-react';
 import { Contact, Deal } from '../../types';

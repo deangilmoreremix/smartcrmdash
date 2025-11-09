@@ -28,15 +28,15 @@ import {
   Hash
 } from 'lucide-react';
 
-import StreamingChat from '../components/aiTools/StreamingChat';
-import RealTimeFormValidation from '../components/aiTools/RealTimeFormValidation';
-import LiveDealAnalysis from '../components/aiTools/LiveDealAnalysis';
-import InstantAIResponseGenerator from '../components/aiTools/InstantAIResponseGenerator';
-import DocumentAnalyzerRealtime from '../components/aiTools/DocumentAnalyzerRealtime';
-import RealTimeEmailComposer from '../components/aiTools/RealTimeEmailComposer';
-import VoiceAnalysisRealtime from '../components/aiTools/VoiceAnalysisRealtime';
-import SmartSearchRealtime from '../components/aiTools/SmartSearchRealtime';
-import AutoFormCompleter from '../components/aiTools/AutoFormCompleter';
+import StreamingChat from '@components/aiTools/StreamingChat';
+import RealTimeFormValidation from '@components/aiTools/RealTimeFormValidation';
+import LiveDealAnalysis from '@components/aiTools/LiveDealAnalysis';
+import InstantAIResponseGenerator from '@components/aiTools/InstantAIResponseGenerator';
+import DocumentAnalyzerRealtime from '@components/aiTools/DocumentAnalyzerRealtime';
+import RealTimeEmailComposer from '@components/aiTools/RealTimeEmailComposer';
+import VoiceAnalysisRealtime from '@components/aiTools/VoiceAnalysisRealtime';
+import SmartSearchRealtime from '@components/aiTools/SmartSearchRealtime';
+import AutoFormCompleter from '@components/aiTools/AutoFormCompleter';
 
 // Import AI tool components
 import EmailAnalysisContent from './aiTools/EmailAnalysisContent';

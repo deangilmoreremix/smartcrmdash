@@ -17,7 +17,7 @@ import {
   Forward
 } from 'lucide-react';
 import { Contact } from '../../types/contact';
-import { useContactStore } from '../../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 import EmailComposer from './EmailComposer';
 import { formatDistanceToNow } from 'date-fns';
 

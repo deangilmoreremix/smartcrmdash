@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { Building2, Users, Palette, Globe, Mail, Phone, FileText, Star, Sun, Moon } from 'lucide-react';
 
 // Simple navigation function

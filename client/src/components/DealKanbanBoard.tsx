@@ -15,9 +15,9 @@ import {
   Target,
   Clock
 } from 'lucide-react';
-import { useDealStore } from '../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { Deal, DealStage } from '../types/deal';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 
 interface DealCardProps {
   deal: Deal;

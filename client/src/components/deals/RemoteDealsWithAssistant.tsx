@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useDealStore } from '../../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { remoteAssistantBridge } from '../../services/remoteAssistantBridge';
 import { Bot, MessageSquare, Brain, TrendingUp, Target, DollarSign } from 'lucide-react';
 

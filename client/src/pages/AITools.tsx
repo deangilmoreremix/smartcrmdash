@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAITools, AIToolType } from '../components/AIToolsProvider';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import {
   Brain,
   Mail,

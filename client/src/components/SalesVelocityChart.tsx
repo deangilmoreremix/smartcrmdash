@@ -12,7 +12,7 @@ import {
   Download,
   Info
 } from 'lucide-react';
-import { useDealStore } from '../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { Deal, DealStage } from '../types/deal';
 
 interface VelocityMetric {

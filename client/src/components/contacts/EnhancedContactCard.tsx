@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { gpt5SocialResearchService } from '../../services/gpt5SocialResearchService';
 import { Contact } from '../../types/contact';
-import { useContactStore } from '../../store/contactStore'; // Added useContactStore import
+import { useContactStore } from '@store/contactStore'; // Added useContactStore import
 import { formatDistanceToNow } from 'date-fns';
 
 interface EnhancedContactCardProps {

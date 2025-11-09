@@ -15,7 +15,7 @@ import {
   FileText,
   Settings
 } from 'lucide-react';
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '@store/taskStore';
 import { Task } from '../types/task';
 import { Button } from './ui/button';
 import { Input } from './ui/input';

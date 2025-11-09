@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { CheckSquare, Calendar, MessageSquare } from 'lucide-react';
 import TasksSection from '../TasksSection';
 import AppointmentWidget from '../AppointmentWidget';

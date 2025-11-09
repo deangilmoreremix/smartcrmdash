@@ -121,10 +121,16 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@/': path.resolve(__dirname, 'src'),
-      '@components/': path.resolve(__dirname, 'src/components'),
-      '@store/': path.resolve(__dirname, 'src/store'),
-      '@utils/': path.resolve(__dirname, 'src/utils'),
+      '@': path.resolve(__dirname, 'src'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@store': path.resolve(__dirname, 'src/store'),
+      '@stores': path.resolve(__dirname, 'src/stores'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@contexts': path.resolve(__dirname, 'src/contexts'),
+      '@hooks': path.resolve(__dirname, 'src/hooks'),
+      '@services': path.resolve(__dirname, 'src/services'),
+      '@types': path.resolve(__dirname, 'src/types'),
+      '@shared': path.resolve(__dirname, '../shared'),
       // Keep existing Node polyfills
       'events': 'events',
       'util': 'util',

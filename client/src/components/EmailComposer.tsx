@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { useCommunicationStore } from '../store/communicationStore';
+import { useCommunicationStore } from '@store/communicationStore';
 import { Email, EmailTemplate } from '../types/communication';
 import { Send, Save, Clock, Paperclip, Sparkles, Eye, Code } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDealStore } from '../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { useGemini } from '../services/geminiService';
 import { 
   X, 
@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import DemoAgentModal from './DemoAgentModal';
 import { gpt5SocialResearchService, SocialResearchResult } from '../services/gpt5SocialResearchService';
-import { useContactStore } from '../store/contactStore';
+import { useContactStore } from '@store/contactStore';
 
 interface DealDetailProps {
   dealId: string;

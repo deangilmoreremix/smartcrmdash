@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';

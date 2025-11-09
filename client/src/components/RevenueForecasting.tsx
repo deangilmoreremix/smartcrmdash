@@ -12,7 +12,7 @@ import {
   Filter,
   RefreshCw
 } from 'lucide-react';
-import { useDealStore } from '../store/dealStore';
+import { useDealStore } from '@store/dealStore';
 import { DealForecast, SalesMetrics } from '../types/deal';
 
 interface ForecastData {

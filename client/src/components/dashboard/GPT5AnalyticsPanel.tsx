@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { Brain, TrendingUp, AlertTriangle, Target, Zap, Activity, BarChart3, DollarSign, Users, Calendar } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
-import { useDealStore } from '../../store/dealStore';
-import { useContactStore } from '../../store/contactStore';
-import { useTaskStore } from '../../store/taskStore';
+import { useDealStore } from '@store/dealStore';
+import { useContactStore } from '@store/contactStore';
+import { useTaskStore } from '@store/taskStore';
 
 interface AnalyticsInsight {
   title: string;

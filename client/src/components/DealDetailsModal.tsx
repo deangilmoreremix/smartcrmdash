@@ -27,8 +27,8 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Deal, DealStage } from '../types/deal';
-import { useDealStore } from '../store/dealStore';
-import { useContactStore } from '../store/contactStore';
+import { useDealStore } from '@store/dealStore';
+import { useContactStore } from '@store/contactStore';
 import { gpt5SocialResearchService, SocialResearchResult } from '../services/gpt5SocialResearchService';
 
 interface DealDetailsModalProps {

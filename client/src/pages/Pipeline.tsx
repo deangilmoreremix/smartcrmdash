@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useDealStore } from '../store/dealStore';
 import { useContactStore } from '../store/contactStore';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { RemotePipelineBridge, type RemotePipelineStatus } from '../services/remotePipelineBridge';
 
 const Pipeline: React.FC = () => {

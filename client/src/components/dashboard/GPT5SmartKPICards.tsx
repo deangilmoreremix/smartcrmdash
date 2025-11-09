@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { Brain, TrendingUp, TrendingDown, DollarSign, Target, Award, BarChart3, Sparkles, Zap } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
-import { useDealStore } from '../../store/dealStore';
-import { useContactStore } from '../../store/contactStore';
+import { useDealStore } from '@store/dealStore';
+import { useContactStore } from '@store/contactStore';
 
 interface SmartKPIMetric {
   title: string;

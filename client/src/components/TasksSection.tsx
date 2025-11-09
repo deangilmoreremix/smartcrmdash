@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import TaskCard from './TaskCard';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { Plus } from 'lucide-react';
 
 const TasksSection = () => {

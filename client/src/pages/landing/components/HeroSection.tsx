@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import ParallaxHero from '../../../components/landing/ParallaxHero';
-import ClientLogos from '../../../components/landing/ClientLogos';
-import FeatureDemo from '../../../components/landing/FeatureDemo';
-import ScrollAnimationWrapper from '../../../components/landing/ScrollAnimationWrapper';
-import InteractiveFeaturesGrid from '../../../components/landing/InteractiveFeaturesGrid';
+import ParallaxHero from '@components/landing/ParallaxHero';
+import ClientLogos from '@components/landing/ClientLogos';
+import FeatureDemo from '@components/landing/FeatureDemo';
+import ScrollAnimationWrapper from '@components/landing/ScrollAnimationWrapper';
+import InteractiveFeaturesGrid from '@components/landing/InteractiveFeaturesGrid';
 
 const HeroSection: React.FC = () => {
   return (
