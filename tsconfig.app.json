@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@components/*": ["src/components/*"],
-      "@store/*": ["src/store/*"],
-      "@utils/*": ["src/utils/*"]
+      "@/*": ["client/src/*"],
+      "@components/*": ["client/src/components/*"],
+      "@store/*": ["client/src/store/*"],
+      "@utils/*": ["client/src/utils/*"]
     },
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -27,5 +27,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["client/src"]
 }
