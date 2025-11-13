@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 import DashboardHeader from './DashboardHeader';
 import GPT5SmartKPICards from './GPT5SmartKPICards';
 import GPT5AnalyticsPanel from './GPT5AnalyticsPanel';

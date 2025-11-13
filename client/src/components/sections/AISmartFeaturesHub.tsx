@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 import { Brain, Zap, Settings, BarChart3 } from 'lucide-react';
 import { useAITools } from '../../components/AIToolsProvider';
 import { AIInsightsPanel } from '../dashboard/AIInsightsPanel';

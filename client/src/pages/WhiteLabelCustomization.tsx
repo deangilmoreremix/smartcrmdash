@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWhitelabel } from '../contexts/WhitelabelContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 import { WhitelabelButton } from '../types/whitelabel';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';

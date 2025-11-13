@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Shield, Users, Database, Settings, BarChart3 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 
 const AdminNavigation: React.FC = () => {
   const { user } = useAuthStore();

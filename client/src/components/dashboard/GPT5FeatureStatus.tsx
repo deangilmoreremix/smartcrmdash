@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 import { Brain, Sparkles, CheckCircle, AlertCircle, Zap, TrendingUp, Activity } from 'lucide-react';
 import { gpt5Service } from '../../services/gpt5Service';
 

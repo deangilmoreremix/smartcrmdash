@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Users, Database, Activity, AlertTriangle } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../../contexts/ThemeContext";';
 import { useAuthStore } from '../store/authStore';
 import AdminNavigation from '../components/AdminNavigation';
 
