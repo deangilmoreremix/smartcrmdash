@@ -1,4 +1,5 @@
 // Test setup file for Jest
+/// <reference types="jest" />
 import { jest } from '@jest/globals';
 
 // Mock environment variables for tests
@@ -8,10 +9,12 @@ process.env.REDIS_URL = 'redis://localhost:6379';
 process.env.REDIS_ENABLED = 'false'; // Disable Redis for tests by default
 
 // Global mocks
+// @ts-ignore
 jest.mock('openai', () => {
   return jest.fn().mockImplementation(() => ({
     chat: {
       completions: {
+        // @ts-ignore
         create: jest.fn().mockResolvedValue({
           choices: [{
             message: {
@@ -27,6 +30,7 @@ jest.mock('openai', () => {
 jest.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
     getGenerativeModel: jest.fn().mockReturnValue({
+      // @ts-ignore
       generateContent: jest.fn().mockResolvedValue({
         response: {
           text: jest.fn().mockReturnValue(JSON.stringify({ greeting: 'Hello from Gemini!' }))
