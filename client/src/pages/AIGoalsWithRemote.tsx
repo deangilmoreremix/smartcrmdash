@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { ExternalLink, Brain } from 'lucide-react';
 import ModuleFederationAIGoals from '../components/ModuleFederationAIGoals';
 

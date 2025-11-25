@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Building2, Users, DollarSign, TrendingUp, Calendar, Settings, Plus, Eye, Edit, Award, Upload, X, FileText, AlertCircle, CheckCircle, Save, Sun, Moon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';

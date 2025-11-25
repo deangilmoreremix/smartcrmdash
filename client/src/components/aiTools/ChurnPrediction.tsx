@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from "../../contexts/ThemeContext";;""';
+import { useTheme } from "../../contexts/ThemeContext";
 import { enhancedGeminiService } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
 import { AlertTriangle, Download, Search, TrendingDown, Users, Target, Mail, Phone } from 'lucide-react';

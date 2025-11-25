@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Target, Users, TrendingUp, ExternalLink, Zap } from 'lucide-react';
 import { useDealStore } from '../store/dealStore';

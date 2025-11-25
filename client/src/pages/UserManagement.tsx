@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Trash2, Shield, Mail, Calendar, Search, Filter, UserCheck, UserX, Settings } from 'lucide-react';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { useAuthStore } from '../store/authStore';
 import { useRole } from '../components/RoleBasedAccess';
 import { RoleMigrationPanel } from '../components/RoleMigrationPanel';

@@ -1,6 +1,6 @@
 // Simple Remote AI Goals Loader for Dashboard Sections
 import React, { useRef, useEffect } from 'react';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 
 interface RemoteAIGoalsLoaderProps {
   showHeader?: boolean;

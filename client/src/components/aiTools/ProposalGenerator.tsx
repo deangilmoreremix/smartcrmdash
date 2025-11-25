@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../../contexts/ThemeContext";
 import { useEnhancedGemini } from '../../services/enhancedGeminiService';
 import { aiUsageTracker } from '../../services/aiUsageTracker';
 import { FileText, Loader2, Download, Copy, CheckCircle, AlertCircle } from 'lucide-react';

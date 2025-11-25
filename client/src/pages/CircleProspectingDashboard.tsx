@@ -9,7 +9,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Progress } from '../components/ui/progress';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { useQuery } from '@tanstack/react-query';
 import CommunicationDashboard from '../components/CommunicationDashboard';
 import GlassCard from '../components/GlassCard';

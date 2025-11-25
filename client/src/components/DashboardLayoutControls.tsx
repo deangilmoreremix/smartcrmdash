@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDashboardLayout } from '../contexts/DashboardLayoutContext';
-import { useTheme } from "../../contexts/ThemeContext";';
+import { useTheme } from "../contexts/ThemeContext";
 import { 
   Settings, 
   RotateCcw, 

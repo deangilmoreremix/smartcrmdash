@@ -3,86 +3,87 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
 import federation from '@originjs/vite-plugin-federation';
-import path from 'path';
+import { fileURLToPath, URL } from 'node:url';
+import alias from '@rollup/plugin-alias';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    federation({
-      name: 'SmartCRM',
-      remotes: {
-        CalendarApp: 'https://calendar.smartcrm.vip/assets/remoteEntry.js',
-        AnalyticsApp: 'https://analytics.smartcrm.vip/assets/remoteEntry.js',
-        ContactsApp: 'https://contacts.smartcrm.vip/assets/remoteEntry.js',
-        AgencyApp: 'https://agency.smartcrm.vip/assets/remoteEntry.js',
-        PipelineApp: 'https://pipeline.smartcrm.vip/assets/remoteEntry.js',
-        ResearchApp: 'https://research.smartcrm.vip/assets/remoteEntry.js',
-        SalesMaxApp: 'https://salesmax.smartcrm.vip/assets/remoteEntry.js',
-        ReferralsApp: 'https://referrals.smartcrm.vip/assets/remoteEntry.js',
-        ContentAIApp: 'https://contentai.smartcrm.vip/assets/remoteEntry.js',
-      },
-      shared: ['react', 'react-dom', 'react-router-dom'],
-    }),
+    // federation({
+    //   name: 'SmartCRM',
+    //   remotes: {
+    //     CalendarApp: 'https://calendar.smartcrm.vip/assets/remoteEntry.js',
+    //     AnalyticsApp: 'https://analytics.smartcrm.vip/assets/remoteEntry.js',
+    //     ContactsApp: 'https://contacts.smartcrm.vip/assets/remoteEntry.js',
+    //     AgencyApp: 'https://agency.smartcrm.vip/assets/remoteEntry.js',
+    //     PipelineApp: 'https://pipeline.smartcrm.vip/assets/remoteEntry.js',
+    //     ResearchApp: 'https://research.smartcrm.vip/assets/remoteEntry.js',
+    //     SalesMaxApp: 'https://salesmax.smartcrm.vip/assets/remoteEntry.js',
+    //     ReferralsApp: 'https://referrals.smartcrm.vip/assets/remoteEntry.js',
+    //     ContentAIApp: 'https://contentai.smartcrm.vip/assets/remoteEntry.js',
+    //   },
+    //   shared: ['react', 'react-dom', 'react-router-dom'],
+    // }),
     visualizer({
       filename: 'dist/stats.html',
       open: false,
       gzipSize: true,
       brotliSize: true,
     }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.gemini\./,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'gemini-api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 5 * 60, // 5 minutes
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 60, // 30 minutes
-              },
-            },
-          },
-        ],
-      },
-      manifest: {
-        name: 'SmartCRM Dashboard',
-        short_name: 'SmartCRM',
-        description: 'Advanced AI-powered Customer Relationship Management system',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: '/android-chrome-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/android-chrome-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
-    }),
+    // VitePWA({
+    //   registerType: 'autoUpdate',
+    //   workbox: {
+    //     globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+    //     runtimeCaching: [
+    //       {
+    //         urlPattern: /^https:\/\/api\.gemini\./,
+    //         handler: 'NetworkFirst',
+    //         options: {
+    //         cacheName: 'gemini-api-cache',
+    //         expiration: {
+    //           maxEntries: 50,
+    //           maxAgeSeconds: 5 * 60, // 5 minutes
+    //         },
+    //       },
+    //     },
+    //     {
+    //       urlPattern: /^https:\/\/.*\.supabase\.co/,
+    //       handler: 'NetworkFirst',
+    //       options: {
+    //         cacheName: 'supabase-api-cache',
+    //         expiration: {
+    //           maxEntries: 100,
+    //           maxAgeSeconds: 30 * 60, // 30 minutes
+    //         },
+    //       },
+    //     },
+    //   ],
+    // },
+    // manifest: {
+    //   name: 'SmartCRM Dashboard',
+    //   short_name: 'SmartCRM',
+    //   description: 'Advanced AI-powered Customer Relationship Management system',
+    //   theme_color: '#2563eb',
+    //   background_color: '#ffffff',
+    //   display: 'standalone',
+    //   orientation: 'portrait',
+    //   scope: '/',
+    //   start_url: '/',
+    //   icons: [
+    //     {
+    //       src: '/android-chrome-192x192.png',
+    //       sizes: '192x192',
+    //       type: 'image/png',
+    //     },
+    //     {
+    //       src: '/android-chrome-512x512.png',
+    //       sizes: '512x512',
+    //       type: 'image/png',
+    //     },
+    //   ],
+    // },
+    // }),
   ],
   optimizeDeps: {
     include: [
@@ -121,10 +122,10 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@/': path.resolve(__dirname, 'src'),
-      '@components/': path.resolve(__dirname, 'src/components'),
-      '@store/': path.resolve(__dirname, 'src/store'),
-      '@utils/': path.resolve(__dirname, 'src/utils'),
+      '@/': fileURLToPath(new URL('./src', import.meta.url)),
+      '@components/': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@store/': fileURLToPath(new URL('./src/store', import.meta.url)),
+      '@utils/': fileURLToPath(new URL('./src/utils', import.meta.url)),
       // Keep existing Node polyfills
       'events': 'events',
       'util': 'util',
@@ -135,6 +136,16 @@ export default defineConfig({
   build: {
     rollupOptions: {
       external: [],
+      plugins: [
+        alias({
+          entries: {
+            '@/': fileURLToPath(new URL('./src', import.meta.url)),
+            '@components/': fileURLToPath(new URL('./src/components', import.meta.url)),
+            '@store/': fileURLToPath(new URL('./src/store', import.meta.url)),
+            '@utils/': fileURLToPath(new URL('./src/utils', import.meta.url)),
+          }
+        })
+      ],
       output: {
         manualChunks(id) {
           // Core vendor chunks
