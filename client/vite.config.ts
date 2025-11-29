@@ -137,14 +137,14 @@ export default defineConfig({
     rollupOptions: {
       external: [],
       plugins: [
-        alias({
-          entries: {
-            '@/': fileURLToPath(new URL('./src', import.meta.url)),
-            '@components/': fileURLToPath(new URL('./src/components', import.meta.url)),
-            '@store/': fileURLToPath(new URL('./src/store', import.meta.url)),
-            '@utils/': fileURLToPath(new URL('./src/utils', import.meta.url)),
-          }
-        })
+        // alias({
+        //   entries: {
+        //     '@/': fileURLToPath(new URL('./src', import.meta.url)),
+        //     '@components/': fileURLToPath(new URL('./src/components', import.meta.url)),
+        //     '@store/': fileURLToPath(new URL('./src/store', import.meta.url)),
+        //     '@utils/': fileURLToPath(new URL('./src/utils', import.meta.url)),
+        //   }
+        // })
       ],
       output: {
         manualChunks(id) {
